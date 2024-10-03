@@ -1,5 +1,5 @@
 #include "reglisteditorwin.h"
-#include "ui_regslisteditorwin.h"
+#include "ui_reglisteditorwin.h"
 #include "reglistmodel.h"
 
 
