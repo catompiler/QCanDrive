@@ -11,10 +11,10 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_reg_entries = new QList<RegEntry*>();
-    m_reg_entries->append(new RegEntry(0x1000, ObjectType::VAR));
+    m_regEntries = new RegEntryList();
+    m_regEntries->append(new RegEntry(0x1000, ObjectType::VAR));
 
-    m_regsListModel = new RegListModel(m_reg_entries);
+    m_regsListModel = new RegListModel(m_regEntries);
     ui->tvRegList->setModel(m_regsListModel);
 }
 
@@ -23,17 +23,18 @@ RegListEditorWin::~RegListEditorWin()
     delete ui;
     delete m_regsListModel;
 
-    for(auto entry: qAsConst(*m_reg_entries)){
+    for(auto entry: qAsConst(*m_regEntries)){
         delete entry;
     }
-    delete m_reg_entries;
+    delete m_regEntries;
 }
 
 void RegListEditorWin::on_pbAdd_clicked()
 {
-    m_reg_entries->append(new RegEntry(0x2000, ObjectType::VAR));
+    qDebug() << "on_pbAdd_clicked";
 
-    qDebug() << "on_pbAdd_clicked"
-             << m_regsListModel->insertRow(m_regsListModel->rowCount(), QModelIndex());
+    m_regsListModel->layoutAboutToBeChanged();
+    m_regEntries->append(new RegEntry(0x2000, ObjectType::VAR));
+    m_regsListModel->layoutChanged();
 }
 

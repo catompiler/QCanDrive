@@ -2,15 +2,12 @@
 #define REGLISTEDITORWIN_H
 
 #include <QMainWindow>
-#include <QList>
+#include "reglistmodel.h"
 
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class RegListEditorWin; }
 QT_END_NAMESPACE
-
-class RegListModel;
-class RegEntry;
 
 
 class RegListEditorWin : public QMainWindow
@@ -28,6 +25,6 @@ private:
     Ui::RegListEditorWin *ui;
     RegListModel* m_regsListModel;
 
-    QList<RegEntry*>* m_reg_entries;
+    RegEntryList* m_regEntries;
 };
 #endif // REGLISTEDITORWIN_H

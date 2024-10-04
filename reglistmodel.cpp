@@ -12,7 +12,7 @@ static const int COL_INDEX = 0;
 static const int COL_TYPE = 1;
 
 
-RegListModel::RegListModel(QList<RegEntry*>* reglist, QObject *parent)
+RegListModel::RegListModel(RegEntryList* reglist, QObject *parent)
     : QAbstractItemModel{parent}
 {
     m_reglist = reglist;
@@ -26,9 +26,16 @@ RegListModel::~RegListModel()
 
 QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if(!hasIndex(row, column, parent)) return QModelIndex();
+    //if(!hasIndex(row, column, parent)) return QModelIndex();
 
-    return createIndex(row, column, nullptr);
+    if(!parent.isValid()){
+        if(row < 0 || row >= m_reglist->count()) return QModelIndex();
+        if(column < 0 || column >= static_cast<int>(COLUMN_COUNT)) return QModelIndex();
+
+        return createIndex(row, column, nullptr);
+    }
+
+    return QModelIndex();
 }
 
 QModelIndex RegListModel::parent(const QModelIndex &child) const
@@ -36,25 +43,27 @@ QModelIndex RegListModel::parent(const QModelIndex &child) const
     return QModelIndex();
 }
 
-QModelIndex RegListModel::sibling(int row, int column, const QModelIndex &idx) const
-{
-    return QModelIndex();
-}
+//QModelIndex RegListModel::sibling(int row, int column, const QModelIndex &idx) const
+//{
+//    return QModelIndex();
+//}
 
 int RegListModel::rowCount(const QModelIndex &parent) const
 {
+    if(parent.isValid()) return 0;
     return m_reglist->count();
 }
 
 int RegListModel::columnCount(const QModelIndex &parent) const
 {
+    if(parent.isValid()) return 0;
     return COLUMN_COUNT;
 }
 
-bool RegListModel::hasChildren(const QModelIndex &parent) const
-{
-    return false;
-}
+//bool RegListModel::hasChildren(const QModelIndex &parent) const
+//{
+//    return false;
+//}
 
 QVariant RegListModel::data(const QModelIndex &index, int role) const
 {
