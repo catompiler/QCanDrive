@@ -79,7 +79,7 @@
      <x>0</x>
      <y>0</y>
      <width>636</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="mnuEdit">
@@ -116,7 +116,8 @@
   </widget>
   <action name="actAddEntry">
    <property name="icon">
-    <iconset theme="document-new"/>
+    <iconset theme="document-new">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Добавить элемент</string>
@@ -124,7 +125,8 @@
   </action>
   <action name="actDelEntry">
    <property name="icon">
-    <iconset theme="edit-delete"/>
+    <iconset theme="edit-delete">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Удалить элемент</string>
@@ -132,7 +134,8 @@
   </action>
   <action name="actAddVar">
    <property name="icon">
-    <iconset theme="list-add"/>
+    <iconset theme="list-add">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Добавить &amp;переменную</string>
@@ -140,7 +143,8 @@
   </action>
   <action name="actAddArr">
    <property name="icon">
-    <iconset theme="insert-link"/>
+    <iconset theme="insert-link">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Добавить &amp;массив</string>
@@ -148,7 +152,8 @@
   </action>
   <action name="actAddRec">
    <property name="icon">
-    <iconset theme="folder-new"/>
+    <iconset theme="folder-new">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Добавить &amp;структуру</string>
@@ -156,7 +161,8 @@
   </action>
   <action name="actQuit">
    <property name="icon">
-    <iconset theme="application-exit"/>
+    <iconset theme="application-exit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>В&amp;ыход</string>

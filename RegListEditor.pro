@@ -16,15 +16,18 @@ SOURCES += \
     reglistmodel.cpp \
     regobject.cpp \
     regrecord.cpp \
+    regtypes.cpp \
     regvar.cpp
 
 HEADERS += \
+    is_base_creator.hpp \
     regarray.h \
     regentry.h \
     reglisteditorwin.h \
     reglistmodel.h \
     regobject.h \
     regrecord.h \
+    regtypes.h \
     regvar.h
 
 FORMS += \

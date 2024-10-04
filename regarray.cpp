@@ -9,3 +9,9 @@ RegArray::~RegArray()
 {
 
 }
+
+
+ObjectType RegArray::type() const
+{
+    return ObjectType::ARR;
+}

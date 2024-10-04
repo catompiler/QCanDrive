@@ -9,3 +9,9 @@ RegRecord::~RegRecord()
 {
 
 }
+
+
+ObjectType RegRecord::type() const
+{
+    return ObjectType::REC;
+}

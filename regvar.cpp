@@ -9,3 +9,9 @@ RegVar::~RegVar()
 {
 
 }
+
+
+ObjectType RegVar::type() const
+{
+    return ObjectType::VAR;
+}
