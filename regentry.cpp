@@ -35,3 +35,23 @@ void RegEntry::setObjectType(ObjectType obj_type)
     m_object_type = obj_type;
 }
 
+QString RegEntry::name() const
+{
+    return m_name;
+}
+
+void RegEntry::setName(const QString &newName)
+{
+    m_name = newName;
+}
+
+QString RegEntry::description() const
+{
+    return m_description;
+}
+
+void RegEntry::setDescription(const QString &newDescription)
+{
+    m_description = newDescription;
+}
+

@@ -44,4 +44,42 @@ QString dataTypeStr(DataType type)
     return QString(strs[static_cast<int>(type)]);
 }
 
+QVector<ObjectType> objectTypes()
+{
+    // std::initializer_list
+    static const auto obj_types = {
+        ObjectType::VAR,
+        ObjectType::ARR,
+        ObjectType::REC
+    };
+    static const QVector<ObjectType> obj_types_vec(obj_types);
+
+    return obj_types_vec;
+}
+
+QVector<DataType> dataTypes()
+{
+    // std::initializer_list
+    static const auto data_types = {
+        DataType::BOOLEAN,
+        DataType::INTEGER8,
+        DataType::INTEGER16,
+        DataType::INTEGER32,
+        DataType::INTEGER64,
+        DataType::UNSIGNED8,
+        DataType::UNSIGNED16,
+        DataType::UNSIGNED32,
+        DataType::UNSIGNED64,
+        DataType::REAL32,
+        DataType::REAL64,
+        DataType::VISIBLE_STRING,
+        DataType::OCTET_STRING,
+        DataType::UNICODE_STRING,
+        DataType::DOMAIN
+    };
+    static const QVector<DataType> data_types_vec(data_types);
+
+    return data_types_vec;
+}
+
 }

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <QString>
+#include <QVector>
 
 //! Тип индекса.
 typedef uint16_t reg_index_t;
@@ -38,6 +39,12 @@ enum class DataType {
 };
 
 namespace RegTypes {
+
+//! Получает все типы объектов.
+extern QVector<ObjectType> objectTypes();
+
+//! Получает все типы данных.
+extern QVector<DataType> dataTypes();
 
 //! Получает строковое представление типа.
 extern QString typeStr(ObjectType type);

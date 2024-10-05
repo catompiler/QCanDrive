@@ -12,6 +12,7 @@ SOURCES += \
     main.cpp \
     regarray.cpp \
     regentry.cpp \
+    regentrydlg.cpp \
     reglisteditorwin.cpp \
     reglistmodel.cpp \
     regobject.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     is_base_creator.hpp \
     regarray.h \
     regentry.h \
+    regentrydlg.h \
     reglisteditorwin.h \
     reglistmodel.h \
     regobject.h \
@@ -31,6 +33,7 @@ HEADERS += \
     regvar.h
 
 FORMS += \
+    regentrydlg.ui \
     reglisteditorwin.ui
 
 # Default rules for deployment.

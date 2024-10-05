@@ -2,6 +2,7 @@
 #define REGENTRY_H
 
 #include <stdint.h>
+#include <QString>
 #include "regtypes.h"
 #include "regobject.h"
 
@@ -14,20 +15,28 @@ public:
     explicit RegEntry(reg_index_t index, ObjectType type);
     ~RegEntry();
 
-    //! Получение индекса.
+    //! Индекс.
     reg_index_t index() const;
-    //! Установка индекса.
     RegEntry& setIndex(reg_index_t index);
 
-    //! Получение типа объекта.
+    //! Тип объекта.
     ObjectType objectType() const;
-    //! Установка типа объекта.
     void setObjectType(ObjectType obj_type);
+
+    //! Имя.
+    QString name() const;
+    void setName(const QString &newName);
+
+    //! Описание.
+    QString description() const;
+    void setDescription(const QString &newDescription);
 
 private:
     reg_index_t m_index;
     reg_subindex_t m_subEntreiesCount;
     ObjectType m_object_type;
+    QString m_name;
+    QString m_description;
     RegObject* m_object;
 };
 
