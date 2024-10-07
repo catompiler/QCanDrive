@@ -15,7 +15,7 @@ RegObject::~RegObject()
 
 }
 
-RegObject* RegObject::byType(ObjectType type)
+RegObject* RegObject::newByType(ObjectType type)
 {
     switch(type){
     default:
@@ -29,4 +29,26 @@ RegObject* RegObject::byType(ObjectType type)
     }
 
     throw std::runtime_error("Invalid reg object type");
+}
+
+void RegObject::deleteByType(RegObject* object)
+{
+    if(object == nullptr) return;
+
+    ObjectType type = object->type();
+
+    switch(type){
+    default:
+        throw std::runtime_error("Invalid reg object type");
+        break;
+    case ObjectType::VAR:
+        delete object;
+        break;
+    case ObjectType::ARR:
+        delete object;
+        break;
+    case ObjectType::REC:
+        delete object;
+        break;
+    }
 }

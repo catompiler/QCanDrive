@@ -17,7 +17,7 @@ public:
 
     //! Индекс.
     reg_index_t index() const;
-    RegEntry& setIndex(reg_index_t index);
+    void setIndex(reg_index_t index);
 
     //! Тип объекта.
     ObjectType objectType() const;
@@ -33,8 +33,7 @@ public:
 
 private:
     reg_index_t m_index;
-    reg_subindex_t m_subEntreiesCount;
-    ObjectType m_object_type;
+    reg_subindex_t m_subEntriesCount;
     QString m_name;
     QString m_description;
     RegObject* m_object;

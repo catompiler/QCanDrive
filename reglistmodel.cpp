@@ -3,13 +3,15 @@
 
 static const char* COLUMN_NAMES[] = {
     "Индекс",
-    "Тип"
+    "Тип",
+    "Имя"
 };
 
 static const auto COLUMN_COUNT = sizeof(COLUMN_NAMES) / sizeof(COLUMN_NAMES[0]);
 
 static const int COL_INDEX = 0;
 static const int COL_TYPE = 1;
+static const int COL_NAME = 2;
 
 
 RegListModel::RegListModel(RegEntryList* reglist, QObject *parent)
@@ -78,9 +80,11 @@ QVariant RegListModel::data(const QModelIndex &index, int role) const
     default:
         return QVariant();
     case COL_INDEX:
-        return QVariant(entry->index());
+        return QVariant(QString("0x") + QString::number(entry->index(), 16));
     case COL_TYPE:
         return QVariant(RegTypes::typeStr(entry->objectType()));
+    case COL_NAME:
+        return QVariant(entry->name());
     }
 
     return QVariant();

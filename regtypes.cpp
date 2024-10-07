@@ -47,7 +47,7 @@ QString dataTypeStr(DataType type)
 QVector<ObjectType> objectTypes()
 {
     // std::initializer_list
-    static const auto obj_types = {
+    static auto obj_types = {
         ObjectType::VAR,
         ObjectType::ARR,
         ObjectType::REC
@@ -60,7 +60,7 @@ QVector<ObjectType> objectTypes()
 QVector<DataType> dataTypes()
 {
     // std::initializer_list
-    static const auto data_types = {
+    static auto data_types = {
         DataType::BOOLEAN,
         DataType::INTEGER8,
         DataType::INTEGER16,

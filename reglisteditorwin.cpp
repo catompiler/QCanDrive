@@ -43,6 +43,9 @@ void RegListEditorWin::on_pbAdd_clicked()
 
         RegEntry* re = new RegEntry(m_regEntryDlg->index(), m_regEntryDlg->objectType());
 
+        re->setName(m_regEntryDlg->name());
+        re->setDescription(m_regEntryDlg->description());
+
         m_regsListModel->layoutAboutToBeChanged();
         m_regEntries->append(re);
         m_regsListModel->layoutChanged();

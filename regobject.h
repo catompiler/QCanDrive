@@ -15,10 +15,13 @@ public:
     virtual ~RegObject();
 
     //! Создаёт объект заданного типа.
-    static RegObject* byType(ObjectType type);
+    static RegObject* newByType(ObjectType type);
+
+    //! Удаляет объект заданного типа.
+    static void deleteByType(RegObject* object);
 
     //! Получает тип.
-    virtual ObjectType type() const {};
+    virtual ObjectType type() const = 0;
 
     //! Получает тип данных.
     virtual DataType dataType() const {};
