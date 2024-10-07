@@ -3,6 +3,7 @@
 #include "regentrydlg.h"
 #include "reglistmodel.h"
 #include "regentry.h"
+#include <QMessageBox>
 #include <QDebug>
 
 
@@ -13,10 +14,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     ui->setupUi(this);
     m_regEntryDlg = new RegEntryDlg();
 
-    m_regEntries = new RegEntryList();
-    //m_regEntries->append(new RegEntry(0x1000, ObjectType::VAR));
-
-    m_regsListModel = new RegListModel(m_regEntries);
+    m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);
 }
 
@@ -25,11 +23,6 @@ RegListEditorWin::~RegListEditorWin()
     delete ui;
     delete m_regEntryDlg;
     delete m_regsListModel;
-
-    for(auto entry: qAsConst(*m_regEntries)){
-        delete entry;
-    }
-    delete m_regEntries;
 }
 
 void RegListEditorWin::on_pbAdd_clicked()
@@ -41,14 +34,29 @@ void RegListEditorWin::on_pbAdd_clicked()
 
     if(m_regEntryDlg->exec()){
 
+        if(m_regsListModel->hasEntryByIndex(m_regEntryDlg->index())){
+            QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
+            return;
+        }
+
         RegEntry* re = new RegEntry(m_regEntryDlg->index(), m_regEntryDlg->objectType());
 
         re->setName(m_regEntryDlg->name());
         re->setDescription(m_regEntryDlg->description());
 
-        m_regsListModel->layoutAboutToBeChanged();
-        m_regEntries->append(re);
-        m_regsListModel->layoutChanged();
+        if(!m_regsListModel->addEntry(re)){
+            qDebug() << "m_regsListModel->addEntry(...)";
+            delete re;
+        }
+    }
+}
+
+void RegListEditorWin::on_pbDel_clicked()
+{
+    QModelIndex index = ui->tvRegList->currentIndex();
+
+    if(index.isValid()){
+        m_regsListModel->removeRow(index.row(), index.parent());
     }
 }
 

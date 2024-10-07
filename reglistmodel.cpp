@@ -1,4 +1,5 @@
 #include "reglistmodel.h"
+#include <algorithm>
 
 
 static const char* COLUMN_NAMES[] = {
@@ -14,15 +15,60 @@ static const int COL_TYPE = 1;
 static const int COL_NAME = 2;
 
 
-RegListModel::RegListModel(RegEntryList* reglist, QObject *parent)
+RegListModel::RegListModel(QObject *parent)
     : QAbstractItemModel{parent}
 {
-    m_reglist = reglist;
+    m_reglist = new RegEntryList();
 }
 
 RegListModel::~RegListModel()
 {
+    for(auto entry: qAsConst(*m_reglist)){
+        delete entry;
+    }
+    delete m_reglist;
+}
 
+bool RegListModel::hasEntryByIndex(reg_index_t index) const
+{
+    return std::find_if(m_reglist->begin(), m_reglist->end(),
+                        [index](const RegEntry* ri){
+                            return ri->index() == index;
+                        }) != m_reglist->end();
+}
+
+bool RegListModel::addEntry(RegEntry* r)
+{
+    reg_index_t index = r->index();
+
+    auto it = std::find_if(m_reglist->begin(), m_reglist->end(),
+                                [index](const RegEntry* ri){
+        return ri->index() >= index;
+    });
+
+    // index already exist.
+    if(it != m_reglist->end()){
+        if((*it)->index() == index){
+            return false;
+        }
+    }
+
+    emit layoutAboutToBeChanged();
+
+    m_reglist->insert(it, r);
+
+    emit layoutChanged();
+
+    return true;
+}
+
+bool RegListModel::addObject(RegObject* r, const QModelIndex& parent)
+{
+    if(!parent.isValid()){
+        return false;
+    }
+
+    return true;
 }
 
 

@@ -15,8 +15,18 @@ public:
 public:
     ObjectType type() const override;
 
+    DataType dataType() const;
+    void setDataType(DataType newDataType);
+
+    QVariant value() const;
+    void setValue(const QVariant& newValue);
+
 private:
+    DataType m_dataType;
     QVariant m_value;
+    QVariant m_minValue;
+    QVariant m_maxValue;
+    QVariant m_defaultValue;
 };
 
 #endif // REGVAR_H

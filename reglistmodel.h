@@ -4,19 +4,25 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
-#include <QList>
+#include <QMap>
 #include "regentry.h"
+#include "regobject.h"
 
 
-typedef QList<RegEntry*> RegEntryList;
+typedef QVector<RegEntry*> RegEntryList;
 
 
 class RegListModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit RegListModel(RegEntryList* reglist, QObject *parent = nullptr);
+    explicit RegListModel(QObject *parent = nullptr);
     ~RegListModel();
+
+    bool hasEntryByIndex(reg_index_t index) const;
+
+    bool addEntry(RegEntry* r);
+    bool addObject(RegObject* r, const QModelIndex& parent = QModelIndex());
 
     // QAbstractItemModel interface
 public:

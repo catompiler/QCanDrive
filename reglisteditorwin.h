@@ -22,13 +22,12 @@ public:
 
 public slots:
     void on_pbAdd_clicked();
+    void on_pbDel_clicked();
 
 private:
     Ui::RegListEditorWin *ui;
     RegEntryDlg* m_regEntryDlg;
 
     RegListModel* m_regsListModel;
-
-    RegEntryList* m_regEntries;
 };
 #endif // REGLISTEDITORWIN_H

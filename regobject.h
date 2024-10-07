@@ -23,9 +23,6 @@ public:
     //! Получает тип.
     virtual ObjectType type() const = 0;
 
-    //! Получает тип данных.
-    virtual DataType dataType() const {};
-
 protected:
     RegObject();
 };
