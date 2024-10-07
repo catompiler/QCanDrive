@@ -10,6 +10,7 @@ namespace Ui { class RegListEditorWin; }
 QT_END_NAMESPACE
 
 class RegEntryDlg;
+class QItemSelection;
 
 
 class RegListEditorWin : public QMainWindow
@@ -22,7 +23,9 @@ public:
 
 public slots:
     void on_pbAdd_clicked();
+    void on_pbAddSub_clicked();
     void on_pbDel_clicked();
+    void tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     Ui::RegListEditorWin *ui;

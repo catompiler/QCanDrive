@@ -56,3 +56,8 @@ void RegEntry::setDescription(const QString &newDescription)
     m_description = newDescription;
 }
 
+RegObject* RegEntry::object() const
+{
+    return m_object;
+}
+

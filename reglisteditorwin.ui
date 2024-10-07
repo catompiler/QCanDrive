@@ -15,7 +15,14 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="2">
+    <item row="0" column="0">
+     <widget class="QPushButton" name="pbAdd">
+      <property name="text">
+       <string>Добавить</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="3">
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -28,14 +35,14 @@
       </property>
      </spacer>
     </item>
-    <item row="0" column="0">
-     <widget class="QPushButton" name="pbAdd">
+    <item row="0" column="2">
+     <widget class="QPushButton" name="pbDel">
       <property name="text">
-       <string>Добавить</string>
+       <string>Удалить</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="4">
+    <item row="1" column="0" colspan="5">
      <widget class="QSplitter" name="splitter">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -65,9 +72,9 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QPushButton" name="pbDel">
+     <widget class="QPushButton" name="pbAddSub">
       <property name="text">
-       <string>Удалить</string>
+       <string>Добавить подъэлемент</string>
       </property>
      </widget>
     </item>
@@ -79,7 +86,7 @@
      <x>0</x>
      <y>0</y>
      <width>636</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="mnuEdit">

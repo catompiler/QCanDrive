@@ -21,6 +21,9 @@ public:
 
     bool hasEntryByIndex(reg_index_t index) const;
 
+    RegEntry* entryByIndex(const QModelIndex& index) const;
+    RegObject* objectByIndex(const QModelIndex& index) const;
+
     bool addEntry(RegEntry* r);
     bool addObject(RegObject* r, const QModelIndex& parent = QModelIndex());
 

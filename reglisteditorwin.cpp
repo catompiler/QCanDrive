@@ -4,6 +4,7 @@
 #include "reglistmodel.h"
 #include "regentry.h"
 #include <QMessageBox>
+#include <QItemSelectionModel>
 #include <QDebug>
 
 
@@ -16,6 +17,14 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 
     m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);
+
+    ui->tvRegList->setSelectionMode(QAbstractItemView::SingleSelection);
+    QItemSelectionModel* sel_model = ui->tvRegList->selectionModel();
+    if(sel_model == nullptr){
+        sel_model = new QItemSelectionModel();
+        ui->tvRegList->setSelectionModel(sel_model);
+    }
+    connect(sel_model, &QItemSelectionModel::selectionChanged, this, &RegListEditorWin::tvRegList_selection_changed);
 }
 
 RegListEditorWin::~RegListEditorWin()
@@ -51,12 +60,46 @@ void RegListEditorWin::on_pbAdd_clicked()
     }
 }
 
+void RegListEditorWin::on_pbAddSub_clicked()
+{
+    qDebug() << "on_pbAddSub_clicked";
+
+    QModelIndex index = ui->tvRegList->currentIndex();
+
+    //RegEntry* re =
+}
+
 void RegListEditorWin::on_pbDel_clicked()
 {
+    qDebug() << "on_pbDel_clicked";
+
     QModelIndex index = ui->tvRegList->currentIndex();
 
     if(index.isValid()){
         m_regsListModel->removeRow(index.row(), index.parent());
     }
+}
+
+void RegListEditorWin::tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    qDebug() << "on_tvRegList_activated";
+
+    if(selected.empty()){
+        return;
+    }
+
+    QModelIndex index = selected.indexes().first();
+
+    if(!index.isValid()){
+        return;
+    }
+
+    RegObject* ro = m_regsListModel->objectByIndex(index);
+
+    if(ro == nullptr){
+        return;
+    }
+
+    qDebug() << RegTypes::typeStr(ro->type());
 }
 

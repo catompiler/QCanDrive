@@ -34,7 +34,33 @@ bool RegListModel::hasEntryByIndex(reg_index_t index) const
     return std::find_if(m_reglist->begin(), m_reglist->end(),
                         [index](const RegEntry* ri){
                             return ri->index() == index;
-                        }) != m_reglist->end();
+    }) != m_reglist->end();
+}
+
+RegEntry* RegListModel::entryByIndex(const QModelIndex& index) const
+{
+    if(!index.isValid()) return nullptr;
+
+    QModelIndex entry_index = index;
+
+    while(entry_index.parent().isValid()){
+        entry_index = entry_index.parent();
+    }
+
+    int n = entry_index.row();
+
+    if(n >= m_reglist->count()) return nullptr;
+
+    return m_reglist->at(n);
+}
+
+RegObject* RegListModel::objectByIndex(const QModelIndex& index) const
+{
+    RegEntry* re = entryByIndex(index);
+
+    if(re == nullptr) return nullptr;
+
+    return re->object();
 }
 
 bool RegListModel::addEntry(RegEntry* r)

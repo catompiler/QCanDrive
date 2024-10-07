@@ -31,6 +31,8 @@ public:
     QString description() const;
     void setDescription(const QString &newDescription);
 
+    RegObject* object() const;
+
 private:
     reg_index_t m_index;
     reg_subindex_t m_subEntriesCount;
