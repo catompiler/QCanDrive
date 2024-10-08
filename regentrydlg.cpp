@@ -70,3 +70,8 @@ void RegEntryDlg::populateTypesList()
         ui->cbType->addItem(RegTypes::typeStr(obj_type), static_cast<int>(obj_type));
     }
 }
+
+void RegEntryDlg::setIndexEditable(bool newIndexEditable)
+{
+    ui->sbIndex->setEnabled(newIndexEditable);
+}

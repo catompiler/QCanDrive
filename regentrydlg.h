@@ -28,6 +28,8 @@ public:
     QString description() const;
     void setDescription(const QString &newDescription);
 
+    void setIndexEditable(bool newIndexEditable);
+
 private:
     Ui::RegEntryDlg *ui;
 

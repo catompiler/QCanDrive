@@ -18,7 +18,9 @@ SOURCES += \
     regobject.cpp \
     regrecord.cpp \
     regtypes.cpp \
-    regvar.cpp
+    regvar.cpp \
+    regvardelegate.cpp \
+    regvarmodel.cpp
 
 HEADERS += \
     is_base_creator.hpp \
@@ -30,7 +32,9 @@ HEADERS += \
     regobject.h \
     regrecord.h \
     regtypes.h \
-    regvar.h
+    regvar.h \
+    regvardelegate.h \
+    regvarmodel.h
 
 FORMS += \
     regentrydlg.ui \

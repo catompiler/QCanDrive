@@ -97,6 +97,12 @@ bool RegListModel::addObject(RegObject* r, const QModelIndex& parent)
     return true;
 }
 
+void RegListModel::entryAtIndexModified(const QModelIndex& index)
+{
+    QModelIndex topleft = createIndex(index.row(), 0);
+    QModelIndex botright = createIndex(index.row(), COLUMN_COUNT - 1);
+    emit dataChanged(topleft, botright);
+}
 
 QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) const
 {
@@ -114,13 +120,9 @@ QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) 
 
 QModelIndex RegListModel::parent(const QModelIndex &child) const
 {
+    Q_UNUSED(child);
     return QModelIndex();
 }
-
-//QModelIndex RegListModel::sibling(int row, int column, const QModelIndex &idx) const
-//{
-//    return QModelIndex();
-//}
 
 int RegListModel::rowCount(const QModelIndex &parent) const
 {
@@ -133,11 +135,6 @@ int RegListModel::columnCount(const QModelIndex &parent) const
     if(parent.isValid()) return 0;
     return COLUMN_COUNT;
 }
-
-//bool RegListModel::hasChildren(const QModelIndex &parent) const
-//{
-//    return false;
-//}
 
 QVariant RegListModel::data(const QModelIndex &index, int role) const
 {
