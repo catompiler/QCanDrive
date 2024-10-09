@@ -1,14 +1,26 @@
 #include "regvar.h"
+#include "regarray.h"
+#include "regrecord.h"
 #include <stdint.h>
 
 
-RegVar::RegVar()
+
+RegVar::RegVar(RegObject* parent)
+    :RegObject(parent)
 {
     m_dataType = DataType::INTEGER32;
     m_minValue = INT32_MIN;
     m_maxValue = INT32_MAX;
     m_defaultValue = 0;
-    m_isParameter = false;
+}
+
+RegVar::RegVar(const RegVar& var)
+    :RegObject(var)
+{
+    m_dataType = var.m_dataType;
+    m_minValue = var.m_minValue;
+    m_maxValue = var.m_maxValue;
+    m_defaultValue = var.m_defaultValue;
 }
 
 RegVar::~RegVar()
@@ -20,6 +32,16 @@ RegVar::~RegVar()
 ObjectType RegVar::type() const
 {
     return ObjectType::VAR;
+}
+
+void RegVar::setParent(RegArray* newParent)
+{
+    RegObject::setParent(static_cast<RegObject*>(newParent));
+}
+
+void RegVar::setParent(RegRecord* newParent)
+{
+    RegObject::setParent(static_cast<RegObject*>(newParent));
 }
 
 DataType RegVar::dataType() const
@@ -62,12 +84,3 @@ void RegVar::setDefaultValue(const QVariant& newDefaultValue)
     m_defaultValue = newDefaultValue;
 }
 
-bool RegVar::isParameter() const
-{
-    return m_isParameter;
-}
-
-void RegVar::setIsParameter(bool newIsParameter)
-{
-    m_isParameter = newIsParameter;
-}

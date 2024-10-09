@@ -38,6 +38,14 @@ enum class DataType {
     DOMAIN = 14
 };
 
+// Основные флаги.
+enum class RegFlags {
+    NONE = 0,
+    PARAMETER = 1,
+};
+// Тип основных флагов.
+typedef uint32_t reg_flags_t;
+
 namespace RegTypes {
 
 //! Получает все типы объектов.

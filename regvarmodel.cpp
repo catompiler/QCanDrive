@@ -15,8 +15,7 @@ static const char* row_names[] = {
     "Тип данных",
     "Мин. значение",
     "Макс. занчение",
-    "Значение. по-умолчанию",
-    "Является параметром",
+    "Значение. по-умолчанию"
 };
 static const auto row_count = (sizeof(row_names) / sizeof(row_names[0]));
 
@@ -113,8 +112,6 @@ QVariant RegVarModel::data(const QModelIndex& index, int role) const
         return m_regVar->maxValue();
     case REGVARMODEL_ROW_DEF_VALUE:
         return m_regVar->defaultValue();
-    case REGVARMODEL_ROW_IS_PARAMETER:
-        return m_regVar->isParameter();
     }
     //}
     return QVariant();

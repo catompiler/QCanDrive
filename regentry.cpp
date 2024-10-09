@@ -31,29 +31,13 @@ ObjectType RegEntry::objectType() const
 void RegEntry::setObjectType(ObjectType obj_type)
 {
     if(m_object->type() != obj_type){
+        RegObject* new_object = RegObject::newByType(obj_type);
+        new_object->setName(m_object->name());
+        new_object->setDescription(m_object->description());
+
         RegObject::deleteByType(m_object);
-        m_object = RegObject::newByType(obj_type);
+        m_object = new_object;
     }
-}
-
-QString RegEntry::name() const
-{
-    return m_name;
-}
-
-void RegEntry::setName(const QString &newName)
-{
-    m_name = newName;
-}
-
-QString RegEntry::description() const
-{
-    return m_description;
-}
-
-void RegEntry::setDescription(const QString &newDescription)
-{
-    m_description = newDescription;
 }
 
 RegObject* RegEntry::object() const

@@ -14,6 +14,7 @@ class RegEntryDlg;
 class RegListModel;
 class RegVarModel;
 class RegVarDelegate;
+class RegEntry;
 
 
 class RegListEditorWin : public QMainWindow

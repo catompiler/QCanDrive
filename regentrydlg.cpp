@@ -75,3 +75,8 @@ void RegEntryDlg::setIndexEditable(bool newIndexEditable)
 {
     ui->sbIndex->setEnabled(newIndexEditable);
 }
+
+void RegEntryDlg::setObjectTypeEditable(bool newObjectTypeEditable)
+{
+    ui->cbType->setEnabled(newObjectTypeEditable);
+}

@@ -4,16 +4,24 @@
 #include <QVariant>
 #include "regobject.h"
 
+class RegArray;
+class RegRecord;
+
 
 class RegVar : public RegObject
 {
 public:
-    RegVar();
+    explicit RegVar(RegObject* parent = nullptr);
+    RegVar(const RegVar& var);
     ~RegVar();
 
     // RegObject interface
 public:
     ObjectType type() const override;
+
+    // Установка родителя.
+    void setParent(RegArray* newParent);
+    void setParent(RegRecord* newParent);
 
     DataType dataType() const;
     void setDataType(DataType newDataType);
@@ -27,15 +35,12 @@ public:
     QVariant defaultValue() const;
     void setDefaultValue(const QVariant& newDefaultValue);
 
-    bool isParameter() const;
-    void setIsParameter(bool newIsParameter);
-
 private:
     DataType m_dataType;
     QVariant m_minValue;
     QVariant m_maxValue;
     QVariant m_defaultValue;
-    bool m_isParameter;
+    reg_flags_t flags;
 };
 
 #endif // REGVAR_H

@@ -15,6 +15,7 @@ SOURCES += \
     regentrydlg.cpp \
     reglisteditorwin.cpp \
     reglistmodel.cpp \
+    regmultiobject.cpp \
     regobject.cpp \
     regrecord.cpp \
     regtypes.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     regentrydlg.h \
     reglisteditorwin.h \
     reglistmodel.h \
+    regmultiobject.h \
     regobject.h \
     regrecord.h \
     regtypes.h \

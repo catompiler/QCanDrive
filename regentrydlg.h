@@ -30,6 +30,8 @@ public:
 
     void setIndexEditable(bool newIndexEditable);
 
+    void setObjectTypeEditable(bool newObjectTypeEditable);
+
 private:
     Ui::RegEntryDlg *ui;
 

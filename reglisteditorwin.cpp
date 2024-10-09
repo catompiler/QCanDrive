@@ -50,6 +50,7 @@ void RegListEditorWin::on_pbAdd_clicked()
     qDebug() << "on_pbAdd_clicked";
 
     m_regEntryDlg->setIndexEditable(true);
+    m_regEntryDlg->setObjectTypeEditable(true);
     m_regEntryDlg->setName(QString("newObject"));
     m_regEntryDlg->setDescription(QString());
 
@@ -62,8 +63,16 @@ void RegListEditorWin::on_pbAdd_clicked()
 
         RegEntry* re = new RegEntry(m_regEntryDlg->index(), m_regEntryDlg->objectType());
 
-        re->setName(m_regEntryDlg->name());
-        re->setDescription(m_regEntryDlg->description());
+        RegObject* ro = re->object();
+
+        if(ro == nullptr){
+            delete re;
+            qDebug() << "RegObject is null";
+            return;
+        }
+
+        ro->setName(m_regEntryDlg->name());
+        ro->setDescription(m_regEntryDlg->description());
 
         if(!m_regsListModel->addEntry(re)){
             qDebug() << "m_regsListModel->addEntry(...)";
@@ -78,7 +87,31 @@ void RegListEditorWin::on_pbAddSub_clicked()
 
     QModelIndex index = ui->tvRegList->currentIndex();
 
-    //RegEntry* re =
+    RegEntry* re = m_regsListModel->entryByIndex(index);
+
+    if(re == nullptr) return;
+
+    if(re->objectType() == ObjectType::VAR) return;
+
+    m_regEntryDlg->setIndexEditable(false);
+    m_regEntryDlg->setIndex(re->index());
+    m_regEntryDlg->setObjectTypeEditable(false);
+    m_regEntryDlg->setObjectType(ObjectType::VAR);
+    m_regEntryDlg->setName(QString("newSubObject"));
+    m_regEntryDlg->setDescription(QString());
+
+    if(m_regEntryDlg->exec()){
+
+        RegObject* ro = RegObject::newByType(m_regEntryDlg->objectType());
+
+        ro->setName(m_regEntryDlg->name());
+        ro->setDescription(m_regEntryDlg->description());
+
+        if(!m_regsListModel->addObject(ro, index)){
+            qDebug() << "m_regsListModel->addEntry(...)";
+            delete ro;
+        }
+    }
 }
 
 void RegListEditorWin::on_pbDel_clicked()
@@ -87,9 +120,9 @@ void RegListEditorWin::on_pbDel_clicked()
 
     QModelIndex index = ui->tvRegList->currentIndex();
 
-    if(index.isValid()){
-        m_regsListModel->removeRow(index.row(), index.parent());
-    }
+    if(!index.isValid()) return;
+
+    //m_regsListModel->removeRow(index.row(), index.parent());
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
@@ -105,17 +138,22 @@ void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
 
         if(re == nullptr) return;
 
+        RegObject* ro = re->object();
+
+        if(ro == nullptr) return;
+
         m_regEntryDlg->setIndexEditable(false);
         m_regEntryDlg->setIndex(re->index());
+        m_regEntryDlg->setObjectTypeEditable(true);
         m_regEntryDlg->setObjectType(re->objectType());
-        m_regEntryDlg->setName(re->name());
-        m_regEntryDlg->setDescription(re->description());
+        m_regEntryDlg->setName(ro->name());
+        m_regEntryDlg->setDescription(ro->description());
 
         if(m_regEntryDlg->exec()){
 
             re->setObjectType(m_regEntryDlg->objectType());
-            re->setName(m_regEntryDlg->name());
-            re->setDescription(m_regEntryDlg->description());
+            ro->setName(m_regEntryDlg->name());
+            ro->setDescription(m_regEntryDlg->description());
 
             m_regsListModel->entryAtIndexModified(index);
 
@@ -140,14 +178,12 @@ void RegListEditorWin::updateRegViewModel(const QModelIndex& index)
     qDebug() << "updateRegViewModel";
 
     if(!index.isValid()){
-        ui->tvRegInfo->setModel(nullptr);
         return;
     }
 
     RegObject* ro = m_regsListModel->objectByIndex(index);
 
     if(ro == nullptr){
-        ui->tvRegInfo->setModel(nullptr);
         return;
     }
 
@@ -158,16 +194,10 @@ void RegListEditorWin::updateRegViewModel(const QModelIndex& index)
         break;
     case ObjectType::VAR:
         m_regVarModel->setRegVar(static_cast<RegVar*>(ro));
-        ui->tvRegInfo->setModel(m_regVarModel);
-        ui->tvRegInfo->setItemDelegate(m_regVarDelegate);
         break;
     case ObjectType::ARR:
-        ui->tvRegInfo->setItemDelegate(nullptr);
-        ui->tvRegInfo->setModel(nullptr);
         break;
     case ObjectType::REC:
-        ui->tvRegInfo->setItemDelegate(nullptr);
-        ui->tvRegInfo->setModel(nullptr);
         break;
     }
 }

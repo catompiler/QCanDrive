@@ -77,12 +77,6 @@ QWidget* RegVarDelegate::createEditor(QWidget* parent, const QStyleOptionViewIte
             break;
         }
     }break;
-    case REGVARMODEL_ROW_IS_PARAMETER:{
-        QComboBox* cb_is_param = new QComboBox(parent);
-        cb_is_param->addItem(tr("Нет"));
-        cb_is_param->addItem(tr("Да"));
-        res_widget = static_cast<QWidget*>(cb_is_param);
-    }break;
     }
 
     return res_widget;
@@ -138,12 +132,6 @@ void RegVarDelegate::setEditorData(QWidget* editor, const QModelIndex& index) co
             break;
         }
     }break;
-    case REGVARMODEL_ROW_IS_PARAMETER:{
-        QComboBox* cb_is_param = qobject_cast<QComboBox*>(editor);
-        if(cb_is_param == nullptr) break;
-
-        cb_is_param->setCurrentIndex(static_cast<int>(regVar->isParameter()));
-    }break;
     }
 }
 
@@ -191,12 +179,6 @@ void RegVarDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, co
             QItemDelegate::setModelData(editor, model, index);
             break;
         }
-    }break;
-    case REGVARMODEL_ROW_IS_PARAMETER:{
-        QComboBox* cb_is_param = qobject_cast<QComboBox*>(editor);
-        if(cb_is_param == nullptr) break;
-
-        regVar->setIsParameter(static_cast<bool>(cb_is_param->currentIndex()));
     }break;
     }
 }
