@@ -18,6 +18,8 @@ public:
 
     virtual RegObject* at(int index) = 0;
 
+    RegVar* countVariable() const;
+
 protected:
     explicit RegMultiObject(RegObject* parent);
     RegMultiObject(const RegMultiObject& obj) = delete;

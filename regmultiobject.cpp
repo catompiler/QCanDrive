@@ -14,6 +14,11 @@ RegMultiObject::RegMultiObject(RegObject* parent)
     m_var_count->setDescription(QObject::tr("Count of subitems"));
 }
 
+RegVar* RegMultiObject::countVariable() const
+{
+    return m_var_count;
+}
+
 RegMultiObject::~RegMultiObject()
 {
     delete m_var_count;

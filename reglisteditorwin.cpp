@@ -107,7 +107,7 @@ void RegListEditorWin::on_pbAddSub_clicked()
         ro->setName(m_regEntryDlg->name());
         ro->setDescription(m_regEntryDlg->description());
 
-        if(!m_regsListModel->addObject(ro, index)){
+        if(!m_regsListModel->addSubObject(ro, index)){
             qDebug() << "m_regsListModel->addEntry(...)";
             delete ro;
         }

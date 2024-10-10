@@ -25,7 +25,7 @@ public:
     RegObject* objectByIndex(const QModelIndex& index) const;
 
     bool addEntry(RegEntry* r);
-    bool addObject(RegObject* r, const QModelIndex& parent = QModelIndex());
+    bool addSubObject(RegObject* r, const QModelIndex& parent = QModelIndex());
 
 public slots:
     void entryAtIndexModified(const QModelIndex& index);

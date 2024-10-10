@@ -15,8 +15,6 @@ public:
     RegVar(const RegVar& var);
     ~RegVar();
 
-    // RegObject interface
-public:
     ObjectType type() const override;
 
     // Установка родителя.
@@ -35,12 +33,15 @@ public:
     QVariant defaultValue() const;
     void setDefaultValue(const QVariant& newDefaultValue);
 
+    reg_flags_t flags() const;
+    void setFlags(reg_flags_t newFlags);
+
 private:
     DataType m_dataType;
     QVariant m_minValue;
     QVariant m_maxValue;
     QVariant m_defaultValue;
-    reg_flags_t flags;
+    reg_flags_t m_flags;
 };
 
 #endif // REGVAR_H

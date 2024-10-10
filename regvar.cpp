@@ -84,3 +84,13 @@ void RegVar::setDefaultValue(const QVariant& newDefaultValue)
     m_defaultValue = newDefaultValue;
 }
 
+reg_flags_t RegVar::flags() const
+{
+    return m_flags;
+}
+
+void RegVar::setFlags(reg_flags_t newFlags)
+{
+    m_flags = newFlags;
+}
+

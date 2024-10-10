@@ -2,6 +2,7 @@
 #include "regarray.h"
 #include "regvar.h"
 #include <algorithm>
+#include <QDebug>
 
 
 static const char* col_names[] = {
@@ -76,11 +77,9 @@ RegEntry* RegListModel::entryByIndex(const QModelIndex& index) const
 
 RegObject* RegListModel::objectByIndex(const QModelIndex& index) const
 {
-    RegEntry* re = entryByIndex(index);
+    if(!index.isValid()) return nullptr;
 
-    if(re == nullptr) return nullptr;
-
-    return re->object();
+    return static_cast<RegObject*>(index.internalPointer());
 }
 
 bool RegListModel::addEntry(RegEntry* r)
@@ -108,13 +107,28 @@ bool RegListModel::addEntry(RegEntry* r)
     return true;
 }
 
-bool RegListModel::addObject(RegObject* r, const QModelIndex& parent)
+bool RegListModel::addSubObject(RegObject* r, const QModelIndex& parent)
 {
-    if(!parent.isValid()){
-        return false;
+    if(!parent.isValid()) return false;
+
+    RegObject* ro = static_cast<RegObject*>(parent.internalPointer());
+
+    if(ro == nullptr) return false;
+    if(ro->type() != ObjectType::ARR && ro->type() != ObjectType::REC) return false;
+
+    RegMultiObject* mo = static_cast<RegMultiObject*>(ro);
+
+    //auto parents = QList<QPersistentModelIndex>() << QPersistentModelIndex(parent);
+
+    emit layoutAboutToBeChanged(); //parents
+
+    bool res = mo->add(r);
+
+    if(res){
+        emit layoutChanged(); //parents
     }
 
-    return true;
+    return res;
 }
 
 void RegListModel::entryAtIndexModified(const QModelIndex& index)
@@ -126,13 +140,37 @@ void RegListModel::entryAtIndexModified(const QModelIndex& index)
 
 QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) const
 {
-    //if(!hasIndex(row, column, parent)) return QModelIndex();
+    //qDebug() << "RegListModel::index(" << row << ", " << column << ", " << parent << ")";
 
     if(!parent.isValid()){
+        if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
         if(row < 0 || row >= m_reglist->count()) return QModelIndex();
+
+        RegEntry* re = m_reglist->at(row);
+        if(re == nullptr) return QModelIndex();
+
+        RegObject* ro = re->object();
+
+        return createIndex(row, column, static_cast<void*>(ro));
+    }else{ // parent is valid.
         if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
 
-        return createIndex(row, column, nullptr);
+        RegObject* po = static_cast<RegObject*>(parent.internalPointer());
+
+        if(po == nullptr) return QModelIndex();
+        if(po->type() != ObjectType::ARR && po->type() != ObjectType::REC){
+            return QModelIndex();
+        }
+
+        RegMultiObject* mo = static_cast<RegMultiObject*>(po);
+
+        if(row == 0){
+            return createIndex(row, column, static_cast<void*>(mo->countVariable()));
+        }
+
+        if(row < 1 || row >= mo->count() + 1) return QModelIndex();
+
+        return createIndex(row, column, static_cast<void*>(mo->at(row - 1)));
     }
 
     return QModelIndex();
@@ -140,61 +178,182 @@ QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) 
 
 QModelIndex RegListModel::parent(const QModelIndex &child) const
 {
-    Q_UNUSED(child);
+    //qDebug() << "RegListModel::parent(" << child << ")";
+
+    if(!child.isValid()) return QModelIndex();
+
+    RegObject* ro = static_cast<RegObject*>(child.internalPointer());
+
+    if(ro == nullptr) return QModelIndex();
+
+    RegObject* po = ro->parent();
+
+    if(po == nullptr) return QModelIndex();
+
+    RegObject* ppo = po->parent();
+
+    if(ppo == nullptr){
+        auto it = std::find_if(m_reglist->begin(), m_reglist->end(), [po](const RegEntry* re){
+            return re->object() == po;
+        });
+
+        if(it == m_reglist->end()) return QModelIndex();
+
+        return createIndex(std::distance(it, m_reglist->end()), 0, po);
+    }
+
+    if(ppo->type() != ObjectType::ARR && ppo->type() != ObjectType::REC){
+        return QModelIndex();
+    }
+
+    RegMultiObject* mo = static_cast<RegMultiObject*>(ppo);
+
+    if(po == mo->countVariable()){
+        return createIndex(0, 0, po);
+    }
+
+    int po_i = 0;
+    for(; po_i < mo->count(); po_i ++){
+        if(mo->at(po_i) == po){
+            return createIndex(po_i + 1, 0, po);
+        }
+    }
+
     return QModelIndex();
 }
 
 int RegListModel::rowCount(const QModelIndex &parent) const
 {
-    if(parent.isValid()) return 0;
-    return m_reglist->count();
+    //qDebug() << "RegListModel::rowCount(" << parent << ")";
+
+    if(!parent.isValid()){
+        return m_reglist->count();
+    }
+
+    RegObject* ro = static_cast<RegObject*>(parent.internalPointer());
+    if(ro == nullptr) return 0;
+
+    if(ro->type() != ObjectType::ARR && ro->type() != ObjectType::REC) return 0;
+
+    RegMultiObject* mo = static_cast<RegMultiObject*>(ro);
+
+    return mo->count() + 1 /* number of subentries var */;
 }
 
 int RegListModel::columnCount(const QModelIndex &parent) const
 {
-    if(parent.isValid()) return 0;
+    Q_UNUSED(parent);
+//    qDebug() << "RegListModel::columnCount(" << parent << ")";
+
+//    if(!parent.isValid()){
+//        return col_count;
+//    }
+
+//    RegObject* ro = static_cast<RegObject*>(parent.internalPointer());
+//    if(ro == nullptr) return 0;
+
+//    if(ro->type() != ObjectType::ARR && ro->type() != ObjectType::REC) return 0;
+
     return col_count;
 }
 
 QVariant RegListModel::data(const QModelIndex &index, int role) const
 {
+    if(!index.isValid()) return QVariant();
     if(role != Qt::DisplayRole) return QVariant();
     if(index.column() >= static_cast<int>(col_count)) return QVariant();
-    if(index.row() >= m_reglist->count()) return QVariant();
 
-    auto entry = m_reglist->at(index.row());
-    if(entry == nullptr) return QVariant();
+    //qDebug() << "RegListModel::data(" << index << ")";
 
-    auto regobj = objectByIndex(index);
-    if(regobj == nullptr) return QVariant();
+    RegEntry* re = nullptr;
+    RegObject* ro = nullptr;
+
+    if(!index.parent().isValid()){
+        if(index.row() >= m_reglist->count()) return QVariant();
+
+        re = m_reglist->at(index.row());
+        if(re == nullptr) return QVariant();
+
+        ro = re->object();
+    }else{
+        ro = static_cast<RegObject*>(index.internalPointer());
+    }
+
+    if(ro == nullptr) return QVariant();
+
+    //RegObject* po = ro->parent();
 
     switch(index.column()){
     default:
         return QVariant();
     case COL_INDEX:
-        return QString("0x") + QString::number(entry->index(), 16);
+        if(re){
+            return QString("0x") + QString::number(re->index(), 16);
+        }
+        return QString("0x") + QString::number(index.row(), 16);
     case COL_NAME:
-        return regobj->name();
+        return ro->name();
     case COL_TYPE:
-        return RegTypes::typeStr(entry->objectType());
+        return RegTypes::typeStr(ro->type());
     case COL_COUNT:
-        switch(regobj->type()){
+        switch(ro->type()){
         default:
         case ObjectType::VAR:
-            return QString("");
-        //case ObjectType::ARR:
-            //return static_cast<RegArray*>(regobj)
+            return QVariant();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return static_cast<RegMultiObject*>(ro)->count() + 1;
         }
 
     case COL_DATATYPE:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return RegTypes::dataTypeStr(static_cast<RegVar*>(ro)->dataType());
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
     case COL_MIN_VAL:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return static_cast<RegVar*>(ro)->minValue();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
     case COL_MAX_VAL:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return static_cast<RegVar*>(ro)->maxValue();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
     case COL_DEF_VAL:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return static_cast<RegVar*>(ro)->defaultValue();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
     case COL_FLAGS:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->flags());
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
     case COL_EXTFLAGS:
         return QString("");
     case COL_DESCR:
-        return regobj->description();
+        return ro->description();
     }
 
     return QVariant();
