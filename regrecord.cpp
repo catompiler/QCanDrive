@@ -47,6 +47,8 @@ bool RegRecord::add(RegObject* regobj)
         item->setParent(this);
     }
 
+    item->setSubIndex(m_fields.count() + 1);
+
     m_fields.append(item);
 
     updateCounter();

@@ -47,6 +47,8 @@ bool RegArray::add(RegObject* regobj)
         item->setParent(this);
     }
 
+    item->setSubIndex(m_array.count() + 1);
+
     m_array.append(item);
 
     updateCounter();

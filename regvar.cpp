@@ -8,19 +8,23 @@
 RegVar::RegVar(RegObject* parent)
     :RegObject(parent)
 {
+    m_subIndex = 0x0;
     m_dataType = DataType::INTEGER32;
     m_minValue = INT32_MIN;
     m_maxValue = INT32_MAX;
     m_defaultValue = 0;
+    m_flags = 0x0;
 }
 
 RegVar::RegVar(const RegVar& var)
     :RegObject(var)
 {
+    m_subIndex = var.m_subIndex;
     m_dataType = var.m_dataType;
     m_minValue = var.m_minValue;
     m_maxValue = var.m_maxValue;
     m_defaultValue = var.m_defaultValue;
+    m_flags = var.m_flags;
 }
 
 RegVar::~RegVar()
@@ -42,6 +46,16 @@ void RegVar::setParent(RegArray* newParent)
 void RegVar::setParent(RegRecord* newParent)
 {
     RegObject::setParent(static_cast<RegObject*>(newParent));
+}
+
+reg_subindex_t RegVar::subIndex() const
+{
+    return m_subIndex;
+}
+
+void RegVar::setSubIndex(reg_subindex_t newSubIndex)
+{
+    m_subIndex = newSubIndex;
 }
 
 DataType RegVar::dataType() const

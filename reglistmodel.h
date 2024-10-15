@@ -21,6 +21,7 @@ public:
 
     bool hasEntryByIndex(reg_index_t index) const;
 
+    QModelIndex entryIndex(const QModelIndex& index) const;
     RegEntry* entryByIndex(const QModelIndex& index) const;
     RegObject* objectByIndex(const QModelIndex& index) const;
 
@@ -44,6 +45,8 @@ public:
 private:
     RegEntryList* m_reglist;
 
+    QVariant dataDisplayRole(const QModelIndex &index) const;
+    QVariant dataEditRole(const QModelIndex &index) const;
 };
 
 #endif // REGLISTMODEL_H

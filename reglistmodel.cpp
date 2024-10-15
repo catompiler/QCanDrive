@@ -58,15 +58,24 @@ bool RegListModel::hasEntryByIndex(reg_index_t index) const
     }) != m_reglist->end();
 }
 
-RegEntry* RegListModel::entryByIndex(const QModelIndex& index) const
+QModelIndex RegListModel::entryIndex(const QModelIndex& index) const
 {
-    if(!index.isValid()) return nullptr;
+    if(!index.isValid()) return QModelIndex();
 
     QModelIndex entry_index = index;
 
     while(entry_index.parent().isValid()){
         entry_index = entry_index.parent();
     }
+
+    return entry_index;
+}
+
+RegEntry* RegListModel::entryByIndex(const QModelIndex& index) const
+{
+    QModelIndex entry_index = entryIndex(index);
+
+    if(!entry_index.isValid()) return nullptr;
 
     int n = entry_index.row();
 
@@ -199,7 +208,7 @@ QModelIndex RegListModel::parent(const QModelIndex &child) const
 
         if(it == m_reglist->end()) return QModelIndex();
 
-        return createIndex(std::distance(it, m_reglist->end()), 0, po);
+        return createIndex(std::distance(m_reglist->begin(), it), 0, po);
     }
 
     if(ppo->type() != ObjectType::ARR && ppo->type() != ObjectType::REC){
@@ -257,13 +266,10 @@ int RegListModel::columnCount(const QModelIndex &parent) const
     return col_count;
 }
 
-QVariant RegListModel::data(const QModelIndex &index, int role) const
+QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
 {
     if(!index.isValid()) return QVariant();
-    if(role != Qt::DisplayRole) return QVariant();
     if(index.column() >= static_cast<int>(col_count)) return QVariant();
-
-    //qDebug() << "RegListModel::data(" << index << ")";
 
     RegEntry* re = nullptr;
     RegObject* ro = nullptr;
@@ -285,12 +291,15 @@ QVariant RegListModel::data(const QModelIndex &index, int role) const
 
     switch(index.column()){
     default:
-        return QVariant();
+        break;
     case COL_INDEX:
         if(re){
             return QString("0x") + QString::number(re->index(), 16);
         }
-        return QString("0x") + QString::number(index.row(), 16);
+        if(ro->type() == ObjectType::VAR){
+            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->subIndex(), 16);
+        }
+        break;
     case COL_NAME:
         return ro->name();
     case COL_TYPE:
@@ -354,6 +363,115 @@ QVariant RegListModel::data(const QModelIndex &index, int role) const
         return QString("");
     case COL_DESCR:
         return ro->description();
+    }
+
+    return QVariant();
+}
+
+QVariant RegListModel::dataEditRole(const QModelIndex& index) const
+{
+    if(!index.isValid()) return QVariant();
+    if(index.column() >= static_cast<int>(col_count)) return QVariant();
+
+    RegEntry* re = nullptr;
+    RegObject* ro = nullptr;
+
+    if(!index.parent().isValid()){
+        if(index.row() >= m_reglist->count()) return QVariant();
+
+        re = m_reglist->at(index.row());
+        if(re == nullptr) return QVariant();
+
+        ro = re->object();
+    }else{
+        ro = static_cast<RegObject*>(index.internalPointer());
+    }
+
+    if(ro == nullptr) return QVariant();
+
+    //RegObject* po = ro->parent();
+
+    switch(index.column()){
+    default:
+        break;
+    case COL_NAME:
+        return ro->name();
+    case COL_TYPE:
+        return static_cast<int>(ro->type());
+    case COL_COUNT:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return QVariant();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return static_cast<RegMultiObject*>(ro)->count() + 1;
+        }
+
+    case COL_DATATYPE:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return RegTypes::dataTypeStr(static_cast<RegVar*>(ro)->dataType());
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
+    case COL_MIN_VAL:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return static_cast<RegVar*>(ro)->minValue();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
+    case COL_MAX_VAL:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return static_cast<RegVar*>(ro)->maxValue();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
+    case COL_DEF_VAL:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return static_cast<RegVar*>(ro)->defaultValue();
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
+    case COL_FLAGS:
+        switch(ro->type()){
+        default:
+        case ObjectType::VAR:
+            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->flags());
+        case ObjectType::ARR:
+        case ObjectType::REC:
+            return QVariant();
+        }
+    case COL_EXTFLAGS:
+        return QString("");
+    case COL_DESCR:
+        return ro->description();
+    }
+
+    return QVariant();
+}
+
+QVariant RegListModel::data(const QModelIndex &index, int role) const
+{
+    switch(role){
+    default:
+        break;
+    case Qt::DisplayRole:
+    case Qt::ToolTipRole:
+        return dataDisplayRole(index);
+    case Qt::EditRole:
+        return dataEditRole(index);
     }
 
     return QVariant();

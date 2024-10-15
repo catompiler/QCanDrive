@@ -85,13 +85,11 @@ void RegListEditorWin::on_pbAddSub_clicked()
 {
     qDebug() << "on_pbAddSub_clicked";
 
-    QModelIndex index = ui->tvRegList->currentIndex();
-
-    RegEntry* re = m_regsListModel->entryByIndex(index);
+    QModelIndex entry_index = m_regsListModel->entryIndex(ui->tvRegList->currentIndex());
+    RegEntry* re = m_regsListModel->entryByIndex(entry_index);
 
     if(re == nullptr) return;
-
-    if(re->objectType() == ObjectType::VAR) return;
+    if(re->objectType() != ObjectType::REC && re->objectType() != ObjectType::ARR) return;
 
     m_regEntryDlg->setIndexEditable(false);
     m_regEntryDlg->setIndex(re->index());
@@ -107,7 +105,7 @@ void RegListEditorWin::on_pbAddSub_clicked()
         ro->setName(m_regEntryDlg->name());
         ro->setDescription(m_regEntryDlg->description());
 
-        if(!m_regsListModel->addSubObject(ro, index)){
+        if(!m_regsListModel->addSubObject(ro, entry_index)){
             qDebug() << "m_regsListModel->addEntry(...)";
             delete ro;
         }
