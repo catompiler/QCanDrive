@@ -21,19 +21,6 @@ static const char* col_names[] = {
 
 static const auto col_count = sizeof(col_names) / sizeof(col_names[0]);
 
-enum ColNames {
-    COL_INDEX = 0,
-    COL_NAME,
-    COL_TYPE,
-    COL_COUNT,
-    COL_DATATYPE,
-    COL_MIN_VAL,
-    COL_MAX_VAL,
-    COL_DEF_VAL,
-    COL_FLAGS,
-    COL_EXTFLAGS,
-    COL_DESCR
-};
 
 
 RegListModel::RegListModel(QObject *parent)
@@ -307,60 +294,54 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
     case COL_COUNT:
         switch(ro->type()){
         default:
-        case ObjectType::VAR:
             return QVariant();
         case ObjectType::ARR:
         case ObjectType::REC:
-            return static_cast<RegMultiObject*>(ro)->count() + 1;
+            return static_cast<RegMultiObject*>(ro)->count();
         }
 
     case COL_DATATYPE:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return RegTypes::dataTypeStr(static_cast<RegVar*>(ro)->dataType());
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_MIN_VAL:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->minValue();
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_MAX_VAL:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->maxValue();
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_DEF_VAL:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->defaultValue();
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_FLAGS:
         switch(ro->type()){
         default:
-        case ObjectType::VAR:
-            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->flags());
-        case ObjectType::ARR:
-        case ObjectType::REC:
             return QVariant();
+        case ObjectType::VAR:
+            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->flags(), 16);
         }
     case COL_EXTFLAGS:
-        return QString("");
+        switch(ro->type()){
+        default:
+            return QVariant();
+        case ObjectType::VAR:
+            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->eflags(), 16);
+        }
     case COL_DESCR:
         return ro->description();
     }
@@ -394,6 +375,11 @@ QVariant RegListModel::dataEditRole(const QModelIndex& index) const
     switch(index.column()){
     default:
         break;
+    case COL_INDEX:
+        if(re == nullptr && ro->type() == ObjectType::VAR){
+            return static_cast<RegVar*>(ro)->subIndex();
+        }
+        break;
     case COL_NAME:
         return ro->name();
     case COL_TYPE:
@@ -401,60 +387,54 @@ QVariant RegListModel::dataEditRole(const QModelIndex& index) const
     case COL_COUNT:
         switch(ro->type()){
         default:
-        case ObjectType::VAR:
             return QVariant();
         case ObjectType::ARR:
         case ObjectType::REC:
-            return static_cast<RegMultiObject*>(ro)->count() + 1;
+            return static_cast<RegMultiObject*>(ro)->count();
         }
 
     case COL_DATATYPE:
         switch(ro->type()){
         default:
-        case ObjectType::VAR:
-            return RegTypes::dataTypeStr(static_cast<RegVar*>(ro)->dataType());
-        case ObjectType::ARR:
-        case ObjectType::REC:
             return QVariant();
+        case ObjectType::VAR:
+            return static_cast<unsigned int>(static_cast<RegVar*>(ro)->dataType());
         }
     case COL_MIN_VAL:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->minValue();
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_MAX_VAL:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->maxValue();
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_DEF_VAL:
         switch(ro->type()){
         default:
+            return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->defaultValue();
-        case ObjectType::ARR:
-        case ObjectType::REC:
-            return QVariant();
         }
     case COL_FLAGS:
         switch(ro->type()){
         default:
-        case ObjectType::VAR:
-            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->flags());
-        case ObjectType::ARR:
-        case ObjectType::REC:
             return QVariant();
+        case ObjectType::VAR:
+            return static_cast<unsigned int>(static_cast<RegVar*>(ro)->flags());
         }
     case COL_EXTFLAGS:
-        return QString("");
+        switch(ro->type()){
+        default:
+            return QVariant();
+        case ObjectType::VAR:
+            return static_cast<unsigned int>(static_cast<RegVar*>(ro)->eflags());
+        }
     case COL_DESCR:
         return ro->description();
     }
@@ -479,6 +459,100 @@ QVariant RegListModel::data(const QModelIndex &index, int role) const
 
 bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    //qDebug() << "RegListModel::setData(" << index <<", " << value << ", " << role << ")";
+
+    if(role != Qt::EditRole) return false;
+
+    if(!index.isValid()) return false;
+    if(index.column() >= static_cast<int>(col_count)) return false;
+
+    RegEntry* re = nullptr;
+    RegObject* ro = nullptr;
+
+    if(!index.parent().isValid()){
+        if(index.row() >= m_reglist->count()) return false;
+
+        re = m_reglist->at(index.row());
+        if(re == nullptr) return false;
+
+        ro = re->object();
+    }else{
+        ro = static_cast<RegObject*>(index.internalPointer());
+    }
+
+    if(ro == nullptr) return false;
+
+    //RegObject* po = ro->parent();
+
+    switch(index.column()){
+    default:
+        break;
+    case COL_INDEX:
+        if(re == nullptr && ro->type() == ObjectType::VAR){
+            static_cast<RegVar*>(ro)->setSubIndex(static_cast<reg_subindex_t>(value.toUInt()));
+            return true;
+        }
+        break;
+    case COL_NAME:
+        ro->setName(value.toString());
+        return true;
+    case COL_TYPE:
+        return false;
+    case COL_COUNT:
+        return false;
+    case COL_DATATYPE:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:
+            static_cast<RegVar*>(ro)->setDataType(static_cast<DataType>(value.toUInt()));
+            return true;
+        }
+    case COL_MIN_VAL:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:
+            static_cast<RegVar*>(ro)->setMinValue(value);
+            return true;
+        }
+    case COL_MAX_VAL:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:
+            static_cast<RegVar*>(ro)->setMaxValue(value);
+            return true;
+        }
+    case COL_DEF_VAL:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:
+            static_cast<RegVar*>(ro)->setDefaultValue(value);
+            return true;
+        }
+    case COL_FLAGS:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:
+            static_cast<RegVar*>(ro)->setFlags(static_cast<reg_flags_t>(value.toUInt()));
+            return true;
+        }
+    case COL_EXTFLAGS:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:
+            static_cast<RegVar*>(ro)->setEFlags(static_cast<reg_flags_t>(value.toUInt()));
+            return true;
+        }
+    case COL_DESCR:
+        ro->setDescription(value.toString());
+        return true;
+    }
+
     return false;
 }
 
@@ -497,7 +571,61 @@ Qt::ItemFlags RegListModel::flags(const QModelIndex& index) const
 
     if(!index.isValid()) return flags;
 
-    if(index.column() > COL_INDEX) flags |= Qt::ItemIsEditable;
+    RegObject* ro = static_cast<RegObject*>(index.internalPointer());
+    if(ro == nullptr) return flags;
+
+    RegObject* po = ro->parent();
+    bool hasParent = po != nullptr;
+
+    switch(ro->type()){
+    case ObjectType::ARR:
+        switch(index.column()){
+        default:
+            break;
+        case COL_NAME:
+            flags |= Qt::ItemIsEditable;
+            break;
+        }
+        break;
+    case ObjectType::REC:
+        switch(index.column()){
+        default:
+            break;
+        case COL_NAME:
+            flags |= Qt::ItemIsEditable;
+            break;
+        }
+        break;
+    case ObjectType::VAR:
+        flags |= Qt::ItemNeverHasChildren;
+
+        switch(index.column()){
+        default:
+            break;
+        case COL_INDEX:
+            if(hasParent && index.row() != 0) flags |= Qt::ItemIsEditable;
+            break;
+        case COL_NAME:
+            flags |= Qt::ItemIsEditable;
+            break;
+        case COL_DATATYPE:
+            flags |= Qt::ItemIsEditable;
+            break;
+        case COL_MIN_VAL:
+        case COL_MAX_VAL:
+        case COL_DEF_VAL:
+            flags |= Qt::ItemIsEditable;
+            break;
+        case COL_FLAGS:
+        case COL_EXTFLAGS:
+            flags |= Qt::ItemIsEditable;
+            break;
+        case COL_DESCR:
+            flags |= Qt::ItemIsEditable;
+            break;
+        }
+        break;
+    }
 
     return flags;
 }

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <QString>
+#include <QStringList>
 #include <QVector>
 
 //! Тип индекса.
@@ -46,6 +47,13 @@ enum class RegFlags {
 // Тип основных флагов.
 typedef uint32_t reg_flags_t;
 
+// Дополнительные флаги.
+enum class RegEFlags {
+    NONE = 0,
+};
+// Тип дополнительных флагов.
+typedef uint32_t reg_eflags_t;
+
 namespace RegTypes {
 
 //! Получает все типы объектов.
@@ -59,6 +67,30 @@ extern QString typeStr(ObjectType type);
 
 //! Получает строковое представление типа данных.
 extern QString dataTypeStr(DataType type);
+
+//! Получает строковые представления типов.
+extern QStringList objectTypesStringList();
+
+//! Получает обозначение истинного значения.
+extern QString trueStr();
+
+//! Получает обозначение ложного значения.
+extern QString falseStr();
+
+//! Получает обозначение булева значения.
+extern QString boolStr(bool value);
+
+//! Получает список строковых представлений булевых значений.
+extern QStringList boolStringList();
+
+// Проверки типа данных.
+extern bool isBoolean(DataType type);
+extern bool isString(DataType type);
+extern bool isNumeric(DataType type);
+extern bool isInteger(DataType type);
+extern bool isSigned(DataType type);
+extern bool isUnsigned(DataType type);
+extern bool isFloat(DataType type);
 
 }
 

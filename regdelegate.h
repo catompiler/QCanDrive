@@ -1,14 +1,14 @@
-#ifndef REGVARDELEGATE_H
-#define REGVARDELEGATE_H
+#ifndef REGDELEGATE_H
+#define REGDELEGATE_H
 
 #include <QItemDelegate>
 
-class RegVarDelegate : public QItemDelegate
+class RegDelegate : public QItemDelegate
 {
     Q_OBJECT
 public:
-    RegVarDelegate();
-    ~RegVarDelegate();
+    RegDelegate();
+    ~RegDelegate();
 
     // QAbstractItemDelegate interface
 public:
@@ -17,4 +17,4 @@ public:
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 };
 
-#endif // REGVARDELEGATE_H
+#endif // REGDELEGATE_H

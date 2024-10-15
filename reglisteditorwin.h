@@ -13,7 +13,7 @@ class QModelIndex;
 class RegEntryDlg;
 class RegListModel;
 class RegVarModel;
-class RegVarDelegate;
+class RegDelegate;
 class RegEntry;
 
 
@@ -39,7 +39,7 @@ private:
     RegListModel* m_regsListModel;
     RegVarModel* m_regVarModel;
 
-    RegVarDelegate* m_regVarDelegate;
+    RegDelegate* m_regVarDelegate;
 
     void updateRegViewModel(const QModelIndex& index);
 };

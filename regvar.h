@@ -39,6 +39,9 @@ public:
     reg_flags_t flags() const;
     void setFlags(reg_flags_t newFlags);
 
+    reg_eflags_t eflags() const;
+    void setEFlags(reg_eflags_t newEflags);
+
 private:
     reg_subindex_t m_subIndex;
     DataType m_dataType;
@@ -46,6 +49,7 @@ private:
     QVariant m_maxValue;
     QVariant m_defaultValue;
     reg_flags_t m_flags;
+    reg_eflags_t m_eflags;
 };
 
 #endif // REGVAR_H

@@ -16,6 +16,21 @@ class RegListModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
+
+    enum ColId {
+        COL_INDEX = 0,
+        COL_NAME,
+        COL_TYPE,
+        COL_COUNT,
+        COL_DATATYPE,
+        COL_MIN_VAL,
+        COL_MAX_VAL,
+        COL_DEF_VAL,
+        COL_FLAGS,
+        COL_EXTFLAGS,
+        COL_DESCR
+    };
+
     explicit RegListModel(QObject *parent = nullptr);
     ~RegListModel();
 

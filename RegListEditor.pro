@@ -11,6 +11,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000    # disables all the APIs depr
 SOURCES += \
     main.cpp \
     regarray.cpp \
+    regdelegate.cpp \
     regentry.cpp \
     regentrydlg.cpp \
     reglisteditorwin.cpp \
@@ -20,12 +21,12 @@ SOURCES += \
     regrecord.cpp \
     regtypes.cpp \
     regvar.cpp \
-    regvardelegate.cpp \
     regvarmodel.cpp
 
 HEADERS += \
     is_base_creator.hpp \
     regarray.h \
+    regdelegate.h \
     regentry.h \
     regentrydlg.h \
     reglisteditorwin.h \
@@ -35,7 +36,6 @@ HEADERS += \
     regrecord.h \
     regtypes.h \
     regvar.h \
-    regvardelegate.h \
     regvarmodel.h
 
 FORMS += \

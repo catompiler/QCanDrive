@@ -14,6 +14,7 @@ RegVar::RegVar(RegObject* parent)
     m_maxValue = INT32_MAX;
     m_defaultValue = 0;
     m_flags = 0x0;
+    m_eflags = 0x0;
 }
 
 RegVar::RegVar(const RegVar& var)
@@ -25,6 +26,7 @@ RegVar::RegVar(const RegVar& var)
     m_maxValue = var.m_maxValue;
     m_defaultValue = var.m_defaultValue;
     m_flags = var.m_flags;
+    m_eflags = var.m_eflags;
 }
 
 RegVar::~RegVar()
@@ -106,5 +108,15 @@ reg_flags_t RegVar::flags() const
 void RegVar::setFlags(reg_flags_t newFlags)
 {
     m_flags = newFlags;
+}
+
+reg_eflags_t RegVar::eflags() const
+{
+    return m_eflags;
+}
+
+void RegVar::setEFlags(reg_eflags_t newEflags)
+{
+    m_eflags = newEflags;
 }
 

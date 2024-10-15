@@ -1,5 +1,5 @@
 #include "reglisteditorwin.h"
-#include "regvardelegate.h"
+#include "regdelegate.h"
 #include "ui_reglisteditorwin.h"
 #include "regentrydlg.h"
 #include "reglistmodel.h"
@@ -22,7 +22,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     m_regEntryDlg = new RegEntryDlg();
 
     m_regVarModel = new RegVarModel();
-    m_regVarDelegate = new RegVarDelegate();
+    m_regVarDelegate = new RegDelegate();
 
     m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);
