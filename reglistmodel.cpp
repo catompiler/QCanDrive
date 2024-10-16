@@ -1,6 +1,7 @@
 #include "reglistmodel.h"
 #include "regarray.h"
 #include "regvar.h"
+#include <QSize>
 #include <algorithm>
 #include <QDebug>
 
@@ -21,6 +22,12 @@ static const char* col_names[] = {
 
 static const auto col_count = sizeof(col_names) / sizeof(col_names[0]);
 
+
+static const int HEADER_WIDTH_SIZE_HINT = 100;
+static const int HEADER_HEIGHT_SIZE_HINT = 20;
+
+static const int ITEM_WIDTH_SIZE_HINT = 100;
+static const int ITEM_HEIGHT_SIZE_HINT = 20;
 
 
 RegListModel::RegListModel(QObject *parent)
@@ -333,14 +340,14 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
         default:
             return QVariant();
         case ObjectType::VAR:
-            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->flags(), 16);
+            return QString("0b") + QString::number(static_cast<RegVar*>(ro)->flags(), 2);
         }
     case COL_EXTFLAGS:
         switch(ro->type()){
         default:
             return QVariant();
         case ObjectType::VAR:
-            return QString("0x") + QString::number(static_cast<RegVar*>(ro)->eflags(), 16);
+            return QString("0b") + QString::number(static_cast<RegVar*>(ro)->eflags(), 2);
         }
     case COL_DESCR:
         return ro->description();
@@ -442,8 +449,19 @@ QVariant RegListModel::dataEditRole(const QModelIndex& index) const
     return QVariant();
 }
 
+QVariant RegListModel::dataSizeHintRole(const QModelIndex& index) const
+{
+    if(!index.isValid()) return QVariant();
+
+    QSize size = QSize(ITEM_WIDTH_SIZE_HINT, ITEM_HEIGHT_SIZE_HINT);
+
+    return size;
+}
+
 QVariant RegListModel::data(const QModelIndex &index, int role) const
 {
+    //qDebug() << "RegListModel::data(" << index <<", " << static_cast<Qt::ItemDataRole>(role) << ")";
+
     switch(role){
     default:
         break;
@@ -452,6 +470,8 @@ QVariant RegListModel::data(const QModelIndex &index, int role) const
         return dataDisplayRole(index);
     case Qt::EditRole:
         return dataEditRole(index);
+    case Qt::SizeHintRole:
+        return dataSizeHintRole(index);
     }
 
     return QVariant();
@@ -459,7 +479,7 @@ QVariant RegListModel::data(const QModelIndex &index, int role) const
 
 bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    //qDebug() << "RegListModel::setData(" << index <<", " << value << ", " << role << ")";
+    //qDebug() << "RegListModel::setData(" << index <<", " << value << ", " << static_cast<Qt::ItemDataRole>(role) << ")";
 
     if(role != Qt::EditRole) return false;
 
@@ -558,9 +578,26 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 QVariant RegListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation != Qt::Horizontal) return QVariant();
-    if(role != Qt::DisplayRole) return QVariant();
-    if(section < 0 || section >= static_cast<int>(col_count)) return QVariant();
+    //qDebug() << "RegListModel::headerData(" << section <<", " << orientation <<", " << static_cast<Qt::ItemDataRole>(role) << ")";
+
+    if(orientation != Qt::Horizontal){
+        return QAbstractItemModel::headerData(section, orientation, role);
+    }
+    if(section < 0 || section >= static_cast<int>(col_count)){
+        return QAbstractItemModel::headerData(section, orientation, role);
+    }
+
+    switch(role){
+    default:
+        return QAbstractItemModel::headerData(section, orientation, role);
+    case Qt::DisplayRole:
+    case Qt::ToolTipRole:
+        break;
+    case Qt::TextAlignmentRole:
+        return static_cast<int>(Qt::AlignHCenter | Qt::AlignVCenter);
+    case Qt::SizeHintRole:
+        return QSize(HEADER_WIDTH_SIZE_HINT, HEADER_HEIGHT_SIZE_HINT);
+    }
 
     return QVariant(col_names[section]);
 }

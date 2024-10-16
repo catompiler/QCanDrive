@@ -24,23 +24,19 @@ RegDelegate::~RegDelegate()
 
 QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    qDebug() << "RegVarDelegate::createEditor";
+    Q_UNUSED(option);
 
-    if(!index.isValid()){
-        return QItemDelegate::createEditor(parent, option, index);
-    }
+    //qDebug() << "RegVarDelegate::createEditor";
+
+    if(!index.isValid()) return nullptr;
 
     const RegListModel* regListModel = qobject_cast<const RegListModel*>(index.model());
 
-    if(regListModel == nullptr){
-        return QItemDelegate::createEditor(parent, option, index);
-    }
+    if(regListModel == nullptr) return nullptr;
 
     RegObject* ro = regListModel->objectByIndex(index);
 
-    if(ro == nullptr){
-        return QItemDelegate::createEditor(parent, option, index);
-    }
+    if(ro == nullptr) return nullptr;
 
     QWidget* res_widget = nullptr;
 
@@ -107,6 +103,8 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
             case DataType::REAL32:
             case DataType::REAL64:{
                 QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
+                sb->setMinimum(INT32_MIN);
+                sb->setMaximum(INT32_MAX);
                 res_widget = sb;
             }break;
             case DataType::VISIBLE_STRING:
@@ -122,13 +120,13 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
             }break;
             }
         }else{
-            res_widget = QItemDelegate::createEditor(parent, option, index);
+            QLineEdit* le = new QLineEdit(parent);
+            res_widget = le;
         }
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
         QLineEdit* le = new QLineEdit(parent);
-        le->setInputMask("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
         res_widget = le;
     }break;
     case RegListModel::COL_DESCR:{
@@ -144,11 +142,15 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
     if(!index.isValid()) return;
 
-    //const RegListModel* regListModel = qobject_cast<const RegListModel*>(index.model());
+    const RegListModel* regListModel = qobject_cast<const RegListModel*>(index.model());
 
-    //if(regListModel == nullptr) return;
+    if(regListModel == nullptr) return;
 
-    QVariant data = index.data(); //regListModel->data(index, Qt::EditRole);
+    RegObject* ro = regListModel->objectByIndex(index);
+
+    if(ro == nullptr) return;
+
+    QVariant data = index.data(Qt::EditRole); //regListModel->data(index, Qt::EditRole);
 
     RegListModel::ColId col_id = static_cast<RegListModel::ColId>(index.column());
 
@@ -181,9 +183,52 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
     case RegListModel::COL_DEF_VAL:{
-        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
-        if(le == nullptr) break;
-        le->setText(data.toString());
+        if(ro->type() == ObjectType::VAR){
+            RegVar* var = static_cast<RegVar*>(ro);
+            DataType data_type = var->dataType();
+            switch(data_type){
+            case DataType::BOOLEAN:{
+                QComboBox* cb = qobject_cast<QComboBox*>(editor);
+                if(cb == nullptr) break;
+                cb->setCurrentIndex(static_cast<int>(data.toBool()));
+            }break;
+            case DataType::INTEGER8:
+            case DataType::INTEGER16:
+            case DataType::INTEGER32:
+            case DataType::INTEGER64:
+            case DataType::UNSIGNED8:
+            case DataType::UNSIGNED16:
+            case DataType::UNSIGNED32:
+            case DataType::UNSIGNED64:{
+                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+                if(le == nullptr) break;
+                le->setText(data.toString());
+            }break;
+            case DataType::REAL32:
+            case DataType::REAL64:{
+                QDoubleSpinBox* sb = qobject_cast<QDoubleSpinBox*>(editor);
+                if(sb == nullptr) break;
+                sb->setValue(data.toDouble());
+            }break;
+            case DataType::VISIBLE_STRING:
+            case DataType::OCTET_STRING:
+            case DataType::UNICODE_STRING:{
+                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+                if(le == nullptr) break;
+                le->setText(data.toString());
+            }break;
+            default:
+            case DataType::DOMAIN:{
+                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+                if(le == nullptr) break;
+                le->setText(data.toString());
+            }break;
+            }
+        }else{
+            QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+            if(le == nullptr) break;
+            le->setText(data.toString());
+        }
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
@@ -203,27 +248,109 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
 {
     if(!index.isValid()) return;
 
-    const RegListModel* regListModel = qobject_cast<const RegListModel*>(model);
+    RegListModel* regListModel = qobject_cast<RegListModel*>(model);
 
     if(regListModel == nullptr) return;
+
+    RegObject* ro = regListModel->objectByIndex(index);
+
+    if(ro == nullptr) return;
 
     RegListModel::ColId col_id = static_cast<RegListModel::ColId>(index.column());
 
     switch(col_id){
-    case RegListModel::COL_INDEX:
-    case RegListModel::COL_NAME:
-    case RegListModel::COL_TYPE:
-    case RegListModel::COL_COUNT:
-    case RegListModel::COL_DATATYPE:
+    case RegListModel::COL_INDEX:{
+        QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
+        if(sb == nullptr) break;
+        regListModel->setData(index, sb->value(), Qt::EditRole);
+    }break;
+    case RegListModel::COL_NAME:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        if(le->text().isEmpty()) break;
+        regListModel->setData(index, le->text(), Qt::EditRole);
+    }break;
+    case RegListModel::COL_TYPE:{
+        QComboBox* cb = qobject_cast<QComboBox*>(editor);
+        if(cb == nullptr) break;
+        regListModel->setData(index, cb->currentIndex(), Qt::EditRole);
+    }break;
+    case RegListModel::COL_COUNT:{
+        QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
+        if(sb == nullptr) break;
+        regListModel->setData(index, sb->value(), Qt::EditRole);
+    }break;
+    case RegListModel::COL_DATATYPE:{
+        QComboBox* cb = qobject_cast<QComboBox*>(editor);
+        if(cb == nullptr) break;
+        regListModel->setData(index, cb->currentIndex(), Qt::EditRole);
+    }break;
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
-    case RegListModel::COL_DEF_VAL:
+    case RegListModel::COL_DEF_VAL:{
+        if(ro->type() == ObjectType::VAR){
+            RegVar* var = static_cast<RegVar*>(ro);
+            DataType data_type = var->dataType();
+            switch(data_type){
+            case DataType::BOOLEAN:{
+                QComboBox* cb = qobject_cast<QComboBox*>(editor);
+                if(cb == nullptr) break;
+                regListModel->setData(index, cb->currentIndex(), Qt::EditRole);
+            }break;
+            case DataType::INTEGER8:
+            case DataType::INTEGER16:
+            case DataType::INTEGER32:
+            case DataType::INTEGER64:
+            case DataType::UNSIGNED8:
+            case DataType::UNSIGNED16:
+            case DataType::UNSIGNED32:
+            case DataType::UNSIGNED64:{
+                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+                if(le == nullptr) break;
+                regListModel->setData(index, le->text(), Qt::EditRole);
+            }break;
+            case DataType::REAL32:
+            case DataType::REAL64:{
+                QDoubleSpinBox* sb = qobject_cast<QDoubleSpinBox*>(editor);
+                if(sb == nullptr) break;
+                regListModel->setData(index, sb->value(), Qt::EditRole);
+            }break;
+            case DataType::VISIBLE_STRING:
+            case DataType::OCTET_STRING:
+            case DataType::UNICODE_STRING:{
+                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+                if(le == nullptr) break;
+                regListModel->setData(index, le->text(), Qt::EditRole);
+            }break;
+            default:
+            case DataType::DOMAIN:{
+                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+                if(le == nullptr) break;
+                regListModel->setData(index, le->text(), Qt::EditRole);
+            }break;
+            }
+        }else{
+            QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+            if(le == nullptr) break;
+            regListModel->setData(index, le->text(), Qt::EditRole);
+        }
+    }break;
     case RegListModel::COL_FLAGS:
-    case RegListModel::COL_EXTFLAGS:
-    case RegListModel::COL_DESCR:
-        break;
+    case RegListModel::COL_EXTFLAGS:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        bool ok = false;
+        unsigned int flags = le->text().toUInt(&ok, 2);
+        if(ok) regListModel->setData(index, flags, Qt::EditRole);
+    }break;
+    case RegListModel::COL_DESCR:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        regListModel->setData(index, le->text(), Qt::EditRole);
+    }break;
     }
 
+    /*
     DataType data_type = DataType::INTEGER32;
 
     switch(data_type){
@@ -246,4 +373,5 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
         QItemDelegate::setEditorData(editor, index);
         break;
     }
+    */
 }

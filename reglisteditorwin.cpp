@@ -3,7 +3,7 @@
 #include "ui_reglisteditorwin.h"
 #include "regentrydlg.h"
 #include "reglistmodel.h"
-#include "regvarmodel.h"
+//#include "regvarmodel.h"
 #include "regentry.h"
 #include "regobject.h"
 #include "regvar.h"
@@ -21,11 +21,12 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     ui->setupUi(this);
     m_regEntryDlg = new RegEntryDlg();
 
-    m_regVarModel = new RegVarModel();
-    m_regVarDelegate = new RegDelegate();
+    //m_regVarModel = new RegVarModel();
+    m_regListDelegate = new RegDelegate();
 
     m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);
+    ui->tvRegList->setItemDelegate(m_regListDelegate);
 
     ui->tvRegList->setSelectionMode(QAbstractItemView::SingleSelection);
     QItemSelectionModel* sel_model = ui->tvRegList->selectionModel();
@@ -41,8 +42,8 @@ RegListEditorWin::~RegListEditorWin()
     delete ui;
     delete m_regEntryDlg;
     delete m_regsListModel;
-    delete m_regVarModel;
-    delete m_regVarDelegate;
+    //delete m_regVarModel;
+    delete m_regListDelegate;
 }
 
 void RegListEditorWin::on_pbAdd_clicked()
@@ -142,7 +143,7 @@ void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
 
         m_regEntryDlg->setIndexEditable(false);
         m_regEntryDlg->setIndex(re->index());
-        m_regEntryDlg->setObjectTypeEditable(true);
+        m_regEntryDlg->setObjectTypeEditable(false);
         m_regEntryDlg->setObjectType(re->objectType());
         m_regEntryDlg->setName(ro->name());
         m_regEntryDlg->setDescription(ro->description());
@@ -162,6 +163,8 @@ void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
 
 void RegListEditorWin::tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    Q_UNUSED(deselected);
+
     qDebug() << "on_tvRegList_activated";
 
     if(selected.empty()){
@@ -191,7 +194,7 @@ void RegListEditorWin::updateRegViewModel(const QModelIndex& index)
     default:
         break;
     case ObjectType::VAR:
-        m_regVarModel->setRegVar(static_cast<RegVar*>(ro));
+        //m_regVarModel->setRegVar(static_cast<RegVar*>(ro));
         break;
     case ObjectType::ARR:
         break;

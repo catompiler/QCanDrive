@@ -62,6 +62,7 @@ private:
 
     QVariant dataDisplayRole(const QModelIndex &index) const;
     QVariant dataEditRole(const QModelIndex &index) const;
+    QVariant dataSizeHintRole(const QModelIndex &index) const;
 };
 
 #endif // REGLISTMODEL_H

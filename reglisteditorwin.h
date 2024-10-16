@@ -12,7 +12,7 @@ class QItemSelection;
 class QModelIndex;
 class RegEntryDlg;
 class RegListModel;
-class RegVarModel;
+//class RegVarModel;
 class RegDelegate;
 class RegEntry;
 
@@ -37,9 +37,9 @@ private:
     RegEntryDlg* m_regEntryDlg;
 
     RegListModel* m_regsListModel;
-    RegVarModel* m_regVarModel;
+    //RegVarModel* m_regVarModel;
 
-    RegDelegate* m_regVarDelegate;
+    RegDelegate* m_regListDelegate;
 
     void updateRegViewModel(const QModelIndex& index);
 };
