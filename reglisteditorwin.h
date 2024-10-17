@@ -15,6 +15,8 @@ class RegListModel;
 //class RegVarModel;
 class RegDelegate;
 class RegEntry;
+class RegSelectDlg;
+
 
 
 class RegListEditorWin : public QMainWindow
@@ -29,12 +31,14 @@ public slots:
     void on_pbAdd_clicked();
     void on_pbAddSub_clicked();
     void on_pbDel_clicked();
+    void on_pbRegSel_clicked();
     void on_tvRegList_activated(const QModelIndex &index);
     void tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     Ui::RegListEditorWin *ui;
     RegEntryDlg* m_regEntryDlg;
+    RegSelectDlg* m_regSelectDlg;
 
     RegListModel* m_regsListModel;
     //RegVarModel* m_regVarModel;

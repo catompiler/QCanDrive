@@ -146,6 +146,7 @@ QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) 
     //qDebug() << "RegListModel::index(" << row << ", " << column << ", " << parent << ")";
 
     if(!parent.isValid()){
+        //if(m_reglist->isEmpty()) return QModelIndex();
         if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
         if(row < 0 || row >= m_reglist->count()) return QModelIndex();
 
@@ -506,16 +507,16 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
 
     switch(index.column()){
     default:
-        break;
+        return false;
     case COL_INDEX:
         if(re == nullptr && ro->type() == ObjectType::VAR){
             static_cast<RegVar*>(ro)->setSubIndex(static_cast<reg_subindex_t>(value.toUInt()));
-            return true;
+            break;
         }
-        break;
+        return false;
     case COL_NAME:
         ro->setName(value.toString());
-        return true;
+        break;
     case COL_TYPE:
         return false;
     case COL_COUNT:
@@ -526,39 +527,43 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
             return false;
         case ObjectType::VAR:
             static_cast<RegVar*>(ro)->setDataType(static_cast<DataType>(value.toUInt()));
-            return true;
+            break;
         }
+        break;
     case COL_MIN_VAL:
         switch(ro->type()){
         default:
             return false;
         case ObjectType::VAR:
             static_cast<RegVar*>(ro)->setMinValue(value);
-            return true;
+            break;
         }
+        break;
     case COL_MAX_VAL:
         switch(ro->type()){
         default:
             return false;
         case ObjectType::VAR:
             static_cast<RegVar*>(ro)->setMaxValue(value);
-            return true;
+            break;
         }
+        break;
     case COL_DEF_VAL:
         switch(ro->type()){
         default:
             return false;
         case ObjectType::VAR:
             static_cast<RegVar*>(ro)->setDefaultValue(value);
-            return true;
+            break;
         }
+        break;
     case COL_FLAGS:
         switch(ro->type()){
         default:
             return false;
         case ObjectType::VAR:
             static_cast<RegVar*>(ro)->setFlags(static_cast<reg_flags_t>(value.toUInt()));
-            return true;
+            break;
         }
     case COL_EXTFLAGS:
         switch(ro->type()){
@@ -566,14 +571,17 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
             return false;
         case ObjectType::VAR:
             static_cast<RegVar*>(ro)->setEFlags(static_cast<reg_flags_t>(value.toUInt()));
-            return true;
+            break;
         }
+        break;
     case COL_DESCR:
         ro->setDescription(value.toString());
-        return true;
+        break;
     }
 
-    return false;
+    emit dataChanged(index, index); // QVector<int>{Qt::EditRole, Qt::DisplayRole}
+
+    return true;
 }
 
 QVariant RegListModel::headerData(int section, Qt::Orientation orientation, int role) const

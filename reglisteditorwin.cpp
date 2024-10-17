@@ -2,6 +2,7 @@
 #include "regdelegate.h"
 #include "ui_reglisteditorwin.h"
 #include "regentrydlg.h"
+#include "regselectdlg.h"
 #include "reglistmodel.h"
 //#include "regvarmodel.h"
 #include "regentry.h"
@@ -20,6 +21,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 {
     ui->setupUi(this);
     m_regEntryDlg = new RegEntryDlg();
+    m_regSelectDlg = new RegSelectDlg();
 
     //m_regVarModel = new RegVarModel();
     m_regListDelegate = new RegDelegate();
@@ -27,6 +29,8 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);
     ui->tvRegList->setItemDelegate(m_regListDelegate);
+
+    m_regSelectDlg->setRegListModel(m_regsListModel);
 
     ui->tvRegList->setSelectionMode(QAbstractItemView::SingleSelection);
     QItemSelectionModel* sel_model = ui->tvRegList->selectionModel();
@@ -40,6 +44,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 RegListEditorWin::~RegListEditorWin()
 {
     delete ui;
+    delete m_regSelectDlg;
     delete m_regEntryDlg;
     delete m_regsListModel;
     //delete m_regVarModel;
@@ -122,6 +127,11 @@ void RegListEditorWin::on_pbDel_clicked()
     if(!index.isValid()) return;
 
     //m_regsListModel->removeRow(index.row(), index.parent());
+}
+
+void RegListEditorWin::on_pbRegSel_clicked()
+{
+    m_regSelectDlg->exec();
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)

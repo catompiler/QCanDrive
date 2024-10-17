@@ -19,6 +19,8 @@ SOURCES += \
     regmultiobject.cpp \
     regobject.cpp \
     regrecord.cpp \
+    regselectdlg.cpp \
+    regselectmodel.cpp \
     regtypes.cpp \
     regvar.cpp \
     regvarmodel.cpp
@@ -34,13 +36,16 @@ HEADERS += \
     regmultiobject.h \
     regobject.h \
     regrecord.h \
+    regselectdlg.h \
+    regselectmodel.h \
     regtypes.h \
     regvar.h \
     regvarmodel.h
 
 FORMS += \
     regentrydlg.ui \
-    reglisteditorwin.ui
+    reglisteditorwin.ui \
+    regselectdlg.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
