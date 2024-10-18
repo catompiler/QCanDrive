@@ -6,6 +6,8 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
+#include <QStringList>
+#include <QString>
 #include <QRegExp>
 #include <QRegExpValidator>
 #include <QDebug>
@@ -242,7 +244,14 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
             le->setText(data.toString());
             break;
         case ObjectType::VAR:{
-            le->setText(QString("0x%1").arg(data.toUInt(), 6, 16, QChar('0')));
+            unsigned int base = data.toUInt();
+            unsigned int base_index = base >> 8;
+            unsigned int base_subindex = base & 0xff;
+            le->setText(
+                        QString("0x%1.%2")
+                            .arg(base_index, 4, 16, QChar('0'))
+                            .arg(base_subindex, 2, 16, QChar('0'))
+                        );
             break;
         }
         }
@@ -355,9 +364,17 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
     case RegListModel::COL_BASE:{
         QLineEdit* le = qobject_cast<QLineEdit*>(editor);
         if(le == nullptr) break;
-        bool ok = false;
-        unsigned int base = le->text().toUInt(&ok, 16);
-        if(ok) regListModel->setData(index, base, Qt::EditRole);
+
+        QString base_str = le->text();
+
+        bool ok_index = false, ok_subindex = false;
+        unsigned int base_index = base_str.section(QChar('.'), 0, 0).toUInt(&ok_index, 16);
+        unsigned int base_subindex = base_str.section(QChar('.'), 1, 1).toUInt(&ok_subindex, 16);
+
+        if(ok_index && ok_subindex){
+            unsigned int base = (base_index << 8) | base_subindex;
+            regListModel->setData(index, base, Qt::EditRole);
+        }
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{

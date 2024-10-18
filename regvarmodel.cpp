@@ -119,7 +119,7 @@ QVariant RegVarModel::data(const QModelIndex& index, int role) const
 
 bool RegVarModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    qDebug() << "RegVarModel::setData" << "role:" << role << "value" << value;
+    //qDebug() << "RegVarModel::setData" << "role:" << role << "value" << value;
 
     if(!index.isValid()) return false;
     if(role != Qt::EditRole) return false;

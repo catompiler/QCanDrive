@@ -11,6 +11,7 @@
 #include "regarray.h"
 #include "regrecord.h"
 #include <QMessageBox>
+#include <QApplication>
 #include <QItemSelectionModel>
 #include <QDebug>
 
@@ -51,9 +52,18 @@ RegListEditorWin::~RegListEditorWin()
     delete m_regListDelegate;
 }
 
-void RegListEditorWin::on_pbAdd_clicked()
+void RegListEditorWin::on_actQuit_triggered(bool checked)
 {
-    qDebug() << "on_pbAdd_clicked";
+    Q_UNUSED(checked);
+
+    qApp->quit();
+}
+
+void RegListEditorWin::on_actAddItem_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    //qDebug() << "on_pbAdd_clicked";
 
     m_regEntryDlg->setIndexEditable(true);
     m_regEntryDlg->setObjectTypeEditable(true);
@@ -87,9 +97,11 @@ void RegListEditorWin::on_pbAdd_clicked()
     }
 }
 
-void RegListEditorWin::on_pbAddSub_clicked()
+void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
 {
-    qDebug() << "on_pbAddSub_clicked";
+    Q_UNUSED(checked);
+
+    //qDebug() << "on_pbAddSub_clicked";
 
     QModelIndex entry_index = m_regsListModel->entryIndex(ui->tvRegList->currentIndex());
     RegEntry* re = m_regsListModel->entryByIndex(entry_index);
@@ -118,9 +130,11 @@ void RegListEditorWin::on_pbAddSub_clicked()
     }
 }
 
-void RegListEditorWin::on_pbDel_clicked()
+void RegListEditorWin::on_actDelItem_triggered(bool checked)
 {
-    qDebug() << "on_pbDel_clicked";
+    Q_UNUSED(checked);
+
+    //qDebug() << "on_pbDel_clicked";
 
     QModelIndex index = ui->tvRegList->currentIndex();
 
@@ -129,14 +143,16 @@ void RegListEditorWin::on_pbDel_clicked()
     m_regsListModel->removeRow(index.row(), index.parent());
 }
 
-void RegListEditorWin::on_pbRegSel_clicked()
+void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 {
+    Q_UNUSED(checked);
+
     m_regSelectDlg->exec();
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
 {
-    qDebug() << "on_tvRegList_activated";
+    //qDebug() << "on_tvRegList_activated";
 
     if(!index.isValid()) return;
 
@@ -173,7 +189,7 @@ void RegListEditorWin::tvRegList_selection_changed(const QItemSelection &selecte
 {
     Q_UNUSED(deselected);
 
-    qDebug() << "on_tvRegList_activated";
+    //qDebug() << "on_tvRegList_activated";
 
     if(selected.empty()){
     }else{

@@ -16,7 +16,7 @@ static const char* col_names[] = {
     "Минимум",
     "Максимум",
     "По-умолчанию",
-    "Баз. значение",
+    "Баз. знач.",
     "Флаги",
     "Доп. флаги",
     "Описание"
@@ -145,7 +145,7 @@ void RegListModel::entryAtIndexModified(const QModelIndex& index)
 
 bool RegListModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    qDebug() << "RegListModel::removeRows(" << row << ", " << count << ", " << parent << ")";
+    //qDebug() << "RegListModel::removeRows(" << row << ", " << count << ", " << parent << ")";
 
     if(count == 0) return false;
 

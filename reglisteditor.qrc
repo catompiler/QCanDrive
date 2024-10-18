@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>icons/Add File-48.png</file>
+        <file>icons/Add List-48.png</file>
+        <file>icons/Delete File-48.png</file>
+        <file>icons/Trash-48.png</file>
+        <file>icons/Manual-48.png</file>
+    </qresource>
+</RCC>
