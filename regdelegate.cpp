@@ -124,6 +124,10 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
             res_widget = le;
         }
     }break;
+    case RegListModel::COL_BASE:{
+        QLineEdit* le = new QLineEdit(parent);
+        res_widget = le;
+    }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
         QLineEdit* le = new QLineEdit(parent);
@@ -230,6 +234,19 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
             le->setText(data.toString());
         }
     }break;
+    case RegListModel::COL_BASE:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        switch(ro->type()){
+        default:
+            le->setText(data.toString());
+            break;
+        case ObjectType::VAR:{
+            le->setText(QString("0x%1").arg(data.toUInt(), 6, 16, QChar('0')));
+            break;
+        }
+        }
+    }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
         QLineEdit* le = qobject_cast<QLineEdit*>(editor);
@@ -334,6 +351,13 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
             if(le == nullptr) break;
             regListModel->setData(index, le->text(), Qt::EditRole);
         }
+    }break;
+    case RegListModel::COL_BASE:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        bool ok = false;
+        unsigned int base = le->text().toUInt(&ok, 16);
+        if(ok) regListModel->setData(index, base, Qt::EditRole);
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{

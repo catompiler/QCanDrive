@@ -16,6 +16,7 @@ static const char* col_names[] = {
     "Минимум",
     "Максимум",
     "По-умолчанию",
+    "Баз. значение",
     "Флаги",
     "Доп. флаги",
     "Описание"
@@ -389,6 +390,19 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->defaultValue();
         }
+    case COL_BASE:
+        switch(ro->type()){
+        default:
+            return QVariant();
+        case ObjectType::VAR:{
+            RegVar* rv = static_cast<RegVar*>(ro);
+            unsigned int base_index = rv->baseIndex();
+            unsigned int base_subindex = rv->baseSubIndex();
+            return QString("0x%1.%2")
+                    .arg(base_index, 4, 16, QChar('0'))
+                    .arg(base_subindex, 2, 16, QChar('0'));
+        }
+        }
     case COL_FLAGS:
         switch(ro->type()){
         default:
@@ -481,6 +495,17 @@ QVariant RegListModel::dataEditRole(const QModelIndex& index) const
             return QVariant();
         case ObjectType::VAR:
             return static_cast<RegVar*>(ro)->defaultValue();
+        }
+    case COL_BASE:
+        switch(ro->type()){
+        default:
+            return QVariant();
+        case ObjectType::VAR:{
+            RegVar* rv = static_cast<RegVar*>(ro);
+            unsigned int base_index = rv->baseIndex();
+            unsigned int base_subindex = rv->baseSubIndex();
+            return (base_index << 8) | base_subindex;
+        }
         }
     case COL_FLAGS:
         switch(ro->type()){
@@ -610,6 +635,19 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
             break;
         }
         break;
+    case COL_BASE:
+        switch(ro->type()){
+        default:
+            return false;
+        case ObjectType::VAR:{
+            RegVar* rv = static_cast<RegVar*>(ro);
+            unsigned int base = value.toUInt();
+            rv->setBaseIndex(base >> 8);
+            rv->setBaseSubIndex(base & 0xff);
+            break;
+        }
+        }
+        break;
     case COL_FLAGS:
         switch(ro->type()){
         default:
@@ -713,6 +751,9 @@ Qt::ItemFlags RegListModel::flags(const QModelIndex& index) const
         case COL_MIN_VAL:
         case COL_MAX_VAL:
         case COL_DEF_VAL:
+            flags |= Qt::ItemIsEditable;
+            break;
+        case COL_BASE:
             flags |= Qt::ItemIsEditable;
             break;
         case COL_FLAGS:

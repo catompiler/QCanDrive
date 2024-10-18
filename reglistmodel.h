@@ -26,6 +26,7 @@ public:
         COL_MIN_VAL,
         COL_MAX_VAL,
         COL_DEF_VAL,
+        COL_BASE,
         COL_FLAGS,
         COL_EXTFLAGS,
         COL_DESCR

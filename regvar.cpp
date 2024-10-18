@@ -9,6 +9,8 @@ RegVar::RegVar(RegObject* parent)
     :RegObject(parent)
 {
     m_subIndex = 0x0;
+    m_baseIndex = 0x0;
+    m_baseSubIndex = 0x0;
     m_dataType = DataType::INTEGER32;
     m_minValue = INT32_MIN;
     m_maxValue = INT32_MAX;
@@ -21,6 +23,8 @@ RegVar::RegVar(const RegVar& var)
     :RegObject(var)
 {
     m_subIndex = var.m_subIndex;
+    m_baseIndex = var.m_baseIndex;
+    m_baseSubIndex = var.m_baseSubIndex;
     m_dataType = var.m_dataType;
     m_minValue = var.m_minValue;
     m_maxValue = var.m_maxValue;
@@ -118,5 +122,25 @@ reg_eflags_t RegVar::eflags() const
 void RegVar::setEFlags(reg_eflags_t newEflags)
 {
     m_eflags = newEflags;
+}
+
+reg_index_t RegVar::baseIndex() const
+{
+    return m_baseIndex;
+}
+
+void RegVar::setBaseIndex(reg_index_t newBaseIndex)
+{
+    m_baseIndex = newBaseIndex;
+}
+
+reg_subindex_t RegVar::baseSubIndex() const
+{
+    return m_baseSubIndex;
+}
+
+void RegVar::setBaseSubIndex(reg_subindex_t newBaseSubIndex)
+{
+    m_baseSubIndex = newBaseSubIndex;
 }
 

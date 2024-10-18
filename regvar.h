@@ -42,8 +42,16 @@ public:
     reg_eflags_t eflags() const;
     void setEFlags(reg_eflags_t newEflags);
 
+    reg_index_t baseIndex() const;
+    void setBaseIndex(reg_index_t newBaseIndex);
+
+    reg_subindex_t baseSubIndex() const;
+    void setBaseSubIndex(reg_subindex_t newBaseSubIndex);
+
 private:
     reg_subindex_t m_subIndex;
+    reg_index_t m_baseIndex;
+    reg_subindex_t m_baseSubIndex;
     DataType m_dataType;
     QVariant m_minValue;
     QVariant m_maxValue;
