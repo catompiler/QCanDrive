@@ -26,11 +26,14 @@ public:
 
 private slots:
     void regList_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
-    void regList_currentChanged(const QModelIndex &current, const QModelIndex &previous);
 
 private:
     Ui::RegSelectDlg *ui;
     RegSelectModel* m_regSelMdl;
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent* event) override;
 };
 
 #endif // REGSELECTDLG_H
