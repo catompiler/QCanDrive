@@ -3,6 +3,7 @@
 #include "regvar.h"
 #include <QSize>
 #include <algorithm>
+#include <iterator>
 #include <QDebug>
 
 
@@ -139,6 +140,58 @@ void RegListModel::entryAtIndexModified(const QModelIndex& index)
     QModelIndex topleft = createIndex(index.row(), 0);
     QModelIndex botright = createIndex(index.row(), col_count - 1);
     emit dataChanged(topleft, botright);
+}
+
+bool RegListModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    qDebug() << "RegListModel::removeRows(" << row << ", " << count << ", " << parent << ")";
+
+    if(count == 0) return false;
+
+    if(parent.isValid()){
+        RegObject* rp = objectByIndex(parent);
+        if(rp == nullptr) return false;
+
+        if(rp->type() != ObjectType::REC && rp->type() != ObjectType::ARR){
+            return false;
+        }
+
+        RegMultiObject* rmp = static_cast<RegMultiObject*>(rp);
+
+        if(row == 0) return false;
+        if(row - 1 + count > rmp->count()) return false;
+
+        beginRemoveRows(parent, row, row + count - 1);
+
+        // skip count variable.
+        row = row - 1;
+
+        while(count --){
+            RegObject::deleteByType(rmp->at(row));
+            rmp->remove(row);
+        }
+
+        endRemoveRows();
+
+    }else{
+        if(row < 0 || row >= m_reglist->count()) return false;
+        if(row + count > m_reglist->count()) return false;
+
+        auto first = m_reglist->begin();
+        std::advance(first, row);
+
+        auto last = first;
+        std::advance(last, count);
+
+        beginRemoveRows(parent, row, row + count - 1);
+
+        qDeleteAll(first, last);
+        m_reglist->erase(first, last);
+
+        endRemoveRows();
+    }
+
+    return true;
 }
 
 QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) const
@@ -565,6 +618,7 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
             static_cast<RegVar*>(ro)->setFlags(static_cast<reg_flags_t>(value.toUInt()));
             break;
         }
+        break;
     case COL_EXTFLAGS:
         switch(ro->type()){
         default:
@@ -674,3 +728,4 @@ Qt::ItemFlags RegListModel::flags(const QModelIndex& index) const
 
     return flags;
 }
+

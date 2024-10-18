@@ -44,7 +44,5 @@ private:
     //RegVarModel* m_regVarModel;
 
     RegDelegate* m_regListDelegate;
-
-    void updateRegViewModel(const QModelIndex& index);
 };
 #endif // REGLISTEDITORWIN_H

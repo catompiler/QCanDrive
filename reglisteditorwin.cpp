@@ -126,7 +126,7 @@ void RegListEditorWin::on_pbDel_clicked()
 
     if(!index.isValid()) return;
 
-    //m_regsListModel->removeRow(index.row(), index.parent());
+    m_regsListModel->removeRow(index.row(), index.parent());
 }
 
 void RegListEditorWin::on_pbRegSel_clicked()
@@ -165,8 +165,6 @@ void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
             ro->setDescription(m_regEntryDlg->description());
 
             m_regsListModel->entryAtIndexModified(index);
-
-            updateRegViewModel(index);
         }
     }
 }
@@ -178,38 +176,7 @@ void RegListEditorWin::tvRegList_selection_changed(const QItemSelection &selecte
     qDebug() << "on_tvRegList_activated";
 
     if(selected.empty()){
-        updateRegViewModel(QModelIndex());
     }else{
-        updateRegViewModel(selected.indexes().first());
-    }
-}
-
-void RegListEditorWin::updateRegViewModel(const QModelIndex& index)
-{
-    qDebug() << "updateRegViewModel";
-
-    if(!index.isValid()){
-        return;
-    }
-
-    RegObject* ro = m_regsListModel->objectByIndex(index);
-
-    if(ro == nullptr){
-        return;
-    }
-
-    qDebug() << RegTypes::typeStr(ro->type());
-
-    switch(ro->type()){
-    default:
-        break;
-    case ObjectType::VAR:
-        //m_regVarModel->setRegVar(static_cast<RegVar*>(ro));
-        break;
-    case ObjectType::ARR:
-        break;
-    case ObjectType::REC:
-        break;
     }
 }
 
