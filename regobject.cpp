@@ -1,11 +1,10 @@
 #include "regobject.h"
-#include "regarray.h"
-#include "regrecord.h"
+#include "regentry.h"
 #include "regvar.h"
 #include <stdexcept>
 
 
-RegObject::RegObject(RegObject* parent)
+RegObject::RegObject(RegEntry* parent)
 {
     m_parent = parent;
 }
@@ -22,50 +21,24 @@ RegObject::~RegObject()
 
 }
 
-RegObject* RegObject::newByType(ObjectType type)
-{
-    switch(type){
-    default:
-        break;
-    case ObjectType::VAR:
-        return new RegVar();
-    case ObjectType::ARR:
-        return new RegArray();
-    case ObjectType::REC:
-        return new RegRecord();
-    }
+//RegObject* RegObject::newByType(ObjectType type)
+//{
+//    switch(type){
+//    case ObjectType::VAR:
+//        return new RegVar();
+//    case ObjectType::ARR:
+//    case ObjectType::REC:
+//        return new RegEntry(type);
+//    }
+//    return nullptr;
+//}
 
-    throw std::runtime_error("Invalid reg object type");
-}
-
-void RegObject::deleteByType(RegObject* object)
-{
-    if(object == nullptr) return;
-
-    ObjectType type = object->type();
-
-    switch(type){
-    default:
-        throw std::runtime_error("Invalid reg object type");
-        break;
-    case ObjectType::VAR:
-        delete object;
-        break;
-    case ObjectType::ARR:
-        delete object;
-        break;
-    case ObjectType::REC:
-        delete object;
-        break;
-    }
-}
-
-RegObject* RegObject::parent() const
+RegEntry* RegObject::parent() const
 {
     return m_parent;
 }
 
-void RegObject::setParent(RegObject* newParent)
+void RegObject::setParent(RegEntry* newParent)
 {
     m_parent = newParent;
 }

@@ -5,8 +5,12 @@
 #include <QModelIndex>
 #include <QVariant>
 #include <QMap>
-#include "regentry.h"
-#include "regobject.h"
+#include "regtypes.h"
+
+
+class RegObject;
+class RegEntry;
+class RegVar;
 
 
 typedef QVector<RegEntry*> RegEntryList;
@@ -35,14 +39,15 @@ public:
     explicit RegListModel(QObject *parent = nullptr);
     ~RegListModel();
 
-    bool hasEntryByIndex(reg_index_t index) const;
+    bool hasEntryByRegIndex(reg_index_t index) const;
 
-    QModelIndex entryIndex(const QModelIndex& index) const;
-    RegEntry* entryByIndex(const QModelIndex& index) const;
-    RegObject* objectByIndex(const QModelIndex& index) const;
+    QModelIndex entryModelIndex(const RegEntry* entry) const;
+    QModelIndex entryModelIndexByModelIndex(const QModelIndex& index) const;
+    RegEntry* entryByModelIndex(const QModelIndex& index) const;
+    RegObject* objectByModelIndex(const QModelIndex& index) const;
 
     bool addEntry(RegEntry* r);
-    bool addSubObject(RegObject* r, const QModelIndex& parent = QModelIndex());
+    bool addSubObject(RegVar* r, const QModelIndex& parent);
 
     // QAbstractItemModel interface
 public:
@@ -62,9 +67,14 @@ public slots:
 private:
     RegEntryList* m_reglist;
 
+    //bool setDataEntry(const QModelIndex &index, const QVariant &value, int role);
+    //bool setDataVar(const QModelIndex &index, const QVariant &value, int role);
+
     QVariant dataDisplayRole(const QModelIndex &index) const;
     QVariant dataEditRole(const QModelIndex &index) const;
     QVariant dataSizeHintRole(const QModelIndex &index) const;
+
+    void fixSorting(const QModelIndex& parent);
 };
 
 #endif // REGLISTMODEL_H

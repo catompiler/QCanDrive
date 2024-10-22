@@ -4,22 +4,20 @@
 #include <QVariant>
 #include "regobject.h"
 
-class RegArray;
-class RegRecord;
+class RegEntry;
 
 
 class RegVar : public RegObject
 {
 public:
-    explicit RegVar(RegObject* parent = nullptr);
+    explicit RegVar(RegEntry* parent = nullptr);
     RegVar(const RegVar& var);
     ~RegVar();
 
     ObjectType type() const override;
 
     // Установка родителя.
-    void setParent(RegArray* newParent);
-    void setParent(RegRecord* newParent);
+    void setParent(RegEntry* newParent);
 
     reg_subindex_t subIndex() const;
     void setSubIndex(reg_subindex_t newSubIndex);
@@ -48,10 +46,14 @@ public:
     reg_subindex_t baseSubIndex() const;
     void setBaseSubIndex(reg_subindex_t newBaseSubIndex);
 
+    unsigned int count() const;
+    void setCount(unsigned int newCount);
+
 private:
     reg_subindex_t m_subIndex;
     reg_index_t m_baseIndex;
     reg_subindex_t m_baseSubIndex;
+    unsigned int m_count;
     DataType m_dataType;
     QVariant m_minValue;
     QVariant m_maxValue;

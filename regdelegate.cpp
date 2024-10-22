@@ -36,7 +36,7 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
 
     if(regListModel == nullptr) return nullptr;
 
-    RegObject* ro = regListModel->objectByIndex(index);
+    RegObject* ro = regListModel->objectByModelIndex(index);
 
     if(ro == nullptr) return nullptr;
 
@@ -82,7 +82,8 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
     case RegListModel::COL_DEF_VAL:{
-        if(ro->type() == ObjectType::VAR){
+        // Var.
+        if(ro->parent() != nullptr){
             RegVar* var = static_cast<RegVar*>(ro);
             DataType data_type = var->dataType();
             switch(data_type){
@@ -152,7 +153,7 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 
     if(regListModel == nullptr) return;
 
-    RegObject* ro = regListModel->objectByIndex(index);
+    RegObject* ro = regListModel->objectByModelIndex(index);
 
     if(ro == nullptr) return;
 
@@ -189,7 +190,8 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
     case RegListModel::COL_DEF_VAL:{
-        if(ro->type() == ObjectType::VAR){
+        // Var.
+        if(ro->parent() != nullptr){
             RegVar* var = static_cast<RegVar*>(ro);
             DataType data_type = var->dataType();
             switch(data_type){
@@ -260,7 +262,7 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
     case RegListModel::COL_EXTFLAGS:{
         QLineEdit* le = qobject_cast<QLineEdit*>(editor);
         if(le == nullptr) break;
-        le->setText(QString::number(data.toUInt(), 2));
+        le->setText(QString("0b%1").arg(data.toUInt(), 0, 2));
     }break;
     case RegListModel::COL_DESCR:{
         QLineEdit* le = qobject_cast<QLineEdit*>(editor);
@@ -278,7 +280,7 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
 
     if(regListModel == nullptr) return;
 
-    RegObject* ro = regListModel->objectByIndex(index);
+    RegObject* ro = regListModel->objectByModelIndex(index);
 
     if(ro == nullptr) return;
 
@@ -314,7 +316,8 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
     case RegListModel::COL_DEF_VAL:{
-        if(ro->type() == ObjectType::VAR){
+        // Var.
+        if(ro->parent() != nullptr){
             RegVar* var = static_cast<RegVar*>(ro);
             DataType data_type = var->dataType();
             switch(data_type){
@@ -381,7 +384,18 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
         QLineEdit* le = qobject_cast<QLineEdit*>(editor);
         if(le == nullptr) break;
         bool ok = false;
-        unsigned int flags = le->text().toUInt(&ok, 2);
+        int base = 10;
+        QString str_val = le->text().trimmed();
+        if(str_val.startsWith("0x")){
+            str_val = str_val.mid(2);
+            base = 16;
+        }else if(str_val.startsWith("0b")){
+            str_val = str_val.mid(2);
+            base = 2;
+        }else if(str_val.startsWith("0")){
+            base = 8;
+        }
+        unsigned int flags = str_val.toUInt(&ok, base);
         if(ok) regListModel->setData(index, flags, Qt::EditRole);
     }break;
     case RegListModel::COL_DESCR:{

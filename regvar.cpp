@@ -1,16 +1,15 @@
 #include "regvar.h"
-#include "regarray.h"
-#include "regrecord.h"
 #include <stdint.h>
 
 
 
-RegVar::RegVar(RegObject* parent)
+RegVar::RegVar(RegEntry* parent)
     :RegObject(parent)
 {
     m_subIndex = 0x0;
     m_baseIndex = 0x0;
     m_baseSubIndex = 0x0;
+    m_count = 1;
     m_dataType = DataType::INTEGER32;
     m_minValue = INT32_MIN;
     m_maxValue = INT32_MAX;
@@ -25,6 +24,7 @@ RegVar::RegVar(const RegVar& var)
     m_subIndex = var.m_subIndex;
     m_baseIndex = var.m_baseIndex;
     m_baseSubIndex = var.m_baseSubIndex;
+    m_count = var.m_count;
     m_dataType = var.m_dataType;
     m_minValue = var.m_minValue;
     m_maxValue = var.m_maxValue;
@@ -44,14 +44,9 @@ ObjectType RegVar::type() const
     return ObjectType::VAR;
 }
 
-void RegVar::setParent(RegArray* newParent)
+void RegVar::setParent(RegEntry* newParent)
 {
-    RegObject::setParent(static_cast<RegObject*>(newParent));
-}
-
-void RegVar::setParent(RegRecord* newParent)
-{
-    RegObject::setParent(static_cast<RegObject*>(newParent));
+    RegObject::setParent(newParent);
 }
 
 reg_subindex_t RegVar::subIndex() const
@@ -142,5 +137,15 @@ reg_subindex_t RegVar::baseSubIndex() const
 void RegVar::setBaseSubIndex(reg_subindex_t newBaseSubIndex)
 {
     m_baseSubIndex = newBaseSubIndex;
+}
+
+unsigned int RegVar::count() const
+{
+    return m_count;
+}
+
+void RegVar::setCount(unsigned int newCount)
+{
+    m_count = newCount;
 }
 

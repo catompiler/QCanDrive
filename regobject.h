@@ -5,6 +5,7 @@
 #include <QString>
 #include "regtypes.h"
 
+class RegEntry;
 
 /**
  * @brief Базовый класс объектов регистров.
@@ -13,19 +14,17 @@ class RegObject
 {
 public:
 
+    explicit RegObject(RegEntry* parent = nullptr);
+    RegObject(const RegObject& obj);
     virtual ~RegObject();
 
-    //! Создаёт объект заданного типа.
-    static RegObject* newByType(ObjectType type);
-
-    //! Удаляет объект заданного типа.
-    static void deleteByType(RegObject* object);
+    //static RegObject* newByType(ObjectType type);
 
     //! Получает тип.
     virtual ObjectType type() const = 0;
 
     //! Родитель.
-    RegObject* parent() const;
+    RegEntry* parent() const;
 
     //! Имя.
     QString name() const;
@@ -36,13 +35,11 @@ public:
     void setDescription(const QString &newDescription);
 
 protected:
-    explicit RegObject(RegObject* parent);
-    RegObject(const RegObject& obj);
-    void setParent(RegObject* newParent);
-
-    RegObject* m_parent;
+    RegEntry* m_parent;
     QString m_name;
     QString m_description;
+
+    void setParent(RegEntry* newParent);
 };
 
 

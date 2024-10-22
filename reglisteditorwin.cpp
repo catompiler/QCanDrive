@@ -8,8 +8,6 @@
 #include "regentry.h"
 #include "regobject.h"
 #include "regvar.h"
-#include "regarray.h"
-#include "regrecord.h"
 #include <QMessageBox>
 #include <QApplication>
 #include <QItemSelectionModel>
@@ -72,27 +70,66 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
 
     if(m_regEntryDlg->exec()){
 
-        if(m_regsListModel->hasEntryByIndex(m_regEntryDlg->index())){
+        if(m_regsListModel->hasEntryByRegIndex(m_regEntryDlg->index())){
             QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
             return;
         }
 
         RegEntry* re = new RegEntry(m_regEntryDlg->index(), m_regEntryDlg->objectType());
 
-        RegObject* ro = re->object();
-
-        if(ro == nullptr){
-            delete re;
-            qDebug() << "RegObject is null";
-            return;
-        }
-
-        ro->setName(m_regEntryDlg->name());
-        ro->setDescription(m_regEntryDlg->description());
+        re->setName(m_regEntryDlg->name());
+        re->setDescription(m_regEntryDlg->description());
 
         if(!m_regsListModel->addEntry(re)){
             qDebug() << "m_regsListModel->addEntry(...)";
             delete re;
+            return;
+        }
+
+        QModelIndex entry_index = m_regsListModel->entryModelIndex(re);
+
+        if(!entry_index.isValid()){
+            qDebug() << "Invalid added entry model index";
+            return;
+        }
+
+        if((re->type() == ObjectType::REC || re->type() == ObjectType::ARR) /* && add count var */){
+            RegVar* count_var = new RegVar();
+
+            count_var->setSubIndex(0);
+            count_var->setDataType(DataType::UNSIGNED8);
+            count_var->setMinValue(0);
+            count_var->setMaxValue(254);
+            count_var->setDefaultValue(0);
+            count_var->setName("count");
+            count_var->setDescription("Number of sub-entries");
+
+            if(!m_regsListModel->addSubObject(count_var, entry_index)){
+                qDebug() << "m_regsListModel->addSubObject(count_var)";
+                delete count_var;
+            }
+
+            ui->tvRegList->expand(entry_index);
+        }
+
+        if((re->type() == ObjectType::VAR || re->type() == ObjectType::ARR) /* && add count var */){
+            RegVar* var = new RegVar();
+
+            if(re->type() == ObjectType::VAR){
+                var->setSubIndex(0);
+                var->setName("value");
+            }else if(re->type() == ObjectType::ARR){
+                var->setSubIndex(1);
+                var->setName("data");
+                var->setCount(0);
+            }
+
+            if(!m_regsListModel->addSubObject(var, entry_index)){
+                qDebug() << "m_regsListModel->addSubObject(var)";
+                delete var;
+            }
+
+            ui->tvRegList->expand(entry_index);
         }
     }
 }
@@ -103,14 +140,12 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
 
     //qDebug() << "on_pbAddSub_clicked";
 
-    QModelIndex entry_index = m_regsListModel->entryIndex(ui->tvRegList->currentIndex());
-    RegEntry* re = m_regsListModel->entryByIndex(entry_index);
-
+    QModelIndex entry_index = m_regsListModel->entryModelIndexByModelIndex(ui->tvRegList->currentIndex());
+    RegEntry* re = m_regsListModel->entryByModelIndex(entry_index);
     if(re == nullptr) return;
-    if(re->objectType() != ObjectType::REC && re->objectType() != ObjectType::ARR) return;
 
-    m_regEntryDlg->setIndexEditable(false);
-    m_regEntryDlg->setIndex(re->index());
+    m_regEntryDlg->setIndexEditable(true);
+    m_regEntryDlg->setIndex(re->count());
     m_regEntryDlg->setObjectTypeEditable(false);
     m_regEntryDlg->setObjectType(ObjectType::VAR);
     m_regEntryDlg->setName(QString("newSubObject"));
@@ -118,14 +153,20 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
 
     if(m_regEntryDlg->exec()){
 
-        RegObject* ro = RegObject::newByType(m_regEntryDlg->objectType());
+        if(re->hasVarBySubIndex(m_regEntryDlg->index())){
+            QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
+            return;
+        }
 
-        ro->setName(m_regEntryDlg->name());
-        ro->setDescription(m_regEntryDlg->description());
+        RegVar* rv = new RegVar();
 
-        if(!m_regsListModel->addSubObject(ro, entry_index)){
-            qDebug() << "m_regsListModel->addEntry(...)";
-            delete ro;
+        rv->setSubIndex(m_regEntryDlg->index());
+        rv->setName(m_regEntryDlg->name());
+        rv->setDescription(m_regEntryDlg->description());
+
+        if(!m_regsListModel->addSubObject(rv, entry_index)){
+            qDebug() << "m_regsListModel->addSubObject(...)";
+            delete rv;
         }
     }
 }
@@ -159,26 +200,23 @@ void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
     // entry.
     if(!index.parent().isValid()){
 
-        RegEntry* re = m_regsListModel->entryByIndex(index);
+        RegEntry* re = m_regsListModel->entryByModelIndex(index);
 
         if(re == nullptr) return;
 
-        RegObject* ro = re->object();
-
-        if(ro == nullptr) return;
-
-        m_regEntryDlg->setIndexEditable(false);
+        m_regEntryDlg->setIndexEditable(true);
         m_regEntryDlg->setIndex(re->index());
-        m_regEntryDlg->setObjectTypeEditable(false);
-        m_regEntryDlg->setObjectType(re->objectType());
-        m_regEntryDlg->setName(ro->name());
-        m_regEntryDlg->setDescription(ro->description());
+        m_regEntryDlg->setObjectTypeEditable(true);
+        m_regEntryDlg->setObjectType(re->type());
+        m_regEntryDlg->setName(re->name());
+        m_regEntryDlg->setDescription(re->description());
 
         if(m_regEntryDlg->exec()){
 
-            re->setObjectType(m_regEntryDlg->objectType());
-            ro->setName(m_regEntryDlg->name());
-            ro->setDescription(m_regEntryDlg->description());
+            re->setIndex(m_regEntryDlg->index());
+            re->setType(m_regEntryDlg->objectType());
+            re->setName(m_regEntryDlg->name());
+            re->setDescription(m_regEntryDlg->description());
 
             m_regsListModel->entryAtIndexModified(index);
         }

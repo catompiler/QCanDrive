@@ -1,5 +1,6 @@
 #include "regselectmodel.h"
 #include "reglistmodel.h"
+#include "regobject.h"
 #include <QDebug>
 
 
@@ -29,10 +30,10 @@ Qt::ItemFlags RegSelectModel::flags(const QModelIndex& index) const
     RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
     if(reglist_model == nullptr) return flags;
 
-    RegObject* ro = reglist_model->objectByIndex(source_index);
+    RegObject* ro = reglist_model->objectByModelIndex(source_index);
     if(ro == nullptr) return flags;
 
-    if(ro->type() != ObjectType::VAR) flags &= ~Qt::ItemIsSelectable;
+    if(ro->parent() == nullptr) flags &= ~Qt::ItemIsSelectable;
 
     return flags;
 }
