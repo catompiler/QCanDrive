@@ -5,6 +5,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QPair>
 
 //! Тип индекса.
 typedef uint16_t reg_index_t;

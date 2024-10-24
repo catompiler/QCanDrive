@@ -1,6 +1,8 @@
 #include "regdelegate.h"
 #include "reglistmodel.h"
+#include "sellineedit.h"
 #include "regtypes.h"
+#include "regutils.h"
 #include "regvar.h"
 #include <QComboBox>
 #include <QSpinBox>
@@ -136,12 +138,12 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         }
     }break;
     case RegListModel::COL_BASE:{
-        QLineEdit* le = new QLineEdit(parent);
+        SelLineEdit* le = new SelLineEdit(parent);
         res_widget = le;
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
-        QLineEdit* le = new QLineEdit(parent);
+        SelLineEdit* le = new SelLineEdit(parent);
         res_widget = le;
     }break;
     case RegListModel::COL_DESCR:{
@@ -249,7 +251,7 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
         }
     }break;
     case RegListModel::COL_BASE:{
-        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        SelLineEdit* le = qobject_cast<SelLineEdit*>(editor);
         if(le == nullptr) break;
         switch(ro->type()){
         default:
@@ -259,18 +261,14 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
             unsigned int base = data.toUInt();
             unsigned int base_index = base >> 8;
             unsigned int base_subindex = base & 0xff;
-            le->setText(
-                        QString("0x%1.%2")
-                            .arg(base_index, 4, 16, QChar('0'))
-                            .arg(base_subindex, 2, 16, QChar('0'))
-                        );
+            le->setText(RegUtils::indexSubIndexToString(base_index, base_subindex));
             break;
         }
         }
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
-        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        SelLineEdit* le = qobject_cast<SelLineEdit*>(editor);
         if(le == nullptr) break;
         le->setText(QString("0b%1").arg(data.toUInt(), 0, 2));
     }break;
@@ -378,35 +376,27 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
         }
     }break;
     case RegListModel::COL_BASE:{
-        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        SelLineEdit* le = qobject_cast<SelLineEdit*>(editor);
         if(le == nullptr) break;
 
-        QString base_str = le->text();
+        bool ok = false;
+        auto index_pair = RegUtils::indexSubIndexFromString(le->text(), &ok);
 
-        bool ok_index = false, ok_subindex = false;
-        unsigned int base_index = base_str.section(QChar('.'), 0, 0).toUInt(&ok_index, 16);
-        unsigned int base_subindex = base_str.section(QChar('.'), 1, 1).toUInt(&ok_subindex, 16);
-
-        if(ok_index && ok_subindex){
-            unsigned int base = (base_index << 8) | base_subindex;
+        if(ok){
+            unsigned int base = (index_pair.first << 8) | index_pair.second;
             regListModel->setData(index, base, Qt::EditRole);
         }
     }break;
     case RegListModel::COL_FLAGS:
     case RegListModel::COL_EXTFLAGS:{
-        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        SelLineEdit* le = qobject_cast<SelLineEdit*>(editor);
         if(le == nullptr) break;
         bool ok = false;
-        int base = 10;
+        int base = 0;
         QString str_val = le->text().trimmed();
-        if(str_val.startsWith("0x")){
-            str_val = str_val.mid(2);
-            base = 16;
-        }else if(str_val.startsWith("0b")){
+        if(str_val.startsWith("0b")){
             str_val = str_val.mid(2);
             base = 2;
-        }else if(str_val.startsWith("0")){
-            base = 8;
         }
         unsigned int flags = str_val.toUInt(&ok, base);
         if(ok) regListModel->setData(index, flags, Qt::EditRole);

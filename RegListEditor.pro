@@ -19,8 +19,10 @@ SOURCES += \
     regselectdlg.cpp \
     regselectmodel.cpp \
     regtypes.cpp \
+    regutils.cpp \
     regvar.cpp \
-    regvarmodel.cpp
+    regvarmodel.cpp \
+    sellineedit.cpp
 
 HEADERS += \
     is_base_creator.hpp \
@@ -33,8 +35,10 @@ HEADERS += \
     regselectdlg.h \
     regselectmodel.h \
     regtypes.h \
+    regutils.h \
     regvar.h \
-    regvarmodel.h
+    regvarmodel.h \
+    sellineedit.h
 
 FORMS += \
     regentrydlg.ui \

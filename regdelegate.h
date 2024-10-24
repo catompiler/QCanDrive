@@ -3,6 +3,7 @@
 
 #include <QItemDelegate>
 
+
 class RegDelegate : public QItemDelegate
 {
     Q_OBJECT
