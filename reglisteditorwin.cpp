@@ -35,6 +35,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     QItemSelectionModel* sel_model = ui->tvRegList->selectionModel();
     if(sel_model == nullptr){
         sel_model = new QItemSelectionModel();
+        sel_model->setParent(ui->tvRegList);
         ui->tvRegList->setSelectionModel(sel_model);
     }
     connect(sel_model, &QItemSelectionModel::selectionChanged, this, &RegListEditorWin::tvRegList_selection_changed);
@@ -181,6 +182,7 @@ void RegListEditorWin::on_actDelItem_triggered(bool checked)
 
     if(!index.isValid()) return;
 
+    ui->tvRegList->selectionModel()->clear();
     m_regsListModel->removeRow(index.row(), index.parent());
 }
 
