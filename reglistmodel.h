@@ -26,7 +26,7 @@ public:
         COL_NAME,
         COL_TYPE,
         COL_COUNT,
-        COL_DATATYPE,
+        COL_MEM_ADDR,
         COL_MIN_VAL,
         COL_MAX_VAL,
         COL_DEF_VAL,

@@ -149,3 +149,13 @@ void RegVar::setCount(unsigned int newCount)
     m_count = newCount;
 }
 
+QString RegVar::memAddr() const
+{
+    return m_memAddr;
+}
+
+void RegVar::setMemAddr(const QString& newMemAddr)
+{
+    m_memAddr = newMemAddr;
+}
+

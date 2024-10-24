@@ -49,12 +49,16 @@ public:
     unsigned int count() const;
     void setCount(unsigned int newCount);
 
+    QString memAddr() const;
+    void setMemAddr(const QString& newMemAddr);
+
 private:
     reg_subindex_t m_subIndex;
     reg_index_t m_baseIndex;
     reg_subindex_t m_baseSubIndex;
     unsigned int m_count;
     DataType m_dataType;
+    QString m_memAddr;
     QVariant m_minValue;
     QVariant m_maxValue;
     QVariant m_defaultValue;

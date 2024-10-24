@@ -64,6 +64,13 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
 
     //qDebug() << "on_pbAdd_clicked";
 
+    QModelIndex entry_index = m_regsListModel->entryModelIndexByModelIndex(ui->tvRegList->currentIndex());
+    RegEntry* re = m_regsListModel->entryByModelIndex(entry_index);
+    if(re != nullptr){
+        m_regEntryDlg->setIndex(re->index() + 1);
+        m_regEntryDlg->setObjectType(re->type());
+    }
+
     m_regEntryDlg->setIndexEditable(true);
     m_regEntryDlg->setObjectTypeEditable(true);
     m_regEntryDlg->setName(QString("newObject"));

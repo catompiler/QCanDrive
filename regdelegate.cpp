@@ -40,6 +40,8 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
 
     if(ro == nullptr) return nullptr;
 
+    bool isEntry = ro->parent() == nullptr;
+
     QWidget* res_widget = nullptr;
 
     RegListModel::ColId col_id = static_cast<RegListModel::ColId>(index.column());
@@ -58,12 +60,21 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         res_widget = le;
     }break;
     case RegListModel::COL_TYPE:{
-        QComboBox* cb = new QComboBox(parent);
-        auto objTypes = RegTypes::objectTypes();
-        for(auto t: qAsConst(objTypes)){
-            cb->addItem(RegTypes::typeStr(t));
+        if(isEntry){
+            QComboBox* cb = new QComboBox(parent);
+            auto objTypes = RegTypes::objectTypes();
+            for(auto t: qAsConst(objTypes)){
+                cb->addItem(RegTypes::typeStr(t));
+            }
+            res_widget = cb;
+        }else{
+            QComboBox* cb = new QComboBox(parent);
+            auto dataTypes = RegTypes::dataTypes();
+            for(auto t: qAsConst(dataTypes)){
+                cb->addItem(RegTypes::dataTypeStr(t));
+            }
+            res_widget = cb;
         }
-        res_widget = cb;
     }break;
     case RegListModel::COL_COUNT:{
         QSpinBox* sb = new QSpinBox(parent);
@@ -71,13 +82,10 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         sb->setMaximum(254);
         res_widget = sb;
     }break;
-    case RegListModel::COL_DATATYPE:{
-        QComboBox* cb = new QComboBox(parent);
-        auto dataTypes = RegTypes::dataTypes();
-        for(auto t: qAsConst(dataTypes)){
-            cb->addItem(RegTypes::dataTypeStr(t));
-        }
-        res_widget = cb;
+    case RegListModel::COL_MEM_ADDR:{
+        QLineEdit* le = new QLineEdit(parent);
+        le->setPlaceholderText(tr("Автоматически"));
+        res_widget = le;
     }break;
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
@@ -157,6 +165,8 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 
     if(ro == nullptr) return;
 
+    //bool isEntry = ro->parent() == nullptr;
+
     QVariant data = index.data(Qt::EditRole); //regListModel->data(index, Qt::EditRole);
 
     RegListModel::ColId col_id = static_cast<RegListModel::ColId>(index.column());
@@ -182,10 +192,10 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
         if(sb == nullptr) break;
         sb->setValue(data.toInt());
     }break;
-    case RegListModel::COL_DATATYPE:{
-        QComboBox* cb = qobject_cast<QComboBox*>(editor);
-        if(cb == nullptr) break;
-        cb->setCurrentIndex(static_cast<int>(data.toInt()));
+    case RegListModel::COL_MEM_ADDR:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        le->setText(data.toString());
     }break;
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
@@ -284,6 +294,8 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
 
     if(ro == nullptr) return;
 
+    //bool isEntry = ro->parent() == nullptr;
+
     RegListModel::ColId col_id = static_cast<RegListModel::ColId>(index.column());
 
     switch(col_id){
@@ -308,10 +320,11 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
         if(sb == nullptr) break;
         regListModel->setData(index, sb->value(), Qt::EditRole);
     }break;
-    case RegListModel::COL_DATATYPE:{
-        QComboBox* cb = qobject_cast<QComboBox*>(editor);
-        if(cb == nullptr) break;
-        regListModel->setData(index, cb->currentIndex(), Qt::EditRole);
+    case RegListModel::COL_MEM_ADDR:{
+        QLineEdit* le = qobject_cast<QLineEdit*>(editor);
+        if(le == nullptr) break;
+        if(le->text().isEmpty()) break;
+        regListModel->setData(index, le->text(), Qt::EditRole);
     }break;
     case RegListModel::COL_MIN_VAL:
     case RegListModel::COL_MAX_VAL:
