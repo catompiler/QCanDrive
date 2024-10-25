@@ -40,11 +40,15 @@ public:
     ~RegListModel();
 
     bool hasEntryByRegIndex(reg_index_t index) const;
+    RegEntry* entryByRegIndex(reg_index_t index) const;
+    QModelIndex entryModelIndexByRegIndex(reg_index_t index) const;
+    QModelIndex objectModelIndexByRegIndex(reg_index_t index, reg_subindex_t subIndex) const;
 
     QModelIndex entryModelIndex(const RegEntry* entry) const;
     QModelIndex entryModelIndexByModelIndex(const QModelIndex& index) const;
     RegEntry* entryByModelIndex(const QModelIndex& index) const;
     RegObject* objectByModelIndex(const QModelIndex& index) const;
+    RegVar* varByModelIndex(const QModelIndex& index) const;
 
     bool addEntry(RegEntry* r);
     bool addSubObject(RegVar* r, const QModelIndex& parent);

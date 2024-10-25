@@ -47,6 +47,7 @@ public:
     ConstVarListIterator cend() const;
 
     bool hasVarBySubIndex(reg_subindex_t subIndex) const;
+    RegVar* varBySubIndex(reg_subindex_t subIndex) const;
 
 private:
     reg_index_t m_index;

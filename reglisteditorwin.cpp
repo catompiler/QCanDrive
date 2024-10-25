@@ -24,6 +24,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 
     //m_regVarModel = new RegVarModel();
     m_regListDelegate = new RegDelegate();
+    m_regListDelegate->setRegSelectDialog(m_regSelectDlg);
 
     m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);

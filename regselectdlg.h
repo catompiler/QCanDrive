@@ -2,6 +2,7 @@
 #define REGSELECTDLG_H
 
 #include <QDialog>
+#include <QPair>
 
 
 namespace Ui {
@@ -24,16 +25,20 @@ public:
     RegListModel* regListModel() const;
     void setRegListModel(RegListModel* newRegListModel);
 
+    bool hasSelectedReg() const;
+    QPair<uint, uint> selectedRegIndex() const;
+    void selectReg(uint index, uint subIndex);
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent* event) override;
+
 private slots:
     void regList_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     Ui::RegSelectDlg *ui;
     RegSelectModel* m_regSelMdl;
-
-    // QWidget interface
-protected:
-    void showEvent(QShowEvent* event) override;
 };
 
 #endif // REGSELECTDLG_H

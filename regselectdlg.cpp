@@ -2,6 +2,8 @@
 #include "ui_regselectdlg.h"
 #include "regselectmodel.h"
 #include "reglistmodel.h"
+#include "regentry.h"
+#include "regvar.h"
 #include <QItemSelectionModel>
 #include <QItemSelection>
 #include <QPushButton>
@@ -47,6 +49,41 @@ void RegSelectDlg::setRegListModel(RegListModel* newRegListModel)
     if(newRegListModel){
     }*/
     m_regSelMdl->setSourceModel(newRegListModel);
+}
+
+bool RegSelectDlg::hasSelectedReg() const
+{
+    return !ui->tvRegList->selectionModel()->selectedIndexes().isEmpty();
+}
+
+QPair<uint, uint> RegSelectDlg::selectedRegIndex() const
+{
+    auto model = qobject_cast<RegListModel*>(m_regSelMdl->sourceModel());
+    if(model == nullptr) return qMakePair(0U, 0U);
+
+    QModelIndexList sel_index_list = ui->tvRegList->selectionModel()->selectedIndexes();
+    if(sel_index_list.isEmpty()) return qMakePair(0U, 0U);
+
+    QModelIndex index = m_regSelMdl->mapToSource(sel_index_list.first());
+
+    RegVar* rv = model->varByModelIndex(index);
+    if(rv == nullptr) return qMakePair(0U, 0U);
+
+    RegEntry* re = rv->parent();
+    if(re == nullptr) return qMakePair(0U, 0U);
+
+    return qMakePair(static_cast<uint>(re->index()), static_cast<uint>(rv->subIndex()));
+}
+
+void RegSelectDlg::selectReg(uint index, uint subIndex)
+{
+    auto model = qobject_cast<RegListModel*>(m_regSelMdl->sourceModel());
+    if(model == nullptr) return;
+
+    QModelIndex src_index = model->objectModelIndexByRegIndex(index, subIndex);
+    QModelIndex sel_index = m_regSelMdl->mapFromSource(src_index);
+
+    ui->tvRegList->selectionModel()->setCurrentIndex(sel_index, QItemSelectionModel::ClearAndSelect);
 }
 
 void RegSelectDlg::regList_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)

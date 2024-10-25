@@ -49,17 +49,50 @@ RegListModel::~RegListModel()
 
 bool RegListModel::hasEntryByRegIndex(reg_index_t index) const
 {
-    return std::find_if(m_reglist->begin(), m_reglist->end(),
-                        [index](const RegEntry* ri){
-                            return ri->index() == index;
-    }) != m_reglist->end();
+    return entryByRegIndex(index) != nullptr;
+}
+
+RegEntry* RegListModel::entryByRegIndex(reg_index_t index) const
+{
+    auto it = std::find_if(m_reglist->begin(), m_reglist->end(),
+                       [index](const RegEntry* ri){
+                           return ri->index() == index;
+    });
+    if(it == m_reglist->end()) return nullptr;
+
+    return *it;
+}
+
+QModelIndex RegListModel::entryModelIndexByRegIndex(reg_index_t index) const
+{
+    auto it = std::find_if(m_reglist->begin(), m_reglist->end(),
+                       [index](const RegEntry* ri){
+                           return ri->index() == index;
+    });
+    if(it == m_reglist->end()) return QModelIndex();
+
+    return createIndex(std::distance(m_reglist->begin(), it), 0, static_cast<void*>(*it));
+}
+
+QModelIndex RegListModel::objectModelIndexByRegIndex(reg_index_t index, reg_subindex_t subIndex) const
+{
+    RegEntry* re = entryByRegIndex(index);
+    if(re == nullptr) return QModelIndex();
+
+    auto it = std::find_if(re->cbegin(), re->cend(),
+                       [subIndex](const RegVar* ri){
+                           return ri->subIndex() == subIndex;
+    });
+    if(it == re->cend()) return QModelIndex();
+
+    return createIndex(std::distance(re->cbegin(), it), 0, static_cast<void*>(*it));
 }
 
 QModelIndex RegListModel::entryModelIndex(const RegEntry* entry) const
 {
     auto it = std::find_if(m_reglist->begin(), m_reglist->end(),
-                           [entry](const RegEntry* ri){
-                               return ri->index() == entry->index();
+                       [entry](const RegEntry* ri){
+                           return ri->index() == entry->index();
     });
 
     if(it == m_reglist->end()) return QModelIndex();
@@ -100,6 +133,16 @@ RegObject* RegListModel::objectByModelIndex(const QModelIndex& index) const
     if(!index.isValid()) return nullptr;
 
     return static_cast<RegObject*>(index.internalPointer());
+}
+
+RegVar* RegListModel::varByModelIndex(const QModelIndex& index) const
+{
+    RegObject* ro = objectByModelIndex(index);
+    if(ro == nullptr) return nullptr;
+
+    if(ro->parent() == nullptr) return nullptr;
+
+    return static_cast<RegVar*>(ro);
 }
 
 bool RegListModel::addEntry(RegEntry* r)

@@ -1,5 +1,6 @@
 #include "regdelegate.h"
 #include "reglistmodel.h"
+#include "regselectdlg.h"
 #include "sellineedit.h"
 #include "regtypes.h"
 #include "regutils.h"
@@ -8,17 +9,14 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
-#include <QStringList>
 #include <QString>
-#include <QRegExp>
-#include <QRegExpValidator>
 #include <QDebug>
 
 
 
 RegDelegate::RegDelegate()
 {
-
+    m_regSelectDialog = nullptr;
 }
 
 RegDelegate::~RegDelegate()
@@ -139,11 +137,20 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
     }break;
     case RegListModel::COL_BASE:{
         SelLineEdit* le = new SelLineEdit(parent);
+        connect(le, &SelLineEdit::select, this, &RegDelegate::selectReg);
+        connect(le, &SelLineEdit::editingFinished, this, &RegDelegate::editingFinished);
         res_widget = le;
     }break;
-    case RegListModel::COL_FLAGS:
+    case RegListModel::COL_FLAGS:{
+        SelLineEdit* le = new SelLineEdit(parent);
+        connect(le, &SelLineEdit::select, this, &RegDelegate::selectEFlags);
+        connect(le, &SelLineEdit::editingFinished, this, &RegDelegate::editingFinished);
+        res_widget = le;
+    }break;
     case RegListModel::COL_EXTFLAGS:{
         SelLineEdit* le = new SelLineEdit(parent);
+        connect(le, &SelLineEdit::select, this, &RegDelegate::selectFlags);
+        connect(le, &SelLineEdit::editingFinished, this, &RegDelegate::editingFinished);
         res_widget = le;
     }break;
     case RegListModel::COL_DESCR:{
@@ -432,4 +439,60 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
         break;
     }
     */
+}
+
+void RegDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    Q_UNUSED(index);
+
+    editor->setGeometry(option.rect);
+}
+
+RegSelectDlg* RegDelegate::regSelectDialog() const
+{
+    return m_regSelectDialog;
+}
+
+void RegDelegate::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_regSelectDialog = newRegSelectDialog;
+}
+
+void RegDelegate::selectReg()
+{
+    SelLineEdit* le = qobject_cast<SelLineEdit*>(sender());
+    if(le == nullptr) return;
+
+    if(m_regSelectDialog == nullptr) return;
+
+    bool ok = false;
+    auto index_pair = RegUtils::indexSubIndexFromString(le->text(), &ok);
+
+    if(ok){
+        m_regSelectDialog->selectReg(index_pair.first, index_pair.second);
+    }
+
+    if(m_regSelectDialog->exec()){
+        if(m_regSelectDialog->hasSelectedReg()){
+            auto sel_pair = m_regSelectDialog->selectedRegIndex();
+            le->setText(RegUtils::indexSubIndexToString(sel_pair.first, sel_pair.second));
+        }
+    }
+}
+
+void RegDelegate::selectFlags()
+{
+}
+
+void RegDelegate::selectEFlags()
+{
+}
+
+void RegDelegate::editingFinished()
+{
+    QWidget* w = qobject_cast<QWidget*>(sender());
+    if(w == nullptr) return;
+
+    emit commitData(w);
+    emit closeEditor(w, QAbstractItemDelegate::NoHint);
 }

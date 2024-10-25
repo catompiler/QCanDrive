@@ -117,8 +117,16 @@ RegEntry::ConstVarListIterator RegEntry::cend() const
 
 bool RegEntry::hasVarBySubIndex(reg_subindex_t subIndex) const
 {
-    return std::find_if(cbegin(), cend(), [subIndex](const RegVar* r){
+    return varBySubIndex(subIndex) != nullptr;
+}
+
+RegVar* RegEntry::varBySubIndex(reg_subindex_t subIndex) const
+{
+    auto it = std::find_if(cbegin(), cend(), [subIndex](const RegVar* r){
         return r->subIndex() == subIndex;
-    }) != cend();
+    });
+    if(it == cend()) return nullptr;
+
+    return *it;
 }
 
