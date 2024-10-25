@@ -12,11 +12,10 @@ class QItemSelection;
 class QModelIndex;
 class RegEntryDlg;
 class RegListModel;
-//class RegVarModel;
 class RegDelegate;
 class RegEntry;
 class RegSelectDlg;
-
+class FlagsEditDlg;
 
 
 class RegListEditorWin : public QMainWindow
@@ -40,9 +39,9 @@ private:
     Ui::RegListEditorWin *ui;
     RegEntryDlg* m_regEntryDlg;
     RegSelectDlg* m_regSelectDlg;
+    FlagsEditDlg* m_flagsEditDlg;
 
     RegListModel* m_regsListModel;
-    //RegVarModel* m_regVarModel;
 
     RegDelegate* m_regListDelegate;
 };

@@ -31,23 +31,78 @@ static const char* data_type_name_strs[] = {
 
 static decltype(sizeof(data_type_name_strs)) data_type_name_strs_count = (sizeof(data_type_name_strs)/sizeof(data_type_name_strs[0]));
 
-QString typeStr(ObjectType type)
+
+static const char* flag_name_strs[] = {
+    "REG_FLAG_NONE",
+    "REG_FLAG_CONF",
+    "REG_FLAG_RO",
+};
+
+static decltype(sizeof(flag_name_strs)) flag_name_strs_count = (sizeof(flag_name_strs)/sizeof(flag_name_strs[0]));
+
+
+static const char* eflag_name_strs[] = {
+    "REG_EFLAG_NONE",
+};
+
+static decltype(sizeof(eflag_name_strs)) eflag_name_strs_count = (sizeof(eflag_name_strs)/sizeof(eflag_name_strs[0]));
+
+
+
+QVector<RegFlag> flags()
 {
-    if(static_cast<decltype(sizeof(obj_type_name_strs))>(type) >= obj_type_name_strs_count){
+    static auto flags = {
+        RegFlag::NONE,
+        RegFlag::CONF,
+        RegFlag::RO
+    };
+    static const QVector<RegFlag> flags_vec(flags);
+
+    return flags_vec;
+}
+
+QString flagName(RegFlag flag)
+{
+    if(static_cast<decltype(sizeof(flag_name_strs))>(flag) >= flag_name_strs_count){
         return QString();
     }
 
-    return QString(obj_type_name_strs[static_cast<int>(type)]);
+    return QString(flag_name_strs[static_cast<int>(flag)]);
 }
 
-QString dataTypeStr(DataType type)
+QStringList flagsNames()
 {
-    if(static_cast<decltype(sizeof(data_type_name_strs))>(type) >= data_type_name_strs_count){
+    static const QStringList flag_names_list = QStringList(flag_name_strs, flag_name_strs + flag_name_strs_count);
+
+    return flag_names_list;
+}
+
+QVector<RegEFlag> eflags()
+{
+    static auto eflags = {
+        RegEFlag::NONE,
+    };
+    static const QVector<RegEFlag> eflags_vec(eflags);
+
+    return eflags_vec;
+}
+
+QString eflagName(RegEFlag eflag)
+{
+    if(static_cast<decltype(sizeof(eflag_name_strs))>(eflag) >= eflag_name_strs_count){
         return QString();
     }
 
-    return QString(data_type_name_strs[static_cast<int>(type)]);
+    return QString(eflag_name_strs[static_cast<int>(eflag)]);
 }
+
+QStringList eflagsNames()
+{
+    static const QStringList eflag_names_list = QStringList(eflag_name_strs, eflag_name_strs + eflag_name_strs_count);
+
+    return eflag_names_list;
+}
+
 
 QVector<ObjectType> objectTypes()
 {
@@ -85,6 +140,24 @@ QVector<DataType> dataTypes()
     static const QVector<DataType> data_types_vec(data_types);
 
     return data_types_vec;
+}
+
+QString typeStr(ObjectType type)
+{
+    if(static_cast<decltype(sizeof(obj_type_name_strs))>(type) >= obj_type_name_strs_count){
+        return QString();
+    }
+
+    return QString(obj_type_name_strs[static_cast<int>(type)]);
+}
+
+QString dataTypeStr(DataType type)
+{
+    if(static_cast<decltype(sizeof(data_type_name_strs))>(type) >= data_type_name_strs_count){
+        return QString();
+    }
+
+    return QString(data_type_name_strs[static_cast<int>(type)]);
 }
 
 QStringList objectTypesStringList()

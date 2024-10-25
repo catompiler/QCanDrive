@@ -4,6 +4,7 @@
 #include <QItemDelegate>
 
 class RegSelectDlg;
+class FlagsEditDlg;
 
 
 class RegDelegate : public QItemDelegate
@@ -23,6 +24,9 @@ public:
     RegSelectDlg* regSelectDialog() const;
     void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
+    FlagsEditDlg* flagsEditDialog() const;
+    void setFlagsEditDialog(FlagsEditDlg* newFlagsEditDialog);
+
 private slots:
     void selectReg();
     void selectFlags();
@@ -31,6 +35,7 @@ private slots:
 
 private:
     RegSelectDlg* m_regSelectDialog;
+    FlagsEditDlg* m_flagsEditDialog;
 };
 
 #endif // REGDELEGATE_H

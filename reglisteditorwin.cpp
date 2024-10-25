@@ -3,8 +3,8 @@
 #include "ui_reglisteditorwin.h"
 #include "regentrydlg.h"
 #include "regselectdlg.h"
+#include "flagseditdlg.h"
 #include "reglistmodel.h"
-//#include "regvarmodel.h"
 #include "regentry.h"
 #include "regobject.h"
 #include "regvar.h"
@@ -21,10 +21,11 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     ui->setupUi(this);
     m_regEntryDlg = new RegEntryDlg();
     m_regSelectDlg = new RegSelectDlg();
+    m_flagsEditDlg = new FlagsEditDlg();
 
-    //m_regVarModel = new RegVarModel();
     m_regListDelegate = new RegDelegate();
     m_regListDelegate->setRegSelectDialog(m_regSelectDlg);
+    m_regListDelegate->setFlagsEditDialog(m_flagsEditDlg);
 
     m_regsListModel = new RegListModel();
     ui->tvRegList->setModel(m_regsListModel);
@@ -45,10 +46,10 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 RegListEditorWin::~RegListEditorWin()
 {
     delete ui;
+    delete m_flagsEditDlg;
     delete m_regSelectDlg;
     delete m_regEntryDlg;
     delete m_regsListModel;
-    //delete m_regVarModel;
     delete m_regListDelegate;
 }
 
@@ -198,7 +199,8 @@ void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    m_regSelectDlg->exec();
+    m_flagsEditDlg->setFlagsNames(RegTypes::flagsNames().mid(1));
+    m_flagsEditDlg->exec();
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)

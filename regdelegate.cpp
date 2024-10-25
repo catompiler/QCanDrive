@@ -1,4 +1,5 @@
 #include "regdelegate.h"
+#include "flagseditdlg.h"
 #include "reglistmodel.h"
 #include "regselectdlg.h"
 #include "sellineedit.h"
@@ -143,13 +144,13 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
     }break;
     case RegListModel::COL_FLAGS:{
         SelLineEdit* le = new SelLineEdit(parent);
-        connect(le, &SelLineEdit::select, this, &RegDelegate::selectEFlags);
+        connect(le, &SelLineEdit::select, this, &RegDelegate::selectFlags);
         connect(le, &SelLineEdit::editingFinished, this, &RegDelegate::editingFinished);
         res_widget = le;
     }break;
     case RegListModel::COL_EXTFLAGS:{
         SelLineEdit* le = new SelLineEdit(parent);
-        connect(le, &SelLineEdit::select, this, &RegDelegate::selectFlags);
+        connect(le, &SelLineEdit::select, this, &RegDelegate::selectEFlags);
         connect(le, &SelLineEdit::editingFinished, this, &RegDelegate::editingFinished);
         res_widget = le;
     }break;
@@ -458,6 +459,16 @@ void RegDelegate::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
     m_regSelectDialog = newRegSelectDialog;
 }
 
+FlagsEditDlg* RegDelegate::flagsEditDialog() const
+{
+    return m_flagsEditDialog;
+}
+
+void RegDelegate::setFlagsEditDialog(FlagsEditDlg* newFlagsEditDialog)
+{
+    m_flagsEditDialog = newFlagsEditDialog;
+}
+
 void RegDelegate::selectReg()
 {
     SelLineEdit* le = qobject_cast<SelLineEdit*>(sender());
@@ -482,10 +493,48 @@ void RegDelegate::selectReg()
 
 void RegDelegate::selectFlags()
 {
+    SelLineEdit* le = qobject_cast<SelLineEdit*>(sender());
+    if(le == nullptr) return;
+    if(m_flagsEditDialog == nullptr) return;
+
+    bool ok = false;
+    int base = 0;
+    QString str_val = le->text().trimmed();
+    if(str_val.startsWith("0b")){
+        str_val = str_val.mid(2);
+        base = 2;
+    }
+    uint flags = str_val.toUInt(&ok, base);
+
+    if(ok) m_flagsEditDialog->setFlagsValues(flags);
+    m_flagsEditDialog->setFlagsNames(RegTypes::flagsNames().mid(1));
+
+    if(m_flagsEditDialog->exec()){
+        le->setText(QString("0b%1").arg(m_flagsEditDialog->flagsValues(), 0, 2));
+    }
 }
 
 void RegDelegate::selectEFlags()
 {
+    SelLineEdit* le = qobject_cast<SelLineEdit*>(sender());
+    if(le == nullptr) return;
+    if(m_flagsEditDialog == nullptr) return;
+
+    bool ok = false;
+    int base = 0;
+    QString str_val = le->text().trimmed();
+    if(str_val.startsWith("0b")){
+        str_val = str_val.mid(2);
+        base = 2;
+    }
+    uint flags = str_val.toUInt(&ok, base);
+
+    if(ok) m_flagsEditDialog->setFlagsValues(flags);
+    m_flagsEditDialog->setFlagsNames(RegTypes::eflagsNames().mid(1));
+
+    if(m_flagsEditDialog->exec()){
+        le->setText(QString("0b%1").arg(m_flagsEditDialog->flagsValues(), 0, 2));
+    }
 }
 
 void RegDelegate::editingFinished()

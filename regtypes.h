@@ -41,21 +41,41 @@ enum class DataType {
 };
 
 // Основные флаги.
-enum class RegFlags {
+enum class RegFlag {
     NONE = 0,
-    PARAMETER = 1,
+    CONF = 1,
+    RO = 2,
 };
 // Тип основных флагов.
 typedef uint32_t reg_flags_t;
 
 // Дополнительные флаги.
-enum class RegEFlags {
+enum class RegEFlag {
     NONE = 0,
+    CO_CON_NMT = 1,
 };
 // Тип дополнительных флагов.
 typedef uint32_t reg_eflags_t;
 
 namespace RegTypes {
+
+//! Получает все флаги.
+extern QVector<RegFlag> flags();
+
+//! Получает имя флага.
+extern QString flagName(RegFlag flag);
+
+//! Получает список имён флагов.
+extern QStringList flagsNames();
+
+//! Получает все флаги.
+extern QVector<RegEFlag> eflags();
+
+//! Получает имя флага.
+extern QString eflagName(RegEFlag eflag);
+
+//! Получает список имён флагов.
+extern QStringList eflagsNames();
 
 //! Получает все типы объектов.
 extern QVector<ObjectType> objectTypes();
@@ -71,6 +91,9 @@ extern QString dataTypeStr(DataType type);
 
 //! Получает строковые представления типов.
 extern QStringList objectTypesStringList();
+
+//! Получает строковые представления типов данных.
+extern QStringList dataTypesStringList();
 
 //! Получает обозначение истинного значения.
 extern QString trueStr();
