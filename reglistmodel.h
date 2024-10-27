@@ -39,6 +39,10 @@ public:
     explicit RegListModel(QObject *parent = nullptr);
     ~RegListModel();
 
+    const RegEntryList* regEntryList() const;
+
+    void setRegList(const RegEntryList& reglist);
+
     bool hasEntryByRegIndex(reg_index_t index) const;
     RegEntry* entryByRegIndex(reg_index_t index) const;
     QModelIndex entryModelIndexByRegIndex(reg_index_t index) const;

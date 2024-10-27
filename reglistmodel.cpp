@@ -47,6 +47,26 @@ RegListModel::~RegListModel()
     delete m_reglist;
 }
 
+const RegEntryList* RegListModel::regEntryList() const
+{
+    return m_reglist;
+}
+
+void RegListModel::setRegList(const RegEntryList& reglist)
+{
+    beginResetModel();
+
+    for(auto entry: qAsConst(*m_reglist)){
+        delete entry;
+    }
+
+    m_reglist->clear();
+
+    m_reglist->append(reglist);
+
+    endResetModel();
+}
+
 bool RegListModel::hasEntryByRegIndex(reg_index_t index) const
 {
     return entryByRegIndex(index) != nullptr;

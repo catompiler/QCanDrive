@@ -27,6 +27,8 @@ public:
     ~RegListEditorWin();
 
 public slots:
+    void on_actOpen_triggered(bool checked = false);
+    void on_actSaveAs_triggered(bool checked = false);
     void on_actQuit_triggered(bool checked = false);
     void on_actAddItem_triggered(bool checked = false);
     void on_actAddSubItem_triggered(bool checked = false);

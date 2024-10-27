@@ -5,5 +5,7 @@
         <file>icons/Delete File-48.png</file>
         <file>icons/Trash-48.png</file>
         <file>icons/Manual-48.png</file>
+        <file>icons/Micro SD-48.png</file>
+        <file>icons/Documents Folder-48.png</file>
     </qresource>
 </RCC>

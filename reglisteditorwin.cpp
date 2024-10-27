@@ -8,9 +8,15 @@
 #include "regentry.h"
 #include "regobject.h"
 #include "regvar.h"
+#include "reglistxmlserializer.h"
 #include <QMessageBox>
 #include <QApplication>
 #include <QItemSelectionModel>
+#include <QIODevice>
+#include <QByteArray>
+#include <QBuffer>
+#include <QFile>
+#include <QFileDialog>
 #include <QDebug>
 
 
@@ -51,6 +57,57 @@ RegListEditorWin::~RegListEditorWin()
     delete m_regEntryDlg;
     delete m_regsListModel;
     delete m_regListDelegate;
+}
+
+void RegListEditorWin::on_actOpen_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Открыть файл"), QString(), tr("Файлы списка регистров (*.regxml)"));
+
+    if(filename.isEmpty()) return;
+
+    QFile file(filename);
+
+    if(!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл!"));
+        return;
+    }
+
+    RegListXmlSerializer ser;
+    RegEntryList reglist;
+
+    if(!ser.deserialize(&file, &reglist)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла!"));
+    }else{
+        m_regsListModel->setRegList(reglist);
+    }
+
+    file.close();
+}
+
+void RegListEditorWin::on_actSaveAs_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QString filename = QFileDialog::getSaveFileName(this, tr("Открыть файл"), QString(), tr("Файлы списка регистров (*.regxml)"));
+
+    if(filename.isEmpty()) return;
+
+    QFile file(filename);
+
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл!"));
+        return;
+    }
+
+    RegListXmlSerializer ser;
+
+    if(!ser.serialize(&file, m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
+    }
+
+    file.close();
 }
 
 void RegListEditorWin::on_actQuit_triggered(bool checked)
@@ -110,7 +167,11 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
             count_var->setDataType(DataType::UNSIGNED8);
             count_var->setMinValue(0);
             count_var->setMaxValue(254);
-            count_var->setDefaultValue(0);
+            if(re->type() == ObjectType::ARR){
+                count_var->setDefaultValue(1);
+            }else{
+                count_var->setDefaultValue(0);
+            }
             count_var->setName("count");
             count_var->setDescription("Number of sub-entries");
 

@@ -17,6 +17,8 @@ SOURCES += \
     regentrydlg.cpp \
     reglisteditorwin.cpp \
     reglistmodel.cpp \
+    reglistserializer.cpp \
+    reglistxmlserializer.cpp \
     regobject.cpp \
     regselectdlg.cpp \
     regselectmodel.cpp \
@@ -35,6 +37,8 @@ HEADERS += \
     regentrydlg.h \
     reglisteditorwin.h \
     reglistmodel.h \
+    reglistserializer.h \
+    reglistxmlserializer.h \
     regobject.h \
     regselectdlg.h \
     regselectmodel.h \

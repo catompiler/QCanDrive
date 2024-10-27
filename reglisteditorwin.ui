@@ -52,6 +52,9 @@
     <property name="title">
      <string>&amp;Файл</string>
     </property>
+    <addaction name="actOpen"/>
+    <addaction name="actSaveAs"/>
+    <addaction name="separator"/>
     <addaction name="actQuit"/>
    </widget>
    <addaction name="mnuFile"/>
@@ -68,6 +71,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actSaveAs"/>
+   <addaction name="actOpen"/>
+   <addaction name="separator"/>
    <addaction name="actQuit"/>
    <addaction name="separator"/>
    <addaction name="actAddItem"/>
@@ -119,6 +125,30 @@
    </property>
    <property name="text">
     <string>Отладка</string>
+   </property>
+  </action>
+  <action name="actSaveAs">
+   <property name="icon">
+    <iconset theme="document-save-as" resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Micro SD-48.png</normaloff>:/images/icons/Micro SD-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Сохранить &amp;как...</string>
+   </property>
+   <property name="toolTip">
+    <string>Сохраняет список регистров в заданный файл</string>
+   </property>
+  </action>
+  <action name="actOpen">
+   <property name="icon">
+    <iconset theme="appointment-new" resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Documents Folder-48.png</normaloff>:/images/icons/Documents Folder-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Открыть</string>
+   </property>
+   <property name="toolTip">
+    <string>Открывает файл</string>
    </property>
   </action>
  </widget>
