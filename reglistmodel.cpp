@@ -64,6 +64,8 @@ void RegListModel::setRegList(const RegEntryList& reglist)
 
     m_reglist->append(reglist);
 
+    fixSortingAll();
+
     endResetModel();
 }
 
@@ -214,7 +216,7 @@ void RegListModel::entryAtIndexModified(const QModelIndex& index)
     QModelIndex topleft = createIndex(index.row(), 0);
     QModelIndex botright = createIndex(index.row(), col_count - 1);
     emit dataChanged(topleft, botright);
-    fixSorting(index.parent());
+    fixSortingModelIndex(index.parent());
 }
 
 bool RegListModel::removeRows(int row, int count, const QModelIndex& parent)
@@ -508,25 +510,43 @@ QVariant RegListModel::dataSizeHintRole(const QModelIndex& index) const
     return size;
 }
 
-void RegListModel::fixSorting(const QModelIndex& parent)
+void RegListModel::fixSortingAll()
+{
+    fixSortingEntries();
+    std::for_each(m_reglist->begin(), m_reglist->end(), [this](RegEntry* re){
+        fixSortingVars(re);
+    });
+}
+
+void RegListModel::fixSortingModelIndex(const QModelIndex& parent)
 {
     const auto parents_list = QList<QPersistentModelIndex>({parent});
 
     emit layoutAboutToBeChanged(parents_list, QAbstractItemModel::VerticalSortHint);
     // Entry.
     if(!parent.isValid()){
-        std::sort(m_reglist->begin(), m_reglist->end(), [](RegEntry* rl, RegEntry* rr){
-            return rl->index() < rr->index();
-        });
+        fixSortingEntries();
     }
     // Var.
     else{
         RegEntry* re = static_cast<RegEntry*>(parent.internalPointer());
-        std::sort(re->begin(), re->end(), [](RegVar* rl, RegVar* rr){
-            return rl->subIndex() < rr->subIndex();
-        });
+        fixSortingVars(re);
     }
     emit layoutChanged(parents_list, QAbstractItemModel::VerticalSortHint);
+}
+
+void RegListModel::fixSortingEntries()
+{
+    std::sort(m_reglist->begin(), m_reglist->end(), [](RegEntry* rl, RegEntry* rr){
+        return rl->index() < rr->index();
+    });
+}
+
+void RegListModel::fixSortingVars(RegEntry* re)
+{
+    std::sort(re->begin(), re->end(), [](RegVar* rl, RegVar* rr){
+        return rl->subIndex() < rr->subIndex();
+    });
 }
 
 QVariant RegListModel::data(const QModelIndex &index, int role) const
@@ -574,7 +594,7 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                     return false;
                 }
                 re->setIndex(newIndex);
-                fixSorting(index.parent());
+                fixSortingModelIndex(index.parent());
             }
         }break;
         case COL_NAME:
@@ -609,7 +629,7 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                     return false;
                 }
                 rv->setSubIndex(newSubIndex);
-                fixSorting(index.parent());
+                fixSortingModelIndex(index.parent());
             }
         }break;
         case COL_NAME:

@@ -256,6 +256,13 @@ void RegListEditorWin::on_actDelItem_triggered(bool checked)
     m_regsListModel->removeRow(index.row(), index.parent());
 }
 
+void RegListEditorWin::on_actDelAll_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    m_regsListModel->setRegList(RegEntryList());
+}
+
 void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked);

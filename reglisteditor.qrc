@@ -3,9 +3,10 @@
         <file>icons/Add File-48.png</file>
         <file>icons/Add List-48.png</file>
         <file>icons/Delete File-48.png</file>
-        <file>icons/Trash-48.png</file>
         <file>icons/Manual-48.png</file>
         <file>icons/Micro SD-48.png</file>
         <file>icons/Documents Folder-48.png</file>
+        <file>icons/Plug 3-48.png</file>
+        <file>icons/Remove Property-48.png</file>
     </qresource>
 </RCC>

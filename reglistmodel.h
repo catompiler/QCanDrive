@@ -82,7 +82,10 @@ private:
     QVariant dataEditRole(const QModelIndex &index) const;
     QVariant dataSizeHintRole(const QModelIndex &index) const;
 
-    void fixSorting(const QModelIndex& parent);
+    void fixSortingAll();
+    void fixSortingModelIndex(const QModelIndex& parent);
+    void fixSortingEntries();
+    void fixSortingVars(RegEntry* re);
 };
 
 #endif // REGLISTMODEL_H

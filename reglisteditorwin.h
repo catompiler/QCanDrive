@@ -33,6 +33,7 @@ public slots:
     void on_actAddItem_triggered(bool checked = false);
     void on_actAddSubItem_triggered(bool checked = false);
     void on_actDelItem_triggered(bool checked = false);
+    void on_actDelAll_triggered(bool checked = false);
     void on_actDebugExec_triggered(bool checked = false);
     void on_tvRegList_activated(const QModelIndex &index);
     void tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected);
