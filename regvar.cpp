@@ -10,7 +10,7 @@ RegVar::RegVar(RegEntry* parent)
     m_baseIndex = 0x0;
     m_baseSubIndex = 0x0;
     m_count = 1;
-    m_dataType = DataType::INTEGER32;
+    m_dataType = DataType::I32;
     m_minValue = INT32_MIN;
     m_maxValue = INT32_MAX;
     m_defaultValue = 0;

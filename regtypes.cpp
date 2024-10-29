@@ -1,5 +1,6 @@
 #include "regtypes.h"
 #include <QObject>
+#include <QtAlgorithms>
 
 namespace RegTypes {
 
@@ -12,62 +13,81 @@ static const char* obj_type_name_strs[] = {
 static decltype(sizeof(obj_type_name_strs)) obj_type_name_strs_count = (sizeof(obj_type_name_strs)/sizeof(obj_type_name_strs[0]));
 
 static const char* data_type_name_strs[] = {
-    "BOOLEAN",
-    "INTEGER8",
-    "INTEGER16",
-    "INTEGER32",
-    "INTEGER64",
-    "UNSIGNED8",
-    "UNSIGNED16",
-    "UNSIGNED32",
-    "UNSIGNED64",
-    "REAL32",
-    "REAL64",
-    "VISIBLE_STRING",
-    "OCTET_STRING",
-    "UNICODE_STRING",
-    "DOMAIN"
+    "I32",
+    "I16",
+    "I8",
+    "U32",
+    "U16",
+    "U8",
+    "IQ24",
+    "IQ15",
+    "IQ7",
 };
 
 static decltype(sizeof(data_type_name_strs)) data_type_name_strs_count = (sizeof(data_type_name_strs)/sizeof(data_type_name_strs[0]));
 
 
 static const char* flag_name_strs[] = {
-    "REG_FLAG_NONE",
-    "REG_FLAG_CONF",
-    "REG_FLAG_RO",
+    "NONE",
+    "CONF",
+    "READONLY",
 };
 
 static decltype(sizeof(flag_name_strs)) flag_name_strs_count = (sizeof(flag_name_strs)/sizeof(flag_name_strs[0]));
 
 
+static const char* flag_full_name_strs[] = {
+    "REG_FLAG_NONE",
+    "REG_FLAG_CONF",
+    "REG_FLAG_READONLY",
+};
+
+static decltype(sizeof(flag_full_name_strs)) flag_full_name_strs_count = (sizeof(flag_full_name_strs)/sizeof(flag_full_name_strs[0]));
+
+
 static const char* eflag_name_strs[] = {
-    "REG_EFLAG_NONE",
+    "NONE",
+    "RL_HIDE",
+    "CO_HIDE",
+    "CO_COUNT",
+    "CON_NMT",
 };
 
 static decltype(sizeof(eflag_name_strs)) eflag_name_strs_count = (sizeof(eflag_name_strs)/sizeof(eflag_name_strs[0]));
 
 
+static const char* eflag_full_name_strs[] = {
+    "REG_EFLAG_NONE",
+    "REG_EFLAG_RL_HIDE",
+    "REG_EFLAG_CO_HIDE",
+    "REG_EFLAG_CO_COUNT",
+    "REG_EFLAG_CON_NMT",
+};
 
-QVector<RegFlag> flags()
+static decltype(sizeof(eflag_full_name_strs)) eflag_full_name_strs_count = (sizeof(eflag_full_name_strs)/sizeof(eflag_full_name_strs[0]));
+
+
+
+QVector<RegFlag::Value> flags()
 {
     static auto flags = {
         RegFlag::NONE,
         RegFlag::CONF,
-        RegFlag::RO
+        RegFlag::READONLY
     };
-    static const QVector<RegFlag> flags_vec(flags);
+    static const QVector<RegFlag::Value> flags_vec(flags);
 
     return flags_vec;
 }
 
-QString flagName(RegFlag flag)
+QString flagName(RegFlag::Value flag)
 {
-    if(static_cast<decltype(sizeof(flag_name_strs))>(flag) >= flag_name_strs_count){
+    int flag_index = 8 - qCountLeadingZeroBits(static_cast<quint8>(flag));
+    if(static_cast<decltype(sizeof(flag_name_strs))>(flag_index) >= flag_name_strs_count){
         return QString();
     }
 
-    return QString(flag_name_strs[static_cast<int>(flag)]);
+    return QString(flag_name_strs[static_cast<int>(flag_index)]);
 }
 
 QStringList flagsNames()
@@ -77,23 +97,45 @@ QStringList flagsNames()
     return flag_names_list;
 }
 
-QVector<RegEFlag> eflags()
+QString flagFullName(RegFlag::Value flag)
+{
+    int flag_index = 8 - qCountLeadingZeroBits(static_cast<quint8>(flag));
+    if(static_cast<decltype(sizeof(flag_full_name_strs))>(flag_index) >= flag_full_name_strs_count){
+        return QString();
+    }
+
+    return QString(flag_full_name_strs[static_cast<int>(flag_index)]);
+}
+
+QStringList flagsFullNames()
+{
+    static const QStringList flag_full_names_list = QStringList(flag_full_name_strs, flag_full_name_strs + flag_full_name_strs_count);
+
+    return flag_full_names_list;
+}
+
+QVector<RegEFlag::Value> eflags()
 {
     static auto eflags = {
         RegEFlag::NONE,
+        RegEFlag::RL_HIDE,
+        RegEFlag::CO_HIDE,
+        RegEFlag::CO_COUNT,
+        RegEFlag::CON_NMT
     };
-    static const QVector<RegEFlag> eflags_vec(eflags);
+    static const QVector<RegEFlag::Value> eflags_vec(eflags);
 
     return eflags_vec;
 }
 
-QString eflagName(RegEFlag eflag)
+QString eflagName(RegEFlag::Value eflag)
 {
-    if(static_cast<decltype(sizeof(eflag_name_strs))>(eflag) >= eflag_name_strs_count){
+    int eflag_index = 8 - qCountLeadingZeroBits(static_cast<quint8>(eflag));
+    if(static_cast<decltype(sizeof(eflag_name_strs))>(eflag_index) >= eflag_name_strs_count){
         return QString();
     }
 
-    return QString(eflag_name_strs[static_cast<int>(eflag)]);
+    return QString(eflag_name_strs[static_cast<int>(eflag_index)]);
 }
 
 QStringList eflagsNames()
@@ -101,6 +143,23 @@ QStringList eflagsNames()
     static const QStringList eflag_names_list = QStringList(eflag_name_strs, eflag_name_strs + eflag_name_strs_count);
 
     return eflag_names_list;
+}
+
+QString eflagFullName(RegEFlag::Value eflag)
+{
+    int eflag_index = 8 - qCountLeadingZeroBits(static_cast<quint8>(eflag));
+    if(static_cast<decltype(sizeof(eflag_full_name_strs))>(eflag_index) >= eflag_full_name_strs_count){
+        return QString();
+    }
+
+    return QString(eflag_full_name_strs[static_cast<int>(eflag_index)]);
+}
+
+QStringList eflagsFullNames()
+{
+    static const QStringList eflag_full_names_list = QStringList(eflag_full_name_strs, eflag_full_name_strs + eflag_full_name_strs_count);
+
+    return eflag_full_names_list;
 }
 
 
@@ -121,21 +180,15 @@ QVector<DataType> dataTypes()
 {
     // std::initializer_list
     static auto data_types = {
-        DataType::BOOLEAN,
-        DataType::INTEGER8,
-        DataType::INTEGER16,
-        DataType::INTEGER32,
-        DataType::INTEGER64,
-        DataType::UNSIGNED8,
-        DataType::UNSIGNED16,
-        DataType::UNSIGNED32,
-        DataType::UNSIGNED64,
-        DataType::REAL32,
-        DataType::REAL64,
-        DataType::VISIBLE_STRING,
-        DataType::OCTET_STRING,
-        DataType::UNICODE_STRING,
-        DataType::DOMAIN
+        DataType::I32,
+        DataType::I16,
+        DataType::I8,
+        DataType::U32,
+        DataType::U16,
+        DataType::U8,
+        DataType::IQ24,
+        DataType::IQ15,
+        DataType::IQ7,
     };
     static const QVector<DataType> data_types_vec(data_types);
 
@@ -200,31 +253,58 @@ QStringList boolStringList()
     return bool_list;
 }
 
+int sizeBytes(DataType type)
+{
+    switch(type){
+    case DataType::I32:
+        return 4;
+    case DataType::I16:
+        return 2;
+    case DataType::I8:
+        return 1;
+    case DataType::U32:
+        return 4;
+    case DataType::U16:
+        return 2;
+    case DataType::U8:
+        return 1;
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+        return 4;
+    }
+    return 0;
+}
+
 bool isBoolean(DataType type)
 {
-    return type == DataType::BOOLEAN;
+    switch(type){
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+        break;
+    }
+    return false;
 }
 
 bool isString(DataType type)
 {
     switch(type){
-    case DataType::BOOLEAN:
-    case DataType::INTEGER8:
-    case DataType::INTEGER16:
-    case DataType::INTEGER32:
-    case DataType::INTEGER64:
-    case DataType::UNSIGNED8:
-    case DataType::UNSIGNED16:
-    case DataType::UNSIGNED32:
-    case DataType::UNSIGNED64:
-    case DataType::REAL32:
-    case DataType::REAL64:
-        break;
-    case DataType::VISIBLE_STRING:
-    case DataType::OCTET_STRING:
-    case DataType::UNICODE_STRING:
-        return true;
-    case DataType::DOMAIN:
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
         break;
     }
     return false;
@@ -233,24 +313,16 @@ bool isString(DataType type)
 bool isNumeric(DataType type)
 {
     switch(type){
-    case DataType::BOOLEAN:
-        break;
-    case DataType::INTEGER8:
-    case DataType::INTEGER16:
-    case DataType::INTEGER32:
-    case DataType::INTEGER64:
-    case DataType::UNSIGNED8:
-    case DataType::UNSIGNED16:
-    case DataType::UNSIGNED32:
-    case DataType::UNSIGNED64:
-    case DataType::REAL32:
-    case DataType::REAL64:
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
         return true;
-    case DataType::VISIBLE_STRING:
-    case DataType::OCTET_STRING:
-    case DataType::UNICODE_STRING:
-    case DataType::DOMAIN:
-        break;
     }
     return false;
 }
@@ -258,23 +330,16 @@ bool isNumeric(DataType type)
 bool isInteger(DataType type)
 {
     switch(type){
-    case DataType::BOOLEAN:
-        break;
-    case DataType::INTEGER8:
-    case DataType::INTEGER16:
-    case DataType::INTEGER32:
-    case DataType::INTEGER64:
-    case DataType::UNSIGNED8:
-    case DataType::UNSIGNED16:
-    case DataType::UNSIGNED32:
-    case DataType::UNSIGNED64:
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
         return true;
-    case DataType::REAL32:
-    case DataType::REAL64:
-    case DataType::VISIBLE_STRING:
-    case DataType::OCTET_STRING:
-    case DataType::UNICODE_STRING:
-    case DataType::DOMAIN:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
         break;
     }
     return false;
@@ -283,26 +348,18 @@ bool isInteger(DataType type)
 bool isSigned(DataType type)
 {
     switch(type){
-    case DataType::BOOLEAN:
-        break;
-    case DataType::INTEGER8:
-    case DataType::INTEGER16:
-    case DataType::INTEGER32:
-    case DataType::INTEGER64:
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
         return true;
-    case DataType::UNSIGNED8:
-    case DataType::UNSIGNED16:
-    case DataType::UNSIGNED32:
-    case DataType::UNSIGNED64:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
         break;
-    case DataType::REAL32:
-    case DataType::REAL64:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
         return true;
-    case DataType::VISIBLE_STRING:
-    case DataType::OCTET_STRING:
-    case DataType::UNICODE_STRING:
-    case DataType::DOMAIN:
-        break;
     }
     return false;
 }
@@ -310,49 +367,36 @@ bool isSigned(DataType type)
 bool isUnsigned(DataType type)
 {
     switch(type){
-    case DataType::BOOLEAN:
-    case DataType::INTEGER8:
-    case DataType::INTEGER16:
-    case DataType::INTEGER32:
-    case DataType::INTEGER64:
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
         break;
-    case DataType::UNSIGNED8:
-    case DataType::UNSIGNED16:
-    case DataType::UNSIGNED32:
-    case DataType::UNSIGNED64:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
         return true;
-    case DataType::REAL32:
-    case DataType::REAL64:
-    case DataType::VISIBLE_STRING:
-    case DataType::OCTET_STRING:
-    case DataType::UNICODE_STRING:
-    case DataType::DOMAIN:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
         break;
     }
     return false;
 }
 
-bool isFloat(DataType type)
+bool isFractional(DataType type)
 {
     switch(type){
-    case DataType::BOOLEAN:
-    case DataType::INTEGER8:
-    case DataType::INTEGER16:
-    case DataType::INTEGER32:
-    case DataType::INTEGER64:
-    case DataType::UNSIGNED8:
-    case DataType::UNSIGNED16:
-    case DataType::UNSIGNED32:
-    case DataType::UNSIGNED64:
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
         break;
-    case DataType::REAL32:
-    case DataType::REAL64:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
         return true;
-    case DataType::VISIBLE_STRING:
-    case DataType::OCTET_STRING:
-    case DataType::UNICODE_STRING:
-    case DataType::DOMAIN:
-        break;
     }
     return false;
 }

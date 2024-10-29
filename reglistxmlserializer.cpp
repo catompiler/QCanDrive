@@ -38,7 +38,6 @@ static const QString element_ = QStringLiteral("");
 RegListXmlSerializer::RegListXmlSerializer(QObject *parent)
     : RegListSerializer(parent)
 {
-
 }
 
 RegListXmlSerializer::~RegListXmlSerializer()

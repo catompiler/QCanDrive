@@ -23,59 +23,72 @@ enum class ObjectType {
 
 // Тип данных.
 enum class DataType {
-    BOOLEAN = 0,
-    INTEGER8 = 1,
-    INTEGER16 = 2,
-    INTEGER32 = 3,
-    INTEGER64 = 4,
-    UNSIGNED8 = 5,
-    UNSIGNED16 = 6,
-    UNSIGNED32 = 7,
-    UNSIGNED64 = 8,
-    REAL32 = 9,
-    REAL64 = 10,
-    VISIBLE_STRING = 11,
-    OCTET_STRING = 12,
-    UNICODE_STRING = 13,
-    DOMAIN = 14
+    I32 = 0,
+    I16 = 1,
+    I8 = 2,
+    U32 = 3,
+    U16 = 4,
+    U8 = 5,
+    IQ24 = 6,
+    IQ15 = 7,
+    IQ7 = 8,
 };
 
 // Основные флаги.
-enum class RegFlag {
+namespace RegFlag {
+enum Value {
     NONE = 0,
     CONF = 1,
-    RO = 2,
+    READONLY = 2,
 };
+}
 // Тип основных флагов.
 typedef uint32_t reg_flags_t;
 
 // Дополнительные флаги.
-enum class RegEFlag {
+namespace RegEFlag {
+enum Value {
     NONE = 0,
-    CO_CON_NMT = 1,
+    RL_HIDE = 1,
+    CO_HIDE = 2,
+    CO_COUNT = 4,
+    CON_NMT = 8,
 };
+}
 // Тип дополнительных флагов.
 typedef uint32_t reg_eflags_t;
 
 namespace RegTypes {
 
 //! Получает все флаги.
-extern QVector<RegFlag> flags();
+extern QVector<RegFlag::Value> flags();
 
 //! Получает имя флага.
-extern QString flagName(RegFlag flag);
+extern QString flagName(RegFlag::Value flag);
 
 //! Получает список имён флагов.
 extern QStringList flagsNames();
 
+//! Получает имя флага.
+extern QString flagFullName(RegFlag::Value flag);
+
+//! Получает список имён флагов.
+extern QStringList flagsFullNames();
+
 //! Получает все флаги.
-extern QVector<RegEFlag> eflags();
+extern QVector<RegEFlag::Value> eflags();
 
 //! Получает имя флага.
-extern QString eflagName(RegEFlag eflag);
+extern QString eflagName(RegEFlag::Value eflag);
 
 //! Получает список имён флагов.
 extern QStringList eflagsNames();
+
+//! Получает имя флага.
+extern QString eflagFullName(RegEFlag::Value eflag);
+
+//! Получает список имён флагов.
+extern QStringList eflagsFullNames();
 
 //! Получает все типы объектов.
 extern QVector<ObjectType> objectTypes();
@@ -108,13 +121,14 @@ extern QString boolStr(bool value);
 extern QStringList boolStringList();
 
 // Проверки типа данных.
+extern int sizeBytes(DataType type);
 extern bool isBoolean(DataType type);
 extern bool isString(DataType type);
 extern bool isNumeric(DataType type);
 extern bool isInteger(DataType type);
 extern bool isSigned(DataType type);
 extern bool isUnsigned(DataType type);
-extern bool isFloat(DataType type);
+extern bool isFractional(DataType type);
 
 }
 

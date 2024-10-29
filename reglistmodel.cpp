@@ -200,13 +200,17 @@ bool RegListModel::addSubObject(RegVar* r, const QModelIndex& parent)
     if(re == nullptr) return false;
     if(re->hasVarBySubIndex(r->subIndex())) return false;
 
-    emit layoutAboutToBeChanged(); //parents
+    const QList<QPersistentModelIndex> parents = {parent};
+
+    emit layoutAboutToBeChanged(parents);
 
     bool res = re->add(r);
 
     if(res){
-        emit layoutChanged(); //parents
+        emit layoutChanged(parents);
     }
+
+    fixCountVar(re, parent);
 
     return res;
 }
@@ -239,6 +243,8 @@ bool RegListModel::removeRows(int row, int count, const QModelIndex& parent)
         }
 
         endRemoveRows();
+
+        fixCountVar(re, parent);
 
     }else{
         if(row < 0 || row >= m_reglist->count()) return false;
@@ -411,10 +417,54 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
                     .arg(base_index, 4, 16, QChar('0'))
                     .arg(base_subindex, 2, 16, QChar('0'));
         }
-        case COL_FLAGS:
-            return QString("0b%1").arg(static_cast<unsigned int>(rv->flags()), 0, 2);
-        case COL_EXTFLAGS:
-            return QString("0b%1").arg(static_cast<unsigned int>(rv->eflags()), 0, 2);
+        case COL_FLAGS:{
+            auto flags = static_cast<unsigned int>(rv->flags());
+            unsigned int flag = 0x1;
+            QString flags_str, flag_str;
+            while(flags){
+                if(flags & 0x1){
+                    flag_str = RegTypes::flagName(static_cast<RegFlag::Value>(flag));
+                    if(!flags_str.isEmpty()){
+                        flags_str += QString(" | ");
+                    }
+                    if(!flag_str.isEmpty()){
+                        flags_str += flag_str;
+                    }else{
+                        flags_str += QString("0x%1").arg(flag, 0, 16);
+                    }
+                }
+                flag <<= 1;
+                flags >>= 1;
+            }
+            if(flags_str.isEmpty()){
+                flags_str = RegTypes::flagName(RegFlag::NONE);
+            }
+            return flags_str;
+        }
+        case COL_EXTFLAGS:{
+            auto flags = static_cast<unsigned int>(rv->eflags());
+            unsigned int flag = 0x1;
+            QString flags_str, flag_str;
+            while(flags){
+                if(flags & 0x1){
+                    flag_str = RegTypes::eflagName(static_cast<RegEFlag::Value>(flag));
+                    if(!flags_str.isEmpty()){
+                        flags_str += QString(" | ");
+                    }
+                    if(!flag_str.isEmpty()){
+                        flags_str += flag_str;
+                    }else{
+                        flags_str += QString("0x%1").arg(flag, 0, 16);
+                    }
+                }
+                flag <<= 1;
+                flags >>= 1;
+            }
+            if(flags_str.isEmpty()){
+                flags_str = RegTypes::eflagName(RegEFlag::NONE);
+            }
+            return flags_str;
+        }
         case COL_DESCR:
             return rv->description();
         }
@@ -508,6 +558,31 @@ QVariant RegListModel::dataSizeHintRole(const QModelIndex& index) const
     QSize size = QSize(ITEM_WIDTH_SIZE_HINT, ITEM_HEIGHT_SIZE_HINT);
 
     return size;
+}
+
+void RegListModel::fixCountVar(RegEntry* re, const QModelIndex& parent)
+{
+    if(re->count() == 0) return;
+
+    int count = re->count() - 1;
+    // calc count of sub-entries for array;
+    if(re->type() == ObjectType::ARR){
+        std::for_each(re->begin(), re->end(), [&](RegVar* rv){
+            if(rv->count() > 1) count += rv->count() - 1;
+        });
+    }
+
+    int row = 0;
+    std::for_each(re->begin(), re->end(), [&](RegVar* rv){
+        if(rv->eflags() & static_cast<uint>(RegEFlag::CO_COUNT)){
+            rv->setDefaultValue(count);
+
+            QModelIndex count_index = index(row, COL_COUNT, parent);
+            emit dataChanged(count_index, count_index);
+
+            row ++;
+        }
+    });
 }
 
 void RegListModel::fixSortingAll()
@@ -641,6 +716,7 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
         case COL_COUNT:
             if(pe->type() != ObjectType::ARR) return false;
             rv->setCount(value.toUInt());
+            fixCountVar(pe, index.parent());
             break;
         case COL_MEM_ADDR:
             rv->setMemAddr(value.toString());

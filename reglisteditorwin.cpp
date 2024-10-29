@@ -9,6 +9,7 @@
 #include "regobject.h"
 #include "regvar.h"
 #include "reglistxmlserializer.h"
+#include "reglistregsexporter.h"
 #include <QMessageBox>
 #include <QApplication>
 #include <QItemSelectionModel>
@@ -110,6 +111,21 @@ void RegListEditorWin::on_actSaveAs_triggered(bool checked)
     file.close();
 }
 
+void RegListEditorWin::on_actExportRegs_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт"), QString(), tr("Заголовочный файл C (*.h)"));
+
+    if(filename.isEmpty()) return;
+
+    RegListRegsExporter exporter;
+
+    if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
+    }
+}
+
 void RegListEditorWin::on_actQuit_triggered(bool checked)
 {
     Q_UNUSED(checked);
@@ -164,7 +180,7 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
             RegVar* count_var = new RegVar();
 
             count_var->setSubIndex(0);
-            count_var->setDataType(DataType::UNSIGNED8);
+            count_var->setDataType(DataType::U8);
             count_var->setMinValue(0);
             count_var->setMaxValue(254);
             if(re->type() == ObjectType::ARR){
@@ -174,6 +190,7 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
             }
             count_var->setName("count");
             count_var->setDescription("Number of sub-entries");
+            count_var->setEFlags(RegEFlag::RL_HIDE | RegEFlag::CO_COUNT);
 
             if(!m_regsListModel->addSubObject(count_var, entry_index)){
                 qDebug() << "m_regsListModel->addSubObject(count_var)";

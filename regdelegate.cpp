@@ -96,40 +96,18 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
             RegVar* var = static_cast<RegVar*>(ro);
             DataType data_type = var->dataType();
             switch(data_type){
-            case DataType::BOOLEAN:{
-                QComboBox* cb = new QComboBox(parent);
-                cb->addItems(RegTypes::boolStringList());
-                res_widget = cb;
-            }break;
-            case DataType::INTEGER8:
-            case DataType::INTEGER16:
-            case DataType::INTEGER32:
-            case DataType::INTEGER64:
-            case DataType::UNSIGNED8:
-            case DataType::UNSIGNED16:
-            case DataType::UNSIGNED32:
-            case DataType::UNSIGNED64:{
+            case DataType::I32:
+            case DataType::I16:
+            case DataType::I8:
+            case DataType::U32:
+            case DataType::U16:
+            case DataType::U8:
+            case DataType::IQ24:
+            case DataType::IQ15:
+            case DataType::IQ7:
                 QLineEdit* le = new QLineEdit(parent);
                 res_widget = le;
-            }break;
-            case DataType::REAL32:
-            case DataType::REAL64:{
-                QDoubleSpinBox* sb = new QDoubleSpinBox(parent);
-                sb->setMinimum(INT32_MIN);
-                sb->setMaximum(INT32_MAX);
-                res_widget = sb;
-            }break;
-            case DataType::VISIBLE_STRING:
-            case DataType::OCTET_STRING:
-            case DataType::UNICODE_STRING:{
-                QLineEdit* le = new QLineEdit(parent);
-                res_widget = le;
-            }break;
-            default:
-            case DataType::DOMAIN:{
-                QLineEdit* le = new QLineEdit(parent);
-                res_widget = le;
-            }break;
+                break;
             }
         }else{
             QLineEdit* le = new QLineEdit(parent);
@@ -215,42 +193,19 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
             RegVar* var = static_cast<RegVar*>(ro);
             DataType data_type = var->dataType();
             switch(data_type){
-            case DataType::BOOLEAN:{
-                QComboBox* cb = qobject_cast<QComboBox*>(editor);
-                if(cb == nullptr) break;
-                cb->setCurrentIndex(static_cast<int>(data.toBool()));
-            }break;
-            case DataType::INTEGER8:
-            case DataType::INTEGER16:
-            case DataType::INTEGER32:
-            case DataType::INTEGER64:
-            case DataType::UNSIGNED8:
-            case DataType::UNSIGNED16:
-            case DataType::UNSIGNED32:
-            case DataType::UNSIGNED64:{
+            case DataType::I32:
+            case DataType::I16:
+            case DataType::I8:
+            case DataType::U32:
+            case DataType::U16:
+            case DataType::U8:
+            case DataType::IQ24:
+            case DataType::IQ15:
+            case DataType::IQ7:
                 QLineEdit* le = qobject_cast<QLineEdit*>(editor);
                 if(le == nullptr) break;
                 le->setText(data.toString());
-            }break;
-            case DataType::REAL32:
-            case DataType::REAL64:{
-                QDoubleSpinBox* sb = qobject_cast<QDoubleSpinBox*>(editor);
-                if(sb == nullptr) break;
-                sb->setValue(data.toDouble());
-            }break;
-            case DataType::VISIBLE_STRING:
-            case DataType::OCTET_STRING:
-            case DataType::UNICODE_STRING:{
-                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
-                if(le == nullptr) break;
-                le->setText(data.toString());
-            }break;
-            default:
-            case DataType::DOMAIN:{
-                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
-                if(le == nullptr) break;
-                le->setText(data.toString());
-            }break;
+                break;
             }
         }else{
             QLineEdit* le = qobject_cast<QLineEdit*>(editor);
@@ -340,42 +295,19 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
             RegVar* var = static_cast<RegVar*>(ro);
             DataType data_type = var->dataType();
             switch(data_type){
-            case DataType::BOOLEAN:{
-                QComboBox* cb = qobject_cast<QComboBox*>(editor);
-                if(cb == nullptr) break;
-                regListModel->setData(index, cb->currentIndex(), Qt::EditRole);
-            }break;
-            case DataType::INTEGER8:
-            case DataType::INTEGER16:
-            case DataType::INTEGER32:
-            case DataType::INTEGER64:
-            case DataType::UNSIGNED8:
-            case DataType::UNSIGNED16:
-            case DataType::UNSIGNED32:
-            case DataType::UNSIGNED64:{
+            case DataType::I32:
+            case DataType::I16:
+            case DataType::I8:
+            case DataType::U32:
+            case DataType::U16:
+            case DataType::U8:
+            case DataType::IQ24:
+            case DataType::IQ15:
+            case DataType::IQ7:
                 QLineEdit* le = qobject_cast<QLineEdit*>(editor);
                 if(le == nullptr) break;
                 regListModel->setData(index, le->text(), Qt::EditRole);
-            }break;
-            case DataType::REAL32:
-            case DataType::REAL64:{
-                QDoubleSpinBox* sb = qobject_cast<QDoubleSpinBox*>(editor);
-                if(sb == nullptr) break;
-                regListModel->setData(index, sb->value(), Qt::EditRole);
-            }break;
-            case DataType::VISIBLE_STRING:
-            case DataType::OCTET_STRING:
-            case DataType::UNICODE_STRING:{
-                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
-                if(le == nullptr) break;
-                regListModel->setData(index, le->text(), Qt::EditRole);
-            }break;
-            default:
-            case DataType::DOMAIN:{
-                QLineEdit* le = qobject_cast<QLineEdit*>(editor);
-                if(le == nullptr) break;
-                regListModel->setData(index, le->text(), Qt::EditRole);
-            }break;
+                break;
             }
         }else{
             QLineEdit* le = qobject_cast<QLineEdit*>(editor);

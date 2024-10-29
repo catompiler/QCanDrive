@@ -53,8 +53,16 @@
     <property name="title">
      <string>&amp;Файл</string>
     </property>
+    <widget class="QMenu" name="menu">
+     <property name="title">
+      <string>&amp;Экспорт</string>
+     </property>
+     <addaction name="actExportRegs"/>
+    </widget>
     <addaction name="actOpen"/>
     <addaction name="actSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="menu"/>
     <addaction name="separator"/>
     <addaction name="actQuit"/>
    </widget>
@@ -76,6 +84,8 @@
    <addaction name="separator"/>
    <addaction name="actSaveAs"/>
    <addaction name="actOpen"/>
+   <addaction name="separator"/>
+   <addaction name="actExportRegs"/>
    <addaction name="separator"/>
    <addaction name="actAddItem"/>
    <addaction name="actAddSubItem"/>
@@ -163,6 +173,15 @@
    </property>
    <property name="toolTip">
     <string>Удалить всё</string>
+   </property>
+  </action>
+  <action name="actExportRegs">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Export-48-Blue.png</normaloff>:/images/icons/Export-48-Blue.png</iconset>
+   </property>
+   <property name="text">
+    <string>Список &amp;регистров</string>
    </property>
   </action>
  </widget>
