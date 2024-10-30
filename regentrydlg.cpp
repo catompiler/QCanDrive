@@ -66,7 +66,7 @@ void RegEntryDlg::populateTypesList()
 {
     auto obj_types = RegTypes::objectTypes();
 
-    for(auto obj_type: obj_types){
+    for(auto& obj_type: obj_types){
         ui->cbType->addItem(RegTypes::typeStr(obj_type), static_cast<int>(obj_type));
     }
 }

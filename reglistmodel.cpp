@@ -41,7 +41,7 @@ RegListModel::RegListModel(QObject *parent)
 
 RegListModel::~RegListModel()
 {
-    for(auto entry: qAsConst(*m_reglist)){
+    for(auto& entry: qAsConst(*m_reglist)){
         delete entry;
     }
     delete m_reglist;
@@ -56,7 +56,7 @@ void RegListModel::setRegList(const RegEntryList& reglist)
 {
     beginResetModel();
 
-    for(auto entry: qAsConst(*m_reglist)){
+    for(auto& entry: qAsConst(*m_reglist)){
         delete entry;
     }
 

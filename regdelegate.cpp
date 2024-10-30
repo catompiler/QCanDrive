@@ -64,14 +64,14 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         if(isEntry){
             QComboBox* cb = new QComboBox(parent);
             auto objTypes = RegTypes::objectTypes();
-            for(auto t: qAsConst(objTypes)){
+            for(auto& t: qAsConst(objTypes)){
                 cb->addItem(RegTypes::typeStr(t));
             }
             res_widget = cb;
         }else{
             QComboBox* cb = new QComboBox(parent);
             auto dataTypes = RegTypes::dataTypes();
-            for(auto t: qAsConst(dataTypes)){
+            for(auto& t: qAsConst(dataTypes)){
                 cb->addItem(RegTypes::dataTypeStr(t));
             }
             res_widget = cb;

@@ -64,7 +64,7 @@ bool RegListXmlSerializer::serialize(QIODevice* dev, const RegEntryList* reglist
 bool RegListXmlSerializer::writeRegs(QXmlStreamWriter* writer, const RegEntryList* reglist) const
 {
     writer->writeStartElement(element_regentries);
-    for(auto re: *reglist){
+    for(auto& re: *reglist){
         if(!writeRegEntry(writer, re)) return false;
     }
     writer->writeEndElement();
