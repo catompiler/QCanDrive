@@ -8,6 +8,8 @@
 #include "regentry.h"
 #include "regobject.h"
 #include "regvar.h"
+#include "regtypes.h"
+#include "regutils.h"
 #include "reglistxmlserializer.h"
 #include "reglistregsexporter.h"
 #include <QMessageBox>
@@ -284,8 +286,13 @@ void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    m_flagsEditDlg->setFlagsNames(RegTypes::flagsNames().mid(1));
-    m_flagsEditDlg->exec();
+    /*m_flagsEditDlg->setFlagsNames(RegTypes::flagsNames().mid(1));
+    m_flagsEditDlg->exec();*/
+
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ENTRY, &entymapping);
+    RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ALL, &entymapping);
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)

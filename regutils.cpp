@@ -1,4 +1,7 @@
 #include "regutils.h"
+#include "regentry.h"
+#include "regvar.h"
+#include <QDebug>
 
 
 
@@ -32,4 +35,150 @@ QPair<uint, uint> RegUtils::indexSubIndexFromString(const QString& index_str, bo
     if(ok) *ok = ok_index && ok_subindex;
 
     return qMakePair(index, subindex);
+}
+
+reg_fullindex_t RegUtils::makeFullIndex(reg_index_t index, reg_subindex_t subindex)
+{
+    return (static_cast<reg_fullindex_t>(index) << 8) |
+           (static_cast<reg_fullindex_t>(subindex) & 0xff);
+}
+
+QPair<reg_index_t, reg_subindex_t> RegUtils::getIndexSubIndex(reg_fullindex_t full_index)
+{
+    reg_index_t index = full_index >> 8;
+    reg_subindex_t subindex = full_index & 0xff;
+
+    return qMakePair(index, subindex);
+}
+
+QMap<reg_index_t, QString> RegUtils::genRegDataEntryNameMapping(const RegEntryList* regentrylist)
+{
+//    qDebug() << "genRegDataEntryNameMapping";
+
+    QMap<reg_index_t, QString> res;
+    QSet<QString> names;
+
+    for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
+        RegEntry* re = *reit;
+
+//        qDebug() << Qt::showbase << Qt::hex << re->index() << re->name();
+
+        QString entryName = re->name();
+
+        if(names.contains(entryName)){
+            entryName = QString("%1_%2").arg(re->name(), QString::number(re->index(), 16));
+            for(uint i = 1; names.contains(entryName); i ++){
+                entryName = QString("%1_%2_%3").arg(re->name(), QString::number(re->index(), 16), QString::number(i, 10));
+            }
+            res.insert(re->index(), entryName);
+        }
+        names.insert(entryName);
+    }
+
+//    // DEBUG.
+//    for(auto it = res.begin(); it != res.end(); ++ it){
+//        qDebug () << Qt::hex << Qt::showbase << it.key() << it.value();
+//    }
+
+    return res;
+}
+
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const QMap<reg_index_t, QString>* entryMapping)
+{
+    if(mappingType == NameMapping::WITHIN_ENTRY){
+        return genRegDataVarsNameMappingWithinEntry(regentrylist);
+    }
+    return genRegDataVarsNameMappingWithinAll(regentrylist, entryMapping);
+}
+
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist)
+{
+//    qDebug() << "genRegDataVarsNameMappingWithinEntry";
+
+    QMap<reg_fullindex_t, QString> res;
+    QSet<QString> names;
+
+    for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
+        RegEntry* re = *reit;
+        for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+            RegVar* rv = *rvit;
+
+            reg_fullindex_t fullindex = makeFullIndex(re->index(), rv->subIndex());
+
+//            qDebug() << Qt::showbase << Qt::hex << fullindex
+//                     << re->name() << rv->name()
+//                     << Qt::noshowbase << Qt::dec << rv->count();
+
+            QString varName = rv->name();
+
+            if(names.contains(varName)){
+                varName = QString("%1_%2").arg(rv->name(), QString::number(rv->subIndex(), 10));
+                for(uint i = 1; names.contains(varName); i ++){
+                    varName = QString("%1_%2_%3").arg(rv->name(), QString::number(fullindex, 16), QString::number(i, 10));
+                }
+                res.insert(fullindex, varName);
+            }
+            names.insert(varName);
+        }
+        names.clear();
+    }
+
+//    // DEBUG.
+//    for(auto it = res.begin(); it != res.end(); ++ it){
+//        qDebug () << Qt::hex << Qt::showbase << it.key() << it.value();
+//    }
+
+    return res;
+}
+
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const QMap<reg_index_t, QString>* entryMapping)
+{
+//    qDebug() << "genRegDataVarsNameMappingWithinAll";
+
+    QMap<reg_fullindex_t, QString> res;
+    QSet<QString> names;
+
+    auto getEntryName = [entryMapping](RegEntry* re){
+        if(entryMapping){
+            auto it = entryMapping->find(re->index());
+            if(it != entryMapping->cend()){
+                return it.value();
+            }
+        }
+        return re->name();
+    };
+
+    for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
+        RegEntry* re = *reit;
+
+        QString entryName = getEntryName(re);
+
+        for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+            RegVar* rv = *rvit;
+
+            reg_fullindex_t fullindex = makeFullIndex(re->index(), rv->subIndex());
+
+//            qDebug() << Qt::showbase << Qt::hex << fullindex
+//                     << entryName << rv->name()
+//                     << Qt::noshowbase << Qt::dec << rv->count();
+
+            QString varName = QString("%1_%2").arg(entryName, rv->name());
+
+            if(names.contains(varName)){
+                varName = QString("%1_%2_%3").arg(entryName, rv->name(), QString::number(rv->subIndex(), 16));
+                for(uint i = 1; names.contains(varName); i ++){
+                    varName = QString("%1_%2_%3_%4").arg(entryName, rv->name(), QString::number(rv->subIndex(), 16), QString::number(i, 10));
+                }
+                res.insert(fullindex, varName);
+            }
+            names.insert(varName);
+        }
+    }
+
+//    // DEBUG.
+//    for(auto it = res.begin(); it != res.end(); ++ it){
+//        qDebug () << Qt::hex << Qt::showbase << it.key() << it.value();
+//    }
+
+    return res;
 }
