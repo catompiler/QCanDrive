@@ -202,17 +202,21 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
     QTextStream out(&file);
 #endif
 
+    QString struct_name;
+    QString struct_type;
     QString base_name = fileinfo.baseName();
 
-    auto write_struct_begin = [this, &out, base_name](const RegEntry* re = nullptr){
-        QString struct_name = makeDataStructName(base_name, re);
-        QString struct_type = makeDataStructTypeName(struct_name);
+    auto write_struct_begin = [this, &out, &base_name, &struct_name, &struct_type](const RegEntry* re = nullptr){
+        struct_name = makeDataStructName(base_name, re);
+        struct_type = makeDataStructTypeName(struct_name);
 
         out << "struct " << struct_type << " {\n";
     };
 
-    auto write_struct_end = [&out](){
+    auto write_struct_end = [&out, &struct_name, &struct_type](){
         out << "};\n";
+        out << QStringLiteral("extern struct %1 %2;").arg(struct_type, struct_name);
+        out << "\n\n";
     };
 
     QString reg_list_name = fileinfo.fileName().replace(QChar('.'), QChar('_'));
@@ -253,7 +257,7 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
             QString fieldName = RegUtils::getVarName(re, rv, m_varNameMap);
             //reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex());
 
-            out << QStringLiteral("%1 %2; /* %3 */")
+            out << QStringLiteral("    %1 %2; /* %3 */")
                    .arg(RegTypes::varDataTypeStr(rv->dataType()),
                         fieldName,
                         rv->description().simplified())
@@ -304,7 +308,7 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
     };
 
     auto write_struct_end = [&out](){
-        out << "\n};\n";
+        out << "\n};\n\n";
     };
 
     QString header_name = fileinfo.fileName().replace(QStringLiteral(".c"), QStringLiteral(".h"));
@@ -350,7 +354,7 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
             QString fieldName = RegUtils::getVarName(re, rv, m_varNameMap);
             //reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex());
 
-            out << QStringLiteral(".%1 = %2 /* %3 */")
+            out << QStringLiteral("    .%1 = %2 /* %3 */")
                    .arg(fieldName,
                         rv->defaultValue().toString(),
                         rv->description().simplified());
