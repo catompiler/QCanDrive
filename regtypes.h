@@ -108,6 +108,9 @@ extern QStringList objectTypesStringList();
 //! Получает строковые представления типов данных.
 extern QStringList dataTypesStringList();
 
+//! Получает С тип данных регистра.
+QString varDataTypeStr(DataType type);
+
 //! Получает обозначение истинного значения.
 extern QString trueStr();
 

@@ -83,7 +83,7 @@ QMap<reg_index_t, QString> RegUtils::genRegDataEntryNameMapping(const RegEntryLi
     return res;
 }
 
-QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const QMap<reg_index_t, QString>* entryMapping)
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const EntryNameMap* entryMapping)
 {
     if(mappingType == NameMapping::WITHIN_ENTRY){
         return genRegDataVarsNameMappingWithinEntry(regentrylist);
@@ -131,27 +131,17 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
     return res;
 }
 
-QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const QMap<reg_index_t, QString>* entryMapping)
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const EntryNameMap* entryMapping)
 {
 //    qDebug() << "genRegDataVarsNameMappingWithinAll";
 
     QMap<reg_fullindex_t, QString> res;
     QSet<QString> names;
 
-    auto getEntryName = [entryMapping](RegEntry* re){
-        if(entryMapping){
-            auto it = entryMapping->find(re->index());
-            if(it != entryMapping->cend()){
-                return it.value();
-            }
-        }
-        return re->name();
-    };
-
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         RegEntry* re = *reit;
 
-        QString entryName = getEntryName(re);
+        QString entryName = getEntryName(re, entryMapping);
 
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             RegVar* rv = *rvit;
@@ -181,4 +171,26 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinAll(cons
 //    }
 
     return res;
+}
+
+QString RegUtils::getEntryName(const RegEntry* re, const EntryNameMap* entryMapping)
+{
+    if(entryMapping){
+        auto it = entryMapping->find(re->index());
+        if(it != entryMapping->cend()){
+            return it.value();
+        }
+    }
+    return re->name();
+}
+
+QString RegUtils::getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping)
+{
+    if(varMapping){
+        auto it = varMapping->find(makeFullIndex(re->index(), rv->subIndex()));
+        if(it != varMapping->cend()){
+            return it.value();
+        }
+    }
+    return rv->name();
 }

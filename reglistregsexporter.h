@@ -2,10 +2,12 @@
 #define REGLISTREGSEXPORTER_H
 
 #include "reglistexporter.h"
+#include "regutils.h"
 #include <QString>
 #include <QMap>
 #include <QList>
 #include <QPair>
+#include <QHash>
 
 
 class RegListRegsExporter : public RegListExporter
@@ -18,51 +20,33 @@ public:
     // RegListExporter interface
 public:
     bool doExport(const QString& filename, const RegEntryList* regentrylist) override;
+    bool doExport_old(const QString& filename, const RegEntryList* regentrylist, const RegUtils::VarNameMap* varNameMap = nullptr, const RegUtils::EntryNameMap* entryNameMap = nullptr) /*override*/;
 
+    RegListRegsExporter& setNameMapping(RegUtils::NameMapping::Value mapType);
+    RegListRegsExporter& setEntryNameMap(const RegUtils::EntryNameMap* entryNameMap);
+    RegListRegsExporter& setVarNameMap(const RegUtils::VarNameMap* varNameMap);
 private:
-    struct Reg {
-        QString id_name;
-        DataType datatype;
-        uint count;
-        QString data;
-        reg_flags_t flags;
-        uint base_id;
-        QString defval;
-        QString comment;
-    };
-    typedef QMap<uint, Reg> RegList;
+    RegUtils::NameMapping::Value m_mapType;
+    const RegUtils::EntryNameMap* m_entryNameMap;
+    const RegUtils::VarNameMap* m_varNameMap;
 
-    struct RegDataField {
-        QString datatype;
-        uint count;
-        QString name;
-        QString defval;
-    };
+    QHash<reg_fullindex_t, QString> m_reg_id_names;
+    QHash<reg_fullindex_t, QString> m_reg_data_names;
 
-    struct RegData {
-        QString name;
-        QList<RegDataField> fields;
-    };
+    bool exportRegIds(const QString& filename, const RegEntryList* regentrylist);
+    bool exportRegList(const QString& filename, const RegEntryList* regentrylist);
+    bool exportRegDataDecl(const QString& filename, const RegEntryList* regentrylist);
+    bool exportRegData(const QString& filename, const RegEntryList* regentrylist);
 
-    RegList genRegList(const RegEntryList* entrylist) const;
-    void fixEqualNames(RegList& reglist) const;
-    RegData genAndFixRegData(RegList& reglist, const QString& name) const;
-
-    bool exportRegList(const QString& filename, const RegList& reglist) const;
-    bool exportRegIds(const QString& filename, const RegList& reglist) const;
-    bool exportRegData(const QString& filename, const RegData& regdata) const;
-    bool exportRegDataDecl(const QString& filename, const RegData& regdata) const;
-
-    QString regDataVarTypeStr(DataType type) const;
-    uint makeRegId(reg_index_t index, reg_subindex_t subindex) const;
-    QString makeRegName(const QString& group_name, const QString& reg_name) const;
-    QString makeRegIdName(const QString& reg_name) const;
-    QString dataTypeToStr(DataType type) const;
+    QString makeRegName(const RegEntry* re, const RegVar* rv) const;
+    QString makeRegIdName(const RegEntry* re, const RegVar* rv) const;
+    QString regDataTypeStr(DataType type) const;
     QString flagToStr(uint flag) const;
     QString flagsToStr(uint flags) const;
     QString idToStr(uint id) const;
-
-    QString memName(const QString& mem, const QString& group, const QString& var) const;
+    QString makeDataStructName(const QString& baseName, const RegEntry* re = nullptr) const;
+    QString makeDataStructTypeName(const QString& name) const;
+    QString memName(const QString& group, const QString& var) const;
 };
 
 #endif // REGLISTREGSEXPORTER_H

@@ -39,18 +39,30 @@ namespace NameMapping{
     };
 }
 
+//! Тип маппинга имён точек входа.
+using EntryNameMap = QMap<reg_index_t, QString>;
+//! Тип маппинга имён переменных.
+using VarNameMap = QMap<reg_fullindex_t, QString>;
+
 //! Генерирует имена для повторяющихся имён точек входа.
-extern QMap<reg_index_t, QString> genRegDataEntryNameMapping(const RegEntryList* regentrylist);
+extern EntryNameMap genRegDataEntryNameMapping(const RegEntryList* regentrylist);
 
 //! Генерирует имена для повторяющихся имён переменных.
-extern QMap<reg_fullindex_t, QString> genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const QMap<reg_index_t, QString>* entryMapping);
+extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const EntryNameMap* entryMapping);
 
 //! Генерирует имена для повторяющихся имён переменных внутри точки входа.
-extern QMap<reg_fullindex_t, QString> genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist);
+extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist);
 
 //! Генерирует имена для повторяющихся имён переменных внутри всего списка.
-extern QMap<reg_fullindex_t, QString> genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const QMap<reg_index_t, QString>* entryMapping);
+extern VarNameMap genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const EntryNameMap* entryMapping);
 
+//! Получает имя точки входа.
+extern QString getEntryName(const RegEntry* re, const EntryNameMap* entryMapping);
+
+//! Получает имя переменной.
+extern QString getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping);
+
+//! Получает
 }
 
 #endif // REGUTILS_H

@@ -121,7 +121,18 @@ void RegListEditorWin::on_actExportRegs_triggered(bool checked)
 
     if(filename.isEmpty()) return;
 
+    const RegUtils::NameMapping::Value mapType = RegUtils::NameMapping::WITHIN_ENTRY;
+
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ENTRY, &entymapping);
+//    RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ALL, &entymapping);
+
     RegListRegsExporter exporter;
+
+    exporter.setNameMapping(mapType)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
 
     if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
         QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));

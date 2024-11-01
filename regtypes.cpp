@@ -227,6 +227,32 @@ QStringList dataTypesStringList()
     return data_type_str_list;
 }
 
+QString varDataTypeStr(DataType type)
+{
+    switch(type){
+    case DataType::I32:
+        return QString("reg_i32_t");
+    case DataType::I16:
+        return QString("reg_i16_t");
+    case DataType::I8:
+        return QString("reg_i8_t");
+    case DataType::U32:
+        return QString("reg_u32_t");
+    case DataType::U16:
+        return QString("reg_u16_t");
+    case DataType::U8:
+        return QString("reg_u8_t");
+    case DataType::IQ24:
+        return QString("reg_iq24_t");
+    case DataType::IQ15:
+        return QString("reg_iq15_t");
+    case DataType::IQ7:
+        return QString("reg_iq7_t");
+    }
+
+    return QString("long");
+}
+
 QString trueStr()
 {
     static const QString true_str = QObject::tr("Да");
