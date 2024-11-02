@@ -154,6 +154,11 @@ QString RegVar::memAddr() const
     return m_memAddr;
 }
 
+QString RegVar::memAddr(unsigned int i) const
+{
+    return QStringLiteral("%1[%2]").arg(m_memAddr).arg(i);
+}
+
 void RegVar::setMemAddr(const QString& newMemAddr)
 {
     m_memAddr = newMemAddr;

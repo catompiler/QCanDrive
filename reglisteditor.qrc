@@ -9,5 +9,6 @@
         <file>icons/Plug 3-48.png</file>
         <file>icons/Remove Property-48.png</file>
         <file>icons/Export-48-Blue.png</file>
+        <file>icons/Export-48-Green.png</file>
     </qresource>
 </RCC>

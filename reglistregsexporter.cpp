@@ -35,12 +35,13 @@ bool RegListRegsExporter::doExport(const QString& filename, const RegEntryList* 
     QString data_name_c = data_name + ".c";
     QString data_name_h = data_name + ".h";
 
+    if(m_dataName.isEmpty()) m_dataName = baseName;
+
     QString ids_filename = regs_dir.filePath(baseName + "_ids.h");
     QString data_filename_c = regs_dir.filePath(data_name_c);
     QString data_filename_h = regs_dir.filePath(data_name_h);
 
     m_reg_id_names.clear();
-    m_reg_data_names.clear();
 
     if(!exportRegIds(ids_filename, regentrylist)) return false;
     if(!exportRegDataDecl(data_filename_h, regentrylist)) return false;
@@ -48,7 +49,6 @@ bool RegListRegsExporter::doExport(const QString& filename, const RegEntryList* 
     if(!exportRegList(filename, regentrylist)) return false;
 
     m_reg_id_names.clear();
-    m_reg_data_names.clear();
 
     return true;
 }
@@ -84,18 +84,21 @@ bool RegListRegsExporter::exportRegIds(const QString& filename, const RegEntryLi
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
 
-            QString regIdStr = makeRegIdName(re, rv);
-            reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex());
+            QString description = rv->description().simplified();
 
-            out << QString("#define %1 %2 /* %6 */")
-                   .arg(regIdStr,
-                        idToStr(id),
-                        rv->description().simplified())
-                << "\n";
+            for(uint i = 0; i < rv->count(); i ++){
 
-            //out << regId;
+                reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex() + i);
+                QString regIdStr = makeRegIdName(re, rv, i);
 
-            m_reg_id_names.insert(id, regIdStr);
+                out << QString("#define %1 %2 /* %6 */")
+                       .arg(regIdStr,
+                            idToStr(id),
+                            description)
+                    << "\n";
+
+                m_reg_id_names.insert(id, regIdStr);
+            }
         }
     }
 
@@ -141,8 +144,6 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
 
-            QString regIdStr = makeRegIdName(re, rv);
-
             reg_fullindex_t base_id = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
             QString baseIdStr;
             auto it_base = m_reg_id_names.find(base_id);
@@ -152,28 +153,24 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
                 baseIdStr = idToStr(base_id);
             }
 
-            QString data_str = rv->memAddr();
+            QString description = rv->description().simplified();
+            QString regDataType = regDataTypeStr(rv->dataType());
+            QString flagsStr = flagsToStr(rv->flags());
 
-            if(data_str.isEmpty()){
-                reg_fullindex_t full_id = RegUtils::makeFullIndex(re->index(), rv->subIndex());
-                auto it_data = m_reg_data_names.find(full_id);
-                if(it_data != m_reg_data_names.end()){
-                    data_str = it_data.value();
-                }/*else{
-                    data_str = "dummy";
-                }*/
+            for(uint i = 0; i < rv->count(); i ++){
+
+                QString regIdStr = makeRegIdName(re, rv, i);
+                QString data_str = RegUtils::getVarMem(m_dataName, re, rv, i, m_entryNameMap, m_varNameMap);
+
+                out << QString("REG(%1, %2, %3, %4, %5) /* %6 */")
+                       .arg(regIdStr,
+                            data_str,
+                            regDataType,
+                            flagsStr,
+                            baseIdStr,
+                            description)
+                    << "\n";
             }
-
-            out << QString("REG(%1, %2, %3, %4, %5) /* %6 */")
-                   .arg(regIdStr,
-                        data_str,
-                        regDataTypeStr(rv->dataType()),
-                        flagsToStr(rv->flags()),
-                        baseIdStr,
-                        rv->description().simplified())
-                << "\n";
-
-            //out << regId;
         }
     }
 
@@ -204,19 +201,16 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
 
     QString struct_name;
     QString struct_type;
-    QString base_name = fileinfo.baseName();
 
-    auto write_struct_begin = [this, &out, &base_name, &struct_name, &struct_type](const RegEntry* re = nullptr){
-        struct_name = makeDataStructName(base_name, re);
+    auto write_struct_begin = [this, &out, &struct_name, &struct_type](const RegEntry* re){
+        struct_name = makeDataStructName(re);
         struct_type = makeDataStructTypeName(struct_name);
 
         out << "struct " << struct_type << " {\n";
     };
 
-    auto write_struct_end = [&out, &struct_name, &struct_type](){
-        out << "};\n";
-        out << QStringLiteral("extern struct %1 %2;").arg(struct_type, struct_name);
-        out << "\n\n";
+    auto write_struct_end = [&out, &struct_name](){
+        out << QStringLiteral("} %1;").arg(struct_name) << "\n";
     };
 
     QString reg_list_name = fileinfo.fileName().replace(QChar('.'), QChar('_'));
@@ -230,9 +224,7 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
         << "// DO NOT EDIT THIS FILE!\n"
         << "\n\n";
 
-    if(m_mapType == RegUtils::NameMapping::WITHIN_ALL){
-        write_struct_begin();
-    }
+    out << "struct " << makeDataStructTypeName(m_dataName) << " {\n";
 
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
@@ -243,9 +235,7 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
 
         if(!hasEmpty) continue;
 
-        if(m_mapType == RegUtils::NameMapping::WITHIN_ENTRY){
-            write_struct_begin(re);
-        }
+        write_struct_begin(re);
 
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
@@ -254,24 +244,23 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
                 continue;
             }
 
-            QString fieldName = RegUtils::getVarName(re, rv, m_varNameMap);
-            //reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex());
+            QString fieldName = RegUtils::getVarDecl(re, rv, m_varNameMap);
+            QString varTypeStr = RegTypes::varDataTypeStr(rv->dataType());
+            QString description = rv->description().simplified();
 
             out << QStringLiteral("    %1 %2; /* %3 */")
-                   .arg(RegTypes::varDataTypeStr(rv->dataType()),
+                   .arg(varTypeStr,
                         fieldName,
-                        rv->description().simplified())
+                        description)
                 << "\n";
         }
 
-        if(m_mapType == RegUtils::NameMapping::WITHIN_ENTRY){
-            write_struct_end();
-        }
-    }
-
-    if(m_mapType == RegUtils::NameMapping::WITHIN_ALL){
         write_struct_end();
     }
+
+    out << "};\n";
+    out << QStringLiteral("extern struct %1 %2;").arg(makeDataStructTypeName(m_dataName), m_dataName);
+    out << "\n\n";
 
     // footer
     out << "\n#endif /* " << header_guard_name << " */\n";
@@ -296,19 +285,16 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
     QTextStream out(&file);
 #endif
 
-    QString base_name = fileinfo.baseName();
-
     QString struct_name;
 
-    auto write_struct_begin = [this, &out, base_name, &struct_name](const RegEntry* re = nullptr){
-        struct_name = makeDataStructName(base_name, re);
-        QString struct_type = makeDataStructTypeName(struct_name);
+    auto write_struct_begin = [this, &out, &struct_name](const RegEntry* re = nullptr){
+        struct_name = makeDataStructName(re);
 
-        out << "struct " << struct_type << " " << struct_name << " = {\n";
+        out << "." << struct_name << " = {\n";
     };
 
     auto write_struct_end = [&out](){
-        out << "\n};\n\n";
+        out << "\n}";
     };
 
     QString header_name = fileinfo.fileName().replace(QStringLiteral(".c"), QStringLiteral(".h"));
@@ -320,9 +306,9 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
         << "// DO NOT EDIT THIS FILE!\n"
         << "\n\n";
 
-    if(m_mapType == RegUtils::NameMapping::WITHIN_ALL){
-        write_struct_begin();
-    }
+    out << "struct " << makeDataStructTypeName(m_dataName) << " " << m_dataName << " = {\n";
+
+    bool firstEntry = true;
 
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
@@ -333,9 +319,12 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
 
         if(!hasEmpty) continue;
 
-        if(m_mapType == RegUtils::NameMapping::WITHIN_ENTRY){
-            write_struct_begin(re);
+        if(!firstEntry){
+            out << ",\n";
         }
+        firstEntry = false;
+
+        write_struct_begin(re);
 
         bool firstVar = true;
 
@@ -352,27 +341,19 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
             firstVar = false;
 
             QString fieldName = RegUtils::getVarName(re, rv, m_varNameMap);
-            //reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex());
+            QString description = rv->description().simplified();
+            QString defval = RegUtils::getVarDefValData(rv);
 
             out << QStringLiteral("    .%1 = %2 /* %3 */")
                    .arg(fieldName,
-                        rv->defaultValue().toString(),
-                        rv->description().simplified());
-
-            m_reg_data_names.insert(
-                            RegUtils::makeFullIndex(re->index(), rv->subIndex()),
-                            memName(struct_name, fieldName)
-                        );
+                        defval,
+                        description);
         }
 
-        if(m_mapType == RegUtils::NameMapping::WITHIN_ENTRY){
-            write_struct_end();
-        }
-    }
-
-    if(m_mapType == RegUtils::NameMapping::WITHIN_ALL){
         write_struct_end();
     }
+
+    out << "\n};\n";
 
     // footer
 
@@ -382,78 +363,47 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
     return true;
 }
 
-QString RegListRegsExporter::makeRegName(const RegEntry* re, const RegVar* rv) const
+QString RegListRegsExporter::makeRegName(const RegEntry* re, const RegVar* rv, uint index) const
 {
-    if(m_mapType == RegUtils::NameMapping::WITHIN_ENTRY){
-        QString entry_name = RegUtils::getEntryName(re, m_entryNameMap);
-        QString var_name = RegUtils::getVarName(re, rv, m_varNameMap);
+    QString entry_name = RegUtils::getEntryName(re, m_entryNameMap);
+    QString var_name = RegUtils::getVarName(re, rv, m_varNameMap);
 
-        return QString("%1_%2").arg(entry_name, var_name);
-    }else if(m_mapType == RegUtils::NameMapping::WITHIN_ALL){
-        QString var_name = RegUtils::getVarName(re, rv, m_varNameMap);
+    QString name = QStringLiteral("%1_%2").arg(entry_name, var_name);
 
-        return var_name;
+    if(rv->count() > 1){
+        name = QStringLiteral("%1_%2").arg(name).arg(index);
     }
 
-    return QString("%1_%2").arg(re->name(), rv->name());
+    return name;
 }
 
-QString RegListRegsExporter::makeRegIdName(const RegEntry* re, const RegVar* rv) const
+QString RegListRegsExporter::makeRegIdName(const RegEntry* re, const RegVar* rv, uint index) const
 {
-    return QString("REG_ID_%1").arg(makeRegName(re, rv).toUpper());
+    return QStringLiteral("REG_ID_%1").arg(makeRegName(re, rv, index).toUpper());
 }
 
-QString RegListRegsExporter::makeDataStructName(const QString& baseName, const RegEntry* re) const
+QString RegListRegsExporter::makeDataStructName(const RegEntry* re) const
 {
-    if(m_mapType == RegUtils::NameMapping::WITHIN_ENTRY){
-        if(re != nullptr){
-            QString entry_name = RegUtils::getEntryName(re, m_entryNameMap);
-            return QString("%1_%2").arg(baseName, entry_name);
-        }
-    }/*else if(m_mapType == RegUtils::NameMapping::WITHIN_ALL){
-        return baseName;
-    }*/
-    return baseName;
+    return RegUtils::getEntryName(re, m_entryNameMap);
 }
 
 QString RegListRegsExporter::makeDataStructTypeName(const QString& name) const
 {
-    return QString("_S_%1").arg(name);
-}
-
-RegListRegsExporter& RegListRegsExporter::setNameMapping(RegUtils::NameMapping::Value mapType)
-{
-    m_mapType = mapType;
-
-    return *this;
-}
-
-RegListRegsExporter& RegListRegsExporter::setEntryNameMap(const RegUtils::EntryNameMap* entryNameMap)
-{
-    m_entryNameMap = entryNameMap;
-
-    return *this;
-}
-
-RegListRegsExporter& RegListRegsExporter::setVarNameMap(const RegUtils::VarNameMap* varNameMap)
-{
-    m_varNameMap = varNameMap;
-
-    return *this;
+    return RegUtils::makeStructTypeName(name);
 }
 
 QString RegListRegsExporter::regDataTypeStr(DataType type) const
 {
     QString type_name = RegTypes::dataTypeStr(static_cast<DataType>(type));
-    if(!type_name.isEmpty()) return QString("REG_TYPE_") + type_name;
-    return QString("0x%1").arg(static_cast<uint>(type));
+    if(!type_name.isEmpty()) return QStringLiteral("REG_TYPE_") + type_name;
+    return QStringLiteral("0x%1").arg(static_cast<uint>(type));
 }
 
 QString RegListRegsExporter::flagToStr(uint flag) const
 {
     QString flag_name = RegTypes::flagName(static_cast<RegFlag::Value>(flag));
-    if(!flag_name.isEmpty()) return QString("REG_FLAG_") + flag_name;
-    return QString("0x%1").arg(flag);
+    if(!flag_name.isEmpty()) return QStringLiteral("REG_FLAG_") + flag_name;
+    return QStringLiteral("0x%1").arg(flag);
 }
 
 QString RegListRegsExporter::flagsToStr(uint flags) const
@@ -483,7 +433,7 @@ QString RegListRegsExporter::flagsToStr(uint flags) const
 
 QString RegListRegsExporter::idToStr(uint id) const
 {
-    return QString("0x%1").arg(id, 6, 16, QChar('0'));
+    return QStringLiteral("0x%1").arg(id, 6, 16, QChar('0'));
 }
 
 QString RegListRegsExporter::memName(const QString& group, const QString& var) const

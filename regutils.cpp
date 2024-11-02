@@ -83,12 +83,9 @@ QMap<reg_index_t, QString> RegUtils::genRegDataEntryNameMapping(const RegEntryLi
     return res;
 }
 
-QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const EntryNameMap* entryMapping)
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist)
 {
-    if(mappingType == NameMapping::WITHIN_ENTRY){
-        return genRegDataVarsNameMappingWithinEntry(regentrylist);
-    }
-    return genRegDataVarsNameMappingWithinAll(regentrylist, entryMapping);
+    return genRegDataVarsNameMappingWithinEntry(regentrylist);
 }
 
 QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist)
@@ -131,48 +128,6 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
     return res;
 }
 
-QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const EntryNameMap* entryMapping)
-{
-//    qDebug() << "genRegDataVarsNameMappingWithinAll";
-
-    QMap<reg_fullindex_t, QString> res;
-    QSet<QString> names;
-
-    for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
-        RegEntry* re = *reit;
-
-        QString entryName = getEntryName(re, entryMapping);
-
-        for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
-            RegVar* rv = *rvit;
-
-            reg_fullindex_t fullindex = makeFullIndex(re->index(), rv->subIndex());
-
-//            qDebug() << Qt::showbase << Qt::hex << fullindex
-//                     << entryName << rv->name()
-//                     << Qt::noshowbase << Qt::dec << rv->count();
-
-            QString varName = QString("%1_%2").arg(entryName, rv->name());
-
-            if(names.contains(varName)){
-                varName = QString("%1_%2_%3").arg(entryName, rv->name(), QString::number(rv->subIndex(), 16));
-                for(uint i = 1; names.contains(varName); i ++){
-                    varName = QString("%1_%2_%3_%4").arg(entryName, rv->name(), QString::number(rv->subIndex(), 16), QString::number(i, 10));
-                }
-                res.insert(fullindex, varName);
-            }
-            names.insert(varName);
-        }
-    }
-
-//    // DEBUG.
-//    for(auto it = res.begin(); it != res.end(); ++ it){
-//        qDebug () << Qt::hex << Qt::showbase << it.key() << it.value();
-//    }
-
-    return res;
-}
-
 QString RegUtils::getEntryName(const RegEntry* re, const EntryNameMap* entryMapping)
 {
     if(entryMapping){
@@ -193,4 +148,91 @@ QString RegUtils::getVarName(const RegEntry* re, const RegVar* rv, const VarName
         }
     }
     return rv->name();
+}
+
+QString RegUtils::getVarDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping)
+{
+    QString name = getVarName(re, rv, varMapping);
+
+    if(rv->count() > 1){
+        name = QStringLiteral("%1[%2]").arg(name).arg(rv->count());
+    }
+
+    return name;
+}
+
+QString RegUtils::getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping)
+{
+    if(!rv->memAddr().isEmpty()){
+        if(rv->count() <= 1) return rv->memAddr();
+        return rv->memAddr(index);
+    }
+
+    QString entryName = getEntryName(re, entryMapping);
+    QString varName = getVarName(re, rv, varMapping);
+
+    QString mem = QStringLiteral("%1.%2").arg(entryName, varName);
+
+    if(rv->count() > 1){
+        mem = QStringLiteral("%1[%2]").arg(mem).arg(index);
+    }
+
+    if(!name.isEmpty()){
+        mem = QStringLiteral("%1.%2").arg(name, mem);
+    }
+
+    return mem;
+}
+
+/*
+RegUtils::AutoDataMem RegUtils::genAutoData(const QString& name, const RegEntryList* reglist, const EntryNameMap* entryMapping, const VarNameMap* varMapping)
+{
+    AutoDataMem automem;
+
+    automem.name = name;
+
+    std::for_each(reglist->begin(), reglist->end(), [&](const RegEntry* re){
+
+        QString entryName = getEntryName(re, entryMapping);
+        auto entryData = automem.entries[re->index()];
+        entryData.name = entryName;
+
+        std::for_each(re->cbegin(), re->cend(), [&](const RegVar* rv){
+
+            QString varName = getVarName(re, rv, varMapping);
+            auto varData = entryData.vars[rv->subIndex()];
+            varData.name = varName;
+        });
+    });
+
+    return automem;
+}
+*/
+
+QString RegUtils::getVarDefValData(const RegVar* rv)
+{
+    QString data;
+
+    QString defval = rv->defaultValue().toString();
+
+    if(rv->count() <= 1){
+        data = defval;
+    }else{
+        data += QStringLiteral("{ ");
+        for(uint i = 0; i < rv->count(); i ++){
+            if(i != 0){
+                data += QStringLiteral(", ");
+            }
+
+            data += defval;
+        }
+        data += QStringLiteral(" }");
+    }
+
+    return data;
+}
+
+QString RegUtils::makeStructTypeName(const QString& name)
+{
+    return QStringLiteral("_S_%1").arg(name);
 }

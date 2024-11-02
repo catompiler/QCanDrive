@@ -50,6 +50,7 @@ public:
     void setCount(unsigned int newCount);
 
     QString memAddr() const;
+    QString memAddr(unsigned int i) const;
     void setMemAddr(const QString& newMemAddr);
 
 private:

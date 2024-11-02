@@ -31,13 +31,6 @@ extern reg_fullindex_t makeFullIndex(reg_index_t index, reg_subindex_t subindex)
 //! Получает пару индекс + под-индекс из полного индекса.
 extern QPair<reg_index_t, reg_subindex_t> getIndexSubIndex(reg_fullindex_t full_index);
 
-//! Типы маппинга имён.
-namespace NameMapping{
-    enum Value {
-        WITHIN_ENTRY = 0,
-        WITHIN_ALL = 1
-    };
-}
 
 //! Тип маппинга имён точек входа.
 using EntryNameMap = QMap<reg_index_t, QString>;
@@ -48,19 +41,57 @@ using VarNameMap = QMap<reg_fullindex_t, QString>;
 extern EntryNameMap genRegDataEntryNameMapping(const RegEntryList* regentrylist);
 
 //! Генерирует имена для повторяющихся имён переменных.
-extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist, NameMapping::Value mappingType, const EntryNameMap* entryMapping);
+extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist);
 
 //! Генерирует имена для повторяющихся имён переменных внутри точки входа.
 extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist);
-
-//! Генерирует имена для повторяющихся имён переменных внутри всего списка.
-extern VarNameMap genRegDataVarsNameMappingWithinAll(const RegEntryList* regentrylist, const EntryNameMap* entryMapping);
 
 //! Получает имя точки входа.
 extern QString getEntryName(const RegEntry* re, const EntryNameMap* entryMapping);
 
 //! Получает имя переменной.
 extern QString getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping);
+
+//! Получает имя переменной для декларации.
+extern QString getVarDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping);
+
+//! Получает память данных.
+extern QString getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping);
+
+//! Получает инициализатор данных по-умолчанию.
+extern QString getVarDefValData(const RegVar* rv);
+
+//! Получает имя типа структуры по имени данных.
+extern QString makeStructTypeName(const QString& name);
+
+/*
+//! Автоматические данные.
+struct AutoDataMem {
+    QString name; //!< Имя общей структуры.
+
+    //! Данные точки входа.
+    struct EntryData {
+        QString name; //!< Имя структуры точки входа.
+
+        //! Данные переменной.
+        struct VarData {
+            QString name; //!< Имя переменной.
+        };
+
+        //! Переменные.
+        QHash<reg_subindex_t, VarData> vars;
+    };
+
+    //! Точки входа.
+    QHash<reg_index_t, EntryData> entries;
+};
+
+//! Генерирует автоматические данные.
+extern AutoDataMem genAutoData(const QString& name, const RegEntryList* reglist, const EntryNameMap* entryMapping, const VarNameMap* varMapping);
+*/
+
+// //! Получает данные переменной.
+// extern QString getVarMem(const RegEntry* re, const RegVar* rv, )
 
 //! Получает
 }

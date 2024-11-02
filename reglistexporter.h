@@ -2,9 +2,10 @@
 #define REGLISTEXPORTER_H
 
 #include <QObject>
+#include <QString>
 #include "reglistmodel.h"
+#include "regutils.h"
 
-class QString;
 
 
 class RegListExporter : public QObject
@@ -16,7 +17,14 @@ public:
 
     virtual bool doExport(const QString& filename, const RegEntryList* reglist) = 0;
 
-signals:
+    RegListExporter& setDataName(const QString& dataName);
+    RegListExporter& setEntryNameMap(const RegUtils::EntryNameMap* entryNameMap);
+    RegListExporter& setVarNameMap(const RegUtils::VarNameMap* varNameMap);
+
+protected:
+    QString m_dataName;
+    const RegUtils::EntryNameMap* m_entryNameMap;
+    const RegUtils::VarNameMap* m_varNameMap;
 
 };
 

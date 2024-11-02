@@ -12,6 +12,7 @@
 #include "regutils.h"
 #include "reglistxmlserializer.h"
 #include "reglistregsexporter.h"
+#include "reglistcoexporter.h"
 #include <QMessageBox>
 #include <QApplication>
 #include <QItemSelectionModel>
@@ -117,20 +118,40 @@ void RegListEditorWin::on_actExportRegs_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт"), QString(), tr("Заголовочный файл C (*.h)"));
+    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт списка регистров"), QString(), tr("Заголовочный файл C (*.h)"));
 
     if(filename.isEmpty()) return;
 
-    const RegUtils::NameMapping::Value mapType = RegUtils::NameMapping::WITHIN_ENTRY;
-
     auto reglist = m_regsListModel->regEntryList();
     auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
-    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ENTRY, &entymapping);
-//    RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ALL, &entymapping);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
 
     RegListRegsExporter exporter;
 
-    exporter.setNameMapping(mapType)
+    exporter.setDataName(QStringLiteral("reg_data"))
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
+    }
+}
+
+void RegListEditorWin::on_actExportCo_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт словаря CANopenNode"), QString(), tr("Заголовочный файл C (*.h)"));
+
+    if(filename.isEmpty()) return;
+
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListCoExporter exporter;
+
+    exporter.setDataName(QStringLiteral("co_data"))
             .setEntryNameMap(&entymapping)
             .setVarNameMap(&varmapping);
 
@@ -299,11 +320,6 @@ void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 
     /*m_flagsEditDlg->setFlagsNames(RegTypes::flagsNames().mid(1));
     m_flagsEditDlg->exec();*/
-
-    auto reglist = m_regsListModel->regEntryList();
-    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
-    RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ENTRY, &entymapping);
-    RegUtils::genRegDataVarsNameMapping(reglist, RegUtils::NameMapping::WITHIN_ALL, &entymapping);
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)

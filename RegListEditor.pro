@@ -15,6 +15,7 @@ SOURCES += \
     regdelegate.cpp \
     regentry.cpp \
     regentrydlg.cpp \
+    reglistcoexporter.cpp \
     reglisteditorwin.cpp \
     reglistexporter.cpp \
     reglistmodel.cpp \
@@ -37,6 +38,7 @@ HEADERS += \
     regdelegate.h \
     regentry.h \
     regentrydlg.h \
+    reglistcoexporter.h \
     reglisteditorwin.h \
     reglistexporter.h \
     reglistmodel.h \

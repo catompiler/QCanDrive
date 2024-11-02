@@ -58,6 +58,7 @@
       <string>&amp;Экспорт</string>
      </property>
      <addaction name="actExportRegs"/>
+     <addaction name="actExportCo"/>
     </widget>
     <addaction name="actOpen"/>
     <addaction name="actSaveAs"/>
@@ -86,6 +87,7 @@
    <addaction name="actOpen"/>
    <addaction name="separator"/>
    <addaction name="actExportRegs"/>
+   <addaction name="actExportCo"/>
    <addaction name="separator"/>
    <addaction name="actAddItem"/>
    <addaction name="actAddSubItem"/>
@@ -182,6 +184,21 @@
    </property>
    <property name="text">
     <string>Список &amp;регистров</string>
+   </property>
+   <property name="toolTip">
+    <string>Список &amp;регистров</string>
+   </property>
+  </action>
+  <action name="actExportCo">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Export-48-Green.png</normaloff>:/images/icons/Export-48-Green.png</iconset>
+   </property>
+   <property name="text">
+    <string>CANopen</string>
+   </property>
+   <property name="toolTip">
+    <string>&amp;Словарь CANopenNode</string>
    </property>
   </action>
  </widget>
