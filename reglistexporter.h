@@ -20,9 +20,11 @@ public:
     RegListExporter& setDataName(const QString& dataName);
     RegListExporter& setEntryNameMap(const RegUtils::EntryNameMap* entryNameMap);
     RegListExporter& setVarNameMap(const RegUtils::VarNameMap* varNameMap);
+    RegListExporter& setSyntaxType(RegUtils::SyntaxType newSyntaxType);
 
 protected:
     QString m_dataName;
+    RegUtils::SyntaxType m_syntaxType;
     const RegUtils::EntryNameMap* m_entryNameMap;
     const RegUtils::VarNameMap* m_varNameMap;
 

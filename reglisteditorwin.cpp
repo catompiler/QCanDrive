@@ -129,6 +129,7 @@ void RegListEditorWin::on_actExportRegs_triggered(bool checked)
     RegListRegsExporter exporter;
 
     exporter.setDataName(QStringLiteral("reg_data"))
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
             .setEntryNameMap(&entymapping)
             .setVarNameMap(&varmapping);
 
@@ -152,6 +153,7 @@ void RegListEditorWin::on_actExportCo_triggered(bool checked)
     RegListCoExporter exporter;
 
     exporter.setDataName(QStringLiteral("co_data"))
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
             .setEntryNameMap(&entymapping)
             .setVarNameMap(&varmapping);
 

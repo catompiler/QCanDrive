@@ -1,6 +1,9 @@
 #include "regutils.h"
 #include "regentry.h"
 #include "regvar.h"
+#include <algorithm>
+#include <functional>
+#include <QRegExp>
 #include <QDebug>
 
 
@@ -128,31 +131,88 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
     return res;
 }
 
-QString RegUtils::getEntryName(const RegEntry* re, const EntryNameMap* entryMapping)
+QString RegUtils::makeName(const QString& text, SyntaxType syntaxType)
+{
+    QString name;
+    QStringList words;
+
+    //qDebug() << text;
+
+    words = text.split(QRegExp("\\s+"));
+    //qDebug() << words;
+
+    QRegExp re_non_word("\\W");
+    std::for_each(words.begin(), words.end(), [&re_non_word](QString& word){
+        word.replace(re_non_word, QChar('_'));
+    });
+    //qDebug() << words;
+
+    QVector<bool> is_abbrev(words.count(), false);
+    std::transform(words.begin(), words.end(), is_abbrev.begin(), isAbbreviation);
+    //qDebug() << is_abbrev;
+
+    for(int i = 0; i < words.count(); i ++){
+        QString& word = words[i];
+
+        switch(syntaxType){
+        case SyntaxType::snake_case:
+            word = word.toLower();
+            break;
+        case SyntaxType::camelCase:
+            if(!is_abbrev[i]){
+                word = word.toLower();
+                if(i != 0){
+                    if(!word.isEmpty()){
+                        word[0] = word[0].toUpper();
+                    }
+                }
+            }else{
+                if(i < words.count() - 1){
+                    if(is_abbrev[i + 1])
+                        word.append('_');
+                }
+            }
+            break;
+        case SyntaxType::UPPER_CASE:
+            word = word.toUpper();
+            break;
+        }
+    }
+
+    if(syntaxType == SyntaxType::snake_case || syntaxType == SyntaxType::UPPER_CASE){
+        name = words.join('_');
+    }else if(syntaxType == SyntaxType::camelCase){
+        name = words.join("");
+    }
+
+    return name;
+}
+
+QString RegUtils::getEntryName(const RegEntry* re, const EntryNameMap* entryMapping, SyntaxType syntaxType)
 {
     if(entryMapping){
         auto it = entryMapping->find(re->index());
         if(it != entryMapping->cend()){
-            return it.value();
+            return makeName(it.value(), syntaxType);
         }
     }
-    return re->name();
+    return makeName(re->name(), syntaxType);
 }
 
-QString RegUtils::getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping)
+QString RegUtils::getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType)
 {
     if(varMapping){
         auto it = varMapping->find(makeFullIndex(re->index(), rv->subIndex()));
         if(it != varMapping->cend()){
-            return it.value();
+            return makeName(it.value(), syntaxType);
         }
     }
-    return rv->name();
+    return makeName(rv->name(), syntaxType);
 }
 
-QString RegUtils::getVarDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping)
+QString RegUtils::getVarDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType)
 {
-    QString name = getVarName(re, rv, varMapping);
+    QString name = getVarName(re, rv, varMapping, syntaxType);
 
     if(rv->count() > 1){
         name = QStringLiteral("%1[%2]").arg(name).arg(rv->count());
@@ -161,15 +221,15 @@ QString RegUtils::getVarDecl(const RegEntry* re, const RegVar* rv, const VarName
     return name;
 }
 
-QString RegUtils::getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping)
+QString RegUtils::getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping, SyntaxType syntaxType)
 {
     if(!rv->memAddr().isEmpty()){
         if(rv->count() <= 1) return rv->memAddr();
         return rv->memAddr(index);
     }
 
-    QString entryName = getEntryName(re, entryMapping);
-    QString varName = getVarName(re, rv, varMapping);
+    QString entryName = getEntryName(re, entryMapping, syntaxType);
+    QString varName = getVarName(re, rv, varMapping, syntaxType);
 
     QString mem = QStringLiteral("%1.%2").arg(entryName, varName);
 
@@ -235,4 +295,17 @@ QString RegUtils::getVarDefValData(const RegVar* rv)
 QString RegUtils::makeStructTypeName(const QString& name)
 {
     return QStringLiteral("_S_%1").arg(name);
+}
+
+bool RegUtils::isAbbreviation(const QString& name)
+{
+    for(auto& c: name){
+        if(c.isLetter()){
+            if(c.isLower()) return false;
+        }else if(!c.isDigit() && c != '_'){
+            return false;
+        }
+    }
+
+    return true;
 }

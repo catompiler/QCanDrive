@@ -46,23 +46,35 @@ extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist);
 //! Генерирует имена для повторяющихся имён переменных внутри точки входа.
 extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist);
 
+enum class SyntaxType {
+    snake_case = 0,
+    camelCase = 1,
+    UPPER_CASE = 2
+};
+
+//! Создаёт имя переменной из текста.
+extern QString makeName(const QString& text, SyntaxType syntaxType = SyntaxType::camelCase);
+
 //! Получает имя точки входа.
-extern QString getEntryName(const RegEntry* re, const EntryNameMap* entryMapping);
+extern QString getEntryName(const RegEntry* re, const EntryNameMap* entryMapping, SyntaxType syntaxType = SyntaxType::camelCase);
 
 //! Получает имя переменной.
-extern QString getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping);
+extern QString getVarName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType = SyntaxType::camelCase);
 
 //! Получает имя переменной для декларации.
-extern QString getVarDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping);
+extern QString getVarDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType = SyntaxType::camelCase);
 
 //! Получает память данных.
-extern QString getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping);
+extern QString getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping, SyntaxType syntaxType = SyntaxType::camelCase);
 
 //! Получает инициализатор данных по-умолчанию.
 extern QString getVarDefValData(const RegVar* rv);
 
 //! Получает имя типа структуры по имени данных.
 extern QString makeStructTypeName(const QString& name);
+
+//! Проверяет, является ли текст/слово аббревиатурой (полностью заглавные буквы).
+extern bool isAbbreviation(const QString& name);
 
 /*
 //! Автоматические данные.

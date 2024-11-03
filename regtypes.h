@@ -48,11 +48,24 @@ typedef uint32_t reg_flags_t;
 // Дополнительные флаги.
 namespace RegEFlag {
 enum Value {
-    NONE = 0,
-    RL_HIDE = 1,
-    CO_HIDE = 2,
-    CO_COUNT = 4,
-    CON_NMT = 8,
+    NONE              = 0x0,
+    RL_HIDE           = 0x1,
+    CO_HIDE           = 0x2,
+    CO_COUNT          = 0x4,
+    RESERVED          = 0x8,
+    CON_CNT_NMT       = 0x10,
+    CON_CNT_EM        = 0x20,
+    CON_CNT_SYNC      = 0x40,
+    CON_CNT_SYNC_PROD = 0x80,
+    CON_CNT_STORAGE   = 0x100,
+    CON_CNT_TIME      = 0x200,
+    CON_CNT_EM_PROD   = 0x400,
+    CON_CNT_HB_CONS   = 0x800,
+    CON_CNT_HB_PROD   = 0x1000,
+    CON_CNT_SDO_SRV   = 0x2000,
+    CON_CNT_SDO_CLI   = 0x4000,
+    CON_CNT_RPDO      = 0x8000,
+    CON_CNT_TPDO      = 0x10000,
 };
 }
 // Тип дополнительных флагов.

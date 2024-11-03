@@ -28,6 +28,30 @@ static void testStr()
     qDebug() << ok_index << index << ok_sub_index << sub_index;
 }*/
 
+/*#include <QDebug>
+#include <QString>
+#include "regutils.h"
+static void testMakeName()
+{
+    qDebug() << RegUtils::makeName("Device type", RegUtils::SyntaxType::camelCase);
+    qDebug() << RegUtils::makeName("COB-ID SYNC message", RegUtils::SyntaxType::camelCase);
+    qDebug() << RegUtils::makeName("COB-ID time stamp object", RegUtils::SyntaxType::camelCase);
+    qDebug() << RegUtils::makeName("COB-ID EMCY", RegUtils::SyntaxType::camelCase);
+    qDebug() << RegUtils::makeName("Inhibit time EMCY", RegUtils::SyntaxType::camelCase);
+
+    qDebug() << RegUtils::makeName("Device type", RegUtils::SyntaxType::snake_case);
+    qDebug() << RegUtils::makeName("COB-ID SYNC message", RegUtils::SyntaxType::snake_case);
+    qDebug() << RegUtils::makeName("COB-ID time stamp object", RegUtils::SyntaxType::snake_case);
+    qDebug() << RegUtils::makeName("COB-ID EMCY", RegUtils::SyntaxType::snake_case);
+    qDebug() << RegUtils::makeName("Inhibit time EMCY", RegUtils::SyntaxType::snake_case);
+
+    qDebug() << RegUtils::makeName("Device type", RegUtils::SyntaxType::UPPER_CASE);
+    qDebug() << RegUtils::makeName("COB-ID SYNC message", RegUtils::SyntaxType::UPPER_CASE);
+    qDebug() << RegUtils::makeName("COB-ID time stamp object", RegUtils::SyntaxType::UPPER_CASE);
+    qDebug() << RegUtils::makeName("COB-ID EMCY", RegUtils::SyntaxType::UPPER_CASE);
+    qDebug() << RegUtils::makeName("Inhibit time EMCY", RegUtils::SyntaxType::UPPER_CASE);
+}*/
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -39,6 +63,7 @@ int main(int argc, char *argv[])
 
     //testRegExp();
     //testStr();
+    //testMakeName();
 
     return a.exec();
 }

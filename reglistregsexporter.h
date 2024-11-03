@@ -36,7 +36,6 @@ private:
     QString idToStr(uint id) const;
     QString makeDataStructName(const RegEntry* re = nullptr) const;
     QString makeDataStructTypeName(const QString& name) const;
-    QString memName(const QString& group, const QString& var) const;
 };
 
 #endif // REGLISTREGSEXPORTER_H

@@ -50,7 +50,20 @@ static const char* eflag_name_strs[] = {
     "RL_HIDE",
     "CO_HIDE",
     "CO_COUNT",
-    "CON_NMT",
+    "RESERVED",
+    "CON_CNT_NMT",
+    "CON_CNT_EM",
+    "CON_CNT_SYNC",
+    "CON_CNT_SYNC_PROD",
+    "CON_CNT_STORAGE",
+    "CON_CNT_TIME",
+    "CON_CNT_EM_PROD",
+    "CON_CNT_HB_CONS",
+    "CON_CNT_HB_PROD",
+    "CON_CNT_SDO_SRV",
+    "CON_CNT_SDO_CLI",
+    "CON_CNT_RPDO",
+    "CON_CNT_TPDO",
 };
 
 static decltype(sizeof(eflag_name_strs)) eflag_name_strs_count = (sizeof(eflag_name_strs)/sizeof(eflag_name_strs[0]));
@@ -61,7 +74,20 @@ static const char* eflag_full_name_strs[] = {
     "REG_EFLAG_RL_HIDE",
     "REG_EFLAG_CO_HIDE",
     "REG_EFLAG_CO_COUNT",
-    "REG_EFLAG_CON_NMT",
+    "REG_EFLAG_RESERVED",
+    "REG_EFLAG_CON_CNT_NMT",
+    "REG_EFLAG_CON_CNT_EM",
+    "REG_EFLAG_CON_CNT_SYNC",
+    "REG_EFLAG_CON_CNT_SYNC_PROD",
+    "REG_EFLAG_CON_CNT_STORAGE",
+    "REG_EFLAG_CON_CNT_TIME",
+    "REG_EFLAG_CON_CNT_EM_PROD",
+    "REG_EFLAG_CON_CNT_HB_CONS",
+    "REG_EFLAG_CON_CNT_HB_PROD",
+    "REG_EFLAG_CON_CNT_SDO_SRV",
+    "REG_EFLAG_CON_CNT_SDO_CLI",
+    "REG_EFLAG_CON_CNT_RPDO",
+    "REG_EFLAG_CON_CNT_TPDO",
 };
 
 static decltype(sizeof(eflag_full_name_strs)) eflag_full_name_strs_count = (sizeof(eflag_full_name_strs)/sizeof(eflag_full_name_strs[0]));
@@ -121,7 +147,20 @@ QVector<RegEFlag::Value> eflags()
         RegEFlag::RL_HIDE,
         RegEFlag::CO_HIDE,
         RegEFlag::CO_COUNT,
-        RegEFlag::CON_NMT
+        RegEFlag::RESERVED,
+        RegEFlag::CON_CNT_NMT,
+        RegEFlag::CON_CNT_EM,
+        RegEFlag::CON_CNT_SYNC,
+        RegEFlag::CON_CNT_SYNC_PROD,
+        RegEFlag::CON_CNT_STORAGE,
+        RegEFlag::CON_CNT_TIME,
+        RegEFlag::CON_CNT_EM_PROD,
+        RegEFlag::CON_CNT_HB_CONS,
+        RegEFlag::CON_CNT_HB_PROD,
+        RegEFlag::CON_CNT_SDO_SRV,
+        RegEFlag::CON_CNT_SDO_CLI,
+        RegEFlag::CON_CNT_RPDO,
+        RegEFlag::CON_CNT_TPDO
     };
     static const QVector<RegEFlag::Value> eflags_vec(eflags);
 
