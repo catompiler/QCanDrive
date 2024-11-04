@@ -32,6 +32,7 @@ SOURCES += \
     sellineedit.cpp
 
 HEADERS += \
+    first_arg_type.hpp \
     flagseditdlg.h \
     flagseditmodel.h \
     is_base_creator.hpp \

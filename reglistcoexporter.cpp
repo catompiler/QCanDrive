@@ -41,6 +41,7 @@ bool RegListCoExporter::doExport(const QString& filename, const RegEntryList* re
     QString co_filename_h = dir.filePath(co_name_h);
 
     if(!exportCoH(co_filename_h, regentrylist)) return false;
+    if(!exportCoC(co_filename_c, regentrylist)) return false;
 
     return true;
 }
@@ -90,6 +91,7 @@ bool RegListCoExporter::exportCoH(const QString& filename, const RegEntryList* r
 bool RegListCoExporter::writeCOCounters(QFile& file, const RegEntryList* regentrylist)
 {
 #if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
     QDebug out = qDebug();
 #else
     QTextStream out(&file);
@@ -142,6 +144,7 @@ bool RegListCoExporter::writeCOCounters(QFile& file, const RegEntryList* regentr
 bool RegListCoExporter::writeCOArraySizes(QFile& file, const RegEntryList* regentrylist)
 {
 #if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
     QDebug out = qDebug();
 #else
     QTextStream out(&file);
@@ -178,6 +181,7 @@ bool RegListCoExporter::writeCOArraySizes(QFile& file, const RegEntryList* regen
 bool RegListCoExporter::writeCOexternOd(QFile& file)
 {
 #if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
     QDebug out = qDebug();
 #else
     QTextStream out(&file);
@@ -196,6 +200,7 @@ bool RegListCoExporter::writeCOexternOd(QFile& file)
 bool RegListCoExporter::writeCOShortcuts(QFile& file, const RegEntryList* regentrylist)
 {
 #if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
     QDebug out = qDebug();
 #else
     QTextStream out(&file);
@@ -222,6 +227,7 @@ bool RegListCoExporter::writeCOShortcuts(QFile& file, const RegEntryList* regent
 bool RegListCoExporter::writeCOShortcutsWithNames(QFile& file, const RegEntryList* regentrylist)
 {
 #if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
     QDebug out = qDebug();
 #else
     QTextStream out(&file);
@@ -244,4 +250,183 @@ bool RegListCoExporter::writeCOShortcutsWithNames(QFile& file, const RegEntryLis
     out << "\n\n";
 
     return true;
+}
+
+bool RegListCoExporter::exportCoC(const QString& filename, const RegEntryList* regentrylist)
+{
+    QFile file(filename);
+
+    if(!file.open(QIODevice::WriteOnly)) return false;
+
+    QFileInfo fileinfo(file);
+
+#if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
+    QDebug out = qDebug();
+#else
+    QTextStream out(&file);
+#endif
+
+    QString co_h_name = fileinfo.fileName().replace(".c", ".h");
+
+    // header
+    out << QStringLiteral("#include \"%1\"\n").arg(co_h_name)
+        << "\n\n"
+        << "#define OD_DEFINITION\n"
+        << "#include \"301/CO_ODinterface.h\"\n"
+        << "#include \"OD.h\"\n"
+        << "\n"
+        << "#if CO_VERSION_MAJOR < 4\n"
+        << "#error This Object dictionary is compatible with CANopenNode V4.0 and above!\n"
+        << "#endif\n"
+        << "\n\n";
+
+    bool res = true;
+
+    res &= writeAllOdObjConstDefs(file, regentrylist);
+
+    // footer
+
+    // Files closed in dtors, but, i want to do it manually.
+    file.close();
+
+    return res;
+}
+
+bool RegListCoExporter::writeAllOdObjConstDefs(QFile& file, const RegEntryList* regentrylist)
+{
+#if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
+    QDebug out = qDebug();
+#else
+    QTextStream out(&file);
+#endif
+
+    out << "// All OD objects (constant definitions)\n";
+
+    out << "typedef struct {\n";
+
+    for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
+        const RegEntry* re = *reit;
+
+        out << QStringLiteral("%1 %2;")
+               .arg(getOdEntryTypeStr(re->type()), getOdEntryFieldDecl(re))
+            << "\n";
+    }
+
+    out << "} ODObjs_t;\n\n";
+
+    out << "static CO_PROGMEM ODObjs_t ODObjs = {\n";
+
+    bool firstEntry = true;
+
+    for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
+        const RegEntry* re = *reit;
+
+        if(!firstEntry){
+            out << ",\n";
+        }
+        firstEntry = false;
+
+        out << QStringLiteral(".%1 = {")
+               .arg(getOdEntryFieldDecl(re))
+            << "\n";
+
+        for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+            const RegVar* rv = *rvit;
+        }
+
+        out << "}";
+    }
+
+    out << "\n};\n";
+
+    return true;
+}
+
+void RegListCoExporter::writeOdObjConstDef(QFile& file, const RegEntry* re) const
+{
+    switch(re->type()){
+    case ObjectType::VAR:
+        writeOdVarConstDef(file, re);
+        break;
+    case ObjectType::ARR:
+        writeOdArrConstDef(file, re);
+        break;
+    case ObjectType::REC:
+        writeOdRecConstDef(file, re);
+        break;
+    }
+}
+
+void RegListCoExporter::writeOdVarConstDef(QFile& file, const RegEntry* re) const
+{
+#if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
+    QDebug out = qDebug();
+#else
+    QTextStream out(&file);
+#endif
+
+    for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+        const RegVar* rv = *rvit;
+    }
+}
+
+void RegListCoExporter::writeOdRecConstDef(QFile& file, const RegEntry* re) const
+{
+#if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
+    QDebug out = qDebug();
+#else
+    QTextStream out(&file);
+#endif
+
+    for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+        const RegVar* rv = *rvit;
+    }
+}
+
+void RegListCoExporter::writeOdArrConstDef(QFile& file, const RegEntry* re) const
+{
+#if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(file)
+    QDebug out = qDebug();
+#else
+    QTextStream out(&file);
+#endif
+
+    for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+        const RegVar* rv = *rvit;
+    }
+}
+QString RegListCoExporter::getOdEntryTypeStr(ObjectType objType) const
+{
+    switch(objType){
+    case ObjectType::VAR:
+        return QStringLiteral("OD_obj_var_t");
+    case ObjectType::ARR:
+        return QStringLiteral("OD_obj_array_t");
+    case ObjectType::REC:
+        return QStringLiteral("OD_obj_record_t");
+    }
+    return QStringLiteral("#error Unknown type!");
+}
+
+QString RegListCoExporter::getOdEntryFieldName(const RegEntry* re) const
+{
+    return QStringLiteral("o_%2_%3")
+            .arg(re->index(), 0, 16)
+            .arg(RegUtils::getEntryName(re, m_entryNameMap, m_syntaxType));
+}
+
+QString RegListCoExporter::getOdEntryFieldDecl(const RegEntry* re) const
+{
+    QString name = getOdEntryFieldName(re);
+    if(re->type() == ObjectType::REC){
+        name = QStringLiteral("%1[%2]")
+               .arg(name)
+               .arg(re->count());
+    }
+    return name;
 }

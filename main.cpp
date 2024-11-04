@@ -52,6 +52,17 @@ static void testMakeName()
     qDebug() << RegUtils::makeName("Inhibit time EMCY", RegUtils::SyntaxType::UPPER_CASE);
 }*/
 
+/*#include "regtypes.h"
+#include <QString>
+#include <QStringList>
+#include <QDebug>
+static void testGetNames()
+{
+    reg_flags_t flags = RegFlag::CONF | RegFlag::READONLY;
+    auto strlist = RegTypes::getNames(flags, RegTypes::flagName);
+    qDebug() << strlist.join("|");
+}*/
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -64,6 +75,7 @@ int main(int argc, char *argv[])
     //testRegExp();
     //testStr();
     //testMakeName();
+    //testGetNames();
 
     return a.exec();
 }

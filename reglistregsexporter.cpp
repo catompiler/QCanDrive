@@ -408,27 +408,10 @@ QString RegListRegsExporter::flagToStr(uint flag) const
 
 QString RegListRegsExporter::flagsToStr(uint flags) const
 {
-    QString flags_str;
+    //auto flags_str_list = RegTypes::getNames(flags, std::function<QString(uint)>(std::bind(&RegListRegsExporter::flagToStr, this, std::placeholders::_1)));
+    auto flags_str_list = RegTypes::getNames(flags, std::bind(&RegListRegsExporter::flagToStr, this, std::placeholders::_1));
 
-    uint flag = 0x1;
-
-    while(flags != 0){
-        if(flags & 0x1){
-            if(!flags_str.isEmpty()){
-                flags_str += " | ";
-            }
-            flags_str = flagToStr(flag);
-        }
-
-        flag <<= 1;
-        flags >>= 1;
-    }
-
-    if(flags_str.isEmpty()){
-        flags_str = flagToStr(RegFlag::NONE);
-    }
-
-    return flags_str;
+    return flags_str_list.join(" | ");
 }
 
 QString RegListRegsExporter::idToStr(uint id) const

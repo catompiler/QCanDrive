@@ -418,52 +418,10 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
                     .arg(base_subindex, 2, 16, QChar('0'));
         }
         case COL_FLAGS:{
-            auto flags = static_cast<unsigned int>(rv->flags());
-            unsigned int flag = 0x1;
-            QString flags_str, flag_str;
-            while(flags){
-                if(flags & 0x1){
-                    flag_str = RegTypes::flagName(static_cast<RegFlag::Value>(flag));
-                    if(!flags_str.isEmpty()){
-                        flags_str += QString(" | ");
-                    }
-                    if(!flag_str.isEmpty()){
-                        flags_str += flag_str;
-                    }else{
-                        flags_str += QString("0x%1").arg(flag, 0, 16);
-                    }
-                }
-                flag <<= 1;
-                flags >>= 1;
-            }
-            if(flags_str.isEmpty()){
-                flags_str = RegTypes::flagName(RegFlag::NONE);
-            }
-            return flags_str;
+            return RegTypes::getNames(rv->flags(), RegTypes::flagName).join(" | ");
         }
         case COL_EXTFLAGS:{
-            auto flags = static_cast<unsigned int>(rv->eflags());
-            unsigned int flag = 0x1;
-            QString flags_str, flag_str;
-            while(flags){
-                if(flags & 0x1){
-                    flag_str = RegTypes::eflagName(static_cast<RegEFlag::Value>(flag));
-                    if(!flags_str.isEmpty()){
-                        flags_str += QString(" | ");
-                    }
-                    if(!flag_str.isEmpty()){
-                        flags_str += flag_str;
-                    }else{
-                        flags_str += QString("0x%1").arg(flag, 0, 16);
-                    }
-                }
-                flag <<= 1;
-                flags >>= 1;
-            }
-            if(flags_str.isEmpty()){
-                flags_str = RegTypes::eflagName(RegEFlag::NONE);
-            }
-            return flags_str;
+            return RegTypes::getNames(rv->eflags(), RegTypes::eflagName).join(" | ");
         }
         case COL_DESCR:
             return rv->description();

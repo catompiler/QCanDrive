@@ -93,6 +93,39 @@ static const char* eflag_full_name_strs[] = {
 static decltype(sizeof(eflag_full_name_strs)) eflag_full_name_strs_count = (sizeof(eflag_full_name_strs)/sizeof(eflag_full_name_strs[0]));
 
 
+static const char* co_attribute_name_strs[] = {
+    "SDO_R",
+    "SDO_W",
+    "SDO_RW",
+    "TPDO",
+    "RPDO",
+    "TRPDO",
+    "TSRDO",
+    "RSRDO",
+    "TRSRDO",
+    "MB",
+    "STR"
+};
+
+static decltype(sizeof(co_attribute_name_strs)) co_attribute_name_strs_count = (sizeof(co_attribute_name_strs)/sizeof(co_attribute_name_strs[0]));
+
+
+static const char* co_attribute_full_name_strs[] = {
+    "ODA_SDO_R",
+    "ODA_SDO_W",
+    "ODA_SDO_RW",
+    "ODA_TPDO",
+    "ODA_RPDO",
+    "ODA_TRPDO",
+    "ODA_TSRDO",
+    "ODA_RSRDO",
+    "ODA_TRSRDO",
+    "ODA_MB",
+    "ODA_STR"
+};
+
+static decltype(sizeof(co_attribute_name_strs)) co_attribute_full_name_strs_count = (sizeof(co_attribute_full_name_strs)/sizeof(co_attribute_full_name_strs[0]));
+
 
 QVector<RegFlag::Value> flags()
 {
@@ -169,7 +202,7 @@ QVector<RegEFlag::Value> eflags()
 
 QString eflagName(RegEFlag::Value eflag)
 {
-    int eflag_index = 8 - qCountLeadingZeroBits(static_cast<quint8>(eflag));
+    int eflag_index = 32 - qCountLeadingZeroBits(static_cast<quint32>(eflag));
     if(static_cast<decltype(sizeof(eflag_name_strs))>(eflag_index) >= eflag_name_strs_count){
         return QString();
     }
@@ -186,7 +219,7 @@ QStringList eflagsNames()
 
 QString eflagFullName(RegEFlag::Value eflag)
 {
-    int eflag_index = 8 - qCountLeadingZeroBits(static_cast<quint8>(eflag));
+    int eflag_index = 32 - qCountLeadingZeroBits(static_cast<quint32>(eflag));
     if(static_cast<decltype(sizeof(eflag_full_name_strs))>(eflag_index) >= eflag_full_name_strs_count){
         return QString();
     }
@@ -199,6 +232,40 @@ QStringList eflagsFullNames()
     static const QStringList eflag_full_names_list = QStringList(eflag_full_name_strs, eflag_full_name_strs + eflag_full_name_strs_count);
 
     return eflag_full_names_list;
+}
+
+QString coAttributeName(COAttribute::Value attr)
+{
+    int attr_index = 16 - qCountLeadingZeroBits(static_cast<quint16>(attr));
+    if(static_cast<decltype(sizeof(co_attribute_name_strs))>(attr_index) >= co_attribute_name_strs_count){
+        return QString();
+    }
+
+    return QString(co_attribute_name_strs[static_cast<int>(attr_index)]);
+}
+
+QStringList coAttributeNames()
+{
+    static const QStringList co_attr_names_list = QStringList(co_attribute_name_strs, co_attribute_name_strs + co_attribute_name_strs_count);
+
+    return co_attr_names_list;
+}
+
+QString coAttributeFullName(COAttribute::Value attr)
+{
+    int attr_index = 16 - qCountLeadingZeroBits(static_cast<quint16>(attr));
+    if(static_cast<decltype(sizeof(co_attribute_full_name_strs))>(attr_index) >= co_attribute_full_name_strs_count){
+        return QString();
+    }
+
+    return QString(co_attribute_full_name_strs[static_cast<int>(attr_index)]);
+}
+
+QStringList coAttributeFullNames()
+{
+    static const QStringList co_attr_full_names_list = QStringList(co_attribute_full_name_strs, co_attribute_full_name_strs + co_attribute_full_name_strs_count);
+
+    return co_attr_full_names_list;
 }
 
 

@@ -22,6 +22,17 @@ private:
     bool writeCOexternOd(QFile& file);
     bool writeCOShortcuts(QFile& file, const RegEntryList* regentrylist);
     bool writeCOShortcutsWithNames(QFile& file, const RegEntryList* regentrylist);
+
+    bool exportCoC(const QString& filename, const RegEntryList* regentrylist);
+    bool writeAllOdObjConstDefs(QFile& file, const RegEntryList* regentrylist);
+    void writeOdObjConstDef(QFile& file, const RegEntry* re) const;
+    void writeOdVarConstDef(QFile& file, const RegEntry* re) const;
+    void writeOdRecConstDef(QFile& file, const RegEntry* re) const;
+    void writeOdArrConstDef(QFile& file, const RegEntry* re) const;
+
+    QString getOdEntryTypeStr(ObjectType objType) const;
+    QString getOdEntryFieldName(const RegEntry* re) const;
+    QString getOdEntryFieldDecl(const RegEntry* re) const;
 };
 
 #endif // REGLISTCOEXPORTER_H
