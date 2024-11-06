@@ -67,6 +67,12 @@ enum Value {
     CON_CNT_SDO_CLI   = 0x4000,
     CON_CNT_RPDO      = 0x8000,
     CON_CNT_TPDO      = 0x10000,
+    CO_SDO_R          = 0x20000,
+    CO_SDO_W          = 0x40000,
+    CO_TPDO           = 0x80000,
+    CO_RPDO           = 0x100000,
+    CO_TSRDO          = 0x200000,
+    CO_RSRDO          = 0x400000,
 };
 }
 // Тип дополнительных флагов.
@@ -75,20 +81,21 @@ typedef uint32_t reg_eflags_t;
 // Аттрибуты CO.
 namespace COAttribute {
 enum Value{
-    SDO_R   = 0x0,
-    SDO_W   = 0x1,
-    SDO_RW  = 0x2,
+    NONE    = 0x0,
+    SDO_R   = 0x1,
+    SDO_W   = 0x2,
+    SDO_RW  = 0x4,
 
-    TPDO    = 0x4,
-    RPDO    = 0x8,
-    TRPDO   = 0x10,
+    TPDO    = 0x8,
+    RPDO    = 0x10,
+    TRPDO   = 0x20,
 
-    TSRDO   = 0x20,
-    RSRDO   = 0x40,
-    TRSRDO  = 0x80,
+    TSRDO   = 0x40,
+    RSRDO   = 0x80,
+    TRSRDO  = 0x100,
 
-    MB      = 0x100,
-    STR     = 0x200
+    MB      = 0x200,
+    STR     = 0x400
 };
 }
 // Тип аттрибутов CO.
@@ -137,6 +144,9 @@ extern QString coAttributeFullName(COAttribute::Value attr);
 
 //! Получает список имён аттрибутов.
 extern QStringList coAttributeFullNames();
+
+//! Получает атрибуты по расширенным флагам.
+extern co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags);
 
 //! Получает все типы объектов.
 extern QVector<ObjectType> objectTypes();

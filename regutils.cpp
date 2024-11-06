@@ -109,7 +109,13 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
 //                     << re->name() << rv->name()
 //                     << Qt::noshowbase << Qt::dec << rv->count();
 
-            QString varName = rv->name();
+            QString varName;
+
+            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+                varName = re->name();
+            }else{
+                varName = rv->name();
+            }
 
             if(names.contains(varName)){
                 varName = QString("%1_%2").arg(rv->name(), QString::number(rv->subIndex(), 10));
@@ -118,7 +124,12 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
                 }
                 res.insert(fullindex, varName);
             }
-            names.insert(varName);
+
+            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+                res.insert(fullindex, varName);
+            }else{
+                names.insert(varName);
+            }
         }
         names.clear();
     }
@@ -129,6 +140,120 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
 //    }
 
     return res;
+}
+
+uint RegUtils::getArrDataLen(const RegEntry* re)
+{
+    uint count = 0;
+
+    for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+        RegVar* rv = *rvit;
+
+        if(rv->subIndex() != 0){
+
+            //count = qMax(count, static_cast<uint>(rv->subIndex() - 1));
+            count += qMax(1U, rv->count());
+        }
+    }
+
+    return count;
+}
+
+uint RegUtils::getArrDataIndex(const RegEntry* re, const RegVar* rv, uint index)
+{
+    uint res_index = 0;
+
+    for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
+        RegVar* cur_rv = *rvit;
+
+        if(cur_rv->subIndex() != 0){
+
+            if(cur_rv == rv){
+                res_index = res_index + qMin(index, qMax(1U, cur_rv->count()) - 1U);
+                break;
+            }
+
+            //res_index = qMax(res_index, static_cast<uint>(cur_rv->subIndex() - 1));
+            res_index += qMax(1U, cur_rv->count());
+        }
+    }
+
+    return res_index;
+}
+
+QString RegUtils::getArrName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType)
+{
+    if(varMapping){
+        auto it = varMapping->find(makeFullIndex(re->index(), rv->subIndex()));
+        if(it != varMapping->cend()){
+            return makeName(it.value(), syntaxType);
+        }
+    }
+    return makeName(re->name(), syntaxType);
+}
+
+QString RegUtils::getArrDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType)
+{
+    QString name = getArrName(re, rv, varMapping, syntaxType);
+
+    name = QStringLiteral("%1[%2]").arg(name).arg(getArrDataLen(re));
+
+    return name;
+}
+
+QString RegUtils::getArrMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping, SyntaxType syntaxType)
+{
+    uint arr_index = getArrDataIndex(re, rv, index);
+
+    if(!rv->memAddr().isEmpty()){
+        //if(rv->count() <= 1) return rv->memAddr();
+        return rv->memAddr(arr_index);
+    }
+
+    QString entryName = getEntryName(re, entryMapping, syntaxType);
+    QString varName = getArrName(re, rv, varMapping, syntaxType);
+
+    QString mem = QStringLiteral("%1.%2[%3]").arg(entryName, varName).arg(arr_index);
+
+    if(!name.isEmpty()){
+        mem = QStringLiteral("%1.%2").arg(name, mem);
+    }
+
+    return mem;
+}
+
+QString RegUtils::getArrDefValData(const RegEntry* re)
+{
+    QString data;
+
+    QString defval;
+
+    data += QStringLiteral("{ ");
+
+    bool firstVar = true;
+    for(auto reit = re->cbegin(); reit != re->cend(); ++ reit){
+        const RegVar* rv = *reit;
+
+        if(rv->subIndex() == 0) continue;
+
+        if(!firstVar){
+            data += QStringLiteral(", ");
+        }
+        firstVar = false;
+
+        defval.clear();
+        for(uint i = 0; i < rv->count(); i ++){
+            if(i != 0){
+                defval += QStringLiteral(", ");
+            }
+            defval += rv->defaultValue().toString();
+        }
+        data += defval;
+    }
+
+    data += QStringLiteral(" }");
+
+    return data;
 }
 
 QString RegUtils::makeName(const QString& text, SyntaxType syntaxType)

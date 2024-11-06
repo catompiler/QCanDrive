@@ -37,6 +37,13 @@ using EntryNameMap = QMap<reg_index_t, QString>;
 //! Тип маппинга имён переменных.
 using VarNameMap = QMap<reg_fullindex_t, QString>;
 
+//! Тип синтаксиса имён.
+enum class SyntaxType {
+    snake_case = 0,
+    camelCase = 1,
+    UPPER_CASE = 2
+};
+
 //! Генерирует имена для повторяющихся имён точек входа.
 extern EntryNameMap genRegDataEntryNameMapping(const RegEntryList* regentrylist);
 
@@ -46,11 +53,25 @@ extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist);
 //! Генерирует имена для повторяющихся имён переменных внутри точки входа.
 extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist);
 
-enum class SyntaxType {
-    snake_case = 0,
-    camelCase = 1,
-    UPPER_CASE = 2
-};
+
+//! Получает длину данных массива (кроме count с под-индексом 0) в точке входа.
+extern uint getArrDataLen(const RegEntry* re);
+
+//! Получает индекс переменной в данных массива (кроме переменной с под-индексом 0).
+extern uint getArrDataIndex(const RegEntry* re, const RegVar* rv, uint index);
+
+//! Получает имя массива.
+QString getArrName(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType);
+
+//! Получает декларацию массива.
+QString getArrDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType);
+
+//! Получает память массива.
+QString getArrMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping, SyntaxType syntaxType);
+
+//! Получает инициализатор данных массива по-умолчанию.
+extern QString getArrDefValData(const RegEntry* re);
+
 
 //! Создаёт имя переменной из текста.
 extern QString makeName(const QString& text, SyntaxType syntaxType = SyntaxType::camelCase);

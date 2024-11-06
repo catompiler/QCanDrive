@@ -160,7 +160,13 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
             for(uint i = 0; i < rv->count(); i ++){
 
                 QString regIdStr = makeRegIdName(re, rv, i);
-                QString data_str = RegUtils::getVarMem(m_dataName, re, rv, i, m_entryNameMap, m_varNameMap, m_syntaxType);
+                QString data_str;
+
+                if(re->type() != ObjectType::ARR || rv->subIndex() == 0){
+                    data_str = RegUtils::getVarMem(m_dataName, re, rv, i, m_entryNameMap, m_varNameMap, m_syntaxType);
+                }else{
+                    data_str = RegUtils::getArrMem(m_dataName, re, rv, i, m_entryNameMap, m_varNameMap, m_syntaxType);
+                }
 
                 out << QString("REG(%1, %2, %3, %4, %5) /* %6 */")
                        .arg(regIdStr,
@@ -244,15 +250,24 @@ bool RegListRegsExporter::exportRegDataDecl(const QString& filename, const RegEn
                 continue;
             }
 
-            QString fieldName = RegUtils::getVarDecl(re, rv, m_varNameMap, m_syntaxType);
+            QString fieldDecl;
+            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+                fieldDecl = RegUtils::getArrDecl(re, rv, m_varNameMap, m_syntaxType);
+            }else{
+                fieldDecl = RegUtils::getVarDecl(re, rv, m_varNameMap, m_syntaxType);
+            }
             QString varTypeStr = RegTypes::varDataTypeStr(rv->dataType());
             QString description = rv->description().simplified();
 
             out << QStringLiteral("    %1 %2; /* %3 */")
                    .arg(varTypeStr,
-                        fieldName,
+                        fieldDecl,
                         description)
                 << "\n";
+
+            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+                break;
+            }
         }
 
         write_struct_end();
@@ -340,14 +355,25 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
             }
             firstVar = false;
 
-            QString fieldName = RegUtils::getVarName(re, rv, m_varNameMap, m_syntaxType);
+            QString fieldName;
+            QString defval;
+            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+                fieldName = RegUtils::getArrName(re, rv, m_varNameMap, m_syntaxType);
+                defval = RegUtils::getArrDefValData(re);
+            }else{
+                fieldName = RegUtils::getVarName(re, rv, m_varNameMap, m_syntaxType);
+                defval = RegUtils::getVarDefValData(rv);
+            }
             QString description = rv->description().simplified();
-            QString defval = RegUtils::getVarDefValData(rv);
 
             out << QStringLiteral("    .%1 = %2 /* %3 */")
                    .arg(fieldName,
                         defval,
                         description);
+
+            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+                break;
+            }
         }
 
         write_struct_end();
@@ -365,13 +391,22 @@ bool RegListRegsExporter::exportRegData(const QString& filename, const RegEntryL
 
 QString RegListRegsExporter::makeRegName(const RegEntry* re, const RegVar* rv, uint index) const
 {
-    QString entry_name = RegUtils::getEntryName(re, m_entryNameMap, RegUtils::SyntaxType::UPPER_CASE);
-    QString var_name = RegUtils::getVarName(re, rv, m_varNameMap, RegUtils::SyntaxType::UPPER_CASE);
+    QString name;
 
-    QString name = QStringLiteral("%1_%2").arg(entry_name, var_name);
+    if(re->type() != ObjectType::ARR || rv->subIndex() == 0x0){
+        QString entry_name = RegUtils::getEntryName(re, m_entryNameMap, RegUtils::SyntaxType::UPPER_CASE);
+        QString var_name = RegUtils::getVarName(re, rv, m_varNameMap, RegUtils::SyntaxType::UPPER_CASE);
 
-    if(rv->count() > 1){
-        name = QStringLiteral("%1_%2").arg(name).arg(index);
+        name = QStringLiteral("%1_%2").arg(entry_name, var_name);
+
+        if(rv->count() > 1){
+            name = QStringLiteral("%1_%2").arg(name).arg(index);
+        }
+    }else{
+        QString entry_name = RegUtils::getEntryName(re, m_entryNameMap, RegUtils::SyntaxType::UPPER_CASE);
+        QString var_name = RegUtils::getArrName(re, rv, m_varNameMap, RegUtils::SyntaxType::UPPER_CASE);
+
+        name = QStringLiteral("%1_%2_%3").arg(entry_name, var_name).arg(RegUtils::getArrDataIndex(re, rv, index));
     }
 
     return name;

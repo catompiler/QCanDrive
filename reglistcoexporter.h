@@ -3,7 +3,7 @@
 
 #include "reglistexporter.h"
 
-class QFile;
+class QTextStream;
 
 
 class RegListCoExporter : public RegListExporter
@@ -17,19 +17,21 @@ public:
 
 private:
     bool exportCoH(const QString& filename, const RegEntryList* regentrylist);
-    bool writeCOCounters(QFile& file, const RegEntryList* regentrylist);
-    bool writeCOArraySizes(QFile& file, const RegEntryList* regentrylist);
-    bool writeCOexternOd(QFile& file);
-    bool writeCOShortcuts(QFile& file, const RegEntryList* regentrylist);
-    bool writeCOShortcutsWithNames(QFile& file, const RegEntryList* regentrylist);
+    bool writeCOCounters(QTextStream& out_stream, const RegEntryList* regentrylist);
+    bool writeCOArraySizes(QTextStream& out_stream, const RegEntryList* regentrylist);
+    bool writeCOexternOd(QTextStream& out_stream);
+    bool writeCOShortcuts(QTextStream& out_stream, const RegEntryList* regentrylist);
+    bool writeCOShortcutsWithNames(QTextStream& out_stream, const RegEntryList* regentrylist);
 
     bool exportCoC(const QString& filename, const RegEntryList* regentrylist);
-    bool writeAllOdObjConstDefs(QFile& file, const RegEntryList* regentrylist);
-    void writeOdObjConstDef(QFile& file, const RegEntry* re) const;
-    void writeOdVarConstDef(QFile& file, const RegEntry* re) const;
-    void writeOdRecConstDef(QFile& file, const RegEntry* re) const;
-    void writeOdArrConstDef(QFile& file, const RegEntry* re) const;
+    bool writeAllOdObjConstDefs(QTextStream& out_stream, const RegEntryList* regentrylist);
+    bool writeOdObjConstDef(QTextStream& out_stream, const RegEntry* re);
+    bool writeOdVarConstDef(QTextStream& out_stream, const RegEntry* re);
+    bool writeOdRecConstDef(QTextStream& out_stream, const RegEntry* re);
+    bool writeOdArrConstDef(QTextStream& out_stream, const RegEntry* re);
+    bool writeOd(QTextStream& out_stream, const RegEntryList* regentrylist);
 
+    QString getOdObjectTypeStr(ObjectType objType) const;
     QString getOdEntryTypeStr(ObjectType objType) const;
     QString getOdEntryFieldName(const RegEntry* re) const;
     QString getOdEntryFieldDecl(const RegEntry* re) const;

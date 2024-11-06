@@ -64,6 +64,12 @@ static const char* eflag_name_strs[] = {
     "CON_CNT_SDO_CLI",
     "CON_CNT_RPDO",
     "CON_CNT_TPDO",
+    "CO_SDO_R",
+    "CO_SDO_W",
+    "CO_TPDO",
+    "CO_RPDO",
+    "CO_TSRDO",
+    "CO_RSRDO",
 };
 
 static decltype(sizeof(eflag_name_strs)) eflag_name_strs_count = (sizeof(eflag_name_strs)/sizeof(eflag_name_strs[0]));
@@ -88,12 +94,19 @@ static const char* eflag_full_name_strs[] = {
     "REG_EFLAG_CON_CNT_SDO_CLI",
     "REG_EFLAG_CON_CNT_RPDO",
     "REG_EFLAG_CON_CNT_TPDO",
+    "REG_EFLAG_CO_SDO_R",
+    "REG_EFLAG_CO_SDO_W",
+    "REG_EFLAG_CO_TPDO",
+    "REG_EFLAG_CO_RPDO",
+    "REG_EFLAG_CO_TSRDO",
+    "REG_EFLAG_CO_RSRDO",
 };
 
 static decltype(sizeof(eflag_full_name_strs)) eflag_full_name_strs_count = (sizeof(eflag_full_name_strs)/sizeof(eflag_full_name_strs[0]));
 
 
 static const char* co_attribute_name_strs[] = {
+    "NONE",
     "SDO_R",
     "SDO_W",
     "SDO_RW",
@@ -111,6 +124,7 @@ static decltype(sizeof(co_attribute_name_strs)) co_attribute_name_strs_count = (
 
 
 static const char* co_attribute_full_name_strs[] = {
+    "0",
     "ODA_SDO_R",
     "ODA_SDO_W",
     "ODA_SDO_RW",
@@ -193,7 +207,13 @@ QVector<RegEFlag::Value> eflags()
         RegEFlag::CON_CNT_SDO_SRV,
         RegEFlag::CON_CNT_SDO_CLI,
         RegEFlag::CON_CNT_RPDO,
-        RegEFlag::CON_CNT_TPDO
+        RegEFlag::CON_CNT_TPDO,
+        RegEFlag::CO_SDO_R,
+        RegEFlag::CO_SDO_W,
+        RegEFlag::CO_TPDO,
+        RegEFlag::CO_RPDO,
+        RegEFlag::CO_TSRDO,
+        RegEFlag::CO_RSRDO,
     };
     static const QVector<RegEFlag::Value> eflags_vec(eflags);
 
@@ -266,6 +286,37 @@ QStringList coAttributeFullNames()
     static const QStringList co_attr_full_names_list = QStringList(co_attribute_full_name_strs, co_attribute_full_name_strs + co_attribute_full_name_strs_count);
 
     return co_attr_full_names_list;
+}
+
+co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags)
+{
+    co_attributes_t attrs = COAttribute::NONE;
+
+    if(eflags & (RegEFlag::CO_TPDO | RegEFlag::CO_RPDO)){
+        attrs |= COAttribute::TRPDO;
+    }else if(eflags & RegEFlag::CO_TPDO){
+        attrs |= COAttribute::TPDO;
+    }else if(eflags & RegEFlag::CO_RPDO){
+        attrs |= COAttribute::RPDO;
+    }
+
+    if(eflags & (RegEFlag::CO_TSRDO | RegEFlag::CO_RSRDO)){
+        attrs |= COAttribute::TRSRDO;
+    }else if(eflags & RegEFlag::CO_TSRDO){
+        attrs |= COAttribute::TSRDO;
+    }else if(eflags & RegEFlag::CO_RSRDO){
+        attrs |= COAttribute::RSRDO;
+    }
+
+    if(eflags & (RegEFlag::CO_SDO_W | RegEFlag::CO_SDO_R)){
+        attrs |= COAttribute::SDO_RW;
+    }else if(eflags & RegEFlag::CO_SDO_W){
+        attrs |= COAttribute::SDO_W;
+    }else if(eflags & RegEFlag::CO_SDO_R){
+        attrs |= COAttribute::SDO_R;
+    }
+
+    return attrs;
 }
 
 
