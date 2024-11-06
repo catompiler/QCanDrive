@@ -115,17 +115,27 @@ bool RegListCoExporter::writeCOCounters(QTextStream& out_stream, const RegEntryL
     cnts[RegEFlag::CON_CNT_RPDO] = qMakePair(0, QStringLiteral("OD_CNT_RPDO"));
     cnts[RegEFlag::CON_CNT_TPDO] = qMakePair(0, QStringLiteral("OD_CNT_TPDO"));
 
+    QMap<uint, uint> cnts_var;
+    for(auto it = cnts.begin(); it != cnts.end(); ++ it){
+        cnts_var[it.key()] = 0;
+    }
+
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
 
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
 
-            for(auto it = cnts.begin(); it != cnts.end(); ++ it){
+            for(auto it = cnts_var.begin(); it != cnts_var.end(); ++ it){
                 if(rv->eflags() & it.key()){
-                    it.value().first ++;
+                    it.value() ++;
                 }
             }
+        }
+
+        for(auto it = cnts_var.begin(); it != cnts_var.end(); ++ it){
+            if(it.value() != 0) cnts[it.key()].first ++;
+            it.value() = 0;
         }
     }
 
