@@ -288,11 +288,9 @@ bool RegListCoExporter::exportCoC(const QString& filename, const RegEntryList* r
     QString co_h_name = fileinfo.fileName().replace(".c", ".h");
 
     // header
-    out << QStringLiteral("#include \"%1\"\n").arg(co_h_name)
-        << "\n\n"
-        << "#define OD_DEFINITION\n"
+    out << "#define OD_DEFINITION\n"
         << "#include \"301/CO_ODinterface.h\"\n"
-        << "#include \"OD.h\"\n"
+        << "#include \"" << co_h_name <<  "\"\n"
         << "\n"
         << "#if CO_VERSION_MAJOR < 4\n"
         << "#error This Object dictionary is compatible with CANopenNode V4.0 and above!\n"
@@ -329,7 +327,7 @@ bool RegListCoExporter::writeAllOdObjConstDefs(QTextStream& out_stream, const Re
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
 
-        out << QStringLiteral("%1 %2;")
+        out << QStringLiteral("    %1 %2;")
                .arg(getOdEntryTypeStr(re->type()), getOdEntryFieldDecl(re))
             << "\n";
     }
