@@ -16,6 +16,7 @@ SOURCES += \
     regentry.cpp \
     regentrydlg.cpp \
     reglistcoexporter.cpp \
+    reglistdataexporter.cpp \
     reglisteditorwin.cpp \
     reglistexporter.cpp \
     reglistmodel.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     regentry.h \
     regentrydlg.h \
     reglistcoexporter.h \
+    reglistdataexporter.h \
     reglisteditorwin.h \
     reglistexporter.h \
     reglistmodel.h \

@@ -417,6 +417,11 @@ QString RegUtils::getVarDefValData(const RegVar* rv)
     return data;
 }
 
+QString RegUtils::makeStructName(const RegEntry* re, const EntryNameMap* entryMapping, SyntaxType syntaxType)
+{
+    return getEntryName(re, entryMapping, syntaxType);
+}
+
 QString RegUtils::makeStructTypeName(const QString& name)
 {
     return QStringLiteral("_S_%1").arg(name);

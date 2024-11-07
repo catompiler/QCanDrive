@@ -12,6 +12,7 @@
 #include "regutils.h"
 #include "reglistxmlserializer.h"
 #include "reglistregsexporter.h"
+#include "reglistdataexporter.h"
 #include "reglistcoexporter.h"
 #include <QMessageBox>
 #include <QApplication>
@@ -143,6 +144,30 @@ void RegListEditorWin::on_actSaveAs_triggered(bool checked)
     }
 
     file.close();
+}
+
+void RegListEditorWin::on_actExportData_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт данных"), QString(), tr("Заголовочный файл C (*.h)"));
+
+    if(filename.isEmpty()) return;
+
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListDataExporter exporter;
+
+    exporter.setDataName(QStringLiteral("reg_data"))
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
+    }
 }
 
 void RegListEditorWin::on_actExportRegs_triggered(bool checked)

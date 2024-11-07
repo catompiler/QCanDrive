@@ -57,6 +57,7 @@
      <property name="title">
       <string>&amp;Экспорт</string>
      </property>
+     <addaction name="actExportData"/>
      <addaction name="actExportRegs"/>
      <addaction name="actExportCo"/>
     </widget>
@@ -88,6 +89,7 @@
    <addaction name="actOpen"/>
    <addaction name="actOpenAppend"/>
    <addaction name="separator"/>
+   <addaction name="actExportData"/>
    <addaction name="actExportRegs"/>
    <addaction name="actExportCo"/>
    <addaction name="separator"/>
@@ -210,6 +212,15 @@
    </property>
    <property name="text">
     <string>&amp;Добавить</string>
+   </property>
+  </action>
+  <action name="actExportData">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Export-48.png</normaloff>:/images/icons/Export-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Да&amp;нные</string>
    </property>
   </action>
  </widget>

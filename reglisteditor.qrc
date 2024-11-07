@@ -11,5 +11,6 @@
         <file>icons/Export-48-Blue.png</file>
         <file>icons/Export-48-Green.png</file>
         <file>icons/Add Folder-48.png</file>
+        <file>icons/Export-48.png</file>
     </qresource>
 </RCC>

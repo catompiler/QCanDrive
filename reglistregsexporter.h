@@ -25,8 +25,6 @@ private:
 
     bool exportRegIds(const QString& filename, const RegEntryList* regentrylist);
     bool exportRegList(const QString& filename, const RegEntryList* regentrylist);
-    bool exportRegDataDecl(const QString& filename, const RegEntryList* regentrylist);
-    bool exportRegData(const QString& filename, const RegEntryList* regentrylist);
 
     QString makeRegName(const RegEntry* re, const RegVar* rv, uint index = 0) const;
     QString makeRegIdName(const RegEntry* re, const RegVar* rv, uint index = 0) const;
@@ -34,8 +32,6 @@ private:
     QString flagToStr(uint flag) const;
     QString flagsToStr(uint flags) const;
     QString idToStr(uint id) const;
-    QString makeDataStructName(const RegEntry* re = nullptr) const;
-    QString makeDataStructTypeName(const QString& name) const;
 };
 
 #endif // REGLISTREGSEXPORTER_H

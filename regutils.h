@@ -91,6 +91,9 @@ extern QString getVarMem(const QString& name, const RegEntry* re, const RegVar* 
 //! Получает инициализатор данных по-умолчанию.
 extern QString getVarDefValData(const RegVar* rv);
 
+//! Получает имя структуры по точке входа.
+extern QString makeStructName(const RegEntry* re, const EntryNameMap* entryMapping, SyntaxType syntaxType);
+
 //! Получает имя типа структуры по имени данных.
 extern QString makeStructTypeName(const QString& name);
 
