@@ -384,7 +384,7 @@ QStringList dataTypesStringList()
     return data_type_str_list;
 }
 
-QString varDataTypeStr(DataType type)
+QString varRegDataTypeStr(DataType type)
 {
     switch(type){
     case DataType::I32:
@@ -405,6 +405,32 @@ QString varDataTypeStr(DataType type)
         return QString("reg_iq15_t");
     case DataType::IQ7:
         return QString("reg_iq7_t");
+    }
+
+    return QString("long");
+}
+
+QString varDataTypeStr(DataType type)
+{
+    switch(type){
+    case DataType::I32:
+        return QString("int32_t");
+    case DataType::I16:
+        return QString("int16_t");
+    case DataType::I8:
+        return QString("int8_t");
+    case DataType::U32:
+        return QString("uint32_t");
+    case DataType::U16:
+        return QString("uint16_t");
+    case DataType::U8:
+        return QString("uint8_t");
+    case DataType::IQ24:
+        return QString("int32_t");
+    case DataType::IQ15:
+        return QString("int32_t");
+    case DataType::IQ7:
+        return QString("int32_t");
     }
 
     return QString("long");

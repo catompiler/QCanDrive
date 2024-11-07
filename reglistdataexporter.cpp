@@ -108,7 +108,7 @@ bool RegListDataExporter::exportRegDataDecl(const QString& filename, const RegEn
             }else{
                 fieldDecl = RegUtils::getVarDecl(re, rv, m_varNameMap, m_syntaxType);
             }
-            QString varTypeStr = RegTypes::varDataTypeStr(rv->dataType());
+            QString varTypeStr = RegTypes::varRegDataTypeStr(rv->dataType());
             QString description = rv->description().simplified();
 
             out << QStringLiteral("    %1 %2; /* %3 */")
