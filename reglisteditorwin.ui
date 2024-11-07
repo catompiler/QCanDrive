@@ -190,7 +190,7 @@
     <string>Список &amp;регистров</string>
    </property>
    <property name="toolTip">
-    <string>Список &amp;регистров</string>
+    <string>Список регистров</string>
    </property>
   </action>
   <action name="actExportCo">
@@ -202,7 +202,7 @@
     <string>CANopen</string>
    </property>
    <property name="toolTip">
-    <string>&amp;Словарь CANopenNode</string>
+    <string>Словарь CANopenNode</string>
    </property>
   </action>
   <action name="actOpenAppend">
@@ -221,6 +221,9 @@
    </property>
    <property name="text">
     <string>Да&amp;нные</string>
+   </property>
+   <property name="toolTip">
+    <string>Данные регистров</string>
    </property>
   </action>
  </widget>
