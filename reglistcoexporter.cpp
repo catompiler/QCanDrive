@@ -229,6 +229,8 @@ bool RegListCoExporter::writeCOShortcuts(QTextStream& out_stream, const RegEntry
                .arg(static_cast<uint>(re->index()), 0, 16)
                .arg(list_index)
             << "\n";
+
+        list_index ++;
     }
 
     out << "\n\n";
