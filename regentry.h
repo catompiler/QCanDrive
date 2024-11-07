@@ -40,6 +40,7 @@ public:
     RegVar* at(int index) const;
     int find(RegVar* var) const;
     int count() const;
+    int countAll() const;
 
     VarListIterator begin();
     ConstVarListIterator cbegin() const;

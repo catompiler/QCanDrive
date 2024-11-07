@@ -95,6 +95,15 @@ int RegEntry::count() const
     return m_vars.count();
 }
 
+int RegEntry::countAll() const
+{
+    int count = 0;
+    std::for_each(cbegin(), cend(), [&count](const RegVar* rv){
+        count += rv->count();
+    });
+    return count;
+}
+
 RegEntry::VarListIterator RegEntry::begin()
 {
     return m_vars.begin();

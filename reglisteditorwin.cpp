@@ -336,7 +336,7 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
     }
 
     m_regEntryDlg->setIndexEditable(true);
-    m_regEntryDlg->setIndex(re->count());
+    m_regEntryDlg->setIndex(re->countAll());
     m_regEntryDlg->setObjectTypeEditable(false);
     m_regEntryDlg->setObjectType(ObjectType::VAR);
     m_regEntryDlg->setName(QString("newSubObject"));
