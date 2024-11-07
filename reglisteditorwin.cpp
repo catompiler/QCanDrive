@@ -324,6 +324,17 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
     RegEntry* re = m_regsListModel->entryByModelIndex(entry_index);
     if(re == nullptr) return;
 
+    switch(re->type()){
+    case ObjectType::VAR:
+        if(re->count() != 0){
+            QMessageBox::critical(this, tr("Ошибка"), tr("Внутри уже есть переменная!"));
+            return;
+        }
+    case ObjectType::ARR:
+    case ObjectType::REC:
+        break;
+    }
+
     m_regEntryDlg->setIndexEditable(true);
     m_regEntryDlg->setIndex(re->count());
     m_regEntryDlg->setObjectTypeEditable(false);
