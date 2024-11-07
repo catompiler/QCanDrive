@@ -19,7 +19,12 @@ public:
 
     bool doExport(const QString& filename, const RegEntryList* regentrylist) override;
 
+    RegListRegsExporter& setListFileName(const QString& fileName);
+    RegListRegsExporter& setIdsFileName(const QString& fileName);
+
 private:
+    QString m_listFileName;
+    QString m_idsFileName;
 
     QHash<reg_fullindex_t, QString> m_reg_id_names;
 

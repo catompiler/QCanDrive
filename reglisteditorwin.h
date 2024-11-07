@@ -16,6 +16,7 @@ class RegDelegate;
 class RegEntry;
 class RegSelectDlg;
 class FlagsEditDlg;
+class ExportDlg;
 
 
 class RegListEditorWin : public QMainWindow
@@ -26,13 +27,11 @@ public:
     RegListEditorWin(QWidget *parent = nullptr);
     ~RegListEditorWin();
 
-public slots:
+private slots:
     void on_actOpen_triggered(bool checked = false);
     void on_actOpenAppend_triggered(bool checked = false);
     void on_actSaveAs_triggered(bool checked = false);
-    void on_actExportData_triggered(bool checked = false);
-    void on_actExportRegs_triggered(bool checked = false);
-    void on_actExportCo_triggered(bool checked = false);
+    void on_actExport_triggered(bool checked = false);
     void on_actQuit_triggered(bool checked = false);
     void on_actAddItem_triggered(bool checked = false);
     void on_actAddSubItem_triggered(bool checked = false);
@@ -47,9 +46,14 @@ private:
     RegEntryDlg* m_regEntryDlg;
     RegSelectDlg* m_regSelectDlg;
     FlagsEditDlg* m_flagsEditDlg;
+    ExportDlg* m_exportDlg;
 
     RegListModel* m_regsListModel;
 
     RegDelegate* m_regListDelegate;
+
+    void doDlgExportRegs();
+    void doDlgExportData();
+    void doDlgExportCo();
 };
 #endif // REGLISTEDITORWIN_H

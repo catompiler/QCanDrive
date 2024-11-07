@@ -25,22 +25,32 @@ RegListDataExporter::~RegListDataExporter()
 
 bool RegListDataExporter::doExport(const QString& filename, const RegEntryList* regentrylist)
 {
-    QFileInfo regs_fi(filename);
-    QDir regs_dir = regs_fi.dir();
+    QDir regs_dir(filename);
 
-    QString baseName = regs_fi.baseName();
-    QString data_name_c = baseName + ".c";
-    QString data_name_h = baseName + ".h";
+    if(!regs_dir.exists()) return false;
 
-    if(m_dataName.isEmpty()) m_dataName = baseName;
+    if(m_declFileName.isEmpty()) m_declFileName = regs_dir.filePath("regs_data.h");
+    if(m_implFileName.isEmpty()) m_implFileName = regs_dir.filePath("regs_data.c");
+    if(m_dataName.isEmpty()) m_dataName = "regs_data";
 
-    QString data_filename_c = regs_dir.filePath(data_name_c);
-    QString data_filename_h = regs_dir.filePath(data_name_h);
-
-    if(!exportRegDataDecl(data_filename_h, regentrylist)) return false;
-    if(!exportRegData(data_filename_c, regentrylist)) return false;
+    if(!exportRegDataDecl(m_declFileName, regentrylist)) return false;
+    if(!exportRegData(m_implFileName, regentrylist)) return false;
 
     return true;
+}
+
+RegListDataExporter& RegListDataExporter::setDeclFileName(const QString& fileName)
+{
+    m_declFileName = fileName;
+
+    return *this;
+}
+
+RegListDataExporter& RegListDataExporter::setImplFileName(const QString& fileName)
+{
+    m_implFileName = fileName;
+
+    return *this;
 }
 
 bool RegListDataExporter::exportRegDataDecl(const QString& filename, const RegEntryList* regentrylist)

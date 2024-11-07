@@ -15,7 +15,13 @@ public:
 
     bool doExport(const QString& filename, const RegEntryList* regentrylist) override;
 
+    RegListCoExporter& setCOhFileName(const QString& fileName);
+    RegListCoExporter& setCOcFileName(const QString& fileName);
+
 private:
+    QString m_cohFileName;
+    QString m_cocFileName;
+
     bool exportCoH(const QString& filename, const RegEntryList* regentrylist);
     bool writeCOCounters(QTextStream& out_stream, const RegEntryList* regentrylist);
     bool writeCOArraySizes(QTextStream& out_stream, const RegEntryList* regentrylist);

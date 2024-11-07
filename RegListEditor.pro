@@ -9,6 +9,7 @@ CONFIG += c++17
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    exportdlg.cpp \
     flagseditdlg.cpp \
     flagseditmodel.cpp \
     main.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     sellineedit.cpp
 
 HEADERS += \
+    exportdlg.h \
     first_arg_type.hpp \
     flagseditdlg.h \
     flagseditmodel.h \
@@ -58,6 +60,7 @@ HEADERS += \
     sellineedit.h
 
 FORMS += \
+    exportdlg.ui \
     flagseditdlg.ui \
     regentrydlg.ui \
     reglisteditorwin.ui \

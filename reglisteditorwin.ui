@@ -53,19 +53,11 @@
     <property name="title">
      <string>&amp;Файл</string>
     </property>
-    <widget class="QMenu" name="menu">
-     <property name="title">
-      <string>&amp;Экспорт</string>
-     </property>
-     <addaction name="actExportData"/>
-     <addaction name="actExportRegs"/>
-     <addaction name="actExportCo"/>
-    </widget>
     <addaction name="actOpen"/>
     <addaction name="actOpenAppend"/>
     <addaction name="actSaveAs"/>
     <addaction name="separator"/>
-    <addaction name="menu"/>
+    <addaction name="actExport"/>
     <addaction name="separator"/>
     <addaction name="actQuit"/>
    </widget>
@@ -89,9 +81,7 @@
    <addaction name="actOpen"/>
    <addaction name="actOpenAppend"/>
    <addaction name="separator"/>
-   <addaction name="actExportData"/>
-   <addaction name="actExportRegs"/>
-   <addaction name="actExportCo"/>
+   <addaction name="actExport"/>
    <addaction name="separator"/>
    <addaction name="actAddItem"/>
    <addaction name="actAddSubItem"/>
@@ -181,30 +171,6 @@
     <string>Удалить всё</string>
    </property>
   </action>
-  <action name="actExportRegs">
-   <property name="icon">
-    <iconset resource="reglisteditor.qrc">
-     <normaloff>:/images/icons/Export-48-Blue.png</normaloff>:/images/icons/Export-48-Blue.png</iconset>
-   </property>
-   <property name="text">
-    <string>Список &amp;регистров</string>
-   </property>
-   <property name="toolTip">
-    <string>Список регистров</string>
-   </property>
-  </action>
-  <action name="actExportCo">
-   <property name="icon">
-    <iconset resource="reglisteditor.qrc">
-     <normaloff>:/images/icons/Export-48-Green.png</normaloff>:/images/icons/Export-48-Green.png</iconset>
-   </property>
-   <property name="text">
-    <string>CANopen</string>
-   </property>
-   <property name="toolTip">
-    <string>Словарь CANopenNode</string>
-   </property>
-  </action>
   <action name="actOpenAppend">
    <property name="icon">
     <iconset resource="reglisteditor.qrc">
@@ -214,16 +180,16 @@
     <string>&amp;Добавить</string>
    </property>
   </action>
-  <action name="actExportData">
+  <action name="actExport">
    <property name="icon">
     <iconset resource="reglisteditor.qrc">
      <normaloff>:/images/icons/Export-48.png</normaloff>:/images/icons/Export-48.png</iconset>
    </property>
    <property name="text">
-    <string>Да&amp;нные</string>
+    <string>&amp;Экспорт</string>
    </property>
    <property name="toolTip">
-    <string>Данные регистров</string>
+    <string>Экспорт</string>
    </property>
   </action>
  </widget>

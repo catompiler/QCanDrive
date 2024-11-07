@@ -4,6 +4,7 @@
 #include "regentrydlg.h"
 #include "regselectdlg.h"
 #include "flagseditdlg.h"
+#include "exportdlg.h"
 #include "reglistmodel.h"
 #include "regentry.h"
 #include "regobject.h"
@@ -33,6 +34,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     m_regEntryDlg = new RegEntryDlg();
     m_regSelectDlg = new RegSelectDlg();
     m_flagsEditDlg = new FlagsEditDlg();
+    m_exportDlg = new ExportDlg();
 
     m_regListDelegate = new RegDelegate();
     m_regListDelegate->setRegSelectDialog(m_regSelectDlg);
@@ -57,6 +59,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 RegListEditorWin::~RegListEditorWin()
 {
     delete ui;
+    delete m_exportDlg;
     delete m_flagsEditDlg;
     delete m_regSelectDlg;
     delete m_regEntryDlg;
@@ -146,75 +149,15 @@ void RegListEditorWin::on_actSaveAs_triggered(bool checked)
     file.close();
 }
 
-void RegListEditorWin::on_actExportData_triggered(bool checked)
+void RegListEditorWin::on_actExport_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт данных"), QString(), tr("Заголовочный файл C (*.h)"));
-
-    if(filename.isEmpty()) return;
-
-    auto reglist = m_regsListModel->regEntryList();
-    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
-    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
-
-    RegListDataExporter exporter;
-
-    exporter.setDataName(QStringLiteral("reg_data"))
-            .setSyntaxType(RegUtils::SyntaxType::camelCase)
-            .setEntryNameMap(&entymapping)
-            .setVarNameMap(&varmapping);
-
-    if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
-    }
-}
-
-void RegListEditorWin::on_actExportRegs_triggered(bool checked)
-{
-    Q_UNUSED(checked);
-
-    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт списка регистров"), QString(), tr("Заголовочный файл C (*.h)"));
-
-    if(filename.isEmpty()) return;
-
-    auto reglist = m_regsListModel->regEntryList();
-    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
-    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
-
-    RegListRegsExporter exporter;
-
-    exporter.setDataName(QStringLiteral("reg_data"))
-            .setSyntaxType(RegUtils::SyntaxType::camelCase)
-            .setEntryNameMap(&entymapping)
-            .setVarNameMap(&varmapping);
-
-    if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
-    }
-}
-
-void RegListEditorWin::on_actExportCo_triggered(bool checked)
-{
-    Q_UNUSED(checked);
-
-    QString filename = QFileDialog::getSaveFileName(this, tr("Экспорт словаря CANopenNode"), QString(), tr("Заголовочный файл C (*.h)"));
-
-    if(filename.isEmpty()) return;
-
-    auto reglist = m_regsListModel->regEntryList();
-    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
-    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
-
-    RegListCoExporter exporter;
-
-    exporter.setDataName(QStringLiteral("reg_data"))
-            .setSyntaxType(RegUtils::SyntaxType::camelCase)
-            .setEntryNameMap(&entymapping)
-            .setVarNameMap(&varmapping);
-
-    if(!exporter.doExport(filename, m_regsListModel->regEntryList())){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
+    if(m_exportDlg->exec()){
+        if(m_exportDlg->exportRegs()) doDlgExportRegs();
+        if(m_exportDlg->exportData()) doDlgExportData();
+        if(m_exportDlg->exportCO()) doDlgExportCo();
+        QMessageBox::information(this, tr("Экспорт"), tr("Завершено!"));
     }
 }
 
@@ -386,9 +329,6 @@ void RegListEditorWin::on_actDelAll_triggered(bool checked)
 void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked);
-
-    /*m_flagsEditDlg->setFlagsNames(RegTypes::flagsNames().mid(1));
-    m_flagsEditDlg->exec();*/
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
@@ -431,6 +371,66 @@ void RegListEditorWin::tvRegList_selection_changed(const QItemSelection &selecte
 
     if(selected.empty()){
     }else{
+    }
+}
+
+void RegListEditorWin::doDlgExportRegs()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListRegsExporter exporter;
+
+    exporter.setListFileName(m_exportDlg->regListFileName())
+            .setIdsFileName(m_exportDlg->regIdsFileName())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+void RegListEditorWin::doDlgExportData()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListDataExporter exporter;
+
+    exporter.setDeclFileName(m_exportDlg->regDataDeclFileName())
+            .setImplFileName(m_exportDlg->regDataImplFileName())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+void RegListEditorWin::doDlgExportCo()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListCoExporter exporter;
+
+    exporter.setCOhFileName(m_exportDlg->cohFileName())
+            .setCOcFileName(m_exportDlg->cocFileName())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
     }
 }
 

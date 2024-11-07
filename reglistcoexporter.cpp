@@ -28,22 +28,32 @@ RegListCoExporter::~RegListCoExporter()
 
 bool RegListCoExporter::doExport(const QString& filename, const RegEntryList* regentrylist)
 {
-    QFileInfo fi(filename);
-    QDir dir = fi.dir();
+    QDir regs_dir(filename);
 
-    QString baseName = fi.baseName();
-    QString co_name_c = baseName + ".c";
-    QString co_name_h = baseName + ".h";
+    if(!regs_dir.exists()) return false;
 
-    if(m_dataName.isEmpty()) m_dataName = baseName;
+    if(m_cohFileName.isEmpty()) m_cohFileName = regs_dir.filePath("CO.h");
+    if(m_cocFileName.isEmpty()) m_cocFileName = regs_dir.filePath("CO.c");
+    if(m_dataName.isEmpty()) m_dataName = "regs_data";
 
-    QString co_filename_c = dir.filePath(co_name_c);
-    QString co_filename_h = dir.filePath(co_name_h);
-
-    if(!exportCoH(co_filename_h, regentrylist)) return false;
-    if(!exportCoC(co_filename_c, regentrylist)) return false;
+    if(!exportCoH(m_cohFileName, regentrylist)) return false;
+    if(!exportCoC(m_cocFileName, regentrylist)) return false;
 
     return true;
+}
+
+RegListCoExporter& RegListCoExporter::setCOhFileName(const QString& fileName)
+{
+    m_cohFileName = fileName;
+
+    return *this;
+}
+
+RegListCoExporter& RegListCoExporter::setCOcFileName(const QString& fileName)
+{
+    m_cocFileName = fileName;
+
+    return *this;
 }
 
 bool RegListCoExporter::exportCoH(const QString& filename, const RegEntryList* regentrylist)
