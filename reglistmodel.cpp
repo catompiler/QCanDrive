@@ -69,6 +69,26 @@ void RegListModel::setRegList(const RegEntryList& reglist)
     endResetModel();
 }
 
+void RegListModel::addRegList(RegEntryList& reglist)
+{
+    beginResetModel();
+
+    for(auto it = reglist.begin(); it != reglist.end();){
+        RegEntry* re = *it;
+        if(std::find_if(m_reglist->begin(), m_reglist->end(), [&re](RegEntry* ref){
+                        return ref->index() == re->index();}) != m_reglist->end()){
+            ++ it;
+            continue;
+        }
+        m_reglist->append(re);
+        it = reglist.erase(it);
+    }
+
+    fixSortingAll();
+
+    endResetModel();
+}
+
 bool RegListModel::hasEntryByRegIndex(reg_index_t index) const
 {
     return entryByRegIndex(index) != nullptr;

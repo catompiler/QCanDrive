@@ -42,6 +42,7 @@ public:
     const RegEntryList* regEntryList() const;
 
     void setRegList(const RegEntryList& reglist);
+    void addRegList(RegEntryList& reglist);
 
     bool hasEntryByRegIndex(reg_index_t index) const;
     RegEntry* entryByRegIndex(reg_index_t index) const;

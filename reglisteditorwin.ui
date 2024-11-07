@@ -61,6 +61,7 @@
      <addaction name="actExportCo"/>
     </widget>
     <addaction name="actOpen"/>
+    <addaction name="actOpenAppend"/>
     <addaction name="actSaveAs"/>
     <addaction name="separator"/>
     <addaction name="menu"/>
@@ -85,6 +86,7 @@
    <addaction name="separator"/>
    <addaction name="actSaveAs"/>
    <addaction name="actOpen"/>
+   <addaction name="actOpenAppend"/>
    <addaction name="separator"/>
    <addaction name="actExportRegs"/>
    <addaction name="actExportCo"/>
@@ -199,6 +201,15 @@
    </property>
    <property name="toolTip">
     <string>&amp;Словарь CANopenNode</string>
+   </property>
+  </action>
+  <action name="actOpenAppend">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Add Folder-48.png</normaloff>:/images/icons/Add Folder-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Добавить</string>
    </property>
   </action>
  </widget>

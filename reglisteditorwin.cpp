@@ -90,6 +90,37 @@ void RegListEditorWin::on_actOpen_triggered(bool checked)
     file.close();
 }
 
+void RegListEditorWin::on_actOpenAppend_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Добавить файл"), QString(), tr("Файлы списка регистров (*.regxml)"));
+
+    if(filename.isEmpty()) return;
+
+    QFile file(filename);
+
+    if(!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл!"));
+        return;
+    }
+
+    RegListXmlSerializer ser;
+    RegEntryList reglist;
+
+    if(!ser.deserialize(&file, &reglist)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла!"));
+    }else{
+        m_regsListModel->addRegList(reglist);
+        if(!reglist.isEmpty()){
+            QMessageBox::warning(this, tr("Предупреждение!"), tr("Часть данных не добавлена из-за совпадения индексов!"));
+            qDeleteAll(reglist);
+        }
+    }
+
+    file.close();
+}
+
 void RegListEditorWin::on_actSaveAs_triggered(bool checked)
 {
     Q_UNUSED(checked);
