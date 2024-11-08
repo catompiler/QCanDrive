@@ -2,7 +2,7 @@
 #define REGLISTEDITORWIN_H
 
 #include <QMainWindow>
-
+#include <QString>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class RegListEditorWin; }
@@ -53,6 +53,10 @@ private:
     RegListModel* m_regsListModel;
 
     RegDelegate* m_regListDelegate;
+
+    QString m_curDir;
+
+    void appendFile(const QString& fileName);
 
     void doDlgExportRegs();
     void doDlgExportData();

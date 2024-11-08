@@ -21,7 +21,9 @@
 #include <QIODevice>
 #include <QByteArray>
 #include <QBuffer>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QFileDialog>
 #include <QDebug>
 
@@ -71,72 +73,48 @@ void RegListEditorWin::on_actOpen_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QString filename = QFileDialog::getOpenFileName(this, tr("Открыть файл"), QString(), tr("Файлы списка регистров (*.regxml)"));
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Открыть файлы"), m_curDir, tr("Файлы списка регистров (*.regxml)"));
 
-    if(filename.isEmpty()) return;
+    if(filenames.isEmpty()) return;
 
-    QFile file(filename);
+    m_curDir = QDir(filenames.front()).path();
 
-    if(!file.open(QIODevice::ReadOnly)){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл!"));
-        return;
+    m_regsListModel->setRegList(RegEntryList());
+
+    for(auto& filename: filenames){
+        appendFile(filename);
     }
-
-    RegListXmlSerializer ser;
-    RegEntryList reglist;
-
-    if(!ser.deserialize(&file, &reglist)){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла!"));
-    }else{
-        m_regsListModel->setRegList(reglist);
-    }
-
-    file.close();
 }
 
 void RegListEditorWin::on_actOpenAppend_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QString filename = QFileDialog::getOpenFileName(this, tr("Добавить файл"), QString(), tr("Файлы списка регистров (*.regxml)"));
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Добавить файлы"), m_curDir, tr("Файлы списка регистров (*.regxml)"));
 
-    if(filename.isEmpty()) return;
+    if(filenames.isEmpty()) return;
 
-    QFile file(filename);
+    m_curDir = QDir(filenames.front()).path();
 
-    if(!file.open(QIODevice::ReadOnly)){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл!"));
-        return;
+    for(auto& filename: filenames){
+        appendFile(filename);
     }
-
-    RegListXmlSerializer ser;
-    RegEntryList reglist;
-
-    if(!ser.deserialize(&file, &reglist)){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла!"));
-    }else{
-        m_regsListModel->addRegList(reglist);
-        if(!reglist.isEmpty()){
-            QMessageBox::warning(this, tr("Предупреждение!"), tr("Часть данных не добавлена из-за совпадения индексов!"));
-            qDeleteAll(reglist);
-        }
-    }
-
-    file.close();
 }
 
 void RegListEditorWin::on_actSaveAs_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Открыть файл"), QString(), tr("Файлы списка регистров (*.regxml)"));
+    QString filename = QFileDialog::getSaveFileName(this, tr("Сохранить файл"), m_curDir, tr("Файлы списка регистров (*.regxml)"));
 
     if(filename.isEmpty()) return;
+
+    m_curDir = QDir(filename).path();
 
     QFile file(filename);
 
     if(!file.open(QIODevice::WriteOnly)){
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл!"));
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно сохранить файл!"));
         return;
     }
 
@@ -386,6 +364,31 @@ void RegListEditorWin::tvRegList_selection_changed(const QItemSelection &selecte
     if(selected.empty()){
     }else{
     }
+}
+
+void RegListEditorWin::appendFile(const QString& fileName)
+{
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл: %1").arg(QFileInfo(fileName).fileName()));
+        return;
+    }
+
+    RegListXmlSerializer ser;
+    RegEntryList reglist;
+
+    if(!ser.deserialize(&file, &reglist)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла: %1").arg(QFileInfo(fileName).fileName()));
+    }else{
+        m_regsListModel->addRegList(reglist);
+        if(!reglist.isEmpty()){
+            QMessageBox::warning(this, tr("Предупреждение!"), tr("Часть данных не добавлена из-за совпадения индексов в файле: %1").arg(QFileInfo(fileName).fileName()));
+            qDeleteAll(reglist);
+        }
+    }
+
+    file.close();
 }
 
 void RegListEditorWin::doDlgExportRegs()
