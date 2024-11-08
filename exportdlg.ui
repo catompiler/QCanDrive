@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Экспорт</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="reglisteditor.qrc">
+    <normaloff>:/images/icons/Export-48-Green.png</normaloff>:/images/icons/Export-48-Green.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">
@@ -619,7 +623,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="reglisteditor.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>bbOkCancel</sender>

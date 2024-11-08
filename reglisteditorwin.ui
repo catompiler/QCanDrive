@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Редактор списка регистров</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="reglisteditor.qrc">
+    <normaloff>:/images/icons/Electronics-48.png</normaloff>:/images/icons/Electronics-48.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>

@@ -11,10 +11,12 @@
         <file>icons/Export-48-Blue.png</file>
         <file>icons/Export-48-Green.png</file>
         <file>icons/Add Folder-48.png</file>
-        <file>icons/Export-48.png</file>
         <file>icons/icons8-collapse-48.png</file>
         <file>icons/icons8-expand-48.png</file>
         <file>icons/Arrow Down-48.png</file>
         <file>icons/Arrow Up-48.png</file>
+        <file>icons/Electronics-48.png</file>
+        <file>icons/Edit File-48.png</file>
+        <file>icons/Edit Property-48.png</file>
     </qresource>
 </RCC>

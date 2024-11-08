@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Редактирование объекта</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="reglisteditor.qrc">
+    <normaloff>:/images/icons/Edit File-48.png</normaloff>:/images/icons/Edit File-48.png</iconset>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QLabel" name="lblIndex">
@@ -95,7 +99,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="reglisteditor.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>bbOkCancel</sender>
