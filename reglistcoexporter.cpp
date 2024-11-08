@@ -161,6 +161,10 @@ bool RegListCoExporter::writeCOCounters(QTextStream& out_stream, const RegEntryL
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
 
+            if(rv->eflags() & RegEFlag::CO_HIDE){
+                continue;
+            }
+
             for(auto it = cnts_var.begin(); it != cnts_var.end(); ++ it){
                 if(rv->eflags() & it.key()){
                     it.value() ++;
@@ -204,12 +208,18 @@ bool RegListCoExporter::writeCOArraySizes(QTextStream& out_stream, const RegEntr
 
         if(re->type() == ObjectType::ARR){
 
+            if(std::find_if(re->cbegin(), re->cend(), [](const RegVar* rv){
+                             return !(rv->eflags() & RegEFlag::CO_HIDE); }) == re->cend()){
+                continue;
+            }
+
             uint size = 0;
 
             for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
                 const RegVar* rv = *rvit;
-                if((rv->eflags() & RegEFlag::CO_COUNT) == 0){
-                    size = qMax(rv->count(), size);
+
+                if(!(rv->eflags() & RegEFlag::CO_COUNT)){
+                    size += rv->count();
                 }
             }
 
@@ -260,6 +270,11 @@ bool RegListCoExporter::writeCOShortcuts(QTextStream& out_stream, const RegEntry
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
 
+        if(std::find_if(re->cbegin(), re->cend(), [](const RegVar* rv){
+                         return !(rv->eflags() & RegEFlag::CO_HIDE); }) == re->cend()){
+            continue;
+        }
+
         out << QStringLiteral("#define OD_ENTRY_H%1 &OD->list[%2]")
                .arg(static_cast<uint>(re->index()), 0, 16)
                .arg(list_index)
@@ -288,6 +303,11 @@ bool RegListCoExporter::writeCOShortcutsWithNames(QTextStream& out_stream, const
 
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
+
+        if(std::find_if(re->cbegin(), re->cend(), [](const RegVar* rv){
+                         return !(rv->eflags() & RegEFlag::CO_HIDE); }) == re->cend()){
+            continue;
+        }
 
         out << QStringLiteral("#define OD_ENTRY_H%1_%2 &OD->list[%3]")
                .arg(static_cast<uint>(re->index()), 0, 16)
@@ -370,6 +390,11 @@ bool RegListCoExporter::writeAllOdObjConstDefs(QTextStream& out_stream, const Re
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
 
+        if(std::find_if(re->cbegin(), re->cend(), [](const RegVar* rv){
+                         return !(rv->eflags() & RegEFlag::CO_HIDE); }) == re->cend()){
+            continue;
+        }
+
         out << QStringLiteral("    %1 %2;")
                .arg(getOdEntryTypeStr(re->type()), getOdEntryFieldDecl(re))
             << "\n";
@@ -383,6 +408,11 @@ bool RegListCoExporter::writeAllOdObjConstDefs(QTextStream& out_stream, const Re
 
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
+
+        if(std::find_if(re->cbegin(), re->cend(), [](const RegVar* rv){
+                         return !(rv->eflags() & RegEFlag::CO_HIDE); }) == re->cend()){
+            continue;
+        }
 
         if(!firstEntry){
             out << ",\n";
@@ -432,6 +462,10 @@ bool RegListCoExporter::writeOdVarConstDef(QTextStream& out_stream, const RegEnt
     for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
         const RegVar* rv = *rvit;
 
+        if(rv->eflags() & RegEFlag::CO_HIDE){
+            continue;
+        }
+
         QString data_str;
         if(re->type() != ObjectType::ARR || rv->subIndex() == 0){
             data_str = RegUtils::getVarMem(m_dataName, re, rv, 0, m_entryNameMap, m_varNameMap, m_syntaxType);
@@ -474,6 +508,10 @@ bool RegListCoExporter::writeOdRecConstDef(QTextStream& out_stream, const RegEnt
 
     for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
         const RegVar* rv = *rvit;
+
+        if(rv->eflags() & RegEFlag::CO_HIDE){
+            continue;
+        }
 
         if(!firstVar){
             out << ",\n";
@@ -606,16 +644,26 @@ bool RegListCoExporter::writeOd(QTextStream& out_stream, const RegEntryList* reg
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
 
+        if(std::find_if(re->cbegin(), re->cend(), [](const RegVar* rv){
+                         return !(rv->eflags() & RegEFlag::CO_HIDE); }) == re->cend()){
+            continue;
+        }
+
         uint count = 0;
-        std::for_each(re->cbegin(), re->cend(), [&count](const RegVar* rv){
-            count += qMax(1U, rv->count());
-        });
+        if(re->type() == ObjectType::ARR){
+            count = re->countAll();
+        }else{
+            std::for_each(re->cbegin(), re->cend(), [&count](const RegVar* rv){
+                if(!(rv->eflags() & RegEFlag::CO_HIDE)){
+                    count += rv->count();
+                }
+            });
+        }
 
         out << QStringLiteral("    {0x%1, 0x%2, %3, &ODObjs.%4, NULL},")
                .arg(static_cast<uint>(re->index()), 0, 16)
                .arg(count, 2, 16, QChar('0'))
-               .arg(getOdObjectTypeStr(re->type()))
-               .arg(getOdEntryFieldName(re))
+               .arg(getOdObjectTypeStr(re->type()), getOdEntryFieldName(re))
             << "\n";
     }
     out << "    {0x0000, 0x00, 0, NULL, NULL}\n"

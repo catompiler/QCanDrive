@@ -115,6 +115,10 @@ bool RegListRegsExporter::exportRegIds(const QString& filename, const RegEntryLi
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
 
+            if(rv->eflags() & RegEFlag::RL_HIDE){
+                continue;
+            }
+
             QString description = rv->description().simplified();
 
             for(uint i = 0; i < rv->count(); i ++){
@@ -182,6 +186,10 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
 
         for(auto rvit = re->cbegin(); rvit != re->cend(); ++ rvit){
             const RegVar* rv = *rvit;
+
+            if(rv->eflags() & RegEFlag::RL_HIDE){
+                continue;
+            }
 
             reg_fullindex_t base_id = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
             QString baseIdStr;

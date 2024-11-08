@@ -384,7 +384,7 @@
                <item>
                 <widget class="QPlainTextEdit" name="pteUCRegList">
                  <property name="plainText">
-                  <string>// Модули
+                  <string>// Модули.
 #include &quot;modules/modules.h&quot;</string>
                  </property>
                 </widget>
@@ -557,7 +557,7 @@
                <item>
                 <widget class="QPlainTextEdit" name="pteUCCOc">
                  <property name="plainText">
-                  <string>// Модули
+                  <string>// Модули.
 #include &quot;modules/modules.h&quot;</string>
                  </property>
                 </widget>

@@ -48,10 +48,10 @@ enum class SyntaxType {
 extern EntryNameMap genRegDataEntryNameMapping(const RegEntryList* regentrylist);
 
 //! Генерирует имена для повторяющихся имён переменных.
-extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist);
+extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist, bool arrayDataSharedName = true);
 
 //! Генерирует имена для повторяющихся имён переменных внутри точки входа.
-extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist);
+extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist, bool arrayDataSharedName = true);
 
 
 //! Получает длину данных массива (кроме count с под-индексом 0) в точке входа.

@@ -86,12 +86,12 @@ QMap<reg_index_t, QString> RegUtils::genRegDataEntryNameMapping(const RegEntryLi
     return res;
 }
 
-QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist)
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMapping(const RegEntryList* regentrylist, bool arrayDataSharedName)
 {
-    return genRegDataVarsNameMappingWithinEntry(regentrylist);
+    return genRegDataVarsNameMappingWithinEntry(regentrylist, arrayDataSharedName);
 }
 
-QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist)
+QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist, bool arrayDataSharedName)
 {
 //    qDebug() << "genRegDataVarsNameMappingWithinEntry";
 
@@ -111,7 +111,7 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
 
             QString varName;
 
-            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+            if(arrayDataSharedName && (re->type() == ObjectType::ARR && rv->subIndex() != 0x0)){
                 varName = re->name();
             }else{
                 varName = rv->name();
@@ -125,7 +125,7 @@ QMap<reg_fullindex_t, QString> RegUtils::genRegDataVarsNameMappingWithinEntry(co
                 res.insert(fullindex, varName);
             }
 
-            if(re->type() == ObjectType::ARR && rv->subIndex() != 0x0){
+            if(arrayDataSharedName && (re->type() == ObjectType::ARR && rv->subIndex() != 0x0)){
                 res.insert(fullindex, varName);
             }else{
                 names.insert(varName);
@@ -189,7 +189,7 @@ QString RegUtils::getArrName(const RegEntry* re, const RegVar* rv, const VarName
             return makeName(it.value(), syntaxType);
         }
     }
-    return makeName(re->name(), syntaxType);
+    return makeName(rv->name(), syntaxType);
 }
 
 QString RegUtils::getArrDecl(const RegEntry* re, const RegVar* rv, const VarNameMap* varMapping, SyntaxType syntaxType)
