@@ -160,6 +160,32 @@ void RegListEditorWin::on_actCollapseTree_triggered(bool checked)
     ui->tvRegList->collapseAll();
 }
 
+void RegListEditorWin::on_actMoveUp_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QModelIndex index = ui->tvRegList->currentIndex();
+
+    if(!index.isValid()) return;
+
+    if(m_regsListModel->moveRow(index.parent(), index.row(), index.parent(), index.row() - 1)){
+        ui->tvRegList->selectionModel()->setCurrentIndex(m_regsListModel->index(index.row() - 1, index.column(), index.parent()), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    }
+}
+
+void RegListEditorWin::on_actMoveDown_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QModelIndex index = ui->tvRegList->currentIndex();
+
+    if(!index.isValid()) return;
+
+    if(m_regsListModel->moveRow(index.parent(), index.row(), index.parent(), index.row() + 1)){
+        ui->tvRegList->selectionModel()->setCurrentIndex(m_regsListModel->index(index.row() + 1, index.column(), index.parent()), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    }
+}
+
 void RegListEditorWin::on_actAddItem_triggered(bool checked)
 {
     Q_UNUSED(checked);

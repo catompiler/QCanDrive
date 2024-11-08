@@ -48,6 +48,9 @@
     <addaction name="separator"/>
     <addaction name="actDelItem"/>
     <addaction name="actDelAll"/>
+    <addaction name="separator"/>
+    <addaction name="actMoveUp"/>
+    <addaction name="actMoveDown"/>
    </widget>
    <widget class="QMenu" name="mnuFile">
     <property name="title">
@@ -98,6 +101,9 @@
    <addaction name="separator"/>
    <addaction name="actExpandTree"/>
    <addaction name="actCollapseTree"/>
+   <addaction name="separator"/>
+   <addaction name="actMoveUp"/>
+   <addaction name="actMoveDown"/>
   </widget>
   <action name="actAddItem">
    <property name="icon">
@@ -223,6 +229,27 @@
    </property>
    <property name="toolTip">
     <string>Свернуть дерево</string>
+   </property>
+  </action>
+  <action name="actMoveUp">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Arrow Up-48.png</normaloff>:/images/icons/Arrow Up-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Переместить в&amp;верх</string>
+   </property>
+   <property name="toolTip">
+    <string>Переместить вверх</string>
+   </property>
+  </action>
+  <action name="actMoveDown">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Arrow Down-48.png</normaloff>:/images/icons/Arrow Down-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Переместить в&amp;низ</string>
    </property>
   </action>
  </widget>

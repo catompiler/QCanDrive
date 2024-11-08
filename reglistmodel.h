@@ -69,6 +69,8 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool removeRows(int row, int count, const QModelIndex& parent) override;
+    bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
+
 
 public slots:
     void entryAtIndexModified(const QModelIndex& index);

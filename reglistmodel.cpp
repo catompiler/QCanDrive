@@ -287,6 +287,82 @@ bool RegListModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
+bool RegListModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+{
+    if(count == 0) return false;
+    if(sourceParent != destinationParent) return false;
+    if(destinationChild >= sourceRow && destinationChild < (sourceRow + count)) return false;
+
+    // Var.
+    if(sourceParent.isValid()){
+        RegEntry* re = static_cast<RegEntry*>(sourceParent.internalPointer());
+        if(re == nullptr) return false;
+        if(sourceRow < 0 || sourceRow >= re->count()) return false;
+        if(sourceRow + count - 1 >= re->count()) return false;
+        if(destinationChild < 0 || destinationChild >= re->count()) return false;
+
+        const QList<QPersistentModelIndex> parents = {sourceParent};
+        emit layoutAboutToBeChanged(parents);
+
+        auto beg = re->begin(); std::advance(beg, sourceRow);
+        auto end = re->begin(); std::advance(end, sourceRow + count);
+        auto to  = re->begin(); std::advance(to, destinationChild);
+
+        auto iter_data_xchg = [](decltype(beg) it1, decltype(end) it2){
+            RegVar* rv1 = *it1;
+            RegVar* rv2 = *it2;
+
+            reg_subindex_t si1 = rv1->subIndex();
+            reg_subindex_t si2 = rv2->subIndex();
+            rv1->setSubIndex(si2);
+            rv2->setSubIndex(si1);
+
+            *it1 = rv2;
+            *it2 = rv1;
+        };
+
+        for(; beg != end; ++ beg, ++ to){
+            iter_data_xchg(beg, to);
+        }
+
+        emit layoutChanged(parents);
+    }
+    // Entry.
+    else{
+        if(sourceRow < 0 || sourceRow >= m_reglist->count()) return false;
+        if(sourceRow + count - 1 >= m_reglist->count()) return false;
+        if(destinationChild < 0 || destinationChild >= m_reglist->count()) return false;
+
+        const QList<QPersistentModelIndex> parents = {};
+        emit layoutAboutToBeChanged(parents/*, QAbstractItemModel::VerticalSortHint*/);
+
+        auto beg = m_reglist->begin(); std::advance(beg, sourceRow);
+        auto end = m_reglist->begin(); std::advance(end, sourceRow + count);
+        auto to  = m_reglist->begin(); std::advance(to, destinationChild);
+
+        auto iter_data_xchg = [](decltype(beg) it1, decltype(end) it2){
+            RegEntry* re1 = *it1;
+            RegEntry* re2 = *it2;
+
+            reg_index_t si1 = re1->index();
+            reg_index_t si2 = re2->index();
+            re1->setIndex(si2);
+            re2->setIndex(si1);
+
+            *it1 = re2;
+            *it2 = re1;
+        };
+
+        for(; beg != end; ++ beg, ++ to){
+            iter_data_xchg(beg, to);
+        }
+
+        emit layoutChanged(parents);
+    }
+
+    return true;
+}
+
 QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) const
 {
     //qDebug() << "RegListModel::index(" << row << ", " << column << ", " << parent << ")";

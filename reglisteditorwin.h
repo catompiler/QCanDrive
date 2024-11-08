@@ -35,6 +35,8 @@ private slots:
     void on_actQuit_triggered(bool checked = false);
     void on_actExpandTree_triggered(bool checked = false);
     void on_actCollapseTree_triggered(bool checked = false);
+    void on_actMoveUp_triggered(bool checked = false);
+    void on_actMoveDown_triggered(bool checked = false);
     void on_actAddItem_triggered(bool checked = false);
     void on_actAddSubItem_triggered(bool checked = false);
     void on_actDelItem_triggered(bool checked = false);

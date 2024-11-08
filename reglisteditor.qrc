@@ -14,5 +14,7 @@
         <file>icons/Export-48.png</file>
         <file>icons/icons8-collapse-48.png</file>
         <file>icons/icons8-expand-48.png</file>
+        <file>icons/Arrow Down-48.png</file>
+        <file>icons/Arrow Up-48.png</file>
     </qresource>
 </RCC>
