@@ -61,8 +61,16 @@
     <addaction name="separator"/>
     <addaction name="actQuit"/>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Вид</string>
+    </property>
+    <addaction name="actExpandTree"/>
+    <addaction name="actCollapseTree"/>
+   </widget>
    <addaction name="mnuFile"/>
    <addaction name="mnuEdit"/>
+   <addaction name="menu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -88,7 +96,8 @@
    <addaction name="actDelItem"/>
    <addaction name="actDelAll"/>
    <addaction name="separator"/>
-   <addaction name="actDebugExec"/>
+   <addaction name="actExpandTree"/>
+   <addaction name="actCollapseTree"/>
   </widget>
   <action name="actAddItem">
    <property name="icon">
@@ -183,13 +192,37 @@
   <action name="actExport">
    <property name="icon">
     <iconset resource="reglisteditor.qrc">
-     <normaloff>:/images/icons/Export-48.png</normaloff>:/images/icons/Export-48.png</iconset>
+     <normaloff>:/images/icons/Export-48-Green.png</normaloff>:/images/icons/Export-48-Green.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Экспорт</string>
+    <string>&amp;Экспорт...</string>
    </property>
    <property name="toolTip">
     <string>Экспорт</string>
+   </property>
+  </action>
+  <action name="actExpandTree">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/icons8-expand-48.png</normaloff>:/images/icons/icons8-expand-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Раскрыть</string>
+   </property>
+   <property name="toolTip">
+    <string>Раскрыть дерево</string>
+   </property>
+  </action>
+  <action name="actCollapseTree">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/icons8-collapse-48.png</normaloff>:/images/icons/icons8-collapse-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>С&amp;вернуть</string>
+   </property>
+   <property name="toolTip">
+    <string>Свернуть дерево</string>
    </property>
   </action>
  </widget>

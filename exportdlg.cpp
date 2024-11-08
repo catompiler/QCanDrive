@@ -152,6 +152,66 @@ void ExportDlg::on_tbCOCSel_clicked(bool checked)
     selectFileNameTo(ui->leCOC, tr("Выбор файла реализации словаря"), QStringLiteral("Файлы языка С (*.c *.h)"));
 }
 
+QString ExportDlg::userCodeCOc() const
+{
+    return ui->pteUCCOc->toPlainText();
+}
+
+void ExportDlg::setUserCodeCOc(const QString& newUserCodeCOc)
+{
+    ui->pteUCCOc->setPlainText(newUserCodeCOc);
+}
+
+QString ExportDlg::userCodeCOh() const
+{
+    return ui->pteUCCOh->toPlainText();
+}
+
+void ExportDlg::setUserCodeCOh(const QString& newUserCodeCOh)
+{
+    ui->pteUCCOh->setPlainText(newUserCodeCOh);
+}
+
+QString ExportDlg::userCodeDataImpl() const
+{
+    return ui->pteUCDataImpl->toPlainText();
+}
+
+void ExportDlg::setUserCodeDataImpl(const QString& newUserCodeDataImpl)
+{
+    ui->pteUCDataImpl->setPlainText(newUserCodeDataImpl);
+}
+
+QString ExportDlg::userCodeDataDecl() const
+{
+    return ui->pteUCDataDecl->toPlainText();
+}
+
+void ExportDlg::setUserCodeDataDecl(const QString& newUserCodeDataDecl)
+{
+    ui->pteUCDataDecl->setPlainText(newUserCodeDataDecl);
+}
+
+QString ExportDlg::userCodeRegList() const
+{
+    return ui->pteUCRegList->toPlainText();
+}
+
+void ExportDlg::setUserCodeRegList(const QString& newUserCodeRegList)
+{
+    ui->pteUCRegList->setPlainText(newUserCodeRegList);
+}
+
+QString ExportDlg::userCodeRegIds() const
+{
+    return ui->pteUCRegIds->toPlainText();
+}
+
+void ExportDlg::setUserCodeRegIds(const QString& newUserCodeRegIds)
+{
+    ui->pteUCRegIds->setPlainText(newUserCodeRegIds);
+}
+
 void ExportDlg::selectFileNameTo(QLineEdit* le, const QString& caption, const QString& filter)
 {
     QString curFileName = QDir(ui->lePath->text()).filePath(le->text());

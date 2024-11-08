@@ -14,10 +14,14 @@ public:
 
     RegListDataExporter& setDeclFileName(const QString& fileName);
     RegListDataExporter& setImplFileName(const QString& fileName);
+    RegListDataExporter& setUserCodeDecl(const QString& userCode);
+    RegListDataExporter& setUserCodeImpl(const QString& userCode);
 
 private:
     QString m_declFileName;
     QString m_implFileName;
+    QString m_userCodeDecl;
+    QString m_userCodeImpl;
 
     bool exportRegDataDecl(const QString& filename, const RegEntryList* regentrylist);
     bool exportRegData(const QString& filename, const RegEntryList* regentrylist);

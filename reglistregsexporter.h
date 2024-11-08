@@ -21,10 +21,16 @@ public:
 
     RegListRegsExporter& setListFileName(const QString& fileName);
     RegListRegsExporter& setIdsFileName(const QString& fileName);
+    RegListRegsExporter& setDataFileName(const QString& fileName);
+    RegListRegsExporter& setUserCodeIds(const QString& userCode);
+    RegListRegsExporter& setUserCodeList(const QString& userCode);
 
 private:
     QString m_listFileName;
     QString m_idsFileName;
+    QString m_dataFileName;
+    QString m_userCodeIds;
+    QString m_userCodeList;
 
     QHash<reg_fullindex_t, QString> m_reg_id_names;
 

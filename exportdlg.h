@@ -51,6 +51,24 @@ public:
     bool exportCO() const;
     void setExportCO(bool newExportCO);
 
+    QString userCodeRegIds() const;
+    void setUserCodeRegIds(const QString& newUserCodeRegIds);
+
+    QString userCodeRegList() const;
+    void setUserCodeRegList(const QString& newUserCodeRegList);
+
+    QString userCodeDataDecl() const;
+    void setUserCodeDataDecl(const QString& newUserCodeDataDecl);
+
+    QString userCodeDataImpl() const;
+    void setUserCodeDataImpl(const QString& newUserCodeDataImpl);
+
+    QString userCodeCOh() const;
+    void setUserCodeCOh(const QString& newUserCodeCOh);
+
+    QString userCodeCOc() const;
+    void setUserCodeCOc(const QString& newUserCodeCOc);
+
 private slots:
     void on_tbPath_clicked(bool checked = false);
     void on_tbRegIdsSel_clicked(bool checked = false);

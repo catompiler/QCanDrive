@@ -168,6 +168,20 @@ void RegListEditorWin::on_actQuit_triggered(bool checked)
     qApp->quit();
 }
 
+void RegListEditorWin::on_actExpandTree_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    ui->tvRegList->expandAll();
+}
+
+void RegListEditorWin::on_actCollapseTree_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    ui->tvRegList->collapseAll();
+}
+
 void RegListEditorWin::on_actAddItem_triggered(bool checked)
 {
     Q_UNUSED(checked);
@@ -384,6 +398,9 @@ void RegListEditorWin::doDlgExportRegs()
 
     exporter.setListFileName(m_exportDlg->regListFileName())
             .setIdsFileName(m_exportDlg->regIdsFileName())
+            .setDataFileName(m_exportDlg->regDataDeclFileName())
+            .setUserCodeIds(m_exportDlg->userCodeRegIds())
+            .setUserCodeList(m_exportDlg->userCodeRegList())
             .setDataName(m_exportDlg->dataName())
             .setSyntaxType(RegUtils::SyntaxType::camelCase)
             .setEntryNameMap(&entymapping)
@@ -404,6 +421,8 @@ void RegListEditorWin::doDlgExportData()
 
     exporter.setDeclFileName(m_exportDlg->regDataDeclFileName())
             .setImplFileName(m_exportDlg->regDataImplFileName())
+            .setUserCodeDecl(m_exportDlg->userCodeDataDecl())
+            .setUserCodeImpl(m_exportDlg->userCodeDataImpl())
             .setDataName(m_exportDlg->dataName())
             .setSyntaxType(RegUtils::SyntaxType::camelCase)
             .setEntryNameMap(&entymapping)
@@ -424,6 +443,9 @@ void RegListEditorWin::doDlgExportCo()
 
     exporter.setCOhFileName(m_exportDlg->cohFileName())
             .setCOcFileName(m_exportDlg->cocFileName())
+            .setDataFileName(m_exportDlg->regDataDeclFileName())
+            .setUserCodeCOh(m_exportDlg->userCodeCOh())
+            .setUserCodeCOc(m_exportDlg->userCodeCOc())
             .setDataName(m_exportDlg->dataName())
             .setSyntaxType(RegUtils::SyntaxType::camelCase)
             .setEntryNameMap(&entymapping)

@@ -17,10 +17,16 @@ public:
 
     RegListCoExporter& setCOhFileName(const QString& fileName);
     RegListCoExporter& setCOcFileName(const QString& fileName);
+    RegListCoExporter& setDataFileName(const QString& fileName);
+    RegListCoExporter& setUserCodeCOh(const QString& userCode);
+    RegListCoExporter& setUserCodeCOc(const QString& userCode);
 
 private:
     QString m_cohFileName;
     QString m_cocFileName;
+    QString m_dataFileName;
+    QString m_userCodeCOh;
+    QString m_userCodeCOc;
 
     bool exportCoH(const QString& filename, const RegEntryList* regentrylist);
     bool writeCOCounters(QTextStream& out_stream, const RegEntryList* regentrylist);

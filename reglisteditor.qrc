@@ -12,5 +12,7 @@
         <file>icons/Export-48-Green.png</file>
         <file>icons/Add Folder-48.png</file>
         <file>icons/Export-48.png</file>
+        <file>icons/icons8-collapse-48.png</file>
+        <file>icons/icons8-expand-48.png</file>
     </qresource>
 </RCC>
