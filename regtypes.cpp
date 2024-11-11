@@ -292,7 +292,7 @@ co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags)
 {
     co_attributes_t attrs = COAttribute::NONE;
 
-    if(eflags & (RegEFlag::CO_TPDO | RegEFlag::CO_RPDO)){
+    if((eflags & (RegEFlag::CO_TPDO | RegEFlag::CO_RPDO)) == (RegEFlag::CO_TPDO | RegEFlag::CO_RPDO)){
         attrs |= COAttribute::TRPDO;
     }else if(eflags & RegEFlag::CO_TPDO){
         attrs |= COAttribute::TPDO;
@@ -300,7 +300,7 @@ co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags)
         attrs |= COAttribute::RPDO;
     }
 
-    if(eflags & (RegEFlag::CO_TSRDO | RegEFlag::CO_RSRDO)){
+    if((eflags & (RegEFlag::CO_TSRDO | RegEFlag::CO_RSRDO)) == (RegEFlag::CO_TSRDO | RegEFlag::CO_RSRDO)){
         attrs |= COAttribute::TRSRDO;
     }else if(eflags & RegEFlag::CO_TSRDO){
         attrs |= COAttribute::TSRDO;
@@ -308,7 +308,7 @@ co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags)
         attrs |= COAttribute::RSRDO;
     }
 
-    if(eflags & (RegEFlag::CO_SDO_W | RegEFlag::CO_SDO_R)){
+    if((eflags & (RegEFlag::CO_SDO_W | RegEFlag::CO_SDO_R)) == (RegEFlag::CO_SDO_W | RegEFlag::CO_SDO_R)){
         attrs |= COAttribute::SDO_RW;
     }else if(eflags & RegEFlag::CO_SDO_W){
         attrs |= COAttribute::SDO_W;
