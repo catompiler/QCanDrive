@@ -18,5 +18,8 @@
         <file>icons/Electronics-48.png</file>
         <file>icons/Edit File-48.png</file>
         <file>icons/Edit Property-48.png</file>
+        <file>icons/Add Property-48.png</file>
+        <file>icons/Copy-48.png</file>
+        <file>icons/Delete-48.png</file>
     </qresource>
 </RCC>

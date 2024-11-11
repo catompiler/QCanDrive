@@ -38,6 +38,7 @@ private slots:
     void on_actMoveUp_triggered(bool checked = false);
     void on_actMoveDown_triggered(bool checked = false);
     void on_actAddItem_triggered(bool checked = false);
+    void on_actDuplicateItem_triggered(bool checked = false);
     void on_actAddSubItem_triggered(bool checked = false);
     void on_actDelItem_triggered(bool checked = false);
     void on_actDelAll_triggered(bool checked = false);

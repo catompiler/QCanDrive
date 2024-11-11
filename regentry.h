@@ -24,7 +24,7 @@ public:
     RegEntry();
     explicit RegEntry(ObjectType type);
     explicit RegEntry(reg_index_t index, ObjectType type);
-    RegEntry(const RegEntry& entry) = delete;
+    RegEntry(const RegEntry& entry);
     ~RegEntry();
 
     //! Индекс.
@@ -49,6 +49,7 @@ public:
 
     bool hasVarBySubIndex(reg_subindex_t subIndex) const;
     RegVar* varBySubIndex(reg_subindex_t subIndex) const;
+    reg_subindex_t lastVarSubIndex() const;
 
 private:
     reg_index_t m_index;

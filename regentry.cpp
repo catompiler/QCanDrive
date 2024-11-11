@@ -24,6 +24,19 @@ RegEntry::RegEntry(reg_index_t index, ObjectType type)
     m_type = type;
 }
 
+RegEntry::RegEntry(const RegEntry& entry)
+    :RegObject(entry)
+{
+    m_index = entry.m_index;
+    m_type = entry.m_type;
+
+    for(auto& orig_rv: entry.m_vars){
+        RegVar* rv = new RegVar(*orig_rv);
+        rv->setParent(this);
+        m_vars.append(rv);
+    }
+}
+
 RegEntry::~RegEntry()
 {
     qDeleteAll(m_vars);
@@ -137,5 +150,11 @@ RegVar* RegEntry::varBySubIndex(reg_subindex_t subIndex) const
     if(it == cend()) return nullptr;
 
     return *it;
+}
+
+reg_subindex_t RegEntry::lastVarSubIndex() const
+{
+    if(m_vars.isEmpty()) return 0;
+    return m_vars.last()->subIndex();
 }
 

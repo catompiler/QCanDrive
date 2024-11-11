@@ -222,11 +222,16 @@ bool RegListModel::addSubObject(RegVar* r, const QModelIndex& parent)
 
     const QList<QPersistentModelIndex> parents = {parent};
 
+    reg_subindex_t last_subindex = re->lastVarSubIndex();
+
     emit layoutAboutToBeChanged(parents);
 
     bool res = re->add(r);
 
     if(res){
+        if(r->subIndex() < last_subindex){
+            fixSortingVars(re);
+        }
         emit layoutChanged(parents);
     }
 

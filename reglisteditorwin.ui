@@ -48,6 +48,7 @@
      <string>Редактор</string>
     </property>
     <addaction name="actAddItem"/>
+    <addaction name="actDuplicateItem"/>
     <addaction name="actAddSubItem"/>
     <addaction name="separator"/>
     <addaction name="actDelItem"/>
@@ -99,6 +100,7 @@
    <addaction name="actExport"/>
    <addaction name="separator"/>
    <addaction name="actAddItem"/>
+   <addaction name="actDuplicateItem"/>
    <addaction name="actAddSubItem"/>
    <addaction name="actDelItem"/>
    <addaction name="actDelAll"/>
@@ -121,7 +123,7 @@
   <action name="actDelItem">
    <property name="icon">
     <iconset theme="edit-delete" resource="reglisteditor.qrc">
-     <normaloff>:/images/icons/Delete File-48.png</normaloff>:/images/icons/Delete File-48.png</iconset>
+     <normaloff>:/images/icons/Remove Property-48.png</normaloff>:/images/icons/Remove Property-48.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Удалить элемент</string>
@@ -130,7 +132,7 @@
   <action name="actAddSubItem">
    <property name="icon">
     <iconset theme="list-add" resource="reglisteditor.qrc">
-     <normaloff>:/images/icons/Add List-48.png</normaloff>:/images/icons/Add List-48.png</iconset>
+     <normaloff>:/images/icons/Add Property-48.png</normaloff>:/images/icons/Add Property-48.png</iconset>
    </property>
    <property name="text">
     <string>Добавить &amp;подэлемент</string>
@@ -181,7 +183,7 @@
   <action name="actDelAll">
    <property name="icon">
     <iconset theme="document-new" resource="reglisteditor.qrc">
-     <normaloff>:/images/icons/Remove Property-48.png</normaloff>:/images/icons/Remove Property-48.png</iconset>
+     <normaloff>:/images/icons/Delete-48.png</normaloff>:/images/icons/Delete-48.png</iconset>
    </property>
    <property name="text">
     <string>Удалить &amp;всё</string>
@@ -254,6 +256,18 @@
    </property>
    <property name="text">
     <string>Переместить в&amp;низ</string>
+   </property>
+  </action>
+  <action name="actDuplicateItem">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Add List-48.png</normaloff>:/images/icons/Add List-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Ду&amp;блировать элемент</string>
+   </property>
+   <property name="toolTip">
+    <string>Дублировать элемент</string>
    </property>
   </action>
  </widget>

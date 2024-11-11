@@ -28,6 +28,38 @@
 #include <QDebug>
 
 
+#define COL_WIDTH_INDEX 75
+#define COL_WIDTH_NAME 100
+#define COL_WIDTH_TYPE 50
+#define COL_WIDTH_COUNT 50
+#define COL_WIDTH_MEM_ADDR 100
+#define COL_WIDTH_MIN_VAL 75
+#define COL_WIDTH_MAX_VAL 75
+#define COL_WIDTH_DEF_VAL 100
+#define COL_WIDTH_BASE 75
+#define COL_WIDTH_FLAGS 75
+#define COL_WIDTH_EXTFLAGS 150
+#define COL_WIDTH_DESCR 100
+//#define COL_WIDTH_ 50
+
+
+static const int col_width[] = {
+    COL_WIDTH_INDEX,
+    COL_WIDTH_NAME,
+    COL_WIDTH_TYPE,
+    COL_WIDTH_COUNT,
+    COL_WIDTH_MEM_ADDR,
+    COL_WIDTH_MIN_VAL,
+    COL_WIDTH_MAX_VAL,
+    COL_WIDTH_DEF_VAL,
+    COL_WIDTH_BASE,
+    COL_WIDTH_FLAGS,
+    COL_WIDTH_EXTFLAGS,
+    COL_WIDTH_DESCR
+};
+static const int col_width_len = ((sizeof(col_width))/(sizeof(col_width[0])));
+
+
 RegListEditorWin::RegListEditorWin(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::RegListEditorWin)
@@ -56,6 +88,10 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
         ui->tvRegList->setSelectionModel(sel_model);
     }
     connect(sel_model, &QItemSelectionModel::selectionChanged, this, &RegListEditorWin::tvRegList_selection_changed);
+
+    for(int i = 0; i < col_width_len; i ++){
+        ui->tvRegList->setColumnWidth(i, col_width[i]);
+    }
 }
 
 RegListEditorWin::~RegListEditorWin()
@@ -275,6 +311,57 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
     }
 }
 
+void RegListEditorWin::on_actDuplicateItem_triggered(bool checked)
+{
+    Q_UNUSED(checked);
+
+    //qDebug() << "on_pbAdd_clicked";
+
+    QModelIndex entry_index = m_regsListModel->entryModelIndexByModelIndex(ui->tvRegList->currentIndex());
+    if(!entry_index.isValid()) return;
+
+    RegEntry* orig_re = m_regsListModel->entryByModelIndex(entry_index);
+    if(orig_re == nullptr) return;
+
+    m_regEntryDlg->setIndex(orig_re->index() + 1);
+    m_regEntryDlg->setObjectType(orig_re->type());
+    m_regEntryDlg->setName(orig_re->name());
+    m_regEntryDlg->setDescription(orig_re->description());
+
+    m_regEntryDlg->setIndexEditable(true);
+    m_regEntryDlg->setObjectTypeEditable(true);
+
+    if(m_regEntryDlg->exec()){
+
+        if(m_regsListModel->hasEntryByRegIndex(m_regEntryDlg->index())){
+            QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
+            return;
+        }
+
+        RegEntry* re = new RegEntry(*orig_re);
+
+        re->setIndex(m_regEntryDlg->index());
+        re->setType(m_regEntryDlg->objectType());
+        re->setName(m_regEntryDlg->name());
+        re->setDescription(m_regEntryDlg->description());
+
+        if(!m_regsListModel->addEntry(re)){
+            qDebug() << "m_regsListModel->addEntry(...)";
+            delete re;
+            return;
+        }
+
+        QModelIndex entry_index = m_regsListModel->entryModelIndex(re);
+
+        if(!entry_index.isValid()){
+            qDebug() << "Invalid added entry model index";
+            return;
+        }
+        ui->tvRegList->expand(entry_index);
+    }
+}
+
+
 void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
 {
     Q_UNUSED(checked);
@@ -300,8 +387,16 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
     m_regEntryDlg->setIndex(re->countAll());
     m_regEntryDlg->setObjectTypeEditable(false);
     m_regEntryDlg->setObjectType(ObjectType::VAR);
-    m_regEntryDlg->setName(QString("newSubObject"));
-    m_regEntryDlg->setDescription(QString());
+
+    RegVar* orig_rv = m_regsListModel->varByModelIndex(ui->tvRegList->currentIndex());
+
+    if(orig_rv){
+        m_regEntryDlg->setName(orig_rv->name());
+        m_regEntryDlg->setDescription(orig_rv->description());
+    }else{
+        m_regEntryDlg->setName(QString("newSubObject"));
+        m_regEntryDlg->setDescription(QString());
+    }
 
     if(m_regEntryDlg->exec()){
 
@@ -310,7 +405,12 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
             return;
         }
 
-        RegVar* rv = new RegVar();
+        RegVar* rv = nullptr;
+        if(orig_rv){
+            rv = new RegVar(*orig_rv);
+        }else{
+            rv = new RegVar();
+        }
 
         rv->setSubIndex(m_regEntryDlg->index());
         rv->setName(m_regEntryDlg->name());
