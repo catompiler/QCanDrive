@@ -224,7 +224,7 @@ bool RegListCoExporter::writeCOArraySizes(QTextStream& out_stream, const RegEntr
             }
 
             out << QStringLiteral("#define OD_CNT_ARR_%1 %2")
-                   .arg(static_cast<uint>(re->index()), 0, 16)
+                   .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper())
                    .arg(size)
                 << "\n";
         }
@@ -276,7 +276,7 @@ bool RegListCoExporter::writeCOShortcuts(QTextStream& out_stream, const RegEntry
         }
 
         out << QStringLiteral("#define OD_ENTRY_H%1 &OD->list[%2]")
-               .arg(static_cast<uint>(re->index()), 0, 16)
+               .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper())
                .arg(list_index)
             << "\n";
 
@@ -310,8 +310,8 @@ bool RegListCoExporter::writeCOShortcutsWithNames(QTextStream& out_stream, const
         }
 
         out << QStringLiteral("#define OD_ENTRY_H%1_%2 &OD->list[%3]")
-               .arg(static_cast<uint>(re->index()), 0, 16)
-               .arg(RegUtils::makeName(re->name(), m_syntaxType))
+               .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper(),
+               RegUtils::makeName(re->name(), m_syntaxType))
                .arg(list_index)
             << "\n";
 
@@ -709,8 +709,9 @@ QString RegListCoExporter::getOdEntryTypeStr(ObjectType objType) const
 QString RegListCoExporter::getOdEntryFieldName(const RegEntry* re) const
 {
     return QStringLiteral("o_%2_%3")
-            .arg(re->index(), 0, 16)
-            .arg(RegUtils::getEntryName(re, m_entryNameMap, m_syntaxType));
+            .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper(),
+                 RegUtils::makeName(re->name(), m_syntaxType));
+                 //RegUtils::getEntryName(re, m_entryNameMap, m_syntaxType));
 }
 
 QString RegListCoExporter::getOdEntryFieldDecl(const RegEntry* re) const
