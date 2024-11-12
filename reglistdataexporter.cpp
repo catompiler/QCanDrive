@@ -23,18 +23,20 @@ RegListDataExporter::~RegListDataExporter()
 }
 
 
-bool RegListDataExporter::doExport(const QString& filename, const RegEntryList* regentrylist)
+bool RegListDataExporter::doExport(const QString& filepath, const RegEntryList* regentrylist)
 {
-    QDir regs_dir(filename);
+    QDir path(filepath);
+    if(!path.exists()) return false;
 
-    if(!regs_dir.exists()) return false;
-
-    if(m_declFileName.isEmpty()) m_declFileName = regs_dir.filePath("regs_data.h");
-    if(m_implFileName.isEmpty()) m_implFileName = regs_dir.filePath("regs_data.c");
+    if(m_declFileName.isEmpty()) m_declFileName = "regs_data.h";
+    if(m_implFileName.isEmpty()) m_implFileName = "regs_data.c";
     if(m_dataName.isEmpty()) m_dataName = "regs_data";
 
-    if(!exportRegDataDecl(m_declFileName, regentrylist)) return false;
-    if(!exportRegData(m_implFileName, regentrylist)) return false;
+    QString declFileName = QFileInfo(m_declFileName).isAbsolute() ? m_declFileName : path.filePath(m_declFileName);
+    QString implFileName = QFileInfo(m_implFileName).isAbsolute() ? m_implFileName : path.filePath(m_implFileName);
+
+    if(!exportRegDataDecl(declFileName, regentrylist)) return false;
+    if(!exportRegData(implFileName, regentrylist)) return false;
 
     return true;
 }

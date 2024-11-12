@@ -36,14 +36,16 @@ RegListEdsExporter::~RegListEdsExporter()
 {
 }
 
-bool RegListEdsExporter::doExport(const QString& filename, const RegEntryList* reglist)
+bool RegListEdsExporter::doExport(const QString& filepath, const RegEntryList* reglist)
 {
-    QDir regs_dir(filename);
-    if(!regs_dir.exists()) return false;
+    QDir path(filepath);
+    if(!path.exists()) return false;
 
-    if(m_edsFileName.isEmpty()) m_edsFileName = regs_dir.filePath("reg_list.eds");
+    if(m_edsFileName.isEmpty()) m_edsFileName = "reg_list.eds";
 
-    QFile file(m_edsFileName);
+    QString edsFileName = QFileInfo(m_edsFileName).isAbsolute() ? m_edsFileName : path.filePath(m_edsFileName);
+
+    QFile file(edsFileName);
     if(!file.open(QIODevice::WriteOnly)) return false;
 
     QTextStream out_stream(&file);

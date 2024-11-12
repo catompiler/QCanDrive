@@ -25,20 +25,22 @@ RegListRegsExporter::~RegListRegsExporter()
 {
 }
 
-bool RegListRegsExporter::doExport(const QString& filename, const RegEntryList* regentrylist)
+bool RegListRegsExporter::doExport(const QString& filepath, const RegEntryList* regentrylist)
 {
-    QDir regs_dir(filename);
+    QDir path(filepath);
+    if(!path.exists()) return false;
 
-    if(!regs_dir.exists()) return false;
-
-    if(m_listFileName.isEmpty()) m_listFileName = regs_dir.filePath("reg_list_data.h");
-    if(m_idsFileName.isEmpty()) m_idsFileName = regs_dir.filePath("reg_ids.h");
+    if(m_listFileName.isEmpty()) m_listFileName = "reg_list_data.h";
+    if(m_idsFileName.isEmpty()) m_idsFileName = "reg_ids.h";
     if(m_dataName.isEmpty()) m_dataName = "regs_data";
+
+    QString idsFileName = QFileInfo(m_idsFileName).isAbsolute() ? m_idsFileName : path.filePath(m_idsFileName);
+    QString listFileName = QFileInfo(m_listFileName).isAbsolute() ? m_listFileName : path.filePath(m_listFileName);
 
     m_reg_id_names.clear();
 
-    if(!exportRegIds(m_idsFileName, regentrylist)) return false;
-    if(!exportRegList(m_listFileName, regentrylist)) return false;
+    if(!exportRegIds(idsFileName, regentrylist)) return false;
+    if(!exportRegList(listFileName, regentrylist)) return false;
 
     m_reg_id_names.clear();
 
@@ -172,7 +174,7 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
         << "\n\n";
 
     if(!m_dataFileName.isEmpty()){
-        out << "#include \"" << m_dataFileName << "\"\n\n";
+        out << "#include \"" << QFileInfo(m_dataFileName).fileName() << "\"\n\n";
     }
 
     out << "// user code begin\n"

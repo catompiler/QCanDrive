@@ -26,19 +26,21 @@ RegListCoExporter::~RegListCoExporter()
 }
 
 
-bool RegListCoExporter::doExport(const QString& filename, const RegEntryList* regentrylist)
+bool RegListCoExporter::doExport(const QString& filepath, const RegEntryList* regentrylist)
 {
-    QDir regs_dir(filename);
-
-    if(!regs_dir.exists()) return false;
+    QDir path(filepath);
+    if(!path.exists()) return false;
 
     // TODO: fix wrong export files path.
-    if(m_cohFileName.isEmpty()) m_cohFileName = regs_dir.filePath("OD.h");
-    if(m_cocFileName.isEmpty()) m_cocFileName = regs_dir.filePath("OD.c");
+    if(m_cohFileName.isEmpty()) m_cohFileName = "OD.h";
+    if(m_cocFileName.isEmpty()) m_cocFileName = "OD.c";
     if(m_dataName.isEmpty()) m_dataName = "regs_data";
 
-    if(!exportCoH(m_cohFileName, regentrylist)) return false;
-    if(!exportCoC(m_cocFileName, regentrylist)) return false;
+    QString cohFileName = QFileInfo(m_cohFileName).isAbsolute() ? m_cohFileName : path.filePath(m_cohFileName);
+    QString cocFileName = QFileInfo(m_cocFileName).isAbsolute() ? m_cocFileName : path.filePath(m_cocFileName);
+
+    if(!exportCoH(cohFileName, regentrylist)) return false;
+    if(!exportCoC(cocFileName, regentrylist)) return false;
 
     return true;
 }
@@ -354,7 +356,7 @@ bool RegListCoExporter::exportCoC(const QString& filename, const RegEntryList* r
         << "\n\n";
 
     if(!m_dataFileName.isEmpty()){
-        out << "#include \"" << m_dataFileName << "\"\n\n";
+        out << "#include \"" << QFileInfo(m_dataFileName).fileName() << "\"\n\n";
     }
 
     out << "// user code begin\n"

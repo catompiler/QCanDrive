@@ -231,12 +231,23 @@ void ExportDlg::setUserCodeRegIds(const QString& newUserCodeRegIds)
 
 void ExportDlg::selectFileNameTo(QLineEdit* le, const QString& caption, const QString& filter)
 {
-    QString curFileName = QDir(ui->lePath->text()).filePath(le->text());
+    QString cur_fileName = le->text();
+    QString cur_path = ui->lePath->text();
 
-    QString fileName = QFileDialog::getSaveFileName(this, caption, curFileName, filter);
+    if(!QFileInfo(cur_fileName).isAbsolute()){
+        cur_fileName = QDir(cur_path).filePath(cur_fileName);
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(this, caption, cur_fileName, filter);
 
     if(!fileName.isEmpty()){
-        le->setText(QFileInfo(fileName).fileName());
+        QFileInfo finfo(fileName);
+
+        if(QDir(cur_path) == finfo.dir()){
+            le->setText(QFileInfo(fileName).fileName());
+        }else{
+            le->setText(fileName);
+        }
     }
 }
 

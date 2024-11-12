@@ -10,7 +10,7 @@ public:
     explicit RegListDataExporter(QObject *parent = nullptr);
     ~RegListDataExporter();
 
-    bool doExport(const QString& filename, const RegEntryList* regentrylist) override;
+    bool doExport(const QString& filepath, const RegEntryList* regentrylist) override;
 
     RegListDataExporter& setDeclFileName(const QString& fileName);
     RegListDataExporter& setImplFileName(const QString& fileName);

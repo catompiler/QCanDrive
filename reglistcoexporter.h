@@ -13,7 +13,7 @@ public:
     explicit RegListCoExporter(QObject *parent = nullptr);
     ~RegListCoExporter();
 
-    bool doExport(const QString& filename, const RegEntryList* regentrylist) override;
+    bool doExport(const QString& filepath, const RegEntryList* regentrylist) override;
 
     RegListCoExporter& setCOhFileName(const QString& fileName);
     RegListCoExporter& setCOcFileName(const QString& fileName);
