@@ -101,6 +101,24 @@ enum Value{
 // Тип аттрибутов CO.
 typedef uint32_t co_attributes_t;
 
+// Скорости CO.
+namespace COBaud {
+enum Value{
+    NONE  = 0x0,
+    B10   = 0x1,
+    B20   = 0x2,
+    B50   = 0x4,
+    B125  = 0x8,
+    B250  = 0x10,
+    B500  = 0x20,
+    B800  = 0x40,
+    B1000 = 0x80
+};
+}
+
+// Тип скоростей CO.
+typedef uint32_t co_bauds_t;
+
 namespace RegTypes {
 
 //! Получает все флаги.
@@ -147,6 +165,12 @@ extern QStringList coAttributeFullNames();
 
 //! Получает атрибуты по расширенным флагам.
 extern co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags);
+
+//! Получает тип объекта CO.
+extern uint coObjectType(ObjectType type);
+
+//! Получает тип данных CO.
+extern uint coDataType(DataType type);
 
 //! Получает все типы объектов.
 extern QVector<ObjectType> objectTypes();

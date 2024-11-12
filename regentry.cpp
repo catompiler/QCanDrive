@@ -122,12 +122,22 @@ RegEntry::VarListIterator RegEntry::begin()
     return m_vars.begin();
 }
 
+RegEntry::ConstVarListIterator RegEntry::begin() const
+{
+    return m_vars.begin();
+}
+
 RegEntry::ConstVarListIterator RegEntry::cbegin() const
 {
     return m_vars.cbegin();
 }
 
 RegEntry::VarListIterator RegEntry::end()
+{
+    return m_vars.end();
+}
+
+RegEntry::ConstVarListIterator RegEntry::end() const
 {
     return m_vars.end();
 }

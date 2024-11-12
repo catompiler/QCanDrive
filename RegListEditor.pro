@@ -19,6 +19,7 @@ SOURCES += \
     reglistcoexporter.cpp \
     reglistdataexporter.cpp \
     reglisteditorwin.cpp \
+    reglistedsexporter.cpp \
     reglistexporter.cpp \
     reglistmodel.cpp \
     reglistregsexporter.cpp \
@@ -45,6 +46,7 @@ HEADERS += \
     reglistcoexporter.h \
     reglistdataexporter.h \
     reglisteditorwin.h \
+    reglistedsexporter.h \
     reglistexporter.h \
     reglistmodel.h \
     reglistregsexporter.h \

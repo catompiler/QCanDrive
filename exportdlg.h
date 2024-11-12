@@ -39,6 +39,9 @@ public:
     QString cocFileName() const;
     void setCocFileName(const QString& newCocFileName);
 
+    QString edsFileName() const;
+    void setEdsFileName(const QString& newEdsFileName);
+
     QString dataName() const;
     void setDataName(const QString& newDataName);
 
@@ -50,6 +53,9 @@ public:
 
     bool exportCO() const;
     void setExportCO(bool newExportCO);
+
+    bool exportEds() const;
+    void setExportEds(bool newExportEds);
 
     QString userCodeRegIds() const;
     void setUserCodeRegIds(const QString& newUserCodeRegIds);
@@ -77,6 +83,7 @@ private slots:
     void on_tbDataImplSel_clicked(bool checked = false);
     void on_tbCOHSel_clicked(bool checked = false);
     void on_tbCOCSel_clicked(bool checked = false);
+    void on_tbEdsSel_clicked(bool checked = false);
 
 private:
     Ui::ExportDlg *ui;

@@ -319,6 +319,46 @@ co_attributes_t eflagsToCoAttributes(reg_eflags_t eflags)
     return attrs;
 }
 
+// https://canopennode.github.io/CANopenSocket/md_doc_objectDictionary.html#definitions-from-cia-301
+uint coObjectType(ObjectType type)
+{
+    switch(type){
+    case ObjectType::VAR:
+        return 7;
+    case ObjectType::ARR:
+        return 8;
+    case ObjectType::REC:
+        return 9;
+    }
+
+    return 0;
+}
+
+uint coDataType(DataType type)
+{
+    switch(type){
+    case DataType::I32:
+        return 0x4;
+    case DataType::I16:
+        return 0x3;
+    case DataType::I8:
+        return 0x2;
+    case DataType::U32:
+        return 0x7;
+    case DataType::U16:
+        return 0x6;
+    case DataType::U8:
+        return 0x5;
+    case DataType::IQ24:
+        return 0x4;
+    case DataType::IQ15:
+        return 0x4;
+    case DataType::IQ7:
+        return 0x4;
+    }
+    return 0x0;
+}
+
 
 QVector<ObjectType> objectTypes()
 {

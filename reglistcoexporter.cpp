@@ -32,8 +32,9 @@ bool RegListCoExporter::doExport(const QString& filename, const RegEntryList* re
 
     if(!regs_dir.exists()) return false;
 
-    if(m_cohFileName.isEmpty()) m_cohFileName = regs_dir.filePath("CO.h");
-    if(m_cocFileName.isEmpty()) m_cocFileName = regs_dir.filePath("CO.c");
+    // TODO: fix wrong export files path.
+    if(m_cohFileName.isEmpty()) m_cohFileName = regs_dir.filePath("OD.h");
+    if(m_cocFileName.isEmpty()) m_cocFileName = regs_dir.filePath("OD.c");
     if(m_dataName.isEmpty()) m_dataName = "regs_data";
 
     if(!exportCoH(m_cohFileName, regentrylist)) return false;

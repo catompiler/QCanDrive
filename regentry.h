@@ -43,8 +43,10 @@ public:
     int countAll() const;
 
     VarListIterator begin();
+    ConstVarListIterator begin() const;
     ConstVarListIterator cbegin() const;
     VarListIterator end();
+    ConstVarListIterator end() const;
     ConstVarListIterator cend() const;
 
     bool hasVarBySubIndex(reg_subindex_t subIndex) const;

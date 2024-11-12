@@ -64,5 +64,6 @@ private:
     void doDlgExportRegs();
     void doDlgExportData();
     void doDlgExportCo();
+    void doDlgExportEds();
 };
 #endif // REGLISTEDITORWIN_H

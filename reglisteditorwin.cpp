@@ -15,6 +15,7 @@
 #include "reglistregsexporter.h"
 #include "reglistdataexporter.h"
 #include "reglistcoexporter.h"
+#include "reglistedsexporter.h"
 #include <QMessageBox>
 #include <QApplication>
 #include <QItemSelectionModel>
@@ -171,6 +172,7 @@ void RegListEditorWin::on_actExport_triggered(bool checked)
         if(m_exportDlg->exportRegs()) doDlgExportRegs();
         if(m_exportDlg->exportData()) doDlgExportData();
         if(m_exportDlg->exportCO()) doDlgExportCo();
+        if(m_exportDlg->exportEds()) doDlgExportEds();
         QMessageBox::information(this, tr("Экспорт"), tr("Завершено!"));
     }
 }
@@ -447,6 +449,8 @@ void RegListEditorWin::on_actDelAll_triggered(bool checked)
 void RegListEditorWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked);
+
+    doDlgExportEds();
 }
 
 void RegListEditorWin::on_tvRegList_activated(const QModelIndex& index)
@@ -575,6 +579,31 @@ void RegListEditorWin::doDlgExportCo()
             .setDataFileName(m_exportDlg->regDataDeclFileName())
             .setUserCodeCOh(m_exportDlg->userCodeCOh())
             .setUserCodeCOc(m_exportDlg->userCodeCOc())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+void RegListEditorWin::doDlgExportEds()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListEdsExporter exporter;
+
+    exporter.setEdsFileName(m_exportDlg->edsFileName())
+            .setFileVersion(1, 0)
+            .setFileAuthor("")
+            .setOrderCode("")
+            .setVendorName("TTS Corp")
+            .setProductName("Super Drive")
+            .setGranularity(8)
             .setDataName(m_exportDlg->dataName())
             .setSyntaxType(RegUtils::SyntaxType::camelCase)
             .setEntryNameMap(&entymapping)

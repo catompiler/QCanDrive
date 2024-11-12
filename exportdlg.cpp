@@ -89,6 +89,16 @@ void ExportDlg::setCocFileName(const QString& newCocFileName)
     ui->leCOC->setText(newCocFileName);
 }
 
+QString ExportDlg::edsFileName() const
+{
+    return ui->leEds->text();
+}
+
+void ExportDlg::setEdsFileName(const QString& newEdsFileName)
+{
+    ui->leEds->setText(newEdsFileName);
+}
+
 QString ExportDlg::dataName() const
 {
     return ui->leDataName->text();
@@ -150,6 +160,13 @@ void ExportDlg::on_tbCOCSel_clicked(bool checked)
     Q_UNUSED(checked);
 
     selectFileNameTo(ui->leCOC, tr("Выбор файла реализации словаря"), QStringLiteral("Файлы языка С (*.c *.h)"));
+}
+
+void ExportDlg::on_tbEdsSel_clicked(bool checked)
+{
+    Q_UNUSED(checked);
+
+    selectFileNameTo(ui->leEds, tr("Выбор файла EDS"), QStringLiteral("Файлы EDS (*.eds)"));
 }
 
 QString ExportDlg::userCodeCOc() const
@@ -231,6 +248,16 @@ bool ExportDlg::exportCO() const
 void ExportDlg::setExportCO(bool newExportCO)
 {
     ui->cbExportCO->setChecked(newExportCO);
+}
+
+bool ExportDlg::exportEds() const
+{
+    return ui->cbExportEds->isChecked();
+}
+
+void ExportDlg::setExportEds(bool newExportEds)
+{
+    ui->cbExportEds->setChecked(newExportEds);
 }
 
 bool ExportDlg::exportData() const
