@@ -46,6 +46,7 @@ public:
 
     bool hasEntryByRegIndex(reg_index_t index) const;
     RegEntry* entryByRegIndex(reg_index_t index) const;
+    RegVar* varByRegIndex(reg_index_t index, reg_subindex_t subIndex) const;
     QModelIndex entryModelIndexByRegIndex(reg_index_t index) const;
     QModelIndex objectModelIndexByRegIndex(reg_index_t index, reg_subindex_t subIndex) const;
 
@@ -90,6 +91,8 @@ private:
     void fixSortingModelIndex(const QModelIndex& parent);
     void fixSortingEntries();
     void fixSortingVars(RegEntry* re);
+    void fixBaseIndex(reg_index_t old_index, reg_index_t new_index);
+    void fixBaseSubIndex(reg_index_t base_index, reg_subindex_t old_subIndex, reg_subindex_t new_subIndex);
 };
 
 #endif // REGLISTMODEL_H

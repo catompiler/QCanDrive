@@ -105,6 +105,15 @@ RegEntry* RegListModel::entryByRegIndex(reg_index_t index) const
     return *it;
 }
 
+RegVar* RegListModel::varByRegIndex(reg_index_t index, reg_subindex_t subIndex) const
+{
+    RegEntry* re = entryByRegIndex(index);
+
+    if(re == nullptr) return nullptr;
+
+    return re->varBySubIndex(subIndex);
+}
+
 QModelIndex RegListModel::entryModelIndexByRegIndex(reg_index_t index) const
 {
     auto it = std::find_if(m_reglist->begin(), m_reglist->end(),
@@ -514,6 +523,16 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
         case COL_BASE:{
             unsigned int base_index = rv->baseIndex();
             unsigned int base_subindex = rv->baseSubIndex();
+            RegVar* brv = varByRegIndex(base_index, base_subindex);
+            if(brv){
+                QString base_name;
+                RegEntry* bre = brv->parent();
+                if(bre){
+                    base_name = QStringLiteral("%1.").arg(bre->name());
+                }
+                base_name += brv->name();
+                return base_name;
+            }
             return QString("0x%1.%2")
                     .arg(base_index, 4, 16, QChar('0'))
                     .arg(base_subindex, 2, 16, QChar('0'));
@@ -683,6 +702,86 @@ void RegListModel::fixSortingVars(RegEntry* re)
     });
 }
 
+/*void RegListModel::fixBaseIndexSubIndex(reg_index_t old_index, reg_subindex_t old_subIndex, reg_index_t new_index, reg_subindex_t new_subIndex)
+{
+    bool index_changed = old_index != new_index;
+    bool subindex_changed = old_subIndex != new_subIndex;
+
+    if(!index_changed || !subindex_changed) return;
+
+    int child_row = 0;
+
+    std::for_each(m_reglist->begin(), m_reglist->end(), [&](RegEntry* re){
+        child_row = 0;
+        QModelIndex parent_index = QModelIndex();
+        std::for_each(re->begin(), re->end(), [&](RegVar* rv){
+            if((index_changed && (rv->baseIndex() == old_index)) ||
+                (subindex_changed && (rv->baseSubIndex() == old_subIndex))){
+
+                rv->setBaseIndex(new_index);
+                rv->setBaseSubIndex(new_subIndex);
+
+                if(!parent_index.isValid()){
+                    parent_index = entryModelIndex(re);
+                }
+                QModelIndex child_index = index(child_row, COL_BASE, parent_index);
+                emit dataChanged(child_index, child_index);
+            }
+            child_row ++;
+        });
+    });
+}*/
+
+void RegListModel::fixBaseIndex(reg_index_t old_index, reg_index_t new_index)
+{
+    if(old_index == new_index) return;
+
+    int child_row = 0;
+
+    std::for_each(m_reglist->begin(), m_reglist->end(), [&](RegEntry* re){
+        child_row = 0;
+        QModelIndex parent_index = QModelIndex();
+        std::for_each(re->begin(), re->end(), [&](RegVar* rv){
+            if(rv->baseIndex() == old_index){
+
+                rv->setBaseIndex(new_index);
+
+                if(!parent_index.isValid()){
+                    parent_index = entryModelIndex(re);
+                }
+                QModelIndex child_index = index(child_row, COL_BASE, parent_index);
+                emit dataChanged(child_index, child_index);
+            }
+            child_row ++;
+        });
+    });
+}
+
+void RegListModel::fixBaseSubIndex(reg_index_t base_index, reg_subindex_t old_subIndex, reg_subindex_t new_subIndex)
+{
+    if(old_subIndex == new_subIndex) return;
+
+    int child_row = 0;
+
+    std::for_each(m_reglist->begin(), m_reglist->end(), [&](RegEntry* re){
+        child_row = 0;
+        QModelIndex parent_index = QModelIndex();
+        std::for_each(re->begin(), re->end(), [&](RegVar* rv){
+            if((rv->baseIndex() == base_index) && (rv->baseSubIndex() == old_subIndex)){
+
+                rv->setBaseSubIndex(new_subIndex);
+
+                if(!parent_index.isValid()){
+                    parent_index = entryModelIndex(re);
+                }
+                QModelIndex child_index = index(child_row, COL_BASE, parent_index);
+                emit dataChanged(child_index, child_index);
+            }
+            child_row ++;
+        });
+    });
+}
+
 QVariant RegListModel::data(const QModelIndex &index, int role) const
 {
     //qDebug() << "RegListModel::data(" << index <<", " << static_cast<Qt::ItemDataRole>(role) << ")";
@@ -727,8 +826,12 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                 if(hasEntryByRegIndex(newIndex)){
                     return false;
                 }
+                reg_index_t oldIndex = re->index();
+
                 re->setIndex(newIndex);
+
                 fixSortingModelIndex(index.parent());
+                fixBaseIndex(oldIndex, newIndex);
             }
         }break;
         case COL_NAME:
@@ -762,8 +865,12 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                 if(pe->hasVarBySubIndex(newSubIndex)){
                     return false;
                 }
+                reg_subindex_t oldSubIndex = rv->subIndex();
+
                 rv->setSubIndex(newSubIndex);
+
                 fixSortingModelIndex(index.parent());
+                fixBaseSubIndex(pe->index(), oldSubIndex, newSubIndex);
             }
         }break;
         case COL_NAME:
