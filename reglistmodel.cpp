@@ -523,6 +523,9 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
         case COL_BASE:{
             unsigned int base_index = rv->baseIndex();
             unsigned int base_subindex = rv->baseSubIndex();
+
+            if(base_index == 0 && base_subindex == 0) return QStringLiteral("-");
+
             RegVar* brv = varByRegIndex(base_index, base_subindex);
             if(brv){
                 QString base_name;
