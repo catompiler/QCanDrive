@@ -11,6 +11,8 @@ ExportDlg::ExportDlg(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    m_varRE.setPattern("\\$\\([A-Za-z0-9_]*\\)");
+
     ui->lePath->setText(QDir::currentPath());
 }
 
@@ -51,6 +53,11 @@ void ExportDlg::setRegListFileName(const QString& newRegListFileName)
 
 QString ExportDlg::regDataDeclFileName() const
 {
+    return replaceVars(ui->leDataDecl->text());
+}
+
+QString ExportDlg::regDataDeclFileNameRaw() const
+{
     return ui->leDataDecl->text();
 }
 
@@ -60,6 +67,11 @@ void ExportDlg::setRegDataDeclFileName(const QString& newRegDataDeclFileName)
 }
 
 QString ExportDlg::regDataImplFileName() const
+{
+    return replaceVars(ui->leDataImpl->text());
+}
+
+QString ExportDlg::regDataImplFileNameRaw() const
 {
     return ui->leDataImpl->text();
 }
@@ -71,6 +83,11 @@ void ExportDlg::setRegDataImplFileName(const QString& newRegDataImplFileName)
 
 QString ExportDlg::cohFileName() const
 {
+    return replaceVars(ui->leCOH->text());
+}
+
+QString ExportDlg::cohFileNameRaw() const
+{
     return ui->leCOH->text();
 }
 
@@ -80,6 +97,11 @@ void ExportDlg::setCohFileName(const QString& newCohFileName)
 }
 
 QString ExportDlg::cocFileName() const
+{
+    return replaceVars(ui->leCOC->text());
+}
+
+QString ExportDlg::cocFileNameRaw() const
 {
     return ui->leCOC->text();
 }
@@ -107,6 +129,16 @@ QString ExportDlg::dataName() const
 void ExportDlg::setDataName(const QString& newDataName)
 {
     ui->leDataName->setText(newDataName);
+}
+
+QString ExportDlg::odName() const
+{
+    return ui->leOdName->text();
+}
+
+void ExportDlg::setOdName(const QString& newOdName)
+{
+    ui->leOdName->setText(newOdName);
 }
 
 void ExportDlg::on_tbPath_clicked(bool checked)
@@ -249,6 +281,28 @@ void ExportDlg::selectFileNameTo(QLineEdit* le, const QString& caption, const QS
             le->setText(fileName);
         }
     }
+}
+
+QString ExportDlg::replaceVars(const QString& text) const
+{
+    const QMap<QString, QString> vars = {
+        {QStringLiteral("DATA_NAME"), ui->leDataName->text()},
+        {QStringLiteral("OD_NAME"), ui->leOdName->text()}
+    };
+
+    QString str = text;
+
+    if(m_varRE.isValid()){
+        int pos = 0;
+        int len = 0;
+        while((pos = m_varRE.indexIn(str, 0)) != -1){
+            len = m_varRE.matchedLength();
+            QString var_name = str.mid(pos+2, len-3).trimmed();
+            str.replace(pos, len, vars.value(var_name, var_name));
+        }
+    }
+
+    return str;
 }
 
 bool ExportDlg::exportCO() const

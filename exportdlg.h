@@ -5,6 +5,7 @@
 #include <QString>
 
 class QLineEdit;
+class QRegExp;
 
 namespace Ui {
 class ExportDlg;
@@ -28,15 +29,19 @@ public:
     void setRegListFileName(const QString& newRegListFileName);
 
     QString regDataDeclFileName() const;
+    QString regDataDeclFileNameRaw() const;
     void setRegDataDeclFileName(const QString& newRegDataDeclFileName);
 
     QString regDataImplFileName() const;
+    QString regDataImplFileNameRaw() const;
     void setRegDataImplFileName(const QString& newRegDataImplFileName);
 
     QString cohFileName() const;
+    QString cohFileNameRaw() const;
     void setCohFileName(const QString& newCohFileName);
 
     QString cocFileName() const;
+    QString cocFileNameRaw() const;
     void setCocFileName(const QString& newCocFileName);
 
     QString edsFileName() const;
@@ -44,6 +49,9 @@ public:
 
     QString dataName() const;
     void setDataName(const QString& newDataName);
+
+    QString odName() const;
+    void setOdName(const QString& newOdName);
 
     bool exportRegs() const;
     void setExportRegs(bool newExportRegs);
@@ -88,7 +96,10 @@ private slots:
 private:
     Ui::ExportDlg *ui;
 
+    QRegExp m_varRE;
+
     void selectFileNameTo(QLineEdit* le, const QString& caption, const QString& filter);
+    QString replaceVars(const QString& text) const;
 };
 
 #endif // EXPORTDLG_H
