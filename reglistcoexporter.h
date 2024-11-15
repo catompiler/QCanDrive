@@ -36,6 +36,7 @@ private:
     bool writeCOexternOd(QTextStream& out_stream);
     bool writeCOShortcuts(QTextStream& out_stream, const RegEntryList* regentrylist);
     bool writeCOShortcutsWithNames(QTextStream& out_stream, const RegEntryList* regentrylist);
+    bool writeCOConfigDef(QTextStream& out_stream, const RegEntryList* regentrylist);
 
     bool exportCoC(const QString& filename, const RegEntryList* regentrylist);
     bool writeAllOdObjConstDefs(QTextStream& out_stream, const RegEntryList* regentrylist);
@@ -49,6 +50,8 @@ private:
     QString getOdEntryTypeStr(ObjectType objType) const;
     QString getOdEntryFieldName(const RegEntry* re) const;
     QString getOdEntryFieldDecl(const RegEntry* re) const;
+    QString getDefCntArrName(uint arr_index) const;
+    QString getDefEntryName(uint entry_index, const QString& entryName) const;
 };
 
 #endif // REGLISTCOEXPORTER_H

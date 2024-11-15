@@ -125,6 +125,7 @@ bool RegListCoExporter::exportCoH(const QString& filename, const RegEntryList* r
     res &= writeCOexternOd(out_stream);
     res &= writeCOShortcuts(out_stream, regentrylist);
     res &= writeCOShortcutsWithNames(out_stream, regentrylist);
+    res &= writeCOConfigDef(out_stream, regentrylist);
 
     // footer
     out << "\n#endif /* " << header_guard_name << " */\n";
@@ -233,8 +234,8 @@ bool RegListCoExporter::writeCOArraySizes(QTextStream& out_stream, const RegEntr
                 }
             }
 
-            out << QStringLiteral("#define %1_CNT_ARR_%2 %3")
-                   .arg(m_odName, QString::number(static_cast<uint>(re->index()), 16).toUpper())
+            out << QStringLiteral("#define %1 %2")
+                   .arg(getDefCntArrName(re->index()))
                    .arg(size)
                 << "\n";
         }
@@ -319,9 +320,8 @@ bool RegListCoExporter::writeCOShortcutsWithNames(QTextStream& out_stream, const
             continue;
         }
 
-        out << QStringLiteral("#define %1_ENTRY_H%2_%3 &%1->list[%4]")
-               .arg(m_odName, QString::number(static_cast<uint>(re->index()), 16).toUpper(),
-               RegUtils::makeName(re->name(), m_syntaxType))
+        out << QStringLiteral("#define %2 &%1->list[%3]")
+               .arg(m_odName, getDefEntryName(re->index(), re->name()))
                .arg(list_index)
             << "\n";
 
@@ -329,6 +329,87 @@ bool RegListCoExporter::writeCOShortcutsWithNames(QTextStream& out_stream, const
     }
 
     out << "\n\n";
+
+    return true;
+}
+
+bool RegListCoExporter::writeCOConfigDef(QTextStream& out_stream, const RegEntryList* regentrylist)
+{
+#if defined(DEBUG_OUTPUT) && DEBUG_OUTPUT == 1
+    Q_UNUSED(out_stream)
+    QDebug out = qDebug();
+#else
+    QTextStream& out = out_stream;
+#endif
+
+    auto getCntArrVal = [this, &regentrylist](uint index) -> QString {
+        auto it = std::find_if(regentrylist->begin(), regentrylist->end(), [&index](const RegEntry* re){
+            return re->index() == index;
+        });
+        if(it == regentrylist->end()){
+            return QStringLiteral("0");
+        }
+        return getDefCntArrName(index);
+    };
+
+    auto getEntryVal = [this, &regentrylist](uint index) -> QString {
+        auto it = std::find_if(regentrylist->begin(), regentrylist->end(), [&index](const RegEntry* re){
+            return re->index() == index;
+        });
+        if(it == regentrylist->end()){
+            return QStringLiteral("NULL");
+        }
+        return getDefEntryName((*it)->index(), (*it)->name());
+    };
+
+    out << "// OD config structure\n";
+
+    out << "#ifdef CO_MULTIPLE_OD\n";
+    out << QStringLiteral("#define %1_INIT_CONFIG(config) {\n").arg(m_odName);
+
+    out << QStringLiteral("(config).CNT_NMT = %1_CNT_NMT;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1017 = %1;\n").arg(getEntryVal(0x1017));
+    out << QStringLiteral("(config).CNT_HB_CONS = %1_CNT_HB_CONS;\n").arg(m_odName);
+    out << QStringLiteral("(config).CNT_ARR_1016 = %1;\n").arg(getCntArrVal(0x1016));
+    out << QStringLiteral("(config).ENTRY_H1016 = %1;\n").arg(getEntryVal(0x1016));
+    out << QStringLiteral("(config).CNT_EM = %1_CNT_EM;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1001 = %1;\n").arg(getEntryVal(0x1001));
+    out << QStringLiteral("(config).ENTRY_H1014 = %1;\n").arg(getEntryVal(0x1014));
+    out << QStringLiteral("(config).ENTRY_H1015 = %1;\n").arg(getEntryVal(0x1015));
+    out << QStringLiteral("(config).CNT_ARR_1003 = %1;\n").arg(getCntArrVal(0x1003));
+    out << QStringLiteral("(config).ENTRY_H1003 = %1;\n").arg(getEntryVal(0x1003));
+    out << QStringLiteral("(config).CNT_SDO_SRV = %1_CNT_SDO_SRV;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1200 = %1;\n").arg(getEntryVal(0x1200));
+    out << QStringLiteral("(config).CNT_SDO_CLI = %1_CNT_SDO_CLI;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1280 = %1;\n").arg(getEntryVal(0x1280));
+    out << QStringLiteral("(config).CNT_TIME = %1_CNT_TIME;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1012 = %1;\n").arg(getEntryVal(0x1012));
+    out << QStringLiteral("(config).CNT_SYNC = %1_CNT_SYNC;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1005 = %1;\n").arg(getEntryVal(0x1005));
+    out << QStringLiteral("(config).ENTRY_H1006 = %1;\n").arg(getEntryVal(0x1006));
+    out << QStringLiteral("(config).ENTRY_H1007 = %1;\n").arg(getEntryVal(0x1007));
+    out << QStringLiteral("(config).ENTRY_H1019 = %1;\n").arg(getEntryVal(0x1019));
+    out << QStringLiteral("(config).CNT_RPDO = %1_CNT_RPDO;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1400 = %1;\n").arg(getEntryVal(0x1400));
+    out << QStringLiteral("(config).ENTRY_H1600 = %1;\n").arg(getEntryVal(0x1600));
+    out << QStringLiteral("(config).CNT_TPDO = %1_CNT_TPDO;\n").arg(m_odName);
+    out << QStringLiteral("(config).ENTRY_H1800 = %1;\n").arg(getEntryVal(0x1800));
+    out << QStringLiteral("(config).ENTRY_H1A00 = %1;\n").arg(getEntryVal(0x1A00));
+    out << QStringLiteral("(config).CNT_LEDS = 0;\n");
+    out << QStringLiteral("(config).CNT_GFC = 0;\n");
+    out << QStringLiteral("(config).ENTRY_H1300 = %1;\n").arg(getEntryVal(0x1300));
+    out << QStringLiteral("(config).CNT_SRDO = 0;\n");
+    out << QStringLiteral("(config).ENTRY_H1301 = %1;\n").arg(getEntryVal(0x1301));
+    out << QStringLiteral("(config).ENTRY_H1381 = %1;\n").arg(getEntryVal(0x1381));
+    out << QStringLiteral("(config).ENTRY_H13FE = %1;\n").arg(getEntryVal(0x13FE));
+    out << QStringLiteral("(config).ENTRY_H13FF = %1;\n").arg(getEntryVal(0x13FF));
+    out << QStringLiteral("(config).CNT_LSS_SLV = 0;\n");
+    out << QStringLiteral("(config).CNT_LSS_MST = 0;\n");
+    out << QStringLiteral("(config).CNT_GTWA = 0;\n");
+    out << QStringLiteral("(config).CNT_TRACE = 0;\n");
+
+    out << "}\n";
+    out << "#endif\n";
 
     return true;
 }
@@ -734,4 +815,16 @@ QString RegListCoExporter::getOdEntryFieldDecl(const RegEntry* re) const
                .arg(re->count());
     }
     return name;
+}
+
+QString RegListCoExporter::getDefCntArrName(uint arr_index) const
+{
+    return QStringLiteral("%1_CNT_ARR_%2").arg(m_odName, QString::number(static_cast<uint>(arr_index), 16).toUpper());
+}
+
+QString RegListCoExporter::getDefEntryName(uint entry_index, const QString& entryName) const
+{
+    return QStringLiteral("%1_ENTRY_H%2_%3")
+            .arg(m_odName, QString::number(static_cast<uint>(entry_index), 16).toUpper(),
+                 RegUtils::makeName(entryName, m_syntaxType));
 }
