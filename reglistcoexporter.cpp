@@ -31,10 +31,10 @@ bool RegListCoExporter::doExport(const QString& filepath, const RegEntryList* re
     QDir path(filepath);
     if(!path.exists()) return false;
 
-    // TODO: fix wrong export files path.
     if(m_cohFileName.isEmpty()) m_cohFileName = "OD.h";
     if(m_cocFileName.isEmpty()) m_cocFileName = "OD.c";
     if(m_dataName.isEmpty()) m_dataName = "regs_data";
+    if(m_odName.isEmpty()) m_odName = QFileInfo(m_cohFileName).baseName();
 
     QString cohFileName = QFileInfo(m_cohFileName).isAbsolute() ? m_cohFileName : path.filePath(m_cohFileName);
     QString cocFileName = QFileInfo(m_cocFileName).isAbsolute() ? m_cocFileName : path.filePath(m_cocFileName);
@@ -76,6 +76,13 @@ RegListCoExporter& RegListCoExporter::setUserCodeCOh(const QString& userCode)
 RegListCoExporter& RegListCoExporter::setUserCodeCOc(const QString& userCode)
 {
     m_userCodeCOc = userCode;
+
+    return *this;
+}
+
+RegListCoExporter& RegListCoExporter::setODName(const QString& odName)
+{
+    m_odName = odName;
 
     return *this;
 }
@@ -139,19 +146,19 @@ bool RegListCoExporter::writeCOCounters(QTextStream& out_stream, const RegEntryL
 
     QMap<uint, QPair<uint, QString>> cnts;
 
-    cnts[RegEFlag::CON_CNT_NMT] = qMakePair(0, QStringLiteral("OD_CNT_NMT"));
-    cnts[RegEFlag::CON_CNT_EM] = qMakePair(0, QStringLiteral("OD_CNT_EM"));
-    cnts[RegEFlag::CON_CNT_SYNC] = qMakePair(0, QStringLiteral("OD_CNT_SYNC"));
-    cnts[RegEFlag::CON_CNT_SYNC_PROD] = qMakePair(0, QStringLiteral("OD_CNT_SYNC_PROD"));
-    cnts[RegEFlag::CON_CNT_STORAGE] = qMakePair(0, QStringLiteral("OD_CNT_STORAGE"));
-    cnts[RegEFlag::CON_CNT_TIME] = qMakePair(0, QStringLiteral("OD_CNT_TIME"));
-    cnts[RegEFlag::CON_CNT_EM_PROD] = qMakePair(0, QStringLiteral("OD_CNT_EM_PROD"));
-    cnts[RegEFlag::CON_CNT_HB_CONS] = qMakePair(0, QStringLiteral("OD_CNT_HB_CONS"));
-    cnts[RegEFlag::CON_CNT_HB_PROD] = qMakePair(0, QStringLiteral("OD_CNT_HB_PROD"));
-    cnts[RegEFlag::CON_CNT_SDO_SRV] = qMakePair(0, QStringLiteral("OD_CNT_SDO_SRV"));
-    cnts[RegEFlag::CON_CNT_SDO_CLI] = qMakePair(0, QStringLiteral("OD_CNT_SDO_CLI"));
-    cnts[RegEFlag::CON_CNT_RPDO] = qMakePair(0, QStringLiteral("OD_CNT_RPDO"));
-    cnts[RegEFlag::CON_CNT_TPDO] = qMakePair(0, QStringLiteral("OD_CNT_TPDO"));
+    cnts[RegEFlag::CON_CNT_NMT] = qMakePair(0, QStringLiteral("%1_CNT_NMT").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_EM] = qMakePair(0, QStringLiteral("%1_CNT_EM").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_SYNC] = qMakePair(0, QStringLiteral("%1_CNT_SYNC").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_SYNC_PROD] = qMakePair(0, QStringLiteral("%1_CNT_SYNC_PROD").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_STORAGE] = qMakePair(0, QStringLiteral("%1_CNT_STORAGE").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_TIME] = qMakePair(0, QStringLiteral("%1_CNT_TIME").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_EM_PROD] = qMakePair(0, QStringLiteral("%1_CNT_EM_PROD").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_HB_CONS] = qMakePair(0, QStringLiteral("%1_CNT_HB_CONS").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_HB_PROD] = qMakePair(0, QStringLiteral("%1_CNT_HB_PROD").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_SDO_SRV] = qMakePair(0, QStringLiteral("%1_CNT_SDO_SRV").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_SDO_CLI] = qMakePair(0, QStringLiteral("%1_CNT_SDO_CLI").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_RPDO] = qMakePair(0, QStringLiteral("%1_CNT_RPDO").arg(m_odName));
+    cnts[RegEFlag::CON_CNT_TPDO] = qMakePair(0, QStringLiteral("%1_CNT_TPDO").arg(m_odName));
 
     QMap<uint, uint> cnts_var;
     for(auto it = cnts.begin(); it != cnts.end(); ++ it){
@@ -226,8 +233,8 @@ bool RegListCoExporter::writeCOArraySizes(QTextStream& out_stream, const RegEntr
                 }
             }
 
-            out << QStringLiteral("#define OD_CNT_ARR_%1 %2")
-                   .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper())
+            out << QStringLiteral("#define %1_CNT_ARR_%2 %3")
+                   .arg(m_odName, QString::number(static_cast<uint>(re->index()), 16).toUpper())
                    .arg(size)
                 << "\n";
         }
@@ -247,10 +254,10 @@ bool RegListCoExporter::writeCOexternOd(QTextStream& out_stream)
     QTextStream& out = out_stream;
 #endif
 
-    out << "#ifndef OD_ATTR_OD\n"
-        << "#define OD_ATTR_OD\n"
-        << "#endif\n"
-        << "extern OD_ATTR_OD OD_t *OD;\n";
+    out << QStringLiteral("#ifndef %1_ATTR_OD\n").arg(m_odName)
+        << QStringLiteral("#define %1_ATTR_OD\n").arg(m_odName)
+        << QStringLiteral("#endif\n")
+        << QStringLiteral("extern %1_ATTR_OD OD_t *%1;\n").arg(m_odName);
 
     out << "\n\n";
 
@@ -278,8 +285,8 @@ bool RegListCoExporter::writeCOShortcuts(QTextStream& out_stream, const RegEntry
             continue;
         }
 
-        out << QStringLiteral("#define OD_ENTRY_H%1 &OD->list[%2]")
-               .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper())
+        out << QStringLiteral("#define %1_ENTRY_H%2 &%1->list[%3]")
+               .arg(m_odName, QString::number(static_cast<uint>(re->index()), 16).toUpper())
                .arg(list_index)
             << "\n";
 
@@ -312,8 +319,8 @@ bool RegListCoExporter::writeCOShortcutsWithNames(QTextStream& out_stream, const
             continue;
         }
 
-        out << QStringLiteral("#define OD_ENTRY_H%1_%2 &OD->list[%3]")
-               .arg(QString::number(static_cast<uint>(re->index()), 16).toUpper(),
+        out << QStringLiteral("#define %1_ENTRY_H%2_%3 &%1->list[%4]")
+               .arg(m_odName, QString::number(static_cast<uint>(re->index()), 16).toUpper(),
                RegUtils::makeName(re->name(), m_syntaxType))
                .arg(list_index)
             << "\n";
@@ -403,9 +410,9 @@ bool RegListCoExporter::writeAllOdObjConstDefs(QTextStream& out_stream, const Re
             << "\n";
     }
 
-    out << "} ODObjs_t;\n\n";
+    out << QStringLiteral("} %1Objs_t;\n\n").arg(m_odName);
 
-    out << "static CO_PROGMEM ODObjs_t ODObjs = {\n";
+    out << QStringLiteral("static CO_PROGMEM %1Objs_t %1Objs = {\n").arg(m_odName);
 
     bool firstEntry = true;
 
@@ -642,7 +649,7 @@ bool RegListCoExporter::writeOd(QTextStream& out_stream, const RegEntryList* reg
 #endif
 
     out << "// Object dictionary\n";
-    out << "static OD_ATTR_OD OD_entry_t ODList[] = {\n";
+    out << QStringLiteral("static %1_ATTR_OD OD_entry_t %1List[] = {\n").arg(m_odName);
 
     for(auto reit = regentrylist->cbegin(); reit != regentrylist->cend(); ++ reit){
         const RegEntry* re = *reit;
@@ -663,7 +670,8 @@ bool RegListCoExporter::writeOd(QTextStream& out_stream, const RegEntryList* reg
             });
         }
 
-        out << QStringLiteral("    {0x%1, 0x%2, %3, &ODObjs.%4, NULL},")
+        out << QStringLiteral("    {0x%2, 0x%3, %4, &%1Objs.%5, NULL},")
+               .arg(m_odName)
                .arg(static_cast<uint>(re->index()), 0, 16)
                .arg(count, 2, 16, QChar('0'))
                .arg(getOdObjectTypeStr(re->type()), getOdEntryFieldName(re))
@@ -672,12 +680,12 @@ bool RegListCoExporter::writeOd(QTextStream& out_stream, const RegEntryList* reg
     out << "    {0x0000, 0x00, 0, NULL, NULL}\n"
         << "};\n"
         << "\n"
-        << "static OD_t _OD = {\n"
-        << "    (sizeof(ODList) / sizeof(ODList[0])) - 1,\n"
-        << "    &ODList[0]\n"
+        << QStringLiteral("static OD_t _%1 = {\n").arg(m_odName)
+        << QStringLiteral("    (sizeof(%1List) / sizeof(%1List[0])) - 1,\n").arg(m_odName)
+        << QStringLiteral("    &%1List[0]\n").arg(m_odName)
         << "};\n"
         << "\n"
-        << "OD_t *OD = &_OD;\n"
+        << QStringLiteral("OD_t *%1 = &_%1;\n").arg(m_odName)
         << "\n\n";
 
     return true;
