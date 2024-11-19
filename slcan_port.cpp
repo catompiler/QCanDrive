@@ -114,7 +114,8 @@ int slcan_serial_flush(slcan_serial_handle_t serial_port)
     auto port = HANDLE_TO_SERIAL(serial_port);
     if(port == nullptr) return SLCAN_IO_FAIL;
 
-    port->flush();
+    port->waitForReadyRead(1);
+    if(port->flush()) port->waitForBytesWritten(1);
 
     return SLCAN_IO_SUCCESS;
 }
@@ -140,8 +141,8 @@ int slcan_serial_poll(slcan_serial_handle_t serial_port, int events, int* revent
     qint64 bytesAvail = port->bytesAvailable();
     qint64 bytesToWrite = port->bytesToWrite();
 
-    qDebug() << "bytesAvail" << bytesAvail;
-    qDebug() << "bytesToWrite" << bytesToWrite;
+    //qDebug() << "bytesAvail" << bytesAvail;
+    //qDebug() << "bytesToWrite" << bytesToWrite;
 
     if((events & SLCAN_POLLIN) && (bytesAvail != 0)) out_events |= SLCAN_POLLIN;
     if((events & SLCAN_POLLOUT) && (bytesToWrite == 0)) out_events |= SLCAN_POLLOUT;
