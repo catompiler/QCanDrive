@@ -1,4 +1,4 @@
-#include "slcan_port.h"
+#include "slcan_port_qt.h"
 #include <time.h>
 #include <QSerialPort>
 #include <QDebug>
@@ -14,6 +14,15 @@ int slcan_clock_gettime (clockid_t clock_id, struct timespec *tp)
 #define SERIAL_TO_HANDLE(S) (reinterpret_cast<void*>(S))
 // Преобразует slcan_serial_handle_t в тип последовательного порта.
 #define HANDLE_TO_SERIAL(H) (reinterpret_cast<QSerialPort*>(H))
+
+
+
+QSerialPort* slcan_serial_getQSerialPort(slcan_serial_handle_t serial_port)
+{
+    if(serial_port == SLCAN_IO_INVALID_HANDLE) return nullptr;
+
+    return HANDLE_TO_SERIAL(serial_port);
+}
 
 
 int slcan_serial_open(const char* serial_port_name, slcan_serial_handle_t* serial_port)
@@ -85,9 +94,12 @@ int slcan_serial_configure(slcan_serial_handle_t serial_port, const slcan_port_c
 void slcan_serial_close(slcan_serial_handle_t serial_port)
 {
     if(serial_port == SLCAN_IO_INVALID_HANDLE) return;
+
     auto port = HANDLE_TO_SERIAL(serial_port);
     if(port == nullptr) return;
+
     port->close();
+    port->deleteLater();
 }
 
 int slcan_serial_read(slcan_serial_handle_t serial_port, void* data, size_t data_size)

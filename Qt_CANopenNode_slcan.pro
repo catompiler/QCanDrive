@@ -37,6 +37,7 @@ SOURCES += \
     main.cpp \
     canopenwin.cpp \
     reg_data.c \
+    sdocommunication.cpp \
     slcan/slcan.c \
     slcan/slcan_can_ext_fifo.c \
     slcan/slcan_can_fifo.c \
@@ -47,7 +48,7 @@ SOURCES += \
     slcan/slcan_master.c \
     slcan/slcan_resp_out_fifo.c \
     slcan/slcan_slave.c \
-    slcan_port.cpp \
+    slcan_port_qt.cpp \
     slcanopennode.cpp
 
 HEADERS += \
@@ -71,6 +72,8 @@ HEADERS += \
     canopenwin.h \
     coobjectdict.h \
     reg_data.h \
+    sdocommunication.h \
+    sdocommunication_data.h \
     slcan/slcan.h \
     slcan/slcan_can_ext_fifo.h \
     slcan/slcan_can_fifo.h \
@@ -90,6 +93,7 @@ HEADERS += \
     slcan/slcan_slave_status.h \
     slcan/slcan_utils.h \
     slcan_conf.h \
+    slcan_port_qt.h \
     slcanopennode.h
 
 FORMS += \

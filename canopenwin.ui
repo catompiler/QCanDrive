@@ -35,11 +35,29 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actConnect"/>
+   <addaction name="actDisconnect"/>
    <addaction name="actDebugExec"/>
   </widget>
   <action name="actDebugExec">
    <property name="text">
     <string>Debug</string>
+   </property>
+  </action>
+  <action name="actConnect">
+   <property name="text">
+    <string>Соединить</string>
+   </property>
+   <property name="toolTip">
+    <string>Соединить</string>
+   </property>
+  </action>
+  <action name="actDisconnect">
+   <property name="text">
+    <string>Разъединить</string>
+   </property>
+   <property name="toolTip">
+    <string>Разъединить</string>
    </property>
   </action>
  </widget>

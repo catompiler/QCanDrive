@@ -21,9 +21,13 @@ public:
 
 private slots:
     void on_actDebugExec_triggered(bool checked);
+    void on_actConnect_triggered(bool checked);
+    void on_actDisconnect_triggered(bool checked);
 
 private:
     Ui::CanOpenWin *ui;
+
+    uint m_tmp;
 
     SLCanOpenNode* m_sco;
 };

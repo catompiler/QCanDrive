@@ -6,6 +6,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * User Configuration.
@@ -381,5 +384,9 @@ typedef struct {
     }
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CO_DRIVER_TARGET_H_ */
