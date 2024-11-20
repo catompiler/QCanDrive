@@ -1,6 +1,8 @@
 #include "canopenwin.h"
 #include "ui_canopenwin.h"
 #include "slcanopennode.h"
+#include "sdovalue.h"
+#include <QTimer>
 #include <QDebug>
 
 
@@ -11,10 +13,29 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     ui->setupUi(this);
 
     m_sco = new SLCanOpenNode(this);
+    connect(m_sco, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
+    connect(m_sco, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
+
+    m_sdo_counter = new SDOValue(m_sco);
+    m_sdo_counter->setNodeId(1);
+    m_sdo_counter->setIndex(0x2000);
+    m_sdo_counter->setSubIndex(0x0);
+    m_sdo_counter->setDataSize(4);
+    m_sdo_counter->setTimeout(1000);
+    connect(m_sdo_counter, &SDOValue::readed, this, [this](){
+        SDOValue* sdoval = qobject_cast<SDOValue*>(sender());
+        if(sdoval == nullptr) return;
+
+        qDebug() << sdoval->value<uint>();
+
+        QTimer::singleShot(1000, this, [sdoval](){ sdoval->read(); });
+    });
+    connect(m_sco, &SLCanOpenNode::connected, m_sdo_counter, &SDOValue::read);
 }
 
 CanOpenWin::~CanOpenWin()
 {
+    delete m_sdo_counter;
     delete m_sco;
     delete ui;
 }
@@ -23,7 +44,8 @@ void CanOpenWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    auto comm = m_sco->transfer(SDOCommunication::UPLOAD, 1, 0x2000, 0x0, &m_tmp, 4, 1000);
+    m_tmp = 1;
+    auto comm = m_sco->read(1, 0x2000, 0x0, &m_tmp, 4);
     if(comm != nullptr){
         connect(comm, &SDOCommunication::finished, this, [this](){
             SDOCommunication* comm = qobject_cast<SDOCommunication*>(sender());
@@ -82,5 +104,15 @@ void CanOpenWin::on_actDisconnect_triggered(bool checked)
     m_sco->closePort();
 
     qDebug() << "Disconnected!";
+}
+
+void CanOpenWin::CANopen_connected()
+{
+
+}
+
+void CanOpenWin::CANopen_disconnected()
+{
+
 }
 

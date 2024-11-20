@@ -38,6 +38,7 @@ SOURCES += \
     canopenwin.cpp \
     reg_data.c \
     sdocommunication.cpp \
+    sdovalue.cpp \
     slcan/slcan.c \
     slcan/slcan_can_ext_fifo.c \
     slcan/slcan_can_fifo.c \
@@ -74,6 +75,7 @@ HEADERS += \
     reg_data.h \
     sdocommunication.h \
     sdocommunication_data.h \
+    sdovalue.h \
     slcan/slcan.h \
     slcan/slcan_can_ext_fifo.h \
     slcan/slcan_can_fifo.h \

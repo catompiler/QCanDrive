@@ -60,15 +60,38 @@ public:
     uint16_t heartbeatTime() const;
     void setHeartbeatTime(uint16_t newHeartbeatTime);
 
+    bool updateOd();
+
     // SLCan poll & CO process timer interval in ms.
     int coTimerInterval() const;
     void setCoTimerInterval(int newCoTimerInterval);
 
-    SDOCommunication* transfer(SDOCommunication::Type type, NodeId devId,
-                               Index dataIndex, SubIndex dataSubIndex,
-                               void* data, size_t dataSize, int timeout = -1);
+    /*
+     * read & write:
+     * timeout == -1 -> max timeout (65535).
+     * timeout ==  0 -> default timeout.
+     * sdocomm == nullptr -> alloc new sdo comm.
+     */
+
+    SDOCommunication* read(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
+                               void* data, size_t dataSize, SDOCommunication* sdocomm = nullptr, int timeout = -1);
+
+    SDOCommunication* write(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
+                               const void* data, size_t dataSize, SDOCommunication* sdocomm = nullptr, int timeout = -1);
+
+    bool read(SDOCommunication* sdocom);
+    bool write(SDOCommunication* sdocom);
+
+    // return true if sdoc removed(not in) from queue and can be deleted or reused.
+    // when return true - not finish sdo comm.
+    bool cancel(SDOCommunication* sdoc);
+
+    int defaultTimeout() const;
+    void setDefaultTimeout(int newDefaultTimeout);
 
 signals:
+    void connected();
+    void disconnected();
 
 private slots:
     void slcanSerialReadyRead();
@@ -94,11 +117,13 @@ private:
     uint32_t m_cobidClientToServer;
     uint32_t m_cobidServerToClient;
     uint16_t m_heartbeatTime;
+    int m_defaultTimeout;
 
     QQueue<SDOCommunication*> m_sdoComms;
 
     void processSDOClient(uint32_t dt);
     bool processFrontComm(uint32_t dt);
+    void cancelAllSDOComms();
     void createOd();
 };
 

@@ -9,6 +9,7 @@ QT_END_NAMESPACE
 
 
 class SLCanOpenNode;
+class SDOValue;
 
 
 class CanOpenWin : public QMainWindow
@@ -24,9 +25,12 @@ private slots:
     void on_actConnect_triggered(bool checked);
     void on_actDisconnect_triggered(bool checked);
 
+    void CANopen_connected();
+    void CANopen_disconnected();
 private:
     Ui::CanOpenWin *ui;
 
+    SDOValue* m_sdo_counter;
     uint m_tmp;
 
     SLCanOpenNode* m_sco;

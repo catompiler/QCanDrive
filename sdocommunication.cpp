@@ -137,7 +137,7 @@ void SDOCommunication::setError(Error newError)
     m_d->m_error = newError;
 }
 
-bool SDOCommunication::cancel() const
+bool SDOCommunication::cancelled() const
 {
     return m_d->m_cancel;
 }
@@ -145,6 +145,16 @@ bool SDOCommunication::cancel() const
 void SDOCommunication::setCancel(bool newCancel)
 {
     m_d->m_cancel = newCancel;
+}
+
+void SDOCommunication::cancel()
+{
+    setCancel(true);
+}
+
+bool SDOCommunication::running() const
+{
+    return m_d->m_state != SDOCommunication::IDLE;
 }
 
 void SDOCommunication::finish()
@@ -177,11 +187,14 @@ bool SDOCommunication::dataTransferDone() const
 size_t SDOCommunication::dataSizeToTransfer() const
 {
     if(m_d->m_dataTransfered >= m_d->m_size) return 0;
+
     return m_d->m_size - m_d->m_dataTransfered;
 }
 
 void* SDOCommunication::dataToTransfer() const
 {
+    if(m_d->m_data == nullptr) return nullptr;
+
     uint8_t* ptr = static_cast<uint8_t*>(m_d->m_data);
 
     return &ptr[m_d->m_dataTransfered];

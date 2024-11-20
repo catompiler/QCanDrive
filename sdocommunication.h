@@ -23,10 +23,11 @@ public:
 
     enum State {
         IDLE = 0,
-        INIT = 1,
-        DATA = 2,
-        RUN = 3,
-        DONE = 4
+        QUEUED = 1,
+        INIT = 2,
+        DATA = 3,
+        RUN = 4,
+        DONE = 5
     };
 
     enum Error {
@@ -41,6 +42,8 @@ public:
     /*SDOCommunication(const SDOCommunication& sdo_comm);
     SDOCommunication(SDOCommunication&& sdo_comm);*/
     ~SDOCommunication();
+
+    // get/set.
 
     Type type() const;
     void setType(Type newType);
@@ -70,8 +73,13 @@ public:
     Error error() const;
     void setError(Error newError);
 
-    bool cancel() const;
+    bool cancelled() const;
     void setCancel(bool newCancel);
+
+    // methods.
+
+    void cancel();
+    bool running() const;
 
     void finish();
     void finish(Error err);
