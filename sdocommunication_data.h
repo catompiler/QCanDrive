@@ -9,12 +9,14 @@ struct SDOCommunication_data {
     SDOCommunication::Index m_index;
     SDOCommunication::SubIndex m_subIndex;
     void* m_data;
-    size_t m_size;
+    size_t m_dataSize;
     int m_timeout;
     SDOCommunication::State m_state;
     SDOCommunication::Error m_error;
     bool m_cancel;
+    size_t m_transferSize;
     size_t m_dataTransfered;
+    size_t m_dataBuffered;
 };
 
 #endif // SDOCOMMUNICATION_DATA_H

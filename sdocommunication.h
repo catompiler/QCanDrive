@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class SDOCommunication_data;
+struct SDOCommunication_data;
 
 
 class SDOCommunication : public QObject
@@ -64,11 +64,12 @@ public:
     SubIndex subIndex() const;
     void setSubIndex(SubIndex newSubIndex);
 
-    void* data() const;
+    void* data();
+    const void* data() const;
     void setData(void* newData);
 
-    size_t size() const;
-    void setSize(size_t newSize);
+    size_t dataSize() const;
+    void setDataSize(size_t newSize);
 
     // ms.
     int timeout() const;
@@ -83,6 +84,9 @@ public:
     bool cancelled() const;
     void setCancel(bool newCancel);
 
+    size_t transferSize() const;
+    void setTransferSize(size_t newTransferSize);
+
     // methods.
 
     void cancel();
@@ -91,11 +95,21 @@ public:
     void finish();
     void finish(Error err);
 
-    void resetDataTransfered();
+    size_t transferedDataSize() const;
+    void resetTransferedSize();
+    void setDataTransfered(size_t size);
     void dataTransfered(size_t size);
     bool dataTransferDone() const;
     size_t dataSizeToTransfer() const;
     void* dataToTransfer() const;
+
+    size_t bufferedDataSize() const;
+    void resetBufferedSize();
+    void setDataBuffered(size_t size);
+    void dataBuffered(size_t size);
+    bool dataBufferingDone() const;
+    size_t dataSizeToBuffering() const;
+    void* dataToBuffering() const;
 
 signals:
     void finished();

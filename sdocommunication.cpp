@@ -1,5 +1,6 @@
 #include "sdocommunication.h"
 #include "sdocommunication_data.h"
+#include <QDebug>
 
 
 SDOCommunication::SDOCommunication(QObject *parent)
@@ -10,12 +11,14 @@ SDOCommunication::SDOCommunication(QObject *parent)
     m_d->m_index = 0;
     m_d->m_subIndex = 0;
     m_d->m_data = nullptr;
-    m_d->m_size = 0;
+    m_d->m_dataSize = 0;
     m_d->m_timeout = 0;
     m_d->m_state = IDLE;
     m_d->m_error = ERROR_NONE;
     m_d->m_cancel = false;
+    m_d->m_transferSize = 0;
     m_d->m_dataTransfered = 0;
+    m_d->m_dataBuffered = 0;
 }
 
 /*SDOCommunication::SDOCommunication(const SDOCommunication& sdo_comm)
@@ -87,7 +90,12 @@ void SDOCommunication::setSubIndex(SubIndex newSubIndex)
     m_d->m_subIndex = newSubIndex;
 }
 
-void* SDOCommunication::data() const
+void* SDOCommunication::data()
+{
+    return m_d->m_data;
+}
+
+const void* SDOCommunication::data() const
 {
     return m_d->m_data;
 }
@@ -97,9 +105,9 @@ void SDOCommunication::setData(void* newData)
     m_d->m_data = newData;
 }
 
-size_t SDOCommunication::size() const
+size_t SDOCommunication::dataSize() const
 {
-    return m_d->m_size;
+    return m_d->m_dataSize;
 }
 
 void SDOCommunication::setState(State newState)
@@ -117,9 +125,9 @@ void SDOCommunication::setTimeout(int newTimeout)
     m_d->m_timeout = newTimeout;
 }
 
-void SDOCommunication::setSize(size_t newSize)
+void SDOCommunication::setDataSize(size_t newSize)
 {
-    m_d->m_size = newSize;
+    m_d->m_dataSize = newSize;
 }
 
 SDOCommunication::State SDOCommunication::state() const
@@ -147,6 +155,16 @@ void SDOCommunication::setCancel(bool newCancel)
     m_d->m_cancel = newCancel;
 }
 
+size_t SDOCommunication::transferSize() const
+{
+    return m_d->m_transferSize;
+}
+
+void SDOCommunication::setTransferSize(size_t newTransferSize)
+{
+    m_d->m_transferSize = newTransferSize;
+}
+
 void SDOCommunication::cancel()
 {
     setCancel(true);
@@ -154,7 +172,8 @@ void SDOCommunication::cancel()
 
 bool SDOCommunication::running() const
 {
-    return m_d->m_state != SDOCommunication::IDLE;
+    return m_d->m_state != SDOCommunication::IDLE &&
+           m_d->m_state != SDOCommunication::DONE;
 }
 
 void SDOCommunication::finish()
@@ -169,9 +188,19 @@ void SDOCommunication::finish(Error err)
     finish();
 }
 
-void SDOCommunication::resetDataTransfered()
+size_t SDOCommunication::transferedDataSize() const
+{
+    return m_d->m_dataTransfered;
+}
+
+void SDOCommunication::resetTransferedSize()
 {
     m_d->m_dataTransfered = 0;
+}
+
+void SDOCommunication::setDataTransfered(size_t size)
+{
+    m_d->m_dataTransfered = size;
 }
 
 void SDOCommunication::dataTransfered(size_t size)
@@ -181,14 +210,14 @@ void SDOCommunication::dataTransfered(size_t size)
 
 bool SDOCommunication::dataTransferDone() const
 {
-    return m_d->m_dataTransfered >= m_d->m_size;
+    return m_d->m_dataTransfered >= m_d->m_transferSize;
 }
 
 size_t SDOCommunication::dataSizeToTransfer() const
 {
-    if(m_d->m_dataTransfered >= m_d->m_size) return 0;
+    if(m_d->m_dataTransfered >= m_d->m_transferSize) return 0;
 
-    return m_d->m_size - m_d->m_dataTransfered;
+    return m_d->m_transferSize - m_d->m_dataTransfered;
 }
 
 void* SDOCommunication::dataToTransfer() const
@@ -198,4 +227,45 @@ void* SDOCommunication::dataToTransfer() const
     uint8_t* ptr = static_cast<uint8_t*>(m_d->m_data);
 
     return &ptr[m_d->m_dataTransfered];
+}
+
+size_t SDOCommunication::bufferedDataSize() const
+{
+    return m_d->m_dataBuffered;
+}
+
+void SDOCommunication::resetBufferedSize()
+{
+    m_d->m_dataBuffered = 0;
+}
+
+void SDOCommunication::setDataBuffered(size_t size)
+{
+    m_d->m_dataBuffered = size;
+}
+
+void SDOCommunication::dataBuffered(size_t size)
+{
+    m_d->m_dataBuffered += size;
+}
+
+bool SDOCommunication::dataBufferingDone() const
+{
+    return m_d->m_dataBuffered >= m_d->m_transferSize;
+}
+
+size_t SDOCommunication::dataSizeToBuffering() const
+{
+    if(m_d->m_dataBuffered >= m_d->m_transferSize) return 0;
+
+    return m_d->m_transferSize - m_d->m_dataBuffered;
+}
+
+void* SDOCommunication::dataToBuffering() const
+{
+    if(m_d->m_data == nullptr) return nullptr;
+
+    uint8_t* ptr = static_cast<uint8_t*>(m_d->m_data);
+
+    return &ptr[m_d->m_dataBuffered];
 }

@@ -36,6 +36,18 @@ public:
     int timeout() const;
     bool setTimeout(int newTimeout);
 
+    void* data();
+    const void* data() const;
+
+    size_t transferSize() const;
+    bool setTransferSize(size_t newTransferSize);
+
+    size_t transferedDataSize() const;
+
+    SDOCommunication::Type transferType() const;
+
+    SDOCommunication::State transferState() const;
+
     SDOCommunication::Error error() const;
 
     bool running() const;
@@ -46,11 +58,11 @@ public:
     template <typename T>
     bool setValue(const T& val);
 
-    /*template <typename T>
+    template <typename T>
     T valueAt(int i, const T& defVal = T(), bool* isOk = nullptr) const;
 
     template <typename T>
-    bool setValueAt(int i, const T& val);*/
+    bool setValueAt(int i, const T& val);
 
 public slots:
     bool read();
@@ -76,7 +88,7 @@ T SDOValue::value(const T& defVal, bool* isOk) const
 {
     if(m_sdoc->data() == nullptr)
     { if(isOk) *isOk = false; return defVal; }
-    if(m_sdoc->size() != sizeof(T))
+    if(m_sdoc->dataSize() != sizeof(T))
     { if(isOk) *isOk = false; return defVal; }
 
     return *static_cast<T*>(m_sdoc->data());
@@ -87,7 +99,7 @@ bool SDOValue::setValue(const T& val)
 {
     if(m_sdoc->data() == nullptr)
     { return false; }
-    if(m_sdoc->size() != sizeof(T))
+    if(m_sdoc->dataSize() != sizeof(T))
     { return false; }
 
     *static_cast<T*>(m_sdoc->data()) = val;
@@ -95,12 +107,12 @@ bool SDOValue::setValue(const T& val)
     return true;
 }
 
-/*template<typename T>
+template<typename T>
 T SDOValue::valueAt(int i, const T& defVal, bool* isOk) const
 {
     if(m_sdoc->data() == nullptr)
     { if(isOk) *isOk = false; return defVal; }
-    if((i < 0) || (m_sdoc->size() < (i + 1) * sizeof(T)))
+    if((i < 0) || (m_sdoc->dataSize() < (i + 1) * sizeof(T)))
     { if(isOk) *isOk = false; return defVal; }
 
     return static_cast<T*>(m_sdoc->data())[i];
@@ -111,12 +123,12 @@ bool SDOValue::setValueAt(int i, const T& val)
 {
     if(m_sdoc->data() == nullptr)
     { return false; }
-    if((i < 0) || (m_sdoc->size() < (i + 1) * sizeof(T)))
+    if((i < 0) || (m_sdoc->dataSize() < (i + 1) * sizeof(T)))
     { return false; }
 
     static_cast<T*>(m_sdoc->data())[i] = val;
 
     return true;
-}*/
+}
 
 #endif // SDOVALUE_H

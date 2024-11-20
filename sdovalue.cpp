@@ -54,7 +54,7 @@ bool SDOValue::setSLCanOpenNode(SLCanOpenNode* slcon)
 
 size_t SDOValue::dataSize() const
 {
-    return m_sdoc->size();
+    return m_sdoc->dataSize();
 }
 
 bool SDOValue::setDataSize(size_t newDataSize)
@@ -63,19 +63,19 @@ bool SDOValue::setDataSize(size_t newDataSize)
         return false;
     }
 
-    if(m_sdoc->size() == newDataSize) return true;
+    if(m_sdoc->dataSize() == newDataSize) return true;
 
     uint8_t* oldData = static_cast<uint8_t*>(m_sdoc->data());
     uint8_t* newData = new uint8_t[newDataSize];
 
     if(oldData != nullptr){
-        size_t minSize = std::min(m_sdoc->size(), newDataSize);
+        size_t minSize = std::min(m_sdoc->dataSize(), newDataSize);
         memcpy(newData, oldData, minSize);
         delete[] oldData;
     }
 
     m_sdoc->setData(newData);
-    m_sdoc->setSize(newDataSize);
+    m_sdoc->setDataSize(newDataSize);
 
     return true;
 }
@@ -136,6 +136,46 @@ bool SDOValue::setTimeout(int newTimeout)
     return true;
 }
 
+void* SDOValue::data()
+{
+    return m_sdoc->data();
+}
+
+const void* SDOValue::data() const
+{
+    return m_sdoc->data();
+}
+
+size_t SDOValue::transferSize() const
+{
+    return m_sdoc->transferSize();
+}
+
+bool SDOValue::setTransferSize(size_t newTransferSize)
+{
+    if(running()) return false;
+    if(newTransferSize > dataSize()) return false;
+
+    m_sdoc->setTransferSize(newTransferSize);
+
+    return true;
+}
+
+size_t SDOValue::transferedDataSize() const
+{
+    return m_sdoc->transferedDataSize();
+}
+
+SDOCommunication::Type SDOValue::transferType() const
+{
+    return m_sdoc->type();
+}
+
+SDOCommunication::State SDOValue::transferState() const
+{
+    return m_sdoc->state();
+}
+
 SDOCommunication::Error SDOValue::error() const
 {
     return m_sdoc->error();
@@ -149,8 +189,9 @@ bool SDOValue::running() const
 
 bool SDOValue::read()
 {
+    if(running()) return false;
     if(m_slcon == nullptr) return false;
-    if(m_sdoc->data() == nullptr || m_sdoc->size() == 0) return false;
+    if(m_sdoc->data() == nullptr || m_sdoc->dataSize() == 0) return false;
 
     if(!m_slcon->read(m_sdoc)) return false;
 
@@ -159,8 +200,9 @@ bool SDOValue::read()
 
 bool SDOValue::write()
 {
+    if(running()) return false;
     if(m_slcon == nullptr) return false;
-    if(m_sdoc->data() == nullptr || m_sdoc->size() == 0) return false;
+    if(m_sdoc->data() == nullptr || m_sdoc->dataSize() == 0) return false;
 
     if(!m_slcon->write(m_sdoc)) return false;
 

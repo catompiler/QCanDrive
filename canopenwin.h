@@ -30,7 +30,7 @@ private slots:
 private:
     Ui::CanOpenWin *ui;
 
-    SDOValue* m_sdo_counter;
+    SDOValue* m_sdo_val;
     uint m_tmp;
 
     SLCanOpenNode* m_sco;

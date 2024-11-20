@@ -5,6 +5,9 @@
 #include <QDebug>
 
 
+#define SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH 0
+
+
 
 SLCanOpenNode::SLCanOpenNode(QObject *parent)
     : QObject{parent}
@@ -124,7 +127,6 @@ bool SLCanOpenNode::openPort(const QString& name, QSerialPort::BaudRate baud, QS
 
 void SLCanOpenNode::closePort()
 {
-    if(!slcan_opened(&m_sc)) return;
 
     slcan_master_reset(&m_scm);
     slcan_close(&m_sc);
@@ -133,6 +135,13 @@ void SLCanOpenNode::closePort()
 
 bool SLCanOpenNode::createCO()
 {
+    if(!slcan_opened(&m_sc)) return false;
+
+    QSerialPort* port = slcan_serial_getQSerialPort(slcan_serial_port(&m_sc));
+    if(port != nullptr){
+        port->blockSignals(true);
+    }
+
     if(m_co != nullptr) return false;
 
     m_co = CO_new(m_od.config(), nullptr);
@@ -175,6 +184,10 @@ bool SLCanOpenNode::createCO()
     m_coProcessTp = meas_clock::now();
 
     CO_CANsetNormalMode(m_co->CANmodule);
+
+    if(port != nullptr){
+        port->blockSignals(false);
+    }
 
     m_coProcessTimer->start();
 
@@ -419,8 +432,8 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
         __attribute__ ((fallthrough));
         case SDOCommunication::INIT:
             sdo_ret = CO_SDOclientDownloadInitiate(sdo_cli,
-                            sdoc->index(), sdoc->subIndex(),
-                            sdoc->size(), std::min(static_cast<uint>(sdoc->timeout()), static_cast<uint>(UINT16_MAX)),
+                            sdoc->index(), sdoc->subIndex(), sdoc->transferSize(),
+                            std::min(static_cast<uint>(sdoc->timeout()), static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
                 sdoc->setState(SDOCommunication::DONE);
@@ -435,17 +448,18 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
         __attribute__ ((fallthrough));
         case SDOCommunication::DATA:
             size_ret = CO_SDOclientDownloadBufWrite(sdo_cli,
-                            static_cast<uint8_t*>(sdoc->dataToTransfer()), sdoc->dataSizeToTransfer());
-            sdoc->dataTransfered(size_ret);
-            if(sdoc->dataTransferDone()){
+                            static_cast<uint8_t*>(sdoc->dataToBuffering()), sdoc->dataSizeToBuffering());
+            sdoc->dataBuffered(size_ret);
+            if(sdoc->dataBufferingDone()){
                 sdoc->setState(SDOCommunication::RUN);
             }
 
         __attribute__ ((fallthrough));
         case SDOCommunication::RUN:
             sdo_ret = CO_SDOclientDownload(sdo_cli,
-                            dt, sdoc->cancelled(), !sdoc->dataTransferDone(), &sdo_abort_ret,
-                            nullptr, nullptr);
+                            dt, sdoc->cancelled(), !sdoc->dataBufferingDone(), &sdo_abort_ret,
+                            &size_ret, nullptr);
+            sdoc->setDataTransfered(size_ret);
             if(sdo_ret == 0){
                 if(sdoc->cancelled()){
                     sdoc->setError(SDOCommunication::ERROR_CANCEL);
@@ -454,6 +468,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 }
                 sdoc->setState(SDOCommunication::DONE);
             }else if(sdo_ret < 0){
+                //qDebug() << size_ret << Qt::hex << sdo_abort_ret;
                 SDOCommunication::Error finish_err = sdoCommError(sdo_abort_ret);
                 sdoc->setState(SDOCommunication::DONE);
                 sdoc->setError(finish_err);
@@ -508,6 +523,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                             dt, sdoc->cancelled(), &sdo_abort_ret,
                             &size_to_ret, &size_ret,
                             nullptr);
+            sdoc->setDataBuffered(size_ret);
             if(sdo_ret == 0){
                 if(sdoc->cancelled()){
                     sdoc->setState(SDOCommunication::DONE);
@@ -516,6 +532,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 }
                 sdoc->setState(SDOCommunication::DATA);
             }else if(sdo_ret < 0){
+                //qDebug() << size_ret << Qt::hex << sdo_abort_ret;
                 SDOCommunication::Error finish_err = sdoCommError(sdo_abort_ret);
                 sdoc->setState(SDOCommunication::DONE);
                 sdoc->setError(finish_err);
@@ -524,13 +541,15 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 if(sdo_ret == CO_SDO_RT_blockUploadInProgress){
                     break;
                 }
+#if defined(SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH) && SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH == 1
                 if(size_to_ret > 0){
-                    if(size_to_ret != sdoc->size()){
+                    if(size_to_ret != sdoc->transferSize()){
                         sdoc->setState(SDOCommunication::DONE);
                         sdoc->setError(SDOCommunication::ERROR_INVALID_SIZE);
                         return true;
                     }
                 }
+#endif
                 if(size_ret == 0){
                     break;
                 }
@@ -547,8 +566,13 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 sdoc->setError(SDOCommunication::ERROR_NONE);
             }else{
                 if(sdoc->state() == SDOCommunication::DATA && size_ret == 0){
+#if defined(SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH) && SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH == 1
                     sdoc->setState(SDOCommunication::DONE);
                     sdoc->setError(SDOCommunication::ERROR_INVALID_SIZE);
+#else
+                    sdoc->setState(SDOCommunication::DONE);
+                    sdoc->setError(SDOCommunication::ERROR_NONE);
+#endif
                 }else{
                     break;
                 }
@@ -571,6 +595,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
 
 SDOCommunication::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
 {
+    //qDebug() << Qt::hex << code;
     switch (code){
     default:
         break;
@@ -651,7 +676,10 @@ SDOCommunication* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex da
     sdoc->setIndex(dataIndex);
     sdoc->setSubIndex(dataSubIndex);
     sdoc->setData(data);
-    sdoc->setSize(dataSize);
+    if(sdoc->dataSize() < dataSize){
+        sdoc->setDataSize(dataSize);
+    }
+    sdoc->setTransferSize(dataSize);
     sdoc->setTimeout((timeout == 0) ? m_defaultTimeout : timeout);
 
     if(!read(sdoc)){
@@ -677,7 +705,10 @@ SDOCommunication* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex d
     sdoc->setIndex(dataIndex);
     sdoc->setSubIndex(dataSubIndex);
     sdoc->setData(const_cast<void*>(data));
-    sdoc->setSize(dataSize);
+    if(sdoc->dataSize() < dataSize){
+        sdoc->setDataSize(dataSize);
+    }
+    sdoc->setTransferSize(dataSize);
     sdoc->setTimeout((timeout == 0) ? m_defaultTimeout : timeout);
 
     if(!write(sdoc)){
@@ -690,11 +721,14 @@ SDOCommunication* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex d
 
 bool SLCanOpenNode::read(SDOCommunication* sdocom)
 {
+    if(!isConnected()) return false;
+
     if(sdocom == nullptr) return false;
-    if(sdocom->size() == 0) return false;
+    if(sdocom->dataSize() == 0) return false;
     if(sdocom->data() == nullptr) return false;
 
-    sdocom->resetDataTransfered();
+    sdocom->resetTransferedSize();
+    sdocom->resetBufferedSize();
     sdocom->setError(SDOCommunication::ERROR_NONE);
     sdocom->setCancel(false);
     sdocom->setType(SDOCommunication::UPLOAD);
@@ -706,11 +740,14 @@ bool SLCanOpenNode::read(SDOCommunication* sdocom)
 
 bool SLCanOpenNode::write(SDOCommunication* sdocom)
 {
+    if(!isConnected()) return false;
+
     if(sdocom == nullptr) return false;
-    if(sdocom->size() == 0) return false;
+    if(sdocom->dataSize() == 0) return false;
     if(sdocom->data() == nullptr) return false;
 
-    sdocom->resetDataTransfered();
+    sdocom->resetTransferedSize();
+    sdocom->resetBufferedSize();
     sdocom->setError(SDOCommunication::ERROR_NONE);
     sdocom->setCancel(false);
     sdocom->setType(SDOCommunication::DOWNLOAD);
