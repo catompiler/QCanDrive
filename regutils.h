@@ -54,6 +54,17 @@ extern VarNameMap genRegDataVarsNameMapping(const RegEntryList* regentrylist, bo
 extern VarNameMap genRegDataVarsNameMappingWithinEntry(const RegEntryList* regentrylist, bool arrayDataSharedName = true);
 
 
+//! Получает размер данных переменной.
+extern uint varDataSize(const RegVar* rv);
+
+//! Получает аттрибуты CO для размера и типа данных.
+extern co_attributes_t coAttributeForTypeSize(DataType dataType, uint sizeBytes);
+
+
+//! Добавляет амперсанд к имени данных, либо возвращает NULL, если имя пусто.
+extern QString memAddress(const QString& mem);
+
+
 //! Получает длину данных массива (кроме count с под-индексом 0) в точке входа.
 extern uint getArrDataLen(const RegEntry* re);
 

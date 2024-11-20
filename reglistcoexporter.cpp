@@ -564,14 +564,15 @@ bool RegListCoExporter::writeOdVarConstDef(QTextStream& out_stream, const RegEnt
             data_str = RegUtils::getArrMem(m_dataName, re, rv, 0, m_entryNameMap, m_varNameMap, m_syntaxType);
         }
 
-        uint dataSize = RegTypes::sizeBytes(rv->dataType());
+        uint dataSize = RegUtils::varDataSize(rv);
 
         co_attributes_t attrs = RegTypes::eflagsToCoAttributes(rv->eflags());
-        if(dataSize > 1) attrs |= COAttribute::MB;
+        attrs |= RegUtils::coAttributeForTypeSize(rv->dataType(), dataSize);
+
         QString attrs_str = RegTypes::getNames(attrs, RegTypes::coAttributeFullName).join(" | ");
 
-        out << QStringLiteral("    .dataOrig = &%1,")
-               .arg(data_str)
+        out << QStringLiteral("    .dataOrig = %1,")
+               .arg(RegUtils::memAddress(data_str))
             << "\n";
 
         out << QStringLiteral("    .attribute = %1,")
@@ -618,14 +619,15 @@ bool RegListCoExporter::writeOdRecConstDef(QTextStream& out_stream, const RegEnt
             data_str = RegUtils::getArrMem(m_dataName, re, rv, 0, m_entryNameMap, m_varNameMap, m_syntaxType);
         }
 
-        uint dataSize = RegTypes::sizeBytes(rv->dataType());
+        uint dataSize = RegUtils::varDataSize(rv);
 
         co_attributes_t attrs = RegTypes::eflagsToCoAttributes(rv->eflags());
-        if(dataSize > 1) attrs |= COAttribute::MB;
+        attrs |= RegUtils::coAttributeForTypeSize(rv->dataType(), dataSize);
+
         QString attrs_str = RegTypes::getNames(attrs, RegTypes::coAttributeFullName).join(" | ");
 
-        out << QStringLiteral("    .dataOrig = &%1,")
-               .arg(data_str)
+        out << QStringLiteral("    .dataOrig = %1,")
+               .arg(RegUtils::memAddress(data_str))
             << "\n";
 
         out << QStringLiteral("    .subIndex = %1,")
@@ -675,10 +677,10 @@ bool RegListCoExporter::writeOdArrConstDef(QTextStream& out_stream, const RegEnt
             cur_data_str = RegUtils::getArrMem(m_dataName, re, rv, 0, m_entryNameMap, m_varNameMap, m_syntaxType);
         }
 
-        uint cur_dataSize = RegTypes::sizeBytes(rv->dataType());
+        uint cur_dataSize = RegUtils::varDataSize(rv);
 
         co_attributes_t cur_attrs = RegTypes::eflagsToCoAttributes(rv->eflags());
-        if(cur_dataSize > 1) cur_attrs |= COAttribute::MB;
+        attrs |= RegUtils::coAttributeForTypeSize(rv->dataType(), dataSize);
 
 
         if(rv->subIndex() == 0x0){
@@ -698,11 +700,11 @@ bool RegListCoExporter::writeOdArrConstDef(QTextStream& out_stream, const RegEnt
     QString attrs_str0 = RegTypes::getNames(attrs0, RegTypes::coAttributeFullName).join(" | ");
     QString attrs_str = RegTypes::getNames(attrs, RegTypes::coAttributeFullName).join(" | ");
 
-    out << QStringLiteral("    .dataOrig0 = &%1,")
-           .arg(data_str0)
+    out << QStringLiteral("    .dataOrig0 = %1,")
+           .arg(RegUtils::memAddress(data_str0))
         << "\n";
-    out << QStringLiteral("    .dataOrig = &%1,")
-           .arg(data_str)
+    out << QStringLiteral("    .dataOrig = %1,")
+           .arg(RegUtils::memAddress(data_str))
         << "\n";
     out << QStringLiteral("    .attribute0 = %1,")
            .arg(attrs_str0)

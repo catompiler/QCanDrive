@@ -105,6 +105,8 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
             case DataType::IQ24:
             case DataType::IQ15:
             case DataType::IQ7:
+            case DataType::STR:
+            case DataType::MEM:
                 QLineEdit* le = new QLineEdit(parent);
                 res_widget = le;
                 break;
@@ -202,6 +204,8 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
             case DataType::IQ24:
             case DataType::IQ15:
             case DataType::IQ7:
+            case DataType::STR:
+            case DataType::MEM:
                 QLineEdit* le = qobject_cast<QLineEdit*>(editor);
                 if(le == nullptr) break;
                 le->setText(data.toString());
@@ -304,6 +308,8 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
             case DataType::IQ24:
             case DataType::IQ15:
             case DataType::IQ7:
+            case DataType::STR:
+            case DataType::MEM:
                 QLineEdit* le = qobject_cast<QLineEdit*>(editor);
                 if(le == nullptr) break;
                 regListModel->setData(index, le->text(), Qt::EditRole);

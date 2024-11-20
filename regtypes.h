@@ -33,6 +33,8 @@ enum class DataType {
     IQ24 = 6,
     IQ15 = 7,
     IQ7 = 8,
+    STR = 9,
+    MEM = 10
 };
 
 // Основные флаги.
@@ -217,6 +219,7 @@ extern bool isInteger(DataType type);
 extern bool isSigned(DataType type);
 extern bool isUnsigned(DataType type);
 extern bool isFractional(DataType type);
+extern bool isMemory(DataType type);
 
 
 template <typename T, typename GetNameType>

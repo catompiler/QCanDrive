@@ -219,7 +219,7 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
 
                 out << QString("REG(%1, %2, %3, %4, %5) /* %6 */")
                        .arg(regIdStr,
-                            data_str,
+                            RegUtils::memAddress(data_str),
                             regDataType,
                             flagsStr,
                             baseIdStr,

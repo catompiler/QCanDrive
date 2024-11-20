@@ -22,6 +22,8 @@ static const char* data_type_name_strs[] = {
     "IQ24",
     "IQ15",
     "IQ7",
+    "STR",
+    "MEM"
 };
 
 static decltype(sizeof(data_type_name_strs)) data_type_name_strs_count = (sizeof(data_type_name_strs)/sizeof(data_type_name_strs[0]));
@@ -355,6 +357,10 @@ uint coDataType(DataType type)
         return 0x4;
     case DataType::IQ7:
         return 0x4;
+    case DataType::STR:
+        return 0x9;
+    case DataType::MEM:
+        return 0xf;
     }
     return 0x0;
 }
@@ -386,6 +392,8 @@ QVector<DataType> dataTypes()
         DataType::IQ24,
         DataType::IQ15,
         DataType::IQ7,
+        DataType::STR,
+        DataType::MEM
     };
     static const QVector<DataType> data_types_vec(data_types);
 
@@ -445,6 +453,10 @@ QString varRegDataTypeStr(DataType type)
         return QString("reg_iq15_t");
     case DataType::IQ7:
         return QString("reg_iq7_t");
+    case DataType::STR:
+        return QString("char");
+    case DataType::MEM:
+        return QString("void*");
     }
 
     return QString("long");
@@ -471,6 +483,10 @@ QString varDataTypeStr(DataType type)
         return QString("int32_t");
     case DataType::IQ7:
         return QString("int32_t");
+    case DataType::STR:
+        return QString("char");
+    case DataType::MEM:
+        return QString("void*");
     }
 
     return QString("long");
@@ -521,6 +537,10 @@ int sizeBytes(DataType type)
     case DataType::IQ15:
     case DataType::IQ7:
         return 4;
+    case DataType::STR:
+        return 0;
+    case DataType::MEM:
+        return 0;
     }
     return 0;
 }
@@ -537,6 +557,8 @@ bool isBoolean(DataType type)
     case DataType::IQ24:
     case DataType::IQ15:
     case DataType::IQ7:
+    case DataType::STR:
+    case DataType::MEM:
         break;
     }
     return false;
@@ -555,6 +577,10 @@ bool isString(DataType type)
     case DataType::IQ15:
     case DataType::IQ7:
         break;
+    case DataType::STR:
+        return true;
+    case DataType::MEM:
+        break;
     }
     return false;
 }
@@ -572,6 +598,9 @@ bool isNumeric(DataType type)
     case DataType::IQ15:
     case DataType::IQ7:
         return true;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
     }
     return false;
 }
@@ -589,6 +618,8 @@ bool isInteger(DataType type)
     case DataType::IQ24:
     case DataType::IQ15:
     case DataType::IQ7:
+    case DataType::STR:
+    case DataType::MEM:
         break;
     }
     return false;
@@ -609,6 +640,9 @@ bool isSigned(DataType type)
     case DataType::IQ15:
     case DataType::IQ7:
         return true;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
     }
     return false;
 }
@@ -627,6 +661,8 @@ bool isUnsigned(DataType type)
     case DataType::IQ24:
     case DataType::IQ15:
     case DataType::IQ7:
+    case DataType::STR:
+    case DataType::MEM:
         break;
     }
     return false;
@@ -645,6 +681,29 @@ bool isFractional(DataType type)
     case DataType::IQ24:
     case DataType::IQ15:
     case DataType::IQ7:
+        return true;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
+    }
+    return false;
+}
+
+bool isMemory(DataType type)
+{
+    switch(type){
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+    case DataType::STR:
+        break;
+    case DataType::MEM:
         return true;
     }
     return false;
