@@ -382,8 +382,8 @@ void SLCanOpenNode::processSDOClient(uint32_t dt)
 
     //CO_SDOclient_t* sdo_cli = m_co->SDOclient;
 
-    for(;;){
-        if(!processFrontComm(dt)) break;
+    for(bool first = true;; first = false){
+        if(!processFrontComm(first ? dt : 0)) break;
     }
 
 #endif
@@ -430,6 +430,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 break;
             }
             sdoc->setState(SDOCommunication::DATA);
+            dt = 0;
 
         __attribute__ ((fallthrough));
         case SDOCommunication::DATA:
@@ -499,6 +500,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 break;
             }
             sdoc->setState(SDOCommunication::RUN);
+            dt = 0;
 
         __attribute__ ((fallthrough));
         case SDOCommunication::RUN:
