@@ -136,6 +136,11 @@ bool SDOValue::setTimeout(int newTimeout)
     return true;
 }
 
+SDOCommunication::Error SDOValue::error() const
+{
+    return m_sdoc->error();
+}
+
 bool SDOValue::running() const
 {
     return m_sdoc->running();
@@ -168,7 +173,7 @@ void SDOValue::sdocommFinished()
         if(m_sdoc->error() == SDOCommunication::ERROR_CANCEL && m_sdoc->cancelled()){
             emit canceled();
         }else{
-            emit error();
+            emit errorOccured();
         }
     }else{
         if(m_sdoc->type() == SDOCommunication::UPLOAD){

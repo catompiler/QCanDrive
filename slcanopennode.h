@@ -123,6 +123,7 @@ private:
 
     void processSDOClient(uint32_t dt);
     bool processFrontComm(uint32_t dt);
+    SDOCommunication::Error sdoCommError(CO_SDO_abortCode_t code) const;
     void cancelAllSDOComms();
     void createOd();
 };

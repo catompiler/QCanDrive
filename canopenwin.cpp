@@ -18,10 +18,17 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 
     m_sdo_counter = new SDOValue(m_sco);
     m_sdo_counter->setNodeId(1);
-    m_sdo_counter->setIndex(0x2000);
-    m_sdo_counter->setSubIndex(0x0);
+    m_sdo_counter->setIndex(0x2002);
+    m_sdo_counter->setSubIndex(0x1);
     m_sdo_counter->setDataSize(4);
     m_sdo_counter->setTimeout(1000);
+    connect(m_sdo_counter, &SDOValue::errorOccured, this, [this](){
+        SDOValue* sdoval = qobject_cast<SDOValue*>(sender());
+        if(sdoval == nullptr) return;
+
+        qDebug() << "error" << sdoval->error();
+    });
+
     connect(m_sdo_counter, &SDOValue::readed, this, [this](){
         SDOValue* sdoval = qobject_cast<SDOValue*>(sender());
         if(sdoval == nullptr) return;

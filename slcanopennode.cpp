@@ -443,7 +443,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
         __attribute__ ((fallthrough));
         case SDOCommunication::RUN:
             sdo_ret = CO_SDOclientDownload(sdo_cli,
-                            dt, sdoc->cancelled(), false, &sdo_abort_ret,
+                            dt, sdoc->cancelled(), !sdoc->dataTransferDone(), &sdo_abort_ret,
                             nullptr, nullptr);
             if(sdo_ret == 0){
                 if(sdoc->cancelled()){
@@ -453,10 +453,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 }
                 sdoc->setState(SDOCommunication::DONE);
             }else if(sdo_ret < 0){
-                SDOCommunication::Error finish_err = SDOCommunication::ERROR_IO;
-                if(sdo_abort_ret == CO_SDO_AB_TIMEOUT){
-                    finish_err = SDOCommunication::ERROR_TIMEOUT;
-                }
+                SDOCommunication::Error finish_err = sdoCommError(sdo_abort_ret);
                 sdoc->setState(SDOCommunication::DONE);
                 sdoc->setError(finish_err);
             }else{
@@ -517,10 +514,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 }
                 sdoc->setState(SDOCommunication::DATA);
             }else if(sdo_ret < 0){
-                SDOCommunication::Error finish_err = SDOCommunication::ERROR_IO;
-                if(sdo_abort_ret == CO_SDO_AB_TIMEOUT){
-                    finish_err = SDOCommunication::ERROR_TIMEOUT;
-                }
+                SDOCommunication::Error finish_err = sdoCommError(sdo_abort_ret);
                 sdoc->setState(SDOCommunication::DONE);
                 sdoc->setError(finish_err);
                 return true;
@@ -546,11 +540,17 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                             static_cast<uint8_t*>(sdoc->dataToTransfer()), sdoc->dataSizeToTransfer());
             sdoc->dataTransfered(size_ret);
 
-            if(!sdoc->dataTransferDone()){
-                break;
+            if(sdoc->dataTransferDone()){
+                sdoc->setState(SDOCommunication::DONE);
+                sdoc->setError(SDOCommunication::ERROR_NONE);
+            }else{
+                if(sdoc->state() == SDOCommunication::DATA && size_ret == 0){
+                    sdoc->setState(SDOCommunication::DONE);
+                    sdoc->setError(SDOCommunication::ERROR_INVALID_SIZE);
+                }else{
+                    break;
+                }
             }
-            sdoc->setState(SDOCommunication::DONE);
-            sdoc->setError(SDOCommunication::ERROR_NONE);
 
         __attribute__ ((fallthrough));
         case SDOCommunication::DONE:
@@ -565,6 +565,63 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
     }
 
     return false;
+}
+
+SDOCommunication::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
+{
+    switch (code){
+    default:
+        break;
+    case CO_SDO_AB_NONE:
+        return SDOCommunication::ERROR_NONE;
+    //case CO_SDO_AB_TOGGLE_BIT:
+    case CO_SDO_AB_TIMEOUT:
+        return SDOCommunication::ERROR_TIMEOUT;
+    case CO_SDO_AB_CMD:
+    case CO_SDO_AB_BLOCK_SIZE:
+    case CO_SDO_AB_SEQ_NUM:
+    case CO_SDO_AB_CRC:
+        return SDOCommunication::ERROR_IO;
+    case CO_SDO_AB_OUT_OF_MEM:
+        return SDOCommunication::ERROR_OUT_OF_MEM;
+    case CO_SDO_AB_UNSUPPORTED_ACCESS:
+    case CO_SDO_AB_WRITEONLY:
+    case CO_SDO_AB_READONLY:
+        return SDOCommunication::ERROR_ACCESS;
+    case CO_SDO_AB_NOT_EXIST:
+        return SDOCommunication::ERROR_NOT_FOUND;
+    case CO_SDO_AB_NO_MAP:
+    case CO_SDO_AB_MAP_LEN:
+        return SDOCommunication::ERROR_INVALID_VALUE;
+    case CO_SDO_AB_PRAM_INCOMPAT:
+    case CO_SDO_AB_DEVICE_INCOMPAT:
+        return SDOCommunication::ERROR_GENERAL;
+    case CO_SDO_AB_HW:
+        return SDOCommunication::ERROR_IO;
+    case CO_SDO_AB_TYPE_MISMATCH:
+    case CO_SDO_AB_DATA_LONG:
+    case CO_SDO_AB_DATA_SHORT:
+        return SDOCommunication::ERROR_INVALID_SIZE;
+    case CO_SDO_AB_SUB_UNKNOWN:
+        return SDOCommunication::ERROR_NOT_FOUND;
+    case CO_SDO_AB_INVALID_VALUE:
+    case CO_SDO_AB_VALUE_HIGH:
+    case CO_SDO_AB_VALUE_LOW:
+    case CO_SDO_AB_MAX_LESS_MIN:
+        return SDOCommunication::ERROR_INVALID_VALUE;
+    case CO_SDO_AB_NO_RESOURCE:
+        return SDOCommunication::ERROR_IO;
+    case CO_SDO_AB_GENERAL:
+        return SDOCommunication::ERROR_GENERAL;
+    //case CO_SDO_AB_DATA_TRANSF:
+    //case CO_SDO_AB_DATA_LOC_CTRL:
+    //case CO_SDO_AB_DATA_DEV_STATE:
+    case CO_SDO_AB_DATA_OD:
+    case CO_SDO_AB_NO_DATA:
+        return SDOCommunication::ERROR_NO_DATA;
+    }
+
+    return SDOCommunication::ERROR_UNKNOWN;
 }
 
 int SLCanOpenNode::coTimerInterval() const

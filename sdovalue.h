@@ -36,6 +36,8 @@ public:
     int timeout() const;
     bool setTimeout(int newTimeout);
 
+    SDOCommunication::Error error() const;
+
     bool running() const;
 
     template <typename T>
@@ -44,13 +46,19 @@ public:
     template <typename T>
     bool setValue(const T& val);
 
+    /*template <typename T>
+    T valueAt(int i, const T& defVal = T(), bool* isOk = nullptr) const;
+
+    template <typename T>
+    bool setValueAt(int i, const T& val);*/
+
 public slots:
     bool read();
     bool write();
 
 signals:
     void finished();
-    void error();
+    void errorOccured();
     void canceled();
     void readed();
     void written();
@@ -86,5 +94,29 @@ bool SDOValue::setValue(const T& val)
 
     return true;
 }
+
+/*template<typename T>
+T SDOValue::valueAt(int i, const T& defVal, bool* isOk) const
+{
+    if(m_sdoc->data() == nullptr)
+    { if(isOk) *isOk = false; return defVal; }
+    if((i < 0) || (m_sdoc->size() < (i + 1) * sizeof(T)))
+    { if(isOk) *isOk = false; return defVal; }
+
+    return static_cast<T*>(m_sdoc->data())[i];
+}
+
+template<typename T>
+bool SDOValue::setValueAt(int i, const T& val)
+{
+    if(m_sdoc->data() == nullptr)
+    { return false; }
+    if((i < 0) || (m_sdoc->size() < (i + 1) * sizeof(T)))
+    { return false; }
+
+    static_cast<T*>(m_sdoc->data())[i] = val;
+
+    return true;
+}*/
 
 #endif // SDOVALUE_H

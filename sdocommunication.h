@@ -31,11 +31,18 @@ public:
     };
 
     enum Error {
-        ERROR_NONE = 0,
-        ERROR_IO = 1,
-        ERROR_TIMEOUT = 2,
-        ERROR_CANCEL = 3,
-        ERROR_INVALID_SIZE = 4
+        ERROR_NONE          = 0,
+        ERROR_IO            = 1,
+        ERROR_TIMEOUT       = 2,
+        ERROR_CANCEL        = 3,
+        ERROR_INVALID_SIZE  = 4,
+        ERROR_INVALID_VALUE = 5,
+        ERROR_ACCESS        = 6,
+        ERROR_NOT_FOUND     = 7,
+        ERROR_NO_DATA       = 8,
+        ERROR_OUT_OF_MEM    = 9,
+        ERROR_GENERAL       = 10,
+        ERROR_UNKNOWN       = 11
     };
 
     explicit SDOCommunication(QObject *parent = nullptr);

@@ -42,7 +42,7 @@
 
 
 //! Отладка сообщений.
-#define SLCAN_DEBUG_INCOMING_CMDS 1
+#define SLCAN_DEBUG_INCOMING_CMDS 0
 
 
 #endif /* SLCAN_CONF_H_ */
