@@ -125,7 +125,7 @@ bool RegListDataExporter::exportRegDataDecl(const QString& filename, const RegEn
         const RegEntry* re = *reit;
 
         bool hasEmpty = std::any_of(re->cbegin(), re->cend(), [](const RegVar* rv){
-            return rv->memAddr().isEmpty() && !RegTypes::isMemory(rv->dataType());
+            return rv->memAddr().isEmpty() && !(RegTypes::isMemory(rv->dataType()) && rv->count() == 0);
         });
 
         if(!hasEmpty) continue;
@@ -140,7 +140,7 @@ bool RegListDataExporter::exportRegDataDecl(const QString& filename, const RegEn
             }
 
             // domain.
-            if(RegTypes::isMemory(rv->dataType())){
+            if(RegTypes::isMemory(rv->dataType()) && rv->count() == 0){
                 continue;
             }
 
@@ -231,7 +231,7 @@ bool RegListDataExporter::exportRegData(const QString& filename, const RegEntryL
         const RegEntry* re = *reit;
 
         bool hasEmpty = std::any_of(re->cbegin(), re->cend(), [](const RegVar* rv){
-            return rv->memAddr().isEmpty() && !RegTypes::isMemory(rv->dataType());
+            return rv->memAddr().isEmpty() && !(RegTypes::isMemory(rv->dataType()) && rv->count() == 0);
         });
 
         if(!hasEmpty) continue;
@@ -253,7 +253,7 @@ bool RegListDataExporter::exportRegData(const QString& filename, const RegEntryL
             }
 
             // domain.
-            if(RegTypes::isMemory(rv->dataType())){
+            if(RegTypes::isMemory(rv->dataType()) && rv->count() == 0){
                 continue;
             }
 

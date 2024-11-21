@@ -476,7 +476,10 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
         default:
             break;
         case COL_INDEX:
-            return QString("0x%1").arg(static_cast<unsigned int>(re->index()), 0, 16);
+            return QStringLiteral("0x%1").arg(
+                        QStringLiteral("%1").arg(
+                            static_cast<unsigned int>(re->index()), 4, 16, QChar('0')
+                            ).toUpper());
         case COL_NAME:
             return re->name();
         case COL_TYPE:
@@ -503,14 +506,18 @@ QVariant RegListModel::dataDisplayRole(const QModelIndex& index) const
         default:
             break;
         case COL_INDEX:
-            return QString("0x%1").arg(static_cast<unsigned int>(rv->subIndex()), 0, 16);
+            /*return QStringLiteral("0x%1").arg(
+                        QStringLiteral("%1").arg(
+                            static_cast<unsigned int>(rv->subIndex()), 2, 16, QChar('0')
+                            ).toUpper());*/
+            return static_cast<unsigned int>(rv->subIndex());
         case COL_NAME:
             return ro->name();
         case COL_TYPE:
             return RegTypes::dataTypeStr(rv->dataType());
         case COL_COUNT:
-            if(pe->type() != ObjectType::ARR) return QVariant();
-            if(rv->count() == 1) return QVariant();
+            if(pe->type() != ObjectType::ARR && !RegTypes::isMemory(rv->dataType())) return QVariant();
+            if(rv->eflags() & RegEFlag::CO_COUNT) return QVariant();
             return QString("[%1]").arg(static_cast<unsigned int>(rv->count()));
         case COL_MEM_ADDR:
             return rv->memAddr();
@@ -605,7 +612,7 @@ QVariant RegListModel::dataEditRole(const QModelIndex& index) const
         case COL_TYPE:
             return static_cast<unsigned int>(rv->dataType());
         case COL_COUNT:
-            if(pe->type() != ObjectType::ARR) return QVariant();
+            if(pe->type() != ObjectType::ARR && !RegTypes::isMemory(rv->dataType())) return QVariant();
             return static_cast<unsigned int>(rv->count());
         case COL_MEM_ADDR:
             return rv->memAddr();
@@ -837,9 +844,11 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                 fixBaseIndex(oldIndex, newIndex);
             }
         }break;
-        case COL_NAME:
-            ro->setName(value.toString());
-            break;
+        case COL_NAME:{
+            QString newName = value.toString().trimmed();
+            if(newName.isEmpty()) return false;
+            ro->setName(newName);
+        }break;
         case COL_TYPE:
             re->setType(static_cast<ObjectType>(value.toUInt()));
             break;
@@ -876,28 +885,30 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                 fixBaseSubIndex(pe->index(), oldSubIndex, newSubIndex);
             }
         }break;
-        case COL_NAME:
-            ro->setName(value.toString());
-            break;
+        case COL_NAME:{
+            QString newName = value.toString().trimmed();
+            if(newName.isEmpty()) return false;
+            ro->setName(newName);
+        }break;
         case COL_TYPE:
             rv->setDataType(static_cast<DataType>(value.toUInt()));
             break;
         case COL_COUNT:
-            if(pe->type() != ObjectType::ARR) return false;
+            if(pe->type() != ObjectType::ARR && !RegTypes::isMemory(rv->dataType())) return false;
             rv->setCount(value.toUInt());
             fixCountVar(pe, index.parent());
             break;
         case COL_MEM_ADDR:
-            rv->setMemAddr(value.toString());
+            rv->setMemAddr(value.toString().trimmed());
             break;
         case COL_MIN_VAL:
-            rv->setMinValue(value.toString());
+            rv->setMinValue(value.toString().trimmed());
             break;
         case COL_MAX_VAL:
-            rv->setMaxValue(value.toString());
+            rv->setMaxValue(value.toString().trimmed());
             break;
         case COL_DEF_VAL:
-            rv->setDefaultValue(value.toString());
+            rv->setDefaultValue(value.toString().trimmed());
             break;
         case COL_BASE:{
             unsigned int base = value.toUInt();
@@ -996,7 +1007,7 @@ Qt::ItemFlags RegListModel::flags(const QModelIndex& index) const
     }
     // var.
     else{
-        //RegVar* rv = static_cast<RegVar*>(ro);
+        RegVar* rv = static_cast<RegVar*>(ro);
 
         flags |= Qt::ItemNeverHasChildren;
 
@@ -1011,7 +1022,9 @@ Qt::ItemFlags RegListModel::flags(const QModelIndex& index) const
             flags |= Qt::ItemIsEditable;
             break;
         case COL_COUNT:
-            if(pe->type() == ObjectType::ARR) flags |= Qt::ItemIsEditable;
+            if((pe->type() == ObjectType::ARR) &&
+               (rv->eflags() & RegEFlag::CO_COUNT) == 0) flags |= Qt::ItemIsEditable;
+            if(RegTypes::isMemory(rv->dataType())) flags |= Qt::ItemIsEditable;
             break;
         case COL_MEM_ADDR:
             flags |= Qt::ItemIsEditable;

@@ -30,15 +30,15 @@
 
 
 #define COL_WIDTH_INDEX 75
-#define COL_WIDTH_NAME 100
-#define COL_WIDTH_TYPE 50
-#define COL_WIDTH_COUNT 50
-#define COL_WIDTH_MEM_ADDR 100
+#define COL_WIDTH_NAME 150
+#define COL_WIDTH_TYPE 75
+#define COL_WIDTH_COUNT 75
+#define COL_WIDTH_MEM_ADDR 150
 #define COL_WIDTH_MIN_VAL 75
 #define COL_WIDTH_MAX_VAL 75
 #define COL_WIDTH_DEF_VAL 100
-#define COL_WIDTH_BASE 75
-#define COL_WIDTH_FLAGS 75
+#define COL_WIDTH_BASE 100
+#define COL_WIDTH_FLAGS 100
 #define COL_WIDTH_EXTFLAGS 150
 #define COL_WIDTH_DESCR 100
 //#define COL_WIDTH_ 50
@@ -300,7 +300,7 @@ void RegListEditorWin::on_actAddItem_triggered(bool checked)
             }else if(re->type() == ObjectType::ARR){
                 var->setSubIndex(1);
                 var->setName("data");
-                var->setCount(0);
+                //var->setCount(0);
             }
 
             if(!m_regsListModel->addSubObject(var, entry_index)){

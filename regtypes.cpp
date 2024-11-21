@@ -456,7 +456,7 @@ QString varRegDataTypeStr(DataType type)
     case DataType::STR:
         return QString("char");
     case DataType::MEM:
-        return QString("void*");
+        return QString("uint8_t");
     }
 
     return QString("long");
@@ -486,7 +486,7 @@ QString varDataTypeStr(DataType type)
     case DataType::STR:
         return QString("char");
     case DataType::MEM:
-        return QString("void*");
+        return QString("uint8_t");
     }
 
     return QString("long");

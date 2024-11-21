@@ -151,6 +151,8 @@ uint RegUtils::varDataSize(const RegVar* rv)
     if(size == 0){
         if(RegTypes::isString(rv->dataType())){
             size = rv->defaultValue().toString().length();
+        }else if(RegTypes::isMemory(rv->dataType())){
+            size = rv->count();
         }
     }
     return size;
@@ -231,7 +233,9 @@ QString RegUtils::getArrDecl(const RegEntry* re, const RegVar* rv, const VarName
 
 QString RegUtils::getArrMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping, SyntaxType syntaxType)
 {
-    if(RegTypes::isMemory(rv->dataType())) return QStringLiteral("NULL");
+    if(RegTypes::isMemory(rv->dataType()) && rv->count() == 0){
+        return rv->memAddr();
+    }
 
     uint arr_index = getArrDataIndex(re, rv, index);
 
@@ -384,7 +388,9 @@ QString RegUtils::getVarDecl(const RegEntry* re, const RegVar* rv, const VarName
 
 QString RegUtils::getVarMem(const QString& name, const RegEntry* re, const RegVar* rv, uint index, const EntryNameMap* entryMapping, const VarNameMap* varMapping, SyntaxType syntaxType)
 {
-    if(RegTypes::isMemory(rv->dataType())) return QString();
+    if(RegTypes::isMemory(rv->dataType()) && rv->count() == 0){
+        return rv->memAddr();
+    }
 
     if(!rv->memAddr().isEmpty()){
         if(rv->count() <= 1) return rv->memAddr();

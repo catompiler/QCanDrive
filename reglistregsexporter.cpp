@@ -123,7 +123,9 @@ bool RegListRegsExporter::exportRegIds(const QString& filename, const RegEntryLi
 
             QString description = rv->description().simplified();
 
-            for(uint i = 0; i < rv->count(); i ++){
+            uint count = RegTypes::isMemory(rv->dataType()) ? 1 : rv->count();
+
+            for(uint i = 0; i < count; i ++){
 
                 reg_fullindex_t id = RegUtils::makeFullIndex(re->index(), rv->subIndex() + i);
                 QString regIdStr = makeRegIdName(re, rv, i);
@@ -206,7 +208,9 @@ bool RegListRegsExporter::exportRegList(const QString& filename, const RegEntryL
             QString regDataType = regDataTypeStr(rv->dataType());
             QString flagsStr = flagsToStr(rv->flags());
 
-            for(uint i = 0; i < rv->count(); i ++){
+            uint count = RegTypes::isMemory(rv->dataType()) ? 1 : rv->count();
+
+            for(uint i = 0; i < count; i ++){
 
                 QString regIdStr = makeRegIdName(re, rv, i);
                 QString data_str;
@@ -250,7 +254,7 @@ QString RegListRegsExporter::makeRegName(const RegEntry* re, const RegVar* rv, u
 
         name = QStringLiteral("%1_%2").arg(entry_name, var_name);
 
-        if(rv->count() > 1){
+        if(!RegTypes::isMemory(rv->dataType()) && rv->count() > 1){
             name = QStringLiteral("%1_%2").arg(name).arg(index);
         }
     }else{

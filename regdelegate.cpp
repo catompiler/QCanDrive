@@ -5,6 +5,7 @@
 #include "sellineedit.h"
 #include "regtypes.h"
 #include "regutils.h"
+#include "regentry.h"
 #include "regvar.h"
 #include <QComboBox>
 #include <QSpinBox>
@@ -43,6 +44,9 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
 
     bool isEntry = ro->parent() == nullptr;
 
+    RegEntry* re = (isEntry) ? static_cast<RegEntry*>(ro) : static_cast<RegEntry*>(ro->parent());
+    RegVar* rv = (isEntry) ? nullptr : static_cast<RegVar*>(ro);
+
     QWidget* res_widget = nullptr;
 
     RegListModel::ColId col_id = static_cast<RegListModel::ColId>(index.column());
@@ -50,10 +54,16 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
     switch(col_id){
     case RegListModel::COL_INDEX:{
         QSpinBox* sb = new QSpinBox(parent);
-        sb->setMinimum(0);
-        sb->setMaximum(65536);
-        sb->setDisplayIntegerBase(16);
-        sb->setPrefix("0x");
+        if(isEntry){
+            sb->setMinimum(0);
+            sb->setMaximum(65536);
+            sb->setDisplayIntegerBase(16);
+            sb->setPrefix("0x");
+        }else{
+            sb->setMinimum(0);
+            sb->setMaximum(255);
+            sb->setDisplayIntegerBase(10);
+        }
         res_widget = sb;
     }break;
     case RegListModel::COL_NAME:{
@@ -71,6 +81,10 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         }else{
             QComboBox* cb = new QComboBox(parent);
             auto dataTypes = RegTypes::dataTypes();
+            if(re->type() == ObjectType::ARR){
+                dataTypes.removeAll(DataType::MEM);
+                dataTypes.removeAll(DataType::STR);
+            }
             for(auto& t: qAsConst(dataTypes)){
                 cb->addItem(RegTypes::dataTypeStr(t));
             }
@@ -79,7 +93,11 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
     }break;
     case RegListModel::COL_COUNT:{
         QSpinBox* sb = new QSpinBox(parent);
-        sb->setMinimum(0);
+        if(rv && RegTypes::isMemory(rv->dataType())){
+            sb->setMinimum(0);
+        }else{
+            sb->setMinimum(1);
+        }
         sb->setMaximum(254);
         res_widget = sb;
     }break;
@@ -288,7 +306,6 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
     case RegListModel::COL_MEM_ADDR:{
         QLineEdit* le = qobject_cast<QLineEdit*>(editor);
         if(le == nullptr) break;
-        if(le->text().isEmpty()) break;
         regListModel->setData(index, le->text(), Qt::EditRole);
     }break;
     case RegListModel::COL_MIN_VAL:
