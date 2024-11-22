@@ -1,6 +1,6 @@
 #include "settings.h"
 #include <QSettings>
-
+#include <QDir>
 
 
 Settings::Settings(QObject *parent)
@@ -22,6 +22,7 @@ bool Settings::save() const
     savePort(s);
     saveCo(s);
     saveAppear(s);
+    writeExporting(s);
 
     return s.status() == QSettings::NoError;
 }
@@ -34,6 +35,7 @@ bool Settings::load()
     loadPort(s);
     loadCo(s);
     loadAppear(s);
+    readExporting(s);
 
     return s.status() == QSettings::NoError;
 }
@@ -138,4 +140,76 @@ void Settings::loadAppear(QSettings& s)
     appear.windowColor = QColor::fromRgb(s.value("windowColor", 0x333333).toUInt());
 
     s.endGroup();
+}
+
+void Settings::readExporting(QSettings& settings)
+{
+    auto& v = exporting;
+    auto& s = settings;
+
+    s.beginGroup("export");
+
+    v.path = s.value("path", QDir::currentPath()).toString();
+    v.dataName = s.value("dataName", "regs_data").toString();
+    v.odName = s.value("odName", "OD").toString();
+    v.edsVendorName = s.value("edsVendorName", "").toString();
+    v.edsProductName = s.value("edsProductName", "").toString();
+    //v.edsFileDescr = s.value("edsFileDescr", "").toString();
+    v.edsFileAuthor = s.value("edsFileAuthor", "").toString();
+    //v.edsVendorName = s.value("edsVendorName", "").toString();
+    //v.edsProductName = s.value("edsProductName", "").toString();
+    v.reglistFileName = s.value("reglistFileName", "reg_list_data.h").toString();
+    v.regIdsFileName = s.value("regIdsFileName", "reg_ids.h").toString();
+    v.reglistUserCode = s.value("reglistUserCode", "").toString();
+    v.regIdsUserCode = s.value("regIdsUserCode", "").toString();
+    //v.regIdsExport = s.value("regIdsExport", true).toBool();
+    v.reglistExport = s.value("reglistExport", true).toBool();
+    v.regdataDeclFileName = s.value("regdataDeclFileName", "$(DATA_NAME).h").toString();
+    v.regdataImplFileName = s.value("regdataImplFileName", "$(DATA_NAME).c").toString();
+    v.regdataDeclUserCode = s.value("regdataDeclUserCode", "").toString();
+    v.regdataImplUserCode = s.value("regdataImplUserCode", "").toString();
+    v.regDataExport = s.value("regDataExport", true).toBool();
+    v.cohFileName = s.value("cohFileName", "(OD_NAME).h").toString();
+    v.cocFileName = s.value("cocFileName", "(OD_NAME).c").toString();
+    v.cohUserCode = s.value("cohUserCode", "").toString();
+    v.cocUserCode = s.value("cocUserCode", "").toString();
+    v.coExport = s.value("coExport", true).toBool();
+    v.edsFileName = s.value("edsFileName", "regs.eds").toString();
+    v.edsExport = s.value("edsExport", true).toBool();
+}
+
+void Settings::writeExporting(QSettings& settings) const
+{
+    auto& v = exporting;
+    auto& s = settings;
+
+    s.beginGroup("export");
+
+    s.setValue("path", v.path);
+    s.setValue("dataName", v.dataName);
+    s.setValue("odName", v.odName);
+    s.setValue("edsVendorName", v.edsVendorName);
+    s.setValue("edsProductName", v.edsProductName);
+    //s.setValue("edsFileDescr", v.edsFileDescr);
+    s.setValue("edsFileAuthor", v.edsFileAuthor);
+    //s.setValue("edsVendorName", v.edsVendorName);
+    //s.setValue("edsProductName", v.edsProductName);
+    s.setValue("reglistFileName", v.reglistFileName);
+    s.setValue("regIdsFileName", v.regIdsFileName);
+    s.setValue("reglistUserCode", v.reglistUserCode);
+    s.setValue("regIdsUserCode", v.regIdsUserCode);
+    //s.setValue("regIdsExport", v.regIdsExport);
+    s.setValue("reglistExport", v.reglistExport);
+    s.setValue("regdataDeclFileName", v.regdataDeclFileName);
+    s.setValue("regdataImplFileName", v.regdataImplFileName);
+    s.setValue("regdataDeclUserCode", v.regdataDeclUserCode);
+    s.setValue("regdataImplUserCode", v.regdataImplUserCode);
+    s.setValue("regDataExport", v.regDataExport);
+    s.setValue("cohFileName", v.cohFileName);
+    s.setValue("cocFileName", v.cocFileName);
+    s.setValue("cohUserCode", v.cohUserCode);
+    s.setValue("cocUserCode", v.cocUserCode);
+    s.setValue("coExport", v.coExport);
+    s.setValue("edsFileName", v.edsFileName);
+    s.setValue("edsExport", v.edsExport);
 }

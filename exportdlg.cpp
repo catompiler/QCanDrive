@@ -201,6 +201,36 @@ void ExportDlg::on_tbEdsSel_clicked(bool checked)
     selectFileNameTo(ui->leEds, tr("Выбор файла EDS"), QStringLiteral("Файлы EDS (*.eds)"));
 }
 
+QString ExportDlg::edsAuthor() const
+{
+    return ui->leEdsAuthor->text();
+}
+
+void ExportDlg::setEdsAuthor(const QString& newEdsAuthor)
+{
+    ui->leEdsAuthor->setText(newEdsAuthor);
+}
+
+QString ExportDlg::edsVendorName() const
+{
+    return ui->leEdsVendorName->text();
+}
+
+void ExportDlg::setEdsVendorName(const QString& newEdsVendorName)
+{
+    ui->leEdsVendorName->setText(newEdsVendorName);
+}
+
+QString ExportDlg::edsProductName() const
+{
+    return ui->leEdsProductName->text();
+}
+
+void ExportDlg::setEdsProductName(const QString& newEdsProductName)
+{
+    ui->leEdsProductName->setText(newEdsProductName);
+}
+
 QString ExportDlg::userCodeCOc() const
 {
     return ui->pteUCCOc->toPlainText();

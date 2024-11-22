@@ -17,6 +17,7 @@ class RegEntry;
 class RegSelectDlg;
 class FlagsEditDlg;
 class ExportDlg;
+class Settings;
 
 
 class RegListEditorWin : public QMainWindow
@@ -59,11 +60,18 @@ private:
 
     QString m_curDir;
 
+    Settings* m_settings;
+
     void appendFile(const QString& fileName);
 
     void doDlgExportRegs();
     void doDlgExportData();
     void doDlgExportCo();
     void doDlgExportEds();
+
+    void restoreSettings();
+    void restoreExporting();
+    void storeSettings();
+    void storeExporting();
 };
 #endif // REGLISTEDITORWIN_H

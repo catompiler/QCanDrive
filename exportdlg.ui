@@ -647,21 +647,60 @@
             </property>
            </widget>
           </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="gbEdsPar">
+         <property name="title">
+          <string>EDS</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblEdsAuthor">
+            <property name="text">
+             <string>Автор файла</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="leEdsAuthor"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblEdsVendorName">
+            <property name="text">
+             <string>Производитель</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="leEdsVendorName"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lblEdsProductName">
+            <property name="text">
+             <string>Устройство</string>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>229</height>
-             </size>
-            </property>
-           </spacer>
+           <widget class="QLineEdit" name="leEdsProductName"/>
           </item>
          </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>281</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

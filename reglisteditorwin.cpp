@@ -16,6 +16,7 @@
 #include "reglistdataexporter.h"
 #include "reglistcoexporter.h"
 #include "reglistedsexporter.h"
+#include "settings.h"
 #include <QMessageBox>
 #include <QApplication>
 #include <QItemSelectionModel>
@@ -66,6 +67,10 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     , ui(new Ui::RegListEditorWin)
 {
     ui->setupUi(this);
+
+    m_settings = new Settings();
+    m_settings->read();
+
     m_regEntryDlg = new RegEntryDlg();
     m_regSelectDlg = new RegSelectDlg();
     m_flagsEditDlg = new FlagsEditDlg();
@@ -93,17 +98,23 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     for(int i = 0; i < col_width_len; i ++){
         ui->tvRegList->setColumnWidth(i, col_width[i]);
     }
+
+    restoreSettings();
 }
 
 RegListEditorWin::~RegListEditorWin()
 {
-    delete ui;
+    storeSettings();
+    m_settings->write();
+
     delete m_exportDlg;
     delete m_flagsEditDlg;
     delete m_regSelectDlg;
     delete m_regEntryDlg;
     delete m_regsListModel;
     delete m_regListDelegate;
+    delete m_settings;
+    delete ui;
 }
 
 void RegListEditorWin::on_actOpen_triggered(bool checked)
@@ -168,7 +179,10 @@ void RegListEditorWin::on_actExport_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
+    restoreExporting();
+
     if(m_exportDlg->exec()){
+        storeExporting();
         if(m_exportDlg->exportRegs()) doDlgExportRegs();
         if(m_exportDlg->exportData()) doDlgExportData();
         if(m_exportDlg->exportCO()) doDlgExportCo();
@@ -600,10 +614,10 @@ void RegListEditorWin::doDlgExportEds()
 
     exporter.setEdsFileName(m_exportDlg->edsFileName())
             .setFileVersion(1, 0)
-            .setFileAuthor("")
+            .setFileAuthor(m_exportDlg->edsAuthor())
             .setOrderCode("")
-            .setVendorName("TTS Corp")
-            .setProductName("Super Drive")
+            .setVendorName(m_exportDlg->edsVendorName())
+            .setProductName(m_exportDlg->edsProductName())
             .setGranularity(8)
             .setDataName(m_exportDlg->dataName())
             .setSyntaxType(RegUtils::SyntaxType::camelCase)
@@ -615,3 +629,71 @@ void RegListEditorWin::doDlgExportEds()
     }
 }
 
+
+void RegListEditorWin::restoreSettings()
+{
+    //restoreExporting();
+}
+
+void RegListEditorWin::restoreExporting()
+{
+    auto& e = m_settings->exporting;
+    auto& d = *m_exportDlg;
+    d.setPath(e.path);
+    d.setDataName(e.dataName);
+    d.setOdName(e.odName);
+    d.setEdsVendorName(e.edsVendorName);
+    d.setEdsProductName(e.edsProductName);
+    d.setEdsAuthor(e.edsFileAuthor);
+    d.setRegListFileName(e.reglistFileName);
+    d.setRegIdsFileName(e.regIdsFileName);
+    d.setUserCodeRegList(e.reglistUserCode);
+    d.setUserCodeRegIds(e.regIdsUserCode);
+    d.setExportRegs(e.reglistExport);
+    d.setRegDataDeclFileName(e.regdataDeclFileName);
+    d.setRegDataImplFileName(e.regdataImplFileName);
+    d.setUserCodeDataDecl(e.regdataDeclUserCode);
+    d.setUserCodeDataImpl(e.regdataImplUserCode);
+    d.setExportData(e.regDataExport);
+    d.setCohFileName(e.cohFileName);
+    d.setCocFileName(e.cocFileName);
+    d.setUserCodeCOh(e.cohUserCode);
+    d.setUserCodeCOc(e.cocUserCode);
+    d.setExportCO(e.coExport);
+    d.setEdsFileName(e.edsFileName);
+    d.setExportEds(e.edsExport);
+}
+
+void RegListEditorWin::storeSettings()
+{
+    //storeExporting();
+}
+
+void RegListEditorWin::storeExporting()
+{
+    auto& e = m_settings->exporting;
+    auto& d = *m_exportDlg;
+    e.path = d.path();
+    e.dataName = d.dataName();
+    e.odName = d.odName();
+    e.edsVendorName = d.edsVendorName();
+    e.edsProductName = d.edsProductName();
+    e.edsFileAuthor = d.edsAuthor();
+    e.reglistFileName = d.regListFileName();
+    e.regIdsFileName = d.regIdsFileName();
+    e.reglistUserCode = d.userCodeRegList();
+    e.regIdsUserCode = d.userCodeRegIds();
+    e.reglistExport = d.exportRegs();
+    e.regdataDeclFileName = d.regDataDeclFileNameRaw();
+    e.regdataImplFileName = d.regDataImplFileNameRaw();
+    e.regdataDeclUserCode = d.userCodeDataDecl();
+    e.regdataImplUserCode = d.userCodeDataImpl();
+    e.regDataExport = d.exportData();
+    e.cohFileName = d.cohFileNameRaw();
+    e.cocFileName = d.cocFileNameRaw();
+    e.cohUserCode = d.userCodeCOh();
+    e.cocUserCode = d.userCodeCOc();
+    e.coExport = d.exportCO();
+    e.edsFileName = d.edsFileName();
+    e.edsExport = d.exportEds();
+}

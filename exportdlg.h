@@ -83,6 +83,15 @@ public:
     QString userCodeCOc() const;
     void setUserCodeCOc(const QString& newUserCodeCOc);
 
+    QString edsVendorName() const;
+    void setEdsVendorName(const QString& newEdsVendorName);
+
+    QString edsProductName() const;
+    void setEdsProductName(const QString& newEdsProductName);
+
+    QString edsAuthor() const;
+    void setEdsAuthor(const QString& newEdsAuthor);
+
 private slots:
     void on_tbPath_clicked(bool checked = false);
     void on_tbRegIdsSel_clicked(bool checked = false);

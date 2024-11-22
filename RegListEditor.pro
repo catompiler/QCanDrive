@@ -38,7 +38,8 @@ SOURCES += \
     regutils.cpp \
     regvar.cpp \
     regvarmodel.cpp \
-    sellineedit.cpp
+    sellineedit.cpp \
+    settings.cpp
 
 HEADERS += \
     exportdlg.h \
@@ -65,7 +66,8 @@ HEADERS += \
     regutils.h \
     regvar.h \
     regvarmodel.h \
-    sellineedit.h
+    sellineedit.h \
+    settings.h
 
 FORMS += \
     exportdlg.ui \
