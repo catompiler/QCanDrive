@@ -2,6 +2,7 @@
 #define SDOCOMMUNICATION_H
 
 #include <QObject>
+#include "cotypes.h"
 
 struct SDOCommunication_data;
 
@@ -10,10 +11,6 @@ class SDOCommunication : public QObject
 {
     Q_OBJECT
 public:
-
-    using NodeId = quint8;
-    using Index = quint16;;
-    using SubIndex = quint8;
 
     enum Type {
         NONE = 0,
@@ -55,14 +52,14 @@ public:
     Type type() const;
     void setType(Type newType);
 
-    NodeId nodeId() const;
-    void setNodeId(NodeId newNodeId);
+    CO::NodeId nodeId() const;
+    void setNodeId(CO::NodeId newNodeId);
 
-    Index index() const;
-    void setIndex(Index newIndex);
+    CO::Index index() const;
+    void setIndex(CO::Index newIndex);
 
-    SubIndex subIndex() const;
-    void setSubIndex(SubIndex newSubIndex);
+    CO::SubIndex subIndex() const;
+    void setSubIndex(CO::SubIndex newSubIndex);
 
     void* data();
     const void* data() const;

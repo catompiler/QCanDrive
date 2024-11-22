@@ -2,6 +2,8 @@
 #include "slcanopennode.h"
 #include <algorithm>
 #include <string.h>
+#include <QDebug>
+
 
 
 SDOValue::SDOValue(QObject *parent)
@@ -24,18 +26,30 @@ SDOValue::SDOValue(SLCanOpenNode* slcon, QObject* parent)
 
 SDOValue::~SDOValue()
 {
-    if(!m_sdoc->running() || m_slcon == nullptr || m_slcon->cancel(m_sdoc)){
+    if(m_sdoc) deleteDataAsFinished();
+}
+
+void SDOValue::deleteDataAsFinished()
+{
+    if(!m_sdoc->running() || (m_slcon != nullptr && m_slcon->cancel(m_sdoc))){
         if(m_sdoc->data()) delete[] static_cast<uint8_t*>(m_sdoc->data());
         delete m_sdoc;
-    }else{
-        disconnect(m_sdoc, &SDOCommunication::finished, this, &SDOValue::sdocommFinished);
-
-        m_sdoc->cancel();
-        connect(m_sdoc, &SDOCommunication::finished, m_sdoc, &SDOCommunication::deleteLater);
-
-        void* ptr_value = m_sdoc->data();
-        connect(m_sdoc, &SDOCommunication::destroyed, [ptr_value](){ delete[] static_cast<uint8_t*>(ptr_value); });
+        m_sdoc = nullptr;
+        return;
     }
+
+    m_sdoc->disconnect();
+
+    SDOCommunication* sdoCommToDelete = m_sdoc;
+    connect(m_sdoc, &SDOCommunication::finished, sdoCommToDelete, [sdoCommToDelete](){ delete sdoCommToDelete; });
+    //connect(m_sdoc, &SDOCommunication::finished, m_sdoc, &SDOCommunication::deleteLater);
+
+    uint8_t* dataPtrToDelete = static_cast<uint8_t*>(m_sdoc->data());
+    connect(m_sdoc, &SDOCommunication::destroyed, [dataPtrToDelete](){ delete[] dataPtrToDelete; });
+
+    m_sdoc->cancel();
+
+    //return false;
 }
 
 SLCanOpenNode* SDOValue::getSLCanOpenNode()
@@ -77,15 +91,20 @@ bool SDOValue::setDataSize(size_t newDataSize)
     m_sdoc->setData(newData);
     m_sdoc->setDataSize(newDataSize);
 
+    size_t transferSz = m_sdoc->transferSize();
+    if(newDataSize < transferSz || transferSz == 0){
+        m_sdoc->setTransferSize(newDataSize);
+    }
+
     return true;
 }
 
-SDOCommunication::Index SDOValue::index() const
+CO::Index SDOValue::index() const
 {
     return m_sdoc->index();
 }
 
-bool SDOValue::setIndex(SDOCommunication::Index newIndex)
+bool SDOValue::setIndex(CO::Index newIndex)
 {
     if(running()) return false;
 
@@ -94,12 +113,12 @@ bool SDOValue::setIndex(SDOCommunication::Index newIndex)
     return true;
 }
 
-SDOCommunication::SubIndex SDOValue::subIndex() const
+CO::SubIndex SDOValue::subIndex() const
 {
     return m_sdoc->subIndex();
 }
 
-bool SDOValue::setSubIndex(SDOCommunication::SubIndex newSubIndex)
+bool SDOValue::setSubIndex(CO::SubIndex newSubIndex)
 {
     if(running()) return false;
 
@@ -108,12 +127,12 @@ bool SDOValue::setSubIndex(SDOCommunication::SubIndex newSubIndex)
     return true;
 }
 
-SDOCommunication::NodeId SDOValue::nodeId() const
+CO::NodeId SDOValue::nodeId() const
 {
     return m_sdoc->nodeId();
 }
 
-bool SDOValue::setNodeId(SDOCommunication::NodeId newNodeId)
+bool SDOValue::setNodeId(CO::NodeId newNodeId)
 {
     if(running()) return false;
 

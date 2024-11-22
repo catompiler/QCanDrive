@@ -171,7 +171,7 @@ COObjectDict::Entry COObjectDict::entryAt(int i)
     return Entry(od_entry);
 }
 
-COObjectDict::Entry COObjectDict::entryByIndex(Index entryIndex)
+COObjectDict::Entry COObjectDict::entryByIndex(CO::Index entryIndex)
 {
     auto it = std::find_if(m_od_entries.begin(), m_od_entries.end(), [&entryIndex](const OD_entry_t& od_entry){
         return od_entry.index == entryIndex;
@@ -1357,7 +1357,7 @@ void COObjectDict::resetConfig()
     memset(&m_config, 0, sizeof(CO_config_t));
 }
 
-OD_entry_t* COObjectDict::odEntryByIndex(Index entryIndex)
+OD_entry_t* COObjectDict::odEntryByIndex(CO::Index entryIndex)
 {
     Entry e = entryByIndex(entryIndex);
 
@@ -1366,7 +1366,7 @@ OD_entry_t* COObjectDict::odEntryByIndex(Index entryIndex)
     return e.odEntry();
 }
 
-uint8_t COObjectDict::arraySizeByIndex(Index entryIndex)
+uint8_t COObjectDict::arraySizeByIndex(CO::Index entryIndex)
 {
     Entry e = entryByIndex(entryIndex);
 
@@ -1435,7 +1435,7 @@ bool COObjectDict::Entry::isEmpty() const
     return true;
 }
 
-int COObjectDict::Entry::subEntry(SubIndex subIndex) const
+int COObjectDict::Entry::subEntry(CO::SubIndex subIndex) const
 {
     assert(m_entry != nullptr);
 
@@ -1471,7 +1471,7 @@ const OD_entry_t* COObjectDict::Entry::odEntry() const
     return m_entry;
 }
 
-COObjectDict::SubIndex COObjectDict::Entry::subIndex(int subEntry) const
+CO::SubIndex COObjectDict::Entry::subIndex(int subEntry) const
 {
     assert(m_entry != nullptr);
 
@@ -1487,10 +1487,10 @@ COObjectDict::SubIndex COObjectDict::Entry::subIndex(int subEntry) const
     }break;
     }
 
-    return static_cast<SubIndex>(subEntry);
+    return static_cast<CO::SubIndex>(subEntry);
 }
 
-bool COObjectDict::Entry::setSubIndex(SubIndex subIndex, int subEntry)
+bool COObjectDict::Entry::setSubIndex(CO::SubIndex subIndex, int subEntry)
 {
     assert(m_entry != nullptr);
 
@@ -1511,14 +1511,14 @@ bool COObjectDict::Entry::setSubIndex(SubIndex subIndex, int subEntry)
     return true;
 }
 
-COObjectDict::Index COObjectDict::Entry::index() const
+CO::Index COObjectDict::Entry::index() const
 {
     assert(m_entry != nullptr);
 
-    return static_cast<COObjectDict::Index>(m_entry->index);
+    return static_cast<CO::Index>(m_entry->index);
 }
 
-void COObjectDict::Entry::setIndex(Index newIndex)
+void COObjectDict::Entry::setIndex(CO::Index newIndex)
 {
     assert(m_entry != nullptr);
 
@@ -2391,7 +2391,7 @@ const void* COObjectDict::Rec::dataOrig() const
     return rec->dataOrig;
 }
 
-COObjectDict::SubIndex COObjectDict::Rec::subIndex() const
+CO::SubIndex COObjectDict::Rec::subIndex() const
 {
     assert(m_object != nullptr);
 
@@ -2400,7 +2400,7 @@ COObjectDict::SubIndex COObjectDict::Rec::subIndex() const
     return rec->subIndex;
 }
 
-void COObjectDict::Rec::setSubIndex(SubIndex newSubIndex)
+void COObjectDict::Rec::setSubIndex(CO::SubIndex newSubIndex)
 {
     assert(m_object != nullptr);
 

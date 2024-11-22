@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "CANopen.h"
+#include "cotypes.h"
 #include <QVector>
 #include <stdint.h>
 #include <stddef.h>
@@ -14,8 +15,6 @@ class COObjectDict : public QObject
     Q_OBJECT
 public:
 
-    using Index = uint16_t;
-    using SubIndex = uint8_t;
     using ObjectPtr = void*;
 
     enum ObjectType {
@@ -26,13 +25,17 @@ public:
     };
 
     enum DataType {
-        NO_DATA = 0,
-        I8      = 1,
-        I16     = 2,
-        I32     = 3,
-        U8      = 4,
-        U16     = 5,
-        U32     = 6
+        I32 = 0,
+        I16 = 1,
+        I8 = 2,
+        U32 = 3,
+        U16 = 4,
+        U8 = 5,
+        IQ24 = 6,
+        IQ15 = 7,
+        IQ7 = 8,
+        STR = 9,
+        MEM = 10
     };
 
     class Object {
@@ -126,8 +129,8 @@ public:
         void* dataOrig();
         const void* dataOrig() const;
 
-        SubIndex subIndex() const;
-        void setSubIndex(SubIndex newSubIndex);
+        CO::SubIndex subIndex() const;
+        void setSubIndex(CO::SubIndex newSubIndex);
 
         OD_attr_t attribute() const;
         void setAttribute(OD_attr_t newAttribute);
@@ -149,16 +152,16 @@ public:
         bool isValid() const;
         bool isEmpty() const;
 
-        int subEntry(SubIndex subIndex) const;
+        int subEntry(CO::SubIndex subIndex) const;
 
         OD_entry_t* odEntry();
         const OD_entry_t* odEntry() const;
 
-        SubIndex subIndex(int subEntry = 0) const;
-        bool setSubIndex(SubIndex subIndex, int subEntry = 0);
+        CO::SubIndex subIndex(int subEntry = 0) const;
+        bool setSubIndex(CO::SubIndex subIndex, int subEntry = 0);
 
-        Index index() const;
-        void setIndex(Index newIndex);
+        CO::Index index() const;
+        void setIndex(CO::Index newIndex);
 
         ObjectType objType() const;
         void setObjType(ObjectType newObjType);
@@ -213,7 +216,7 @@ public:
     Entry addEntry();
     void removeEntry(int i);
     Entry entryAt(int i);
-    Entry entryByIndex(Index entryIndex);
+    Entry entryByIndex(CO::Index entryIndex);
 
     Entry add_H1000_DevType();
     Entry add_H1001_ErrReg();
@@ -305,8 +308,8 @@ private:
 
     void updateOd();
     void resetConfig();
-    OD_entry_t* odEntryByIndex(Index entryIndex);
-    uint8_t arraySizeByIndex(Index entryIndex);
+    OD_entry_t* odEntryByIndex(CO::Index entryIndex);
+    uint8_t arraySizeByIndex(CO::Index entryIndex);
     void removeEmptyEntries();
     void fixEntriesSorting();
 };

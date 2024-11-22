@@ -60,32 +60,32 @@ void SDOCommunication::setType(Type newType)
     m_d->m_type = newType;
 }
 
-SDOCommunication::NodeId SDOCommunication::nodeId() const
+CO::NodeId SDOCommunication::nodeId() const
 {
     return m_d->m_nodeId;
 }
 
-void SDOCommunication::setNodeId(NodeId newNodeId)
+void SDOCommunication::setNodeId(CO::NodeId newNodeId)
 {
     m_d->m_nodeId = newNodeId;
 }
 
-SDOCommunication::Index SDOCommunication::index() const
+CO::Index SDOCommunication::index() const
 {
     return m_d->m_index;
 }
 
-void SDOCommunication::setIndex(Index newIndex)
+void SDOCommunication::setIndex(CO::Index newIndex)
 {
     m_d->m_index = newIndex;
 }
 
-SDOCommunication::SubIndex SDOCommunication::subIndex() const
+CO::SubIndex SDOCommunication::subIndex() const
 {
     return m_d->m_subIndex;
 }
 
-void SDOCommunication::setSubIndex(SubIndex newSubIndex)
+void SDOCommunication::setSubIndex(CO::SubIndex newSubIndex)
 {
     m_d->m_subIndex = newSubIndex;
 }

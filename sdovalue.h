@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <stddef.h>
+#include "cotypes.h"
 #include "sdocommunication.h"
 
 
@@ -22,16 +23,17 @@ public:
     bool setSLCanOpenNode(SLCanOpenNode* slcon);
 
     size_t dataSize() const;
+    // already set transferSize to newDataSize, if needed.
     bool setDataSize(size_t newDataSize);
 
-    SDOCommunication::NodeId nodeId() const;
-    bool setNodeId(SDOCommunication::NodeId newNodeId);
+    CO::NodeId nodeId() const;
+    bool setNodeId(CO::NodeId newNodeId);
 
-    SDOCommunication::Index index() const;
-    bool setIndex(SDOCommunication::Index newIndex);
+    CO::Index index() const;
+    bool setIndex(CO::Index newIndex);
 
-    SDOCommunication::SubIndex subIndex() const;
-    bool setSubIndex(SDOCommunication::SubIndex newSubIndex);
+    CO::SubIndex subIndex() const;
+    bool setSubIndex(CO::SubIndex newSubIndex);
 
     int timeout() const;
     bool setTimeout(int newTimeout);
@@ -81,6 +83,8 @@ protected slots:
 protected:
     SDOCommunication* m_sdoc;
     SLCanOpenNode* m_slcon;
+
+    void deleteDataAsFinished();
 };
 
 template<typename T>
