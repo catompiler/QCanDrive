@@ -34,6 +34,7 @@ SOURCES += \
     CO_driver_slcan_master.c \
     OD.c \
     coobjectdict.cpp \
+    covaluesholder.cpp \
     main.cpp \
     canopenwin.cpp \
     reg_data.c \
@@ -72,6 +73,8 @@ HEADERS += \
     OD.h \
     canopenwin.h \
     coobjectdict.h \
+    cotypes.h \
+    covaluesholder.h \
     reg_data.h \
     sdocommunication.h \
     sdocommunication_data.h \
