@@ -9,6 +9,7 @@ QT_END_NAMESPACE
 
 
 class SLCanOpenNode;
+class CoValuesHolder;
 class SDOValue;
 
 
@@ -33,6 +34,7 @@ private:
     SDOValue* m_sdo_val;
     uint m_tmp;
 
-    SLCanOpenNode* m_sco;
+    SLCanOpenNode* m_slcon;
+    CoValuesHolder* m_valsHolder;
 };
 #endif // CANOPENWIN_H

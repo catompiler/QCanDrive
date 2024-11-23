@@ -433,7 +433,8 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
         case SDOComm::INIT:
             sdo_ret = CO_SDOclientDownloadInitiate(sdo_cli,
                             sdoc->index(), sdoc->subIndex(), sdoc->transferSize(),
-                            std::min(static_cast<uint>(sdoc->timeout()), static_cast<uint>(UINT16_MAX)),
+                            std::min(static_cast<uint>(sdoc->timeout() == 0 ? m_defaultTimeout : sdoc->timeout()),
+                                     static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
                 sdoc->setState(SDOComm::DONE);
@@ -505,7 +506,8 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
         case SDOComm::INIT:
             sdo_ret = CO_SDOclientUploadInitiate(sdo_cli,
                             sdoc->index(), sdoc->subIndex(),
-                            std::min(static_cast<uint>(sdoc->timeout()), static_cast<uint>(UINT16_MAX)),
+                            std::min(static_cast<uint>(sdoc->timeout() == 0 ? m_defaultTimeout : sdoc->timeout()),
+                                     static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
                 sdoc->setState(SDOComm::DONE);

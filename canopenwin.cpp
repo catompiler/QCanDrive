@@ -1,6 +1,7 @@
 #include "canopenwin.h"
 #include "ui_canopenwin.h"
 #include "slcanopennode.h"
+#include "covaluesholder.h"
 #include "sdovalue.h"
 #include <QTimer>
 #include <QString>
@@ -14,11 +15,22 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_sco = new SLCanOpenNode(this);
-    connect(m_sco, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
-    connect(m_sco, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
+    m_slcon = new SLCanOpenNode(this);
+    connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
+    connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
 
-    m_sdo_val = new SDOValue(m_sco);
+    m_valsHolder = new CoValuesHolder(m_slcon);
+    connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
+    connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
+
+    auto sdoval = m_valsHolder->addSdoValue(1, 0x2000, 0, 4);
+    connect(sdoval, &SDOValue::finished, this, [this, sdoval](){
+        qDebug() << "updated" << sdoval->error();
+        statusBar()->showMessage(QString::number(sdoval->value<uint>()));
+    });
+
+
+    m_sdo_val = new SDOValue(m_slcon);
     m_sdo_val->setNodeId(1);
     m_sdo_val->setIndex(0x2004);
     m_sdo_val->setSubIndex(0x0);
@@ -69,7 +81,7 @@ CanOpenWin::CanOpenWin(QWidget *parent)
         QTimer::singleShot(1000, this, [sdoval](){ sdoval->read(); });
     });
 
-    connect(m_sco, &SLCanOpenNode::connected, m_sdo_val, &SDOValue::write);
+    connect(m_slcon, &SLCanOpenNode::connected, m_sdo_val, &SDOValue::write);
     //connect(m_sco, &SLCanOpenNode::connected, m_sdo_val, &SDOValue::read);
     /*connect(m_sco, &SLCanOpenNode::connected, this, [this](){
         if(!m_sdo_val->write()){
@@ -81,7 +93,8 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 CanOpenWin::~CanOpenWin()
 {
     delete m_sdo_val;
-    delete m_sco;
+    delete m_valsHolder;
+    delete m_slcon;
     delete ui;
 }
 
@@ -90,7 +103,7 @@ void CanOpenWin::on_actDebugExec_triggered(bool checked)
     Q_UNUSED(checked)
 
     m_tmp = 1;
-    auto comm = m_sco->read(1, 0x2000, 0x0, &m_tmp, 4);
+    auto comm = m_slcon->read(1, 0x2000, 0x0, &m_tmp, 4);
     if(comm != nullptr){
         connect(comm, &SDOComm::finished, this, [this](){
             SDOComm* comm = qobject_cast<SDOComm*>(sender());
@@ -115,21 +128,21 @@ void CanOpenWin::on_actConnect_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    if(m_sco->isConnected()){
+    if(m_slcon->isConnected()){
         qDebug() << "Already connected!";
         return;
     }
 
-    bool is_open = m_sco->openPort("COM23", QSerialPort::Baud115200, QSerialPort::NoParity, QSerialPort::OneStop);
+    bool is_open = m_slcon->openPort("COM23", QSerialPort::Baud115200, QSerialPort::NoParity, QSerialPort::OneStop);
     if(is_open){
         qDebug() << "Port opened!";
 
-        bool co_created = m_sco->createCO();
+        bool co_created = m_slcon->createCO();
         if(co_created){
             qDebug() << "Connected!";
         }else{
             qDebug() << "CO Fail :(";
-            m_sco->closePort();
+            m_slcon->closePort();
         }
     }else{
         qDebug() << "Fail :(";
@@ -140,13 +153,13 @@ void CanOpenWin::on_actDisconnect_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    if(!m_sco->isConnected()){
+    if(!m_slcon->isConnected()){
         qDebug() << "Not connected!";
         return;
     }
 
-    m_sco->destroyCO();
-    m_sco->closePort();
+    m_slcon->destroyCO();
+    m_slcon->closePort();
 
     qDebug() << "Disconnected!";
 }

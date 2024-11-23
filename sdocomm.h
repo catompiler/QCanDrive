@@ -43,8 +43,6 @@ public:
     };
 
     explicit SDOComm(QObject *parent = nullptr);
-    /*SDOCommunication(const SDOCommunication& sdo_comm);
-    SDOCommunication(SDOCommunication&& sdo_comm);*/
     ~SDOComm();
 
     // get/set.

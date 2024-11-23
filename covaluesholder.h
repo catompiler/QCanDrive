@@ -10,6 +10,7 @@
 
 
 class QTimer;
+class SLCanOpenNode;
 
 
 class CoValuesHolder : public QObject
@@ -19,13 +20,19 @@ public:
 
     using HoldedSDOValuePtr = const SDOValue*;
 
-    explicit CoValuesHolder(QObject *parent = nullptr);
+    explicit CoValuesHolder(SLCanOpenNode* slcon = nullptr, QObject *parent = nullptr);
     ~CoValuesHolder();
+
+    SLCanOpenNode* getSLCanOpenNode();
+    bool setSLCanOpenNode(SLCanOpenNode* slcon);
+
+    bool updatingEnabled() const;
+    bool setUpdatingEnabled(bool newUpdatingEnabled);
 
     int updateInterval() const;
     void setUpdateInterval(int newUpdateInterval);
 
-    HoldedSDOValuePtr addSdoValue(CO::NodeId valNodeId, CO::Index valIndex, CO::SubIndex valSubIndex, size_t size);
+    HoldedSDOValuePtr addSdoValue(CO::NodeId valNodeId, CO::Index valIndex, CO::SubIndex valSubIndex, size_t dataSize, int timeout = 0);
     void delSdoValue(HoldedSDOValuePtr delSdoVal);
     HoldedSDOValuePtr getSDOValue(CO::NodeId valNodeId, CO::Index valIndex, CO::SubIndex valSubIndex) const;
 
@@ -35,15 +42,16 @@ public:
 
 public slots:
     void update();
-
-signals:
-    void updated();
+    void enableUpdating();
+    void disableUpdating();
 
 private:
     typedef quint32 FullIndex;
 
     QMap<FullIndex, QPair<SDOValue*, size_t>> m_sdoValues;
 
+    SLCanOpenNode* m_slcon;
+    bool m_updatingEnabled;
     QTimer* m_updateTimer;
 
     FullIndex makeFullIndex(CO::NodeId valNodeId, CO::Index valIndex, CO::SubIndex valSubIndex) const;
