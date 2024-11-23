@@ -8,7 +8,7 @@
 #include "slcan/slcan_master.h"
 #include "CANopen.h"
 #include "coobjectdict.h"
-#include "sdocommunication.h"
+#include "sdocomm.h"
 
 
 class QTimer;
@@ -73,18 +73,18 @@ public:
      * sdocomm == nullptr -> alloc new sdo comm.
      */
 
-    SDOCommunication* read(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
-                               void* data, size_t dataSize, SDOCommunication* sdocomm = nullptr, int timeout = -1);
+    SDOComm* read(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
+                               void* data, size_t dataSize, SDOComm* sdocomm = nullptr, int timeout = -1);
 
-    SDOCommunication* write(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
-                               const void* data, size_t dataSize, SDOCommunication* sdocomm = nullptr, int timeout = -1);
+    SDOComm* write(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
+                               const void* data, size_t dataSize, SDOComm* sdocomm = nullptr, int timeout = -1);
 
-    bool read(SDOCommunication* sdocom);
-    bool write(SDOCommunication* sdocom);
+    bool read(SDOComm* sdocom);
+    bool write(SDOComm* sdocom);
 
     // return true if sdoc removed(not in) from queue and can be deleted or reused.
     // when return true - not finish sdo comm.
-    bool cancel(SDOCommunication* sdoc);
+    bool cancel(SDOComm* sdoc);
 
     int defaultTimeout() const;
     void setDefaultTimeout(int newDefaultTimeout);
@@ -119,11 +119,11 @@ private:
     uint16_t m_heartbeatTime;
     int m_defaultTimeout;
 
-    QQueue<SDOCommunication*> m_sdoComms;
+    QQueue<SDOComm*> m_sdoComms;
 
     void processSDOClient(uint32_t dt);
     bool processFrontComm(uint32_t dt);
-    SDOCommunication::Error sdoCommError(CO_SDO_abortCode_t code) const;
+    SDOComm::Error sdoCommError(CO_SDO_abortCode_t code) const;
     void cancelAllSDOComms();
     void createOd();
 };

@@ -9,8 +9,8 @@
 SDOValue::SDOValue(QObject *parent)
     : QObject{parent}
 {
-    m_sdoc = new SDOCommunication();
-    connect(m_sdoc, &SDOCommunication::finished, this, &SDOValue::sdocommFinished);
+    m_sdoc = new SDOComm();
+    connect(m_sdoc, &SDOComm::finished, this, &SDOValue::sdocommFinished);
 
     m_slcon = nullptr;
 }
@@ -18,8 +18,8 @@ SDOValue::SDOValue(QObject *parent)
 SDOValue::SDOValue(SLCanOpenNode* slcon, QObject* parent)
     : QObject{parent}
 {
-    m_sdoc = new SDOCommunication();
-    connect(m_sdoc, &SDOCommunication::finished, this, &SDOValue::sdocommFinished);
+    m_sdoc = new SDOComm();
+    connect(m_sdoc, &SDOComm::finished, this, &SDOValue::sdocommFinished);
 
     m_slcon = slcon;
 }
@@ -40,12 +40,12 @@ void SDOValue::deleteDataAsFinished()
 
     m_sdoc->disconnect();
 
-    SDOCommunication* sdoCommToDelete = m_sdoc;
-    connect(m_sdoc, &SDOCommunication::finished, sdoCommToDelete, [sdoCommToDelete](){ delete sdoCommToDelete; });
+    SDOComm* sdoCommToDelete = m_sdoc;
+    connect(m_sdoc, &SDOComm::finished, sdoCommToDelete, [sdoCommToDelete](){ delete sdoCommToDelete; });
     //connect(m_sdoc, &SDOCommunication::finished, m_sdoc, &SDOCommunication::deleteLater);
 
     uint8_t* dataPtrToDelete = static_cast<uint8_t*>(m_sdoc->data());
-    connect(m_sdoc, &SDOCommunication::destroyed, [dataPtrToDelete](){ delete[] dataPtrToDelete; });
+    connect(m_sdoc, &SDOComm::destroyed, [dataPtrToDelete](){ delete[] dataPtrToDelete; });
 
     m_sdoc->cancel();
 
@@ -185,17 +185,17 @@ size_t SDOValue::transferedDataSize() const
     return m_sdoc->transferedDataSize();
 }
 
-SDOCommunication::Type SDOValue::transferType() const
+SDOComm::Type SDOValue::transferType() const
 {
     return m_sdoc->type();
 }
 
-SDOCommunication::State SDOValue::transferState() const
+SDOComm::State SDOValue::transferState() const
 {
     return m_sdoc->state();
 }
 
-SDOCommunication::Error SDOValue::error() const
+SDOComm::Error SDOValue::error() const
 {
     return m_sdoc->error();
 }
@@ -230,16 +230,16 @@ bool SDOValue::write()
 
 void SDOValue::sdocommFinished()
 {
-    if(m_sdoc->error() != SDOCommunication::ERROR_NONE){
-        if(m_sdoc->error() == SDOCommunication::ERROR_CANCEL && m_sdoc->cancelled()){
+    if(m_sdoc->error() != SDOComm::ERROR_NONE){
+        if(m_sdoc->error() == SDOComm::ERROR_CANCEL && m_sdoc->cancelled()){
             emit canceled();
         }else{
             emit errorOccured();
         }
     }else{
-        if(m_sdoc->type() == SDOCommunication::UPLOAD){
+        if(m_sdoc->type() == SDOComm::UPLOAD){
             emit readed();
-        }else if(m_sdoc->type() == SDOCommunication::DOWNLOAD){
+        }else if(m_sdoc->type() == SDOComm::DOWNLOAD){
             emit written();
         }
     }

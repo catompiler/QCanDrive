@@ -4,7 +4,7 @@
 #include <QObject>
 #include <stddef.h>
 #include "cotypes.h"
-#include "sdocommunication.h"
+#include "sdocomm.h"
 
 
 class SLCanOpenNode;
@@ -46,11 +46,11 @@ public:
 
     size_t transferedDataSize() const;
 
-    SDOCommunication::Type transferType() const;
+    SDOComm::Type transferType() const;
 
-    SDOCommunication::State transferState() const;
+    SDOComm::State transferState() const;
 
-    SDOCommunication::Error error() const;
+    SDOComm::Error error() const;
 
     bool running() const;
 
@@ -81,7 +81,7 @@ protected slots:
     void sdocommFinished();
 
 protected:
-    SDOCommunication* m_sdoc;
+    SDOComm* m_sdoc;
     SLCanOpenNode* m_slcon;
 
     void deleteDataAsFinished();

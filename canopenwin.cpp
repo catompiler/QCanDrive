@@ -33,7 +33,7 @@ CanOpenWin::CanOpenWin(QWidget *parent)
         SDOValue* sdoval = qobject_cast<SDOValue*>(sender());
         if(sdoval == nullptr) return;
 
-        qDebug() << ((sdoval->transferType() == SDOCommunication::UPLOAD) ? "read" : "write")
+        qDebug() << ((sdoval->transferType() == SDOComm::UPLOAD) ? "read" : "write")
                  << "error" << sdoval->error();
     });
 
@@ -92,8 +92,8 @@ void CanOpenWin::on_actDebugExec_triggered(bool checked)
     m_tmp = 1;
     auto comm = m_sco->read(1, 0x2000, 0x0, &m_tmp, 4);
     if(comm != nullptr){
-        connect(comm, &SDOCommunication::finished, this, [this](){
-            SDOCommunication* comm = qobject_cast<SDOCommunication*>(sender());
+        connect(comm, &SDOComm::finished, this, [this](){
+            SDOComm* comm = qobject_cast<SDOComm*>(sender());
 
             if(comm == nullptr){
                 qDebug() << "NULL sender!";
@@ -102,7 +102,7 @@ void CanOpenWin::on_actDebugExec_triggered(bool checked)
 
             comm->deleteLater();
 
-            if(comm->error() == SDOCommunication::ERROR_NONE){
+            if(comm->error() == SDOComm::ERROR_NONE){
                 qDebug() << "Readed:" << m_tmp;
             }else{
                 qDebug() << "Error:" << static_cast<uint>(comm->error());

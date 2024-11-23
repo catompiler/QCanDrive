@@ -414,74 +414,74 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
     CO_SDO_return_t sdo_ret = CO_SDO_RT_ok_communicationEnd;
     CO_SDO_abortCode_t sdo_abort_ret = CO_SDO_AB_NONE;
 
-    if(sdoc->type() == SDOCommunication::DOWNLOAD){
+    if(sdoc->type() == SDOComm::DOWNLOAD){
 
         switch(sdoc->state()){
-        case SDOCommunication::QUEUED:{
+        case SDOComm::QUEUED:{
             uint32_t cobidCliToSrv = m_cobidClientToServer + sdoc->nodeId();
             uint32_t cobidSrvToCli = m_cobidServerToClient + sdoc->nodeId();
             sdo_ret = CO_SDOclient_setup(sdo_cli, cobidCliToSrv, cobidSrvToCli, sdoc->nodeId());
             if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
-                sdoc->setState(SDOCommunication::DONE);
-                sdoc->setError(SDOCommunication::ERROR_IO);
+                sdoc->setState(SDOComm::DONE);
+                sdoc->setError(SDOComm::ERROR_IO);
                 return true;
             }
-            sdoc->setState(SDOCommunication::INIT);
+            sdoc->setState(SDOComm::INIT);
             }
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::INIT:
+        case SDOComm::INIT:
             sdo_ret = CO_SDOclientDownloadInitiate(sdo_cli,
                             sdoc->index(), sdoc->subIndex(), sdoc->transferSize(),
                             std::min(static_cast<uint>(sdoc->timeout()), static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
-                sdoc->setState(SDOCommunication::DONE);
-                sdoc->setError(SDOCommunication::ERROR_IO);
+                sdoc->setState(SDOComm::DONE);
+                sdoc->setError(SDOComm::ERROR_IO);
                 return true;
             }else if(sdo_ret > CO_SDO_RT_ok_communicationEnd){
                 break;
             }
-            sdoc->setState(SDOCommunication::DATA);
+            sdoc->setState(SDOComm::DATA);
             dt = 0;
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::DATA:
+        case SDOComm::DATA:
             size_ret = CO_SDOclientDownloadBufWrite(sdo_cli,
                             static_cast<uint8_t*>(sdoc->dataToBuffering()), sdoc->dataSizeToBuffering());
             sdoc->dataBuffered(size_ret);
             if(sdoc->dataBufferingDone()){
-                sdoc->setState(SDOCommunication::RUN);
+                sdoc->setState(SDOComm::RUN);
             }
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::RUN:
+        case SDOComm::RUN:
             sdo_ret = CO_SDOclientDownload(sdo_cli,
                             dt, sdoc->cancelled(), !sdoc->dataBufferingDone(), &sdo_abort_ret,
                             &size_ret, nullptr);
             sdoc->setDataTransfered(size_ret);
             if(sdo_ret == 0){
                 if(sdoc->cancelled()){
-                    sdoc->setError(SDOCommunication::ERROR_CANCEL);
+                    sdoc->setError(SDOComm::ERROR_CANCEL);
                 }else{
-                    sdoc->setError(SDOCommunication::ERROR_NONE);
+                    sdoc->setError(SDOComm::ERROR_NONE);
                 }
-                sdoc->setState(SDOCommunication::DONE);
+                sdoc->setState(SDOComm::DONE);
             }else if(sdo_ret < 0){
                 //qDebug() << size_ret << Qt::hex << sdo_abort_ret;
-                SDOCommunication::Error finish_err = sdoCommError(sdo_abort_ret);
-                sdoc->setState(SDOCommunication::DONE);
+                SDOComm::Error finish_err = sdoCommError(sdo_abort_ret);
+                sdoc->setState(SDOComm::DONE);
                 sdoc->setError(finish_err);
             }else{
                 break;
             }
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::DONE:
+        case SDOComm::DONE:
             CO_SDOclientClose(sdo_cli);
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::IDLE:
+        case SDOComm::IDLE:
             m_sdoComms.dequeue();
             sdoc->finish();
             return true;
@@ -489,36 +489,36 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
     }else{ // sdoc->type() == SDOCommunication::UPLOAD
 
         switch(sdoc->state()){
-        case SDOCommunication::QUEUED:{
+        case SDOComm::QUEUED:{
             uint32_t cobidCliToSrv = m_cobidClientToServer + sdoc->nodeId();
             uint32_t cobidSrvToCli = m_cobidServerToClient + sdoc->nodeId();
             sdo_ret = CO_SDOclient_setup(sdo_cli, cobidCliToSrv, cobidSrvToCli, sdoc->nodeId());
             if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
-                sdoc->setState(SDOCommunication::DONE);
-                sdoc->setError(SDOCommunication::ERROR_IO);
+                sdoc->setState(SDOComm::DONE);
+                sdoc->setError(SDOComm::ERROR_IO);
                 return true;
             }
-            sdoc->setState(SDOCommunication::INIT);
+            sdoc->setState(SDOComm::INIT);
             }
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::INIT:
+        case SDOComm::INIT:
             sdo_ret = CO_SDOclientUploadInitiate(sdo_cli,
                             sdoc->index(), sdoc->subIndex(),
                             std::min(static_cast<uint>(sdoc->timeout()), static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
-                sdoc->setState(SDOCommunication::DONE);
-                sdoc->setError(SDOCommunication::ERROR_IO);
+                sdoc->setState(SDOComm::DONE);
+                sdoc->setError(SDOComm::ERROR_IO);
                 return true;
             }else if(sdo_ret > CO_SDO_RT_ok_communicationEnd){
                 break;
             }
-            sdoc->setState(SDOCommunication::RUN);
+            sdoc->setState(SDOComm::RUN);
             dt = 0;
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::RUN:
+        case SDOComm::RUN:
             sdo_ret = CO_SDOclientUpload(sdo_cli,
                             dt, sdoc->cancelled(), &sdo_abort_ret,
                             &size_to_ret, &size_ret,
@@ -526,15 +526,15 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
             sdoc->setDataBuffered(size_ret);
             if(sdo_ret == 0){
                 if(sdoc->cancelled()){
-                    sdoc->setState(SDOCommunication::DONE);
-                    sdoc->setError(SDOCommunication::ERROR_CANCEL);
+                    sdoc->setState(SDOComm::DONE);
+                    sdoc->setError(SDOComm::ERROR_CANCEL);
                     return true;
                 }
-                sdoc->setState(SDOCommunication::DATA);
+                sdoc->setState(SDOComm::DATA);
             }else if(sdo_ret < 0){
                 //qDebug() << size_ret << Qt::hex << sdo_abort_ret;
-                SDOCommunication::Error finish_err = sdoCommError(sdo_abort_ret);
-                sdoc->setState(SDOCommunication::DONE);
+                SDOComm::Error finish_err = sdoCommError(sdo_abort_ret);
+                sdoc->setState(SDOComm::DONE);
                 sdoc->setError(finish_err);
                 return true;
             }else{
@@ -556,22 +556,22 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
             }
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::DATA:
+        case SDOComm::DATA:
             size_ret = CO_SDOclientUploadBufRead(sdo_cli,
                             static_cast<uint8_t*>(sdoc->dataToTransfer()), sdoc->dataSizeToTransfer());
             sdoc->dataTransfered(size_ret);
 
             if(sdoc->dataTransferDone()){
-                sdoc->setState(SDOCommunication::DONE);
-                sdoc->setError(SDOCommunication::ERROR_NONE);
+                sdoc->setState(SDOComm::DONE);
+                sdoc->setError(SDOComm::ERROR_NONE);
             }else{
-                if(sdoc->state() == SDOCommunication::DATA && size_ret == 0){
+                if(sdoc->state() == SDOComm::DATA && size_ret == 0){
 #if defined(SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH) && SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH == 1
                     sdoc->setState(SDOCommunication::DONE);
                     sdoc->setError(SDOCommunication::ERROR_INVALID_SIZE);
 #else
-                    sdoc->setState(SDOCommunication::DONE);
-                    sdoc->setError(SDOCommunication::ERROR_NONE);
+                    sdoc->setState(SDOComm::DONE);
+                    sdoc->setError(SDOComm::ERROR_NONE);
 #endif
                 }else{
                     break;
@@ -579,11 +579,11 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
             }
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::DONE:
+        case SDOComm::DONE:
             CO_SDOclientClose(sdo_cli);
 
         __attribute__ ((fallthrough));
-        case SDOCommunication::IDLE:
+        case SDOComm::IDLE:
             m_sdoComms.dequeue();
             sdoc->finish();
             return true;
@@ -593,62 +593,62 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
     return false;
 }
 
-SDOCommunication::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
+SDOComm::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
 {
     //qDebug() << Qt::hex << code;
     switch (code){
     default:
         break;
     case CO_SDO_AB_NONE:
-        return SDOCommunication::ERROR_NONE;
+        return SDOComm::ERROR_NONE;
     //case CO_SDO_AB_TOGGLE_BIT:
     case CO_SDO_AB_TIMEOUT:
-        return SDOCommunication::ERROR_TIMEOUT;
+        return SDOComm::ERROR_TIMEOUT;
     case CO_SDO_AB_CMD:
     case CO_SDO_AB_BLOCK_SIZE:
     case CO_SDO_AB_SEQ_NUM:
     case CO_SDO_AB_CRC:
-        return SDOCommunication::ERROR_IO;
+        return SDOComm::ERROR_IO;
     case CO_SDO_AB_OUT_OF_MEM:
-        return SDOCommunication::ERROR_OUT_OF_MEM;
+        return SDOComm::ERROR_OUT_OF_MEM;
     case CO_SDO_AB_UNSUPPORTED_ACCESS:
     case CO_SDO_AB_WRITEONLY:
     case CO_SDO_AB_READONLY:
-        return SDOCommunication::ERROR_ACCESS;
+        return SDOComm::ERROR_ACCESS;
     case CO_SDO_AB_NOT_EXIST:
-        return SDOCommunication::ERROR_NOT_FOUND;
+        return SDOComm::ERROR_NOT_FOUND;
     case CO_SDO_AB_NO_MAP:
     case CO_SDO_AB_MAP_LEN:
-        return SDOCommunication::ERROR_INVALID_VALUE;
+        return SDOComm::ERROR_INVALID_VALUE;
     case CO_SDO_AB_PRAM_INCOMPAT:
     case CO_SDO_AB_DEVICE_INCOMPAT:
-        return SDOCommunication::ERROR_GENERAL;
+        return SDOComm::ERROR_GENERAL;
     case CO_SDO_AB_HW:
-        return SDOCommunication::ERROR_IO;
+        return SDOComm::ERROR_IO;
     case CO_SDO_AB_TYPE_MISMATCH:
     case CO_SDO_AB_DATA_LONG:
     case CO_SDO_AB_DATA_SHORT:
-        return SDOCommunication::ERROR_INVALID_SIZE;
+        return SDOComm::ERROR_INVALID_SIZE;
     case CO_SDO_AB_SUB_UNKNOWN:
-        return SDOCommunication::ERROR_NOT_FOUND;
+        return SDOComm::ERROR_NOT_FOUND;
     case CO_SDO_AB_INVALID_VALUE:
     case CO_SDO_AB_VALUE_HIGH:
     case CO_SDO_AB_VALUE_LOW:
     case CO_SDO_AB_MAX_LESS_MIN:
-        return SDOCommunication::ERROR_INVALID_VALUE;
+        return SDOComm::ERROR_INVALID_VALUE;
     case CO_SDO_AB_NO_RESOURCE:
-        return SDOCommunication::ERROR_IO;
+        return SDOComm::ERROR_IO;
     case CO_SDO_AB_GENERAL:
-        return SDOCommunication::ERROR_GENERAL;
+        return SDOComm::ERROR_GENERAL;
     //case CO_SDO_AB_DATA_TRANSF:
     //case CO_SDO_AB_DATA_LOC_CTRL:
     //case CO_SDO_AB_DATA_DEV_STATE:
     case CO_SDO_AB_DATA_OD:
     case CO_SDO_AB_NO_DATA:
-        return SDOCommunication::ERROR_NO_DATA;
+        return SDOComm::ERROR_NO_DATA;
     }
 
-    return SDOCommunication::ERROR_UNKNOWN;
+    return SDOComm::ERROR_UNKNOWN;
 }
 
 int SLCanOpenNode::coTimerInterval() const
@@ -661,16 +661,16 @@ void SLCanOpenNode::setCoTimerInterval(int newCoTimerInterval)
     m_coProcessTimer->setInterval(newCoTimerInterval);
 }
 
-SDOCommunication* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubIndex, void* data, size_t dataSize, SDOCommunication* sdocomm, int timeout)
+SDOComm* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubIndex, void* data, size_t dataSize, SDOComm* sdocomm, int timeout)
 {
     if(!isConnected()) return nullptr;
 
     if(data == nullptr || dataSize == 0) return nullptr;
     if(devId < 1 || devId > 127) return nullptr;
 
-    SDOCommunication* sdoc = sdocomm;
+    SDOComm* sdoc = sdocomm;
     if(sdoc == nullptr){
-        sdoc = new SDOCommunication();
+        sdoc = new SDOComm();
     }
     sdoc->setNodeId(devId);
     sdoc->setIndex(dataIndex);
@@ -690,16 +690,16 @@ SDOCommunication* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex da
     return sdoc;
 }
 
-SDOCommunication* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex dataSubIndex, const void* data, size_t dataSize, SDOCommunication* sdocomm, int timeout)
+SDOComm* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex dataSubIndex, const void* data, size_t dataSize, SDOComm* sdocomm, int timeout)
 {
     if(!isConnected()) return nullptr;
 
     if(data == nullptr || dataSize == 0) return nullptr;
     if(devId < 1 || devId > 127) return nullptr;
 
-    SDOCommunication* sdoc = sdocomm;
+    SDOComm* sdoc = sdocomm;
     if(sdoc == nullptr){
-        sdoc = new SDOCommunication();
+        sdoc = new SDOComm();
     }
     sdoc->setNodeId(devId);
     sdoc->setIndex(dataIndex);
@@ -719,7 +719,7 @@ SDOCommunication* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex d
     return sdoc;
 }
 
-bool SLCanOpenNode::read(SDOCommunication* sdocom)
+bool SLCanOpenNode::read(SDOComm* sdocom)
 {
     if(!isConnected()) return false;
 
@@ -729,16 +729,16 @@ bool SLCanOpenNode::read(SDOCommunication* sdocom)
 
     sdocom->resetTransferedSize();
     sdocom->resetBufferedSize();
-    sdocom->setError(SDOCommunication::ERROR_NONE);
+    sdocom->setError(SDOComm::ERROR_NONE);
     sdocom->setCancel(false);
-    sdocom->setType(SDOCommunication::UPLOAD);
-    sdocom->setState(SDOCommunication::QUEUED);
+    sdocom->setType(SDOComm::UPLOAD);
+    sdocom->setState(SDOComm::QUEUED);
     m_sdoComms.enqueue(sdocom);
 
     return true;
 }
 
-bool SLCanOpenNode::write(SDOCommunication* sdocom)
+bool SLCanOpenNode::write(SDOComm* sdocom)
 {
     if(!isConnected()) return false;
 
@@ -748,16 +748,16 @@ bool SLCanOpenNode::write(SDOCommunication* sdocom)
 
     sdocom->resetTransferedSize();
     sdocom->resetBufferedSize();
-    sdocom->setError(SDOCommunication::ERROR_NONE);
+    sdocom->setError(SDOComm::ERROR_NONE);
     sdocom->setCancel(false);
-    sdocom->setType(SDOCommunication::DOWNLOAD);
-    sdocom->setState(SDOCommunication::QUEUED);
+    sdocom->setType(SDOComm::DOWNLOAD);
+    sdocom->setState(SDOComm::QUEUED);
     m_sdoComms.enqueue(sdocom);
 
     return true;
 }
 
-bool SLCanOpenNode::cancel(SDOCommunication* sdoc)
+bool SLCanOpenNode::cancel(SDOComm* sdoc)
 {
     if(sdoc == nullptr) return true;
 
@@ -779,7 +779,7 @@ void SLCanOpenNode::cancelAllSDOComms()
 {
     while(!m_sdoComms.isEmpty()){
         auto sdoc = m_sdoComms.dequeue();
-        sdoc->finish(SDOCommunication::ERROR_CANCEL);
+        sdoc->finish(SDOComm::ERROR_CANCEL);
     }
 }
 

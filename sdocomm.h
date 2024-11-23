@@ -1,13 +1,13 @@
-#ifndef SDOCOMMUNICATION_H
-#define SDOCOMMUNICATION_H
+#ifndef SDOCOMM_H
+#define SDOCOMM_H
 
 #include <QObject>
 #include "cotypes.h"
 
-struct SDOCommunication_data;
+struct SDOComm_data;
 
 
-class SDOCommunication : public QObject
+class SDOComm : public QObject
 {
     Q_OBJECT
 public:
@@ -42,10 +42,10 @@ public:
         ERROR_UNKNOWN       = 11
     };
 
-    explicit SDOCommunication(QObject *parent = nullptr);
+    explicit SDOComm(QObject *parent = nullptr);
     /*SDOCommunication(const SDOCommunication& sdo_comm);
     SDOCommunication(SDOCommunication&& sdo_comm);*/
-    ~SDOCommunication();
+    ~SDOComm();
 
     // get/set.
 
@@ -112,7 +112,7 @@ signals:
     void finished();
 
 protected:
-    SDOCommunication_data* m_d;
+    SDOComm_data* m_d;
 };
 
-#endif // SDOCOMMUNICATION_H
+#endif // SDOCOMM_H
