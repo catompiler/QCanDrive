@@ -7,6 +7,10 @@ CONFIG += c++17
 # debug
 CONFIG += debug
 
+# Qwt
+CONFIG += qwt
+
+
 INCLUDEPATH += CANopenNode/ \
                slcan/ \
                .
@@ -40,6 +44,7 @@ SOURCES += \
     reg_data.c \
     sdocomm.cpp \
     sdovalue.cpp \
+    sequentialbuffer.cpp \
     slcan/slcan.c \
     slcan/slcan_can_ext_fifo.c \
     slcan/slcan_can_fifo.c \
@@ -51,7 +56,9 @@ SOURCES += \
     slcan/slcan_resp_out_fifo.c \
     slcan/slcan_slave.c \
     slcan_port_qt.cpp \
-    slcanopennode.cpp
+    slcanopennode.cpp \
+    trendplot.cpp \
+    trendseriesdata.cpp
 
 HEADERS += \
     CANopenNode/301/CO_Emergency.h \
@@ -79,6 +86,7 @@ HEADERS += \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \
+    sequentialbuffer.h \
     slcan/slcan.h \
     slcan/slcan_can_ext_fifo.h \
     slcan/slcan_can_fifo.h \
@@ -99,7 +107,9 @@ HEADERS += \
     slcan/slcan_utils.h \
     slcan_conf.h \
     slcan_port_qt.h \
-    slcanopennode.h
+    slcanopennode.h \
+    trendplot.h \
+    trendseriesdata.h
 
 FORMS += \
     canopenwin.ui
