@@ -23,6 +23,19 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>&amp;Файл</string>
+    </property>
+    <addaction name="actQuit"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>&amp;Соединение</string>
+    </property>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -35,32 +48,58 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actQuit"/>
+   <addaction name="separator"/>
    <addaction name="actConnect"/>
    <addaction name="actDisconnect"/>
+   <addaction name="separator"/>
    <addaction name="actDebugExec"/>
   </widget>
   <action name="actDebugExec">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/res/icons/Engineering-48.png</normaloff>:/images/res/icons/Engineering-48.png</iconset>
+   </property>
    <property name="text">
     <string>Debug</string>
    </property>
   </action>
   <action name="actConnect">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/res/icons/Connected-48.png</normaloff>:/images/res/icons/Connected-48.png</iconset>
+   </property>
    <property name="text">
-    <string>Соединить</string>
+    <string>&amp;Соединить</string>
    </property>
    <property name="toolTip">
     <string>Соединить</string>
    </property>
   </action>
   <action name="actDisconnect">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/res/icons/Disconnected-48.png</normaloff>:/images/res/icons/Disconnected-48.png</iconset>
+   </property>
    <property name="text">
-    <string>Разъединить</string>
+    <string>&amp;Разъединить</string>
    </property>
    <property name="toolTip">
     <string>Разъединить</string>
    </property>
   </action>
+  <action name="actQuit">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/images/res/icons/Shutdown-48.png</normaloff>:/images/res/icons/Shutdown-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>В&amp;ыход</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>

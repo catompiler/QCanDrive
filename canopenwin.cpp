@@ -19,8 +19,6 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 
     m_trend = new TrendPlot();
     m_trend->setBufferSize(50);
-    m_trend->setDefaultAlpha(0.5);
-    m_trend->setBackground(Qt::darkGray);
     qDebug() << "trend number:" << m_trend->addTrend(Qt::cyan);
     qDebug() << "trend number:" << m_trend->addTrend(Qt::magenta);
     setCentralWidget(m_trend);
@@ -55,6 +53,13 @@ CanOpenWin::~CanOpenWin()
     delete m_slcon;
     delete m_trend;
     delete ui;
+}
+
+void CanOpenWin::on_actQuit_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    close();
 }
 
 void CanOpenWin::on_actDebugExec_triggered(bool checked)

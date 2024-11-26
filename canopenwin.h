@@ -23,6 +23,7 @@ public:
     ~CanOpenWin();
 
 private slots:
+    void on_actQuit_triggered(bool checked);
     void on_actDebugExec_triggered(bool checked);
     void on_actConnect_triggered(bool checked);
     void on_actDisconnect_triggered(bool checked);

@@ -35,7 +35,7 @@ TrendPlot::TrendPlot(QWidget* parent)
     :QwtPlot(parent)
 {
     m_size = 0;
-    m_defaultAlpha = 1.0;
+    m_defaultAlpha = 0.75;
 
     setAutoDelete(true);
 
@@ -45,7 +45,11 @@ TrendPlot::TrendPlot(QWidget* parent)
         setCanvas(myCanvas);
     }
     myCanvas->setFrameStyle(QFrame::Plain | QFrame::NoFrame);
+
+    setCanvasBackground(Qt::darkGray);
+
     plotLayout()->setAlignCanvasToScales(true);
+
     setAxisScale(QwtAxis::XBottom, 0.0, 1.0);
     setAxisScale(QwtAxis::YLeft, 0.0, 1.0);
     setAxisAutoScale(QwtAxis::XBottom, true);
