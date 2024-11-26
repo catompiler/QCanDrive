@@ -44,6 +44,7 @@ SOURCES += \
     reg_data.c \
     sdocomm.cpp \
     sdovalue.cpp \
+    sdovalueplot.cpp \
     sequentialbuffer.cpp \
     signalplot.cpp \
     signalseriesdata.cpp \
@@ -82,10 +83,12 @@ HEADERS += \
     coobjectdict.h \
     cotypes.h \
     covaluesholder.h \
+    covaluetypes.h \
     reg_data.h \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \
+    sdovalueplot.h \
     sequentialbuffer.h \
     signalplot.h \
     signalseriesdata.h \
