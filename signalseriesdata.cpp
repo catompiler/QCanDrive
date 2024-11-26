@@ -1,66 +1,66 @@
-#include "trendseriesdata.h"
+#include "signalseriesdata.h"
 #include "sequentialbuffer.h"
 
 
 
-TrendSeriesData::TrendSeriesData(SequentialBuffer* newBuffer)
+SignalSeriesData::SignalSeriesData(SequentialBuffer* newBuffer)
     :QwtSeriesData<QPointF>()
 {
     m_buffer = newBuffer;
 }
 
-TrendSeriesData::~TrendSeriesData()
+SignalSeriesData::~SignalSeriesData()
 {
     if(m_buffer) delete m_buffer;
 }
 
-SequentialBuffer* TrendSeriesData::buffer()
+SequentialBuffer* SignalSeriesData::buffer()
 {
     return m_buffer;
 }
 
-const SequentialBuffer* TrendSeriesData::buffer() const
+const SequentialBuffer* SignalSeriesData::buffer() const
 {
     return m_buffer;
 }
 
-void TrendSeriesData::setBuffer(SequentialBuffer* newBuffer)
+void SignalSeriesData::setBuffer(SequentialBuffer* newBuffer)
 {
     m_buffer = newBuffer;
 }
 
-size_t TrendSeriesData::size() const
+size_t SignalSeriesData::size() const
 {
     if(m_buffer == nullptr) return 0;
     return m_buffer->avail();
 }
 
-size_t TrendSeriesData::bufferSize() const
+size_t SignalSeriesData::bufferSize() const
 {
     if(m_buffer == nullptr) return 0;
     return m_buffer->size();
 }
 
-void TrendSeriesData::setBufferSize(size_t newSize)
+void SignalSeriesData::setBufferSize(size_t newSize)
 {
     if(m_buffer == nullptr) return;
 
     m_buffer->setSize(newSize);
 }
 
-QPointF TrendSeriesData::sample(size_t i) const
+QPointF SignalSeriesData::sample(size_t i) const
 {
     if(m_buffer == nullptr) return QPointF();
     return m_buffer->get(i);
 }
 
-QRectF TrendSeriesData::boundingRect() const
+QRectF SignalSeriesData::boundingRect() const
 {
     if(m_buffer == nullptr) return QRectF(0, 0, -1, -1);
     return m_buffer->boundingRect();
 }
 
-void TrendSeriesData::putSample(const qreal& newY, const qreal& newDx)
+void SignalSeriesData::putSample(const qreal& newY, const qreal& newDx)
 {
     if(m_buffer == nullptr) return;
 

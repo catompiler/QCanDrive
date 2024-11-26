@@ -11,7 +11,7 @@ QT_END_NAMESPACE
 class SLCanOpenNode;
 class CoValuesHolder;
 class SDOValue;
-class TrendPlot;
+class SignalPlot;
 
 
 class CanOpenWin : public QMainWindow
@@ -32,7 +32,7 @@ private slots:
     void CANopen_disconnected();
 private:
     Ui::CanOpenWin *ui;
-    TrendPlot* m_trend;
+    SignalPlot* m_plot;
 
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;

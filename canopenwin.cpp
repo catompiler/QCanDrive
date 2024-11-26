@@ -3,7 +3,7 @@
 #include "slcanopennode.h"
 #include "covaluesholder.h"
 #include "sdovalue.h"
-#include "trendplot.h"
+#include "signalplot.h"
 #include "sequentialbuffer.h"
 #include <QTimer>
 #include <QString>
@@ -17,11 +17,11 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_trend = new TrendPlot();
-    m_trend->setBufferSize(50);
-    qDebug() << "trend number:" << m_trend->addTrend(Qt::cyan);
-    qDebug() << "trend number:" << m_trend->addTrend(Qt::magenta);
-    setCentralWidget(m_trend);
+    m_plot = new SignalPlot();
+    m_plot->setBufferSize(50);
+    qDebug() << "trend number:" << m_plot->addSignal(Qt::cyan);
+    qDebug() << "trend number:" << m_plot->addSignal(Qt::magenta);
+    setCentralWidget(m_plot);
 
     m_slcon = new SLCanOpenNode(this);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
@@ -35,13 +35,13 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     auto sdoval = m_valsHolder->addSdoValue(1, 0x2002, 1, 4);
     connect(sdoval, &SDOValue::readed, this, [this, sdoval](){
         qreal val = 0.01 * sdoval->value<int>();
-        m_trend->putSample(0, val);
-        m_trend->putSample(1, val * val);
-        QRectF boundingRect = m_trend->boundingRect();
-        m_trend->setAxisScale(QwtAxis::XBottom, boundingRect.left(), boundingRect.right());
-        m_trend->setBaseLine(boundingRect.top() - boundingRect.height());
+        m_plot->putSample(0, val);
+        m_plot->putSample(1, val * val);
+        QRectF boundingRect = m_plot->boundingRect();
+        m_plot->setAxisScale(QwtAxis::XBottom, boundingRect.left(), boundingRect.right());
+        m_plot->setBaseLine(boundingRect.top() - boundingRect.height());
 
-        m_trend->replot();
+        m_plot->replot();
     });
 }
 
@@ -51,7 +51,7 @@ CanOpenWin::~CanOpenWin()
     m_slcon->closePort();
     delete m_valsHolder;
     delete m_slcon;
-    delete m_trend;
+    delete m_plot;
     delete ui;
 }
 

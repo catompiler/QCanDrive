@@ -45,6 +45,8 @@ SOURCES += \
     sdocomm.cpp \
     sdovalue.cpp \
     sequentialbuffer.cpp \
+    signalplot.cpp \
+    signalseriesdata.cpp \
     slcan/slcan.c \
     slcan/slcan_can_ext_fifo.c \
     slcan/slcan_can_fifo.c \
@@ -56,9 +58,7 @@ SOURCES += \
     slcan/slcan_resp_out_fifo.c \
     slcan/slcan_slave.c \
     slcan_port_qt.cpp \
-    slcanopennode.cpp \
-    trendplot.cpp \
-    trendseriesdata.cpp
+    slcanopennode.cpp
 
 HEADERS += \
     CANopenNode/301/CO_Emergency.h \
@@ -87,6 +87,8 @@ HEADERS += \
     sdocomm_data.h \
     sdovalue.h \
     sequentialbuffer.h \
+    signalplot.h \
+    signalseriesdata.h \
     slcan/slcan.h \
     slcan/slcan_can_ext_fifo.h \
     slcan/slcan_can_fifo.h \
@@ -107,9 +109,7 @@ HEADERS += \
     slcan/slcan_utils.h \
     slcan_conf.h \
     slcan_port_qt.h \
-    slcanopennode.h \
-    trendplot.h \
-    trendseriesdata.h
+    slcanopennode.h
 
 FORMS += \
     canopenwin.ui

@@ -1,5 +1,5 @@
-#ifndef TRENDPLOT_H
-#define TRENDPLOT_H
+#ifndef SIGNALPLOT_H
+#define SIGNALPLOT_H
 
 #include <QwtPlot>
 #include <QVector>
@@ -13,13 +13,13 @@ class QwtPlotCurve;
 class SequentialBuffer;
 
 
-class TrendPlot : public QwtPlot
+class SignalPlot : public QwtPlot
 {
     Q_OBJECT
 public:
 
-    TrendPlot(QWidget* parent = nullptr);
-    ~TrendPlot();
+    SignalPlot(QWidget* parent = nullptr);
+    ~SignalPlot();
 
     size_t bufferSize() const;
     void setBufferSize(size_t newSize);
@@ -31,9 +31,9 @@ public:
     void setBackground(const QBrush& newBrush);
 
     // takes ownership of the newBuffer
-    int addTrend(const QColor& newColor = QColor(), const qreal& z = -1, SequentialBuffer* newBuffer = nullptr);
-    void removeTrend(int n);
-    int trendsCount() const;
+    int addSignal(const QColor& newColor = QColor(), const qreal& z = -1, SequentialBuffer* newBuffer = nullptr);
+    void removeSignal(int n);
+    int signalsCount() const;
 
     QwtPlotCurve::CurveStyle curveStyle(int n) const;
     void setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle);
@@ -61,4 +61,4 @@ protected:
     const QwtPlotCurve* getCurve(int n) const;
 };
 
-#endif // TRENDPLOT_H
+#endif // SIGNALPLOT_H

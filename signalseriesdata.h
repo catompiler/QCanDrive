@@ -1,5 +1,5 @@
-#ifndef TRENDSERIESDATA_H
-#define TRENDSERIESDATA_H
+#ifndef SIGNALSERIESDATA_H
+#define SIGNALSERIESDATA_H
 
 
 #include <QwtSeriesData>
@@ -9,11 +9,11 @@
 class SequentialBuffer;
 
 
-class TrendSeriesData : public QwtSeriesData<QPointF>
+class SignalSeriesData : public QwtSeriesData<QPointF>
 {
 public:
-    TrendSeriesData(SequentialBuffer* newBuffer = nullptr);
-    ~TrendSeriesData();
+    SignalSeriesData(SequentialBuffer* newBuffer = nullptr);
+    ~SignalSeriesData();
 
     SequentialBuffer* buffer();
     const SequentialBuffer* buffer() const;
@@ -32,4 +32,4 @@ private:
     SequentialBuffer* m_buffer;
 };
 
-#endif // TRENDSERIESDATA_H
+#endif // SIGNALSERIESDATA_H

@@ -1,4 +1,4 @@
-#include "trendplot.h"
+#include "signalplot.h"
 #include <QwtPlotCanvas>
 #include <QwtPlotCurve>
 #include <QwtPlotItem>
@@ -6,7 +6,7 @@
 #include <QwtSeriesData>
 #include <QwtScaleEngine>
 #include "sequentialbuffer.h"
-#include "trendseriesdata.h"
+#include "signalseriesdata.h"
 #include <QDebug>
 
 const Qt::GlobalColor m_colors[] = {
@@ -31,7 +31,7 @@ const Qt::GlobalColor m_colors[] = {
 
 const int ColorsCount = static_cast<int>(sizeof(m_colors) / sizeof(m_colors[0]));
 
-TrendPlot::TrendPlot(QWidget* parent)
+SignalPlot::SignalPlot(QWidget* parent)
     :QwtPlot(parent)
 {
     m_size = 0;
@@ -56,17 +56,17 @@ TrendPlot::TrendPlot(QWidget* parent)
     setAxisAutoScale(QwtAxis::YLeft, true);
 }
 
-TrendPlot::~TrendPlot()
+SignalPlot::~SignalPlot()
 {
 
 }
 
-size_t TrendPlot::bufferSize() const
+size_t SignalPlot::bufferSize() const
 {
     return m_size;
 }
 
-void TrendPlot::setBufferSize(size_t newSize)
+void SignalPlot::setBufferSize(size_t newSize)
 {
     m_size = newSize;
 
@@ -74,34 +74,34 @@ void TrendPlot::setBufferSize(size_t newSize)
 
     for(auto& item: items){
         auto curv = static_cast<QwtPlotCurve*>(item);
-        auto trendData = static_cast<TrendSeriesData*>(curv->data());
+        auto trendData = static_cast<SignalSeriesData*>(curv->data());
         trendData->setBufferSize(newSize);
     }
 }
 
-qreal TrendPlot::defaultAlpha() const
+qreal SignalPlot::defaultAlpha() const
 {
     return m_defaultAlpha;
 }
 
-void TrendPlot::setDefaultAlpha(qreal newDefaultAlpha)
+void SignalPlot::setDefaultAlpha(qreal newDefaultAlpha)
 {
     m_defaultAlpha = newDefaultAlpha;
 }
 
-QBrush TrendPlot::background() const
+QBrush SignalPlot::background() const
 {
     return canvasBackground();
 }
 
-void TrendPlot::setBackground(const QBrush& newBrush)
+void SignalPlot::setBackground(const QBrush& newBrush)
 {
     setCanvasBackground(newBrush);
 }
 
-int TrendPlot::addTrend(const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)
+int SignalPlot::addSignal(const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)
 {
-    int curvesCount = trendsCount();
+    int curvesCount = signalsCount();
 
     QwtPlotCurve* newCurve = new QwtPlotCurve();
     if(z < 0){
@@ -142,13 +142,13 @@ int TrendPlot::addTrend(const QColor& newColor, const qreal& z, SequentialBuffer
     newCurve->setPen(curvePen);
     newCurve->setBrush(curveBrush);
     newCurve->setRenderHint(QwtPlotItem::RenderAntialiased);
-    newCurve->setSamples(new TrendSeriesData(curveBuffer));
+    newCurve->setSamples(new SignalSeriesData(curveBuffer));
     newCurve->attach(this);
 
     return curvesCount;
 }
 
-void TrendPlot::removeTrend(int n)
+void SignalPlot::removeSignal(int n)
 {
     if(n == -1){
         detachItems(QwtPlotItem::Rtti_PlotCurve, true);
@@ -162,12 +162,12 @@ void TrendPlot::removeTrend(int n)
     curv->detach();
 }
 
-int TrendPlot::trendsCount() const
+int SignalPlot::signalsCount() const
 {
     return itemList(QwtPlotItem::Rtti_PlotCurve).count();
 }
 
-QwtPlotCurve::CurveStyle TrendPlot::curveStyle(int n) const
+QwtPlotCurve::CurveStyle SignalPlot::curveStyle(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -176,7 +176,7 @@ QwtPlotCurve::CurveStyle TrendPlot::curveStyle(int n) const
     return curv->style();
 }
 
-void TrendPlot::setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle)
+void SignalPlot::setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -185,7 +185,7 @@ void TrendPlot::setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle)
     curv->setStyle(newStyle);
 }
 
-QPen TrendPlot::pen(int n) const
+QPen SignalPlot::pen(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -194,7 +194,7 @@ QPen TrendPlot::pen(int n) const
     return curv->pen();
 }
 
-void TrendPlot::setPen(int n, const QPen& newPen)
+void SignalPlot::setPen(int n, const QPen& newPen)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -203,7 +203,7 @@ void TrendPlot::setPen(int n, const QPen& newPen)
     curv->setPen(newPen);
 }
 
-QBrush TrendPlot::brush(int n) const
+QBrush SignalPlot::brush(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -212,7 +212,7 @@ QBrush TrendPlot::brush(int n) const
     return curv->brush();
 }
 
-void TrendPlot::setBrush(int n, const QBrush& newBrush)
+void SignalPlot::setBrush(int n, const QBrush& newBrush)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -221,7 +221,7 @@ void TrendPlot::setBrush(int n, const QBrush& newBrush)
     curv->setBrush(newBrush);
 }
 
-qreal TrendPlot::baseLine(int n) const
+qreal SignalPlot::baseLine(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -230,7 +230,7 @@ qreal TrendPlot::baseLine(int n) const
     return curv->baseline();
 }
 
-void TrendPlot::setBaseLine(int n, qreal newBaseLine)
+void SignalPlot::setBaseLine(int n, qreal newBaseLine)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -239,14 +239,14 @@ void TrendPlot::setBaseLine(int n, qreal newBaseLine)
     curv->setBaseline(newBaseLine);
 }
 
-void TrendPlot::setBaseLine(qreal newBaseLine)
+void SignalPlot::setBaseLine(qreal newBaseLine)
 {
-    for(int i = 0; i < trendsCount(); i ++){
+    for(int i = 0; i < signalsCount(); i ++){
         setBaseLine(i, newBaseLine);
     }
 }
 
-QRectF TrendPlot::boundingRect(int n) const
+QRectF SignalPlot::boundingRect(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -255,7 +255,7 @@ QRectF TrendPlot::boundingRect(int n) const
     return curv->dataRect();
 }
 
-QRectF TrendPlot::boundingRect() const
+QRectF SignalPlot::boundingRect() const
 {
     QRectF resRect;
 
@@ -263,7 +263,7 @@ QRectF TrendPlot::boundingRect() const
 
     for(auto& item: items){
         auto curv = static_cast<QwtPlotCurve*>(item);
-        auto trendData = static_cast<TrendSeriesData*>(curv->data());
+        auto trendData = static_cast<SignalSeriesData*>(curv->data());
 
         QRectF rect = trendData->boundingRect();
 
@@ -273,18 +273,18 @@ QRectF TrendPlot::boundingRect() const
     return resRect;
 }
 
-void TrendPlot::putSample(int n, const qreal& newY, const qreal& newDx)
+void SignalPlot::putSample(int n, const qreal& newY, const qreal& newDx)
 {
     QwtPlotCurve* curv = getCurve(n);
 
     if(curv == nullptr) return;
 
-    auto trendData = static_cast<TrendSeriesData*>(curv->data());
+    auto trendData = static_cast<SignalSeriesData*>(curv->data());
 
     trendData->putSample(newY, newDx);
 }
 
-QwtPlotCurve* TrendPlot::getCurve(int n)
+QwtPlotCurve* SignalPlot::getCurve(int n)
 {
     auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
@@ -293,7 +293,7 @@ QwtPlotCurve* TrendPlot::getCurve(int n)
     return static_cast<QwtPlotCurve*>(items.at(n));
 }
 
-const QwtPlotCurve* TrendPlot::getCurve(int n) const
+const QwtPlotCurve* SignalPlot::getCurve(int n) const
 {
     auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
