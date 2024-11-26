@@ -17,26 +17,12 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 {
     ui->setupUi(this);
 
-    SequentialBuffer* buf = new SequentialBuffer();
-    buf->setSamplingPeriod(1.0);
-    buf->setSize(10);
-    buf->setAddressingMode(SequentialBuffer::CIRCULAR);
-
-    SequentialBuffer* buf2 = new SequentialBuffer();
-    buf2->setSamplingPeriod(1.0);
-    buf2->setSize(10);
-    buf2->setAddressingMode(SequentialBuffer::CIRCULAR);
-
-    connect(this, &CanOpenWin::destroyed, this, [buf, buf2](){
-        delete buf;
-        delete buf2;
-    });
-
     m_trend = new TrendPlot();
-    qDebug() << "trend number:" << m_trend->addTrend(buf, 10);
-    qDebug() << "trend number:" << m_trend->addTrend(buf2, 5);
-    m_trend->setBrush(0, Qt::red);
-    m_trend->setBrush(1, Qt::blue);
+    m_trend->setBufferSize(50);
+    m_trend->setDefaultAlpha(0.5);
+    m_trend->setBackground(Qt::darkGray);
+    qDebug() << "trend number:" << m_trend->addTrend(Qt::cyan);
+    qDebug() << "trend number:" << m_trend->addTrend(Qt::magenta);
     setCentralWidget(m_trend);
 
     m_slcon = new SLCanOpenNode(this);
@@ -44,34 +30,27 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
 
     m_valsHolder = new CoValuesHolder(m_slcon);
-    m_valsHolder->setUpdateInterval(100);
+    m_valsHolder->setUpdateInterval(0);
     connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
 
     auto sdoval = m_valsHolder->addSdoValue(1, 0x2002, 1, 4);
-    connect(sdoval, &SDOValue::readed, this, [this, sdoval, buf, buf2](){
+    connect(sdoval, &SDOValue::readed, this, [this, sdoval](){
         qreal val = 0.01 * sdoval->value<int>();
-        buf->put(val);
-        buf2->put(val * val);
-        qDebug() << val;
-        qDebug() << buf->boundingRect();
-        m_trend->setAxisScale( QwtAxis::XBottom, buf->boundingRect().left(), buf->boundingRect().right());
-        qreal minVal = 0.0;
-        for(int i = 0; i < m_trend->trendsCount(); i ++){
-            qreal val = m_trend->boundingRect(i).top() - m_trend->boundingRect(i).height();
-            if(i == 0) minVal = val;
-            minVal = std::min(minVal, val);
-        }
-        qDebug() << "baseline" << minVal;
-        for(int i = 0; i < m_trend->trendsCount(); i ++){
-            m_trend->setBaseLine(i, minVal);
-        }
+        m_trend->putSample(0, val);
+        m_trend->putSample(1, val * val);
+        QRectF boundingRect = m_trend->boundingRect();
+        m_trend->setAxisScale(QwtAxis::XBottom, boundingRect.left(), boundingRect.right());
+        m_trend->setBaseLine(boundingRect.top() - boundingRect.height());
+
         m_trend->replot();
     });
 }
 
 CanOpenWin::~CanOpenWin()
 {
+    m_slcon->destroyCO();
+    m_slcon->closePort();
     delete m_valsHolder;
     delete m_slcon;
     delete m_trend;

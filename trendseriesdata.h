@@ -12,19 +12,24 @@ class SequentialBuffer;
 class TrendSeriesData : public QwtSeriesData<QPointF>
 {
 public:
-    TrendSeriesData(const SequentialBuffer* newBuffer = nullptr);
+    TrendSeriesData(SequentialBuffer* newBuffer = nullptr);
     ~TrendSeriesData();
 
-    //SequentialBuffer* buffer();
+    SequentialBuffer* buffer();
     const SequentialBuffer* buffer() const;
-    void setBuffer(const SequentialBuffer* newBuffer);
+    void setBuffer(SequentialBuffer* newBuffer);
 
     size_t size() const override;
+    size_t bufferSize() const;
+    void setBufferSize(size_t newSize);
+
     QPointF sample(size_t i) const override;
     QRectF boundingRect() const override;
 
+    void putSample(const qreal& newY, const qreal& newDx = -1);
+
 private:
-    const SequentialBuffer* m_buffer;
+    SequentialBuffer* m_buffer;
 };
 
 #endif // TRENDSERIESDATA_H
