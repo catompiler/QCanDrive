@@ -2,13 +2,13 @@
 #include "ui_canopenwin.h"
 #include "slcanopennode.h"
 #include "covaluesholder.h"
-#include "sdovalue.h"
-#include "signalplot.h"
-#include "sequentialbuffer.h"
+#include "covaluetypes.h"
+#include "sdovalueplot.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
 #include <QDebug>
+#include <QHBoxLayout>
 
 
 CanOpenWin::CanOpenWin(QWidget *parent)
@@ -17,41 +17,35 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 {
     ui->setupUi(this);
 
-    m_plot = new SignalPlot();
-    m_plot->setBufferSize(50);
-    qDebug() << "trend number:" << m_plot->addSignal(Qt::cyan);
-    qDebug() << "trend number:" << m_plot->addSignal(Qt::magenta);
-    setCentralWidget(m_plot);
-
     m_slcon = new SLCanOpenNode(this);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
     connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
 
     m_valsHolder = new CoValuesHolder(m_slcon);
-    m_valsHolder->setUpdateInterval(0);
+    m_valsHolder->setUpdateInterval(100);
     connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
 
-    auto sdoval = m_valsHolder->addSdoValue(1, 0x2002, 1, 4);
-    connect(sdoval, &SDOValue::readed, this, [this, sdoval](){
-        qreal val = 0.01 * sdoval->value<int>();
-        m_plot->putSample(0, val);
-        m_plot->putSample(1, val * val);
-        QRectF boundingRect = m_plot->boundingRect();
-        m_plot->setAxisScale(QwtAxis::XBottom, boundingRect.left(), boundingRect.right());
-        m_plot->setBaseLine(boundingRect.top() - boundingRect.height());
-
-        m_plot->replot();
-    });
+    m_plot = new SDOValuePlot[2];
+    m_plot[0].setValuesHolder(m_valsHolder);
+    m_plot[0].setBufferSize(100);
+    m_plot[0].addSDOValue(1, 0x2002, 1, COValue::I32, Qt::blue, 1);
+    m_plot[1].setValuesHolder(m_valsHolder);
+    m_plot[1].setBufferSize(100);
+    m_plot[1].addSDOValue(1, 0x2002, 2, COValue::I32, Qt::red, 2);
+    QHBoxLayout* lay = new QHBoxLayout();
+    lay->addWidget(&m_plot[0]);
+    lay->addWidget(&m_plot[1]);
+    centralWidget()->setLayout(lay);
 }
 
 CanOpenWin::~CanOpenWin()
 {
     m_slcon->destroyCO();
     m_slcon->closePort();
+    delete[] m_plot;
     delete m_valsHolder;
     delete m_slcon;
-    delete m_plot;
     delete ui;
 }
 

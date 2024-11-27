@@ -54,6 +54,10 @@ SignalPlot::SignalPlot(QWidget* parent)
     setAxisScale(QwtAxis::YLeft, 0.0, 1.0);
     setAxisAutoScale(QwtAxis::XBottom, true);
     setAxisAutoScale(QwtAxis::YLeft, true);
+
+    if(auto scaleEng = axisScaleEngine(QwtAxis::XBottom)){
+        scaleEng->setAttribute(QwtScaleEngine::Floating);
+    }
 }
 
 SignalPlot::~SignalPlot()
@@ -280,6 +284,8 @@ void SignalPlot::putSample(int n, const qreal& newY, const qreal& newDx)
     if(curv == nullptr) return;
 
     auto trendData = static_cast<SignalSeriesData*>(curv->data());
+
+    //qDebug() << newY << newDx;
 
     trendData->putSample(newY, newDx);
 }

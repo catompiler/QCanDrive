@@ -11,6 +11,7 @@ CoValuesHolder::CoValuesHolder(SLCanOpenNode* slcon, QObject *parent)
     m_updateTimer = new QTimer();
     m_updateTimer->setInterval(500);
     m_updateTimer->setSingleShot(false);
+    m_updatingEnabled = false;
     connect(m_updateTimer, &QTimer::timeout, this, &CoValuesHolder::update);
 }
 
@@ -127,6 +128,8 @@ CoValuesHolder::HoldedSDOValuePtr CoValuesHolder::getSDOValue(CO::NodeId valNode
 
 void CoValuesHolder::update()
 {
+    emit updateBegin();
+
     for(auto it = m_sdoValues.begin(); it != m_sdoValues.end(); ){
         SDOValue* sdoval = it->first;
         uint count = it->second;

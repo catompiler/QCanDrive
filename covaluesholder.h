@@ -40,6 +40,9 @@ public:
     T value(CO::NodeId valNodeId, CO::Index valIndex, CO::SubIndex valSubIndex,
             const T& defVal = T(), bool* isOk = nullptr) const;
 
+signals:
+    void updateBegin();
+
 public slots:
     void update();
     void enableUpdating();
