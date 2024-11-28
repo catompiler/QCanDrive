@@ -5,8 +5,8 @@
 
 
 
-SDOValuePlot::SDOValuePlot(CoValuesHolder* valsHolder, QWidget* parent)
-    :SignalPlot(parent)
+SDOValuePlot::SDOValuePlot(const QString& newName, CoValuesHolder* valsHolder, QWidget* parent)
+    :SignalPlot(newName, parent)
 {
     m_valsHolder = nullptr;
     setValuesHolder(valsHolder);
@@ -37,8 +37,8 @@ void SDOValuePlot::setValuesHolder(CoValuesHolder* newValuesHolder)
     }
 }
 
-bool SDOValuePlot::addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex,
-                               const std::variant<COValue::Type, size_t>& sizeOrType, const QColor& newColor, const qreal& z)
+bool SDOValuePlot::addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, const std::variant<COValue::Type, size_t>& sizeOrType,
+                               const QString& newName, const QColor& newColor, const qreal& z)
 {
     if(m_valsHolder == nullptr) return false;
 
@@ -50,7 +50,7 @@ bool SDOValuePlot::addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::Sub
     }
     if(typeSize == 0) return false;
 
-    int signal_num = addSignal(newColor, z);
+    int signal_num = addSignal(newName, newColor, z);
     if(signal_num == -1) return false;
 
     auto sdoValPtr = m_valsHolder->addSdoValue(newNodeId, newIndex, newSubIndex, typeSize);

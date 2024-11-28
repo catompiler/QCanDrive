@@ -60,6 +60,12 @@ QRectF SignalSeriesData::boundingRect() const
     return m_buffer->boundingRect();
 }
 
+void SignalSeriesData::clear()
+{
+    if(m_buffer == nullptr) return;
+    m_buffer->clear();
+}
+
 void SignalSeriesData::putSample(const qreal& newY, const qreal& newDx)
 {
     if(m_buffer == nullptr) return;

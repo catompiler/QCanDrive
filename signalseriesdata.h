@@ -26,6 +26,8 @@ public:
     QPointF sample(size_t i) const override;
     QRectF boundingRect() const override;
 
+    void clear();
+
     void putSample(const qreal& newY, const qreal& newDx = -1);
 
 private:

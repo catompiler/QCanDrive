@@ -27,12 +27,16 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
 
     m_plot = new SDOValuePlot[2];
+    m_plot[0].setTitle("Sine");
     m_plot[0].setValuesHolder(m_valsHolder);
     m_plot[0].setBufferSize(100);
-    m_plot[0].addSDOValue(1, 0x2002, 1, COValue::I32, Qt::blue, 1);
+    m_plot[0].addSDOValue(1, 0x2002, 1, COValue::I32, "Value", Qt::blue, 1);
+    connect(m_slcon, &SLCanOpenNode::connected, &m_plot[0], &SDOValuePlot::clear);
+    m_plot[1].setTitle("JAS");
     m_plot[1].setValuesHolder(m_valsHolder);
     m_plot[1].setBufferSize(100);
-    m_plot[1].addSDOValue(1, 0x2002, 2, COValue::I32, Qt::red, 2);
+    m_plot[1].addSDOValue(1, 0x2002, 2, COValue::I32, "", Qt::red, 2);
+    connect(m_slcon, &SLCanOpenNode::connected, &m_plot[1], &SDOValuePlot::clear);
     QHBoxLayout* lay = new QHBoxLayout();
     lay->addWidget(&m_plot[0]);
     lay->addWidget(&m_plot[1]);
@@ -59,6 +63,8 @@ void CanOpenWin::on_actQuit_triggered(bool checked)
 void CanOpenWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked)
+
+    qDebug() << m_plot[0].size() << m_plot[0].sizeHint() << m_plot[0].sizePolicy() << m_plot[0].minimumSizeHint() << m_plot[0].minimumSize();
 }
 
 void CanOpenWin::on_actConnect_triggered(bool checked)

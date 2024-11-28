@@ -33,11 +33,15 @@ const Qt::GlobalColor m_colors[] = {
 
 const int ColorsCount = static_cast<int>(sizeof(m_colors) / sizeof(m_colors[0]));
 
-SignalPlot::SignalPlot(QWidget* parent)
+SignalPlot::SignalPlot(const QString& newName, QWidget* parent)
     :QwtPlot(parent)
 {
+    setTitle(newName);
+
     m_size = 0;
     m_defaultAlpha = 0.75;
+
+    setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored );
 
     setAutoDelete(true);
 
@@ -56,6 +60,8 @@ SignalPlot::SignalPlot(QWidget* parent)
     setAxisScale(QwtAxis::YLeft, 0.0, 1.0);
     setAxisAutoScale(QwtAxis::XBottom, true);
     setAxisAutoScale(QwtAxis::YLeft, true);
+    setAxisMaxMajor(QwtAxis::XBottom, 3);
+    setAxisMaxMajor(QwtAxis::YLeft, 3);
 
     if(auto scaleEng = axisScaleEngine(QwtAxis::XBottom)){
         scaleEng->setAttribute(QwtScaleEngine::Floating);
@@ -120,11 +126,21 @@ void SignalPlot::setBackground(const QBrush& newBrush)
     setCanvasBackground(newBrush);
 }
 
-int SignalPlot::addSignal(const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)
+QString SignalPlot::name() const
+{
+    return title().text();
+}
+
+void SignalPlot::setName(const QString& newName)
+{
+    setTitle(newName);
+}
+
+int SignalPlot::addSignal(const QString& newName, const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)
 {
     int curvesCount = signalsCount();
 
-    QwtPlotCurve* newCurve = new QwtPlotCurve();
+    QwtPlotCurve* newCurve = new QwtPlotCurve(newName);
     if(z < 0){
         newCurve->setZ(curvesCount);
     }else{
@@ -186,6 +202,24 @@ void SignalPlot::removeSignal(int n)
 int SignalPlot::signalsCount() const
 {
     return itemList(QwtPlotItem::Rtti_PlotCurve).count();
+}
+
+QString SignalPlot::signalName(int n) const
+{
+    const QwtPlotCurve* curv = getCurve(n);
+
+    if(curv == nullptr) return QString();
+
+    return curv->title().text();
+}
+
+void SignalPlot::setSignalName(int n, const QString& newName)
+{
+    QwtPlotCurve* curv = getCurve(n);
+
+    if(curv == nullptr) return;
+
+    curv->setTitle(newName);
 }
 
 QwtPlotCurve::CurveStyle SignalPlot::curveStyle(int n) const
@@ -292,6 +326,20 @@ QRectF SignalPlot::boundingRect() const
     }
 
     return resRect;
+}
+
+void SignalPlot::clear()
+{
+    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    for(auto& item: items){
+        auto curv = static_cast<QwtPlotCurve*>(item);
+        auto trendData = static_cast<SignalSeriesData*>(curv->data());
+
+        trendData->clear();
+    }
+
+    replot();
 }
 
 void SignalPlot::putSample(int n, const qreal& newY, const qreal& newDx)

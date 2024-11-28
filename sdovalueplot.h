@@ -17,14 +17,14 @@ class SDOValuePlot : public SignalPlot
 {
     Q_OBJECT
 public:
-    SDOValuePlot(CoValuesHolder* valsHolder = nullptr, QWidget* parent = nullptr);
+    SDOValuePlot(const QString& newName = QString(), CoValuesHolder* valsHolder = nullptr, QWidget* parent = nullptr);
     ~SDOValuePlot();
 
     CoValuesHolder* valuesHolder() const;
     void setValuesHolder(CoValuesHolder* newValuesHolder);
 
-    bool addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex,
-                     const std::variant<COValue::Type, size_t>& sizeOrType, const QColor& newColor = QColor(), const qreal& z = -1);
+    bool addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, const std::variant<COValue::Type, size_t>& sizeOrType,
+                     const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1);
     size_t SDOValuesCount() const;
     CoValuesHolder::HoldedSDOValuePtr SDOValue(size_t n) const;
     void delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval);

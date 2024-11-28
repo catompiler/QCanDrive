@@ -18,7 +18,7 @@ class SignalPlot : public QwtPlot
     Q_OBJECT
 public:
 
-    SignalPlot(QWidget* parent = nullptr);
+    SignalPlot(const QString& newName = QString(), QWidget* parent = nullptr);
     ~SignalPlot();
 
     size_t bufferSize() const;
@@ -30,10 +30,16 @@ public:
     QBrush background() const;
     void setBackground(const QBrush& newBrush);
 
+    QString name() const;
+    void setName(const QString& newName);
+
     // takes ownership of the newBuffer
-    int addSignal(const QColor& newColor = QColor(), const qreal& z = -1, SequentialBuffer* newBuffer = nullptr);
+    int addSignal(const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1, SequentialBuffer* newBuffer = nullptr);
     void removeSignal(int n);
     int signalsCount() const;
+
+    QString signalName(int n) const;
+    void setSignalName(int n, const QString& newName);
 
     QwtPlotCurve::CurveStyle curveStyle(int n) const;
     void setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle);
@@ -52,6 +58,9 @@ public:
     QRectF boundingRect() const;
 
     void putSample(int n, const qreal& newY, const qreal& newDx = -1);
+
+public slots:
+    void clear();
 
 protected:
     size_t m_size;
