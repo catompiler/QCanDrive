@@ -5,6 +5,8 @@
 #include <QwtPlotLayout>
 #include <QwtSeriesData>
 #include <QwtScaleEngine>
+#include <QwtScaleWidget>
+#include <QFontMetrics>
 #include "sequentialbuffer.h"
 #include "signalseriesdata.h"
 #include <QDebug>
@@ -46,7 +48,7 @@ SignalPlot::SignalPlot(QWidget* parent)
     }
     myCanvas->setFrameStyle(QFrame::Plain | QFrame::NoFrame);
 
-    setCanvasBackground(Qt::darkGray);
+    setCanvasBackground(Qt::darkGray); //QColor(112, 112, 112)
 
     plotLayout()->setAlignCanvasToScales(true);
 
@@ -58,6 +60,21 @@ SignalPlot::SignalPlot(QWidget* parent)
     if(auto scaleEng = axisScaleEngine(QwtAxis::XBottom)){
         scaleEng->setAttribute(QwtScaleEngine::Floating);
     }
+
+    /*
+       In situations, when there is a label at the most right position of the
+       scale, additional space is needed to display the overlapping part
+       of the label would be taken by reducing the width of scale and canvas.
+       To avoid this "jumping canvas" effect, we add a permanent margin.
+       We don't need to do the same for the left border, because there
+       is enough space for the overlapping label below the left scale.
+     */
+
+    QwtScaleWidget* scaleWidget = axisWidget( QwtAxis::XBottom );
+    const int mbd = QFontMetrics( scaleWidget->font() ).averageCharWidth();
+    scaleWidget->setMinBorderDist( 0, mbd * 2 );
+
+    setAutoReplot(false);
 }
 
 SignalPlot::~SignalPlot()
