@@ -46,6 +46,7 @@ SOURCES += \
     sdovalue.cpp \
     sdovalueplot.cpp \
     sequentialbuffer.cpp \
+    signalcurveeditdlg.cpp \
     signalplot.cpp \
     signalseriesdata.cpp \
     slcan/slcan.c \
@@ -59,7 +60,8 @@ SOURCES += \
     slcan/slcan_resp_out_fifo.c \
     slcan/slcan_slave.c \
     slcan_port_qt.cpp \
-    slcanopennode.cpp
+    slcanopennode.cpp \
+    trendploteditdlg.cpp
 
 HEADERS += \
     CANopenNode/301/CO_Emergency.h \
@@ -90,6 +92,7 @@ HEADERS += \
     sdovalue.h \
     sdovalueplot.h \
     sequentialbuffer.h \
+    signalcurveeditdlg.h \
     signalplot.h \
     signalseriesdata.h \
     slcan/slcan.h \
@@ -112,10 +115,13 @@ HEADERS += \
     slcan/slcan_utils.h \
     slcan_conf.h \
     slcan_port_qt.h \
-    slcanopennode.h
+    slcanopennode.h \
+    trendploteditdlg.h
 
 FORMS += \
-    canopenwin.ui
+    canopenwin.ui \
+    signalcurveeditdlg.ui \
+    trendploteditdlg.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

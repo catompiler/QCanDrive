@@ -12,6 +12,7 @@ class SLCanOpenNode;
 class CoValuesHolder;
 class SDOValue;
 class SDOValuePlot;
+class TrendPlotEditDlg;
 
 
 class CanOpenWin : public QMainWindow
@@ -33,8 +34,9 @@ private slots:
 private:
     Ui::CanOpenWin *ui;
     SDOValuePlot* m_plot;
-
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;
+
+    TrendPlotEditDlg* m_trendDlg;
 };
 #endif // CANOPENWIN_H

@@ -4,6 +4,7 @@
 #include "covaluesholder.h"
 #include "covaluetypes.h"
 #include "sdovalueplot.h"
+#include "trendploteditdlg.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
@@ -25,6 +26,8 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_valsHolder->setUpdateInterval(100);
     connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
+
+    m_trendDlg = new TrendPlotEditDlg();
 
     m_plot = new SDOValuePlot[2];
     m_plot[0].setTitle("Sine");
@@ -48,6 +51,7 @@ CanOpenWin::~CanOpenWin()
     m_slcon->destroyCO();
     m_slcon->closePort();
     delete[] m_plot;
+    delete m_trendDlg;
     delete m_valsHolder;
     delete m_slcon;
     delete ui;
@@ -64,7 +68,7 @@ void CanOpenWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    qDebug() << m_plot[0].size() << m_plot[0].sizeHint() << m_plot[0].sizePolicy() << m_plot[0].minimumSizeHint() << m_plot[0].minimumSize();
+    m_trendDlg->exec();
 }
 
 void CanOpenWin::on_actConnect_triggered(bool checked)
