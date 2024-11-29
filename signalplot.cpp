@@ -11,7 +11,7 @@
 #include "signalseriesdata.h"
 #include <QDebug>
 
-const Qt::GlobalColor m_colors[] = {
+static const Qt::GlobalColor m_colors[] = {
            Qt::yellow,
            Qt::green,
            Qt::red,
@@ -157,6 +157,8 @@ int SignalPlot::addSignal(const QString& newName, const QColor& newColor, const 
         if(m_size == 0) m_size = curveBuffer->size();
     }
 
+    curveBuffer->setSamplingPeriod(m_period);
+
     QColor curveColor;
     if(newColor.isValid()){
         curveColor = newColor;
@@ -220,6 +222,24 @@ void SignalPlot::setSignalName(int n, const QString& newName)
     if(curv == nullptr) return;
 
     curv->setTitle(newName);
+}
+
+qreal SignalPlot::z(int n) const
+{
+    const QwtPlotCurve* curv = getCurve(n);
+
+    if(curv == nullptr) return 0.0;
+
+    return curv->z();
+}
+
+void SignalPlot::setZ(int n, const qreal& newZ)
+{
+    QwtPlotCurve* curv = getCurve(n);
+
+    if(curv == nullptr) return;
+
+    curv->setZ(newZ);
 }
 
 QwtPlotCurve::CurveStyle SignalPlot::curveStyle(int n) const
@@ -342,6 +362,16 @@ void SignalPlot::clear()
     replot();
 }
 
+qreal SignalPlot::period() const
+{
+    return m_period;
+}
+
+void SignalPlot::setPeriod(qreal newPeriod)
+{
+    m_period = newPeriod;
+}
+
 void SignalPlot::putSample(int n, const qreal& newY, const qreal& newDx)
 {
     QwtPlotCurve* curv = getCurve(n);
@@ -353,6 +383,17 @@ void SignalPlot::putSample(int n, const qreal& newY, const qreal& newDx)
     //qDebug() << newY << newDx;
 
     trendData->putSample(newY, newDx);
+}
+
+QList<Qt::GlobalColor> SignalPlot::getDefaultColors()
+{
+    QList<Qt::GlobalColor> colors;
+
+    for(int i = 0; i < ColorsCount; i ++){
+        colors.append(m_colors[i]);
+    }
+
+    return colors;
 }
 
 QwtPlotCurve* SignalPlot::getCurve(int n)

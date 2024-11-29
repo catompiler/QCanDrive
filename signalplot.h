@@ -41,6 +41,9 @@ public:
     QString signalName(int n) const;
     void setSignalName(int n, const QString& newName);
 
+    qreal z(int n) const;
+    void setZ(int n, const qreal& newZ);
+
     QwtPlotCurve::CurveStyle curveStyle(int n) const;
     void setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle);
 
@@ -59,12 +62,18 @@ public:
 
     void putSample(int n, const qreal& newY, const qreal& newDx = -1);
 
+    static QList<Qt::GlobalColor> getDefaultColors();
+
+    qreal period() const;
+    void setPeriod(qreal newPeriod);
+
 public slots:
     void clear();
 
 protected:
     size_t m_size;
     qreal m_defaultAlpha;
+    qreal m_period;
 
     QwtPlotCurve* getCurve(int n);
     const QwtPlotCurve* getCurve(int n) const;

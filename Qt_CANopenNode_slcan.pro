@@ -47,6 +47,8 @@ SOURCES += \
     sdovalueplot.cpp \
     sequentialbuffer.cpp \
     signalcurveeditdlg.cpp \
+    signalcurveprop.cpp \
+    signalcurvepropmodel.cpp \
     signalplot.cpp \
     signalseriesdata.cpp \
     slcan/slcan.c \
@@ -93,6 +95,8 @@ HEADERS += \
     sdovalueplot.h \
     sequentialbuffer.h \
     signalcurveeditdlg.h \
+    signalcurveprop.h \
+    signalcurvepropmodel.h \
     signalplot.h \
     signalseriesdata.h \
     slcan/slcan.h \

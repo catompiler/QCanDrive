@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
-    <height>322</height>
+    <width>357</width>
+    <height>286</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,8 +53,17 @@
       </item>
       <item row="1" column="1">
        <widget class="QSpinBox" name="sbIndex">
+        <property name="prefix">
+         <string>0x</string>
+        </property>
         <property name="maximum">
-         <number>255</number>
+         <number>65535</number>
+        </property>
+        <property name="value">
+         <number>8192</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
         </property>
        </widget>
       </item>
@@ -110,7 +119,7 @@
      <property name="title">
       <string>Ручка</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
+     <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
        <widget class="QLabel" name="lblPenColor">
         <property name="text">
@@ -120,11 +129,11 @@
       </item>
       <item row="0" column="1">
        <widget class="QFrame" name="frPenColor">
-        <property name="frameShape">
-         <enum>QFrame::Box</enum>
+        <property name="autoFillBackground">
+         <bool>true</bool>
         </property>
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
         </property>
        </widget>
       </item>
@@ -142,35 +151,8 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="1" column="1" colspan="2">
        <widget class="QComboBox" name="cbPenStyle"/>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblPenTransp">
-        <property name="text">
-         <string>Прозрачность</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSlider" name="slPenTransp">
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="lblPenTranspVal">
-        <property name="text">
-         <string>100%</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
@@ -180,38 +162,31 @@
      <property name="title">
       <string>Кисть</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblBrushTransp">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblBrushColor">
         <property name="text">
-         <string>Прозрачность</string>
+         <string>Цвет</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QFrame" name="frBrushColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
         <property name="frameShape">
-         <enum>QFrame::Box</enum>
+         <enum>QFrame::Panel</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Plain</enum>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="cbBrushStyle"/>
-      </item>
       <item row="0" column="2">
        <widget class="QToolButton" name="tbBrushColorSel">
         <property name="text">
          <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="lblBrushTranspVal">
-        <property name="text">
-         <string>100%</string>
         </property>
        </widget>
       </item>
@@ -222,25 +197,8 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblBrushColor">
-        <property name="text">
-         <string>Цвет</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSlider" name="slBrushTransp">
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
+      <item row="1" column="1" colspan="2">
+       <widget class="QComboBox" name="cbBrushStyle"/>
       </item>
      </layout>
     </widget>
