@@ -18,8 +18,13 @@ CoValuesHolder::CoValuesHolder(SLCanOpenNode* slcon, QObject *parent)
 CoValuesHolder::~CoValuesHolder()
 {
     for(auto it = m_sdoValues.begin(); it != m_sdoValues.end(); ++ it){
-        delete it->first;
+        if(it->second == 0){
+            delete it->first;
+        }else{
+            it->first->deleteLater();
+        }
     }
+    m_sdoValues.clear();
     delete m_updateTimer;
 }
 
@@ -74,7 +79,10 @@ CoValuesHolder::HoldedSDOValuePtr CoValuesHolder::addSdoValue(CO::NodeId valNode
 
     auto it = m_sdoValues.find(valFullIndex);
 
-    if(it != m_sdoValues.end()) return HoldedSDOValuePtr(it->first);
+    if(it != m_sdoValues.end()){
+        it->second ++;
+        return HoldedSDOValuePtr(it->first);
+    }
 
     SDOValue* sdoval = new SDOValue(m_slcon);
     sdoval->setNodeId(valNodeId);

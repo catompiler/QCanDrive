@@ -8,6 +8,8 @@ namespace Ui { class CanOpenWin; }
 QT_END_NAMESPACE
 
 
+class QMenu;
+class QPoint;
 class QGridLayout;
 class SLCanOpenNode;
 class CoValuesHolder;
@@ -30,6 +32,8 @@ private slots:
     void on_actDebugExec_triggered(bool checked);
     void on_actConnect_triggered(bool checked);
     void on_actDisconnect_triggered(bool checked);
+    void on_actAddPlot_triggered(bool checked);
+    void on_actEditPlot_triggered(bool checked);
 
     void CANopen_connected();
     void CANopen_disconnected();
@@ -39,10 +43,13 @@ private:
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;
     QGridLayout* m_layout;
+    QMenu* m_plotsMenu;
 
     int m_updIntervalms;
 
     TrendPlotEditDlg* m_trendDlg;
     SignalCurveEditDlg* m_signalCurveEditDlg;
+
+    void showPlotContextMenu(const QPoint& pos);
 };
 #endif // CANOPENWIN_H

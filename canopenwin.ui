@@ -34,8 +34,15 @@
      <string>&amp;Соединение</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>&amp;Добавить</string>
+    </property>
+    <addaction name="actAddPlot"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -95,6 +102,22 @@
    </property>
    <property name="text">
     <string>В&amp;ыход</string>
+   </property>
+  </action>
+  <action name="actAddPlot">
+   <property name="text">
+    <string>&amp;График</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить график</string>
+   </property>
+  </action>
+  <action name="actEditPlot">
+   <property name="text">
+    <string>&amp;Редактировать</string>
+   </property>
+   <property name="toolTip">
+    <string>Редактировать график</string>
    </property>
   </action>
  </widget>

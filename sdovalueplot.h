@@ -23,12 +23,13 @@ public:
     CoValuesHolder* valuesHolder() const;
     void setValuesHolder(CoValuesHolder* newValuesHolder);
 
-    bool addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, const std::variant<COValue::Type, size_t>& sizeOrType,
+    bool addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type type,
                      const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1);
-    size_t SDOValuesCount() const;
-    CoValuesHolder::HoldedSDOValuePtr SDOValue(size_t n) const;
+    int SDOValuesCount() const;
+    CoValuesHolder::HoldedSDOValuePtr SDOValue(int n) const;
     void delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval);
-    int SDOValueSignalNumber(size_t n) const;
+    COValue::Type SDValueType(int n) const;
+    int SDOValueSignalNumber(int n) const;
 
 private slots:
     void sdovalueReaded();
@@ -40,7 +41,7 @@ protected:
     struct SDOValItem{
         CoValuesHolder::HoldedSDOValuePtr sdoval;
         bool readed;
-        std::variant<COValue::Type, size_t> sizeOrType;
+        COValue::Type type;
         int signal_num;
         QElapsedTimer elapsedTimer;
     };

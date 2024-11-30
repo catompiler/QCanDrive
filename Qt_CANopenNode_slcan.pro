@@ -98,6 +98,7 @@ HEADERS += \
     signalcurveprop.h \
     signalcurvepropmodel.h \
     signalplot.h \
+    signalplotprop.h \
     signalseriesdata.h \
     slcan/slcan.h \
     slcan/slcan_can_ext_fifo.h \
