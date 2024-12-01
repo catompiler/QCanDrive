@@ -75,6 +75,7 @@ protected:
     qreal m_defaultAlpha;
     qreal m_period;
 
+    int findCurve(const QwtPlotCurve* findCurv) const;
     QwtPlotCurve* getCurve(int n);
     const QwtPlotCurve* getCurve(int n) const;
 };

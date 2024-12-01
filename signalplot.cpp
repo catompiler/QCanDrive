@@ -396,6 +396,20 @@ QList<Qt::GlobalColor> SignalPlot::getDefaultColors()
     return colors;
 }
 
+int SignalPlot::findCurve(const QwtPlotCurve* findCurv) const
+{
+    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    int n = 0;
+    for(auto& item: items){
+        const auto& curv = static_cast<const QwtPlotCurve*>(item);
+        if(curv == findCurv) return n;
+        n ++;
+    }
+
+    return -1;
+}
+
 QwtPlotCurve* SignalPlot::getCurve(int n)
 {
     auto items = itemList(QwtPlotItem::Rtti_PlotCurve);

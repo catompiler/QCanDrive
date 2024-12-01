@@ -56,7 +56,7 @@ bool SDOValuePlot::addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::Sub
         return false;
     }
 
-    m_sdoValues.append({sdoValPtr, true, type, signal_num, QElapsedTimer()});
+    m_sdoValues.append({sdoValPtr, true, type, QElapsedTimer()});
 
     connect(sdoValPtr, &SDOValue::readed, this, &SDOValuePlot::sdovalueReaded);
 
@@ -75,11 +75,24 @@ CoValuesHolder::HoldedSDOValuePtr SDOValuePlot::SDOValue(int n) const
     return m_sdoValues[n].sdoval;
 }
 
+void SDOValuePlot::delSDOValue(int n)
+{
+    if(n < 0 || n >= m_sdoValues.size()) return;
+
+    auto& item  = m_sdoValues[n];
+
+    removeSignal(n);
+
+    disconnect(item.sdoval, &SDOValue::readed, this, &SDOValuePlot::sdovalueReaded);
+    m_valsHolder->delSdoValue(item.sdoval);
+
+    m_sdoValues.removeAt(n);
+}
+
 void SDOValuePlot::delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval)
 {
     if(auto it = std::find_if(m_sdoValues.begin(), m_sdoValues.end(), [sdoval](const auto& val){ return val.sdoval == sdoval; }); it != m_sdoValues.end()){
-        m_valsHolder->delSdoValue(it->sdoval);
-        m_sdoValues.erase(it);
+        delSDOValue(std::distance(m_sdoValues.begin(), it));
     }
 }
 
@@ -88,13 +101,6 @@ COValue::Type SDOValuePlot::SDValueType(int n) const
     if(n < 0 || n >= m_sdoValues.size()) return COValue::Type();
 
     return m_sdoValues[n].type;
-}
-
-int SDOValuePlot::SDOValueSignalNumber(int n) const
-{
-    if(n < 0 || n >= m_sdoValues.size()) return -1;
-
-    return m_sdoValues[n].signal_num;
 }
 
 void SDOValuePlot::sdovalueReaded()
@@ -109,7 +115,7 @@ void SDOValuePlot::sdovalueReaded()
     }
 
     if(it != m_sdoValues.end()){
-        putValue(&(*it));
+        putValue(n);
         it->elapsedTimer.start();
         it->readed = true;
     }
@@ -118,9 +124,10 @@ void SDOValuePlot::sdovalueReaded()
 void SDOValuePlot::sdovalsUpdating()
 {
     //qDebug() << "sdovalsUpdating";
-    for(auto it = m_sdoValues.begin(); it != m_sdoValues.end(); ++ it){
+    int n = 0;
+    for(auto it = m_sdoValues.begin(); it != m_sdoValues.end(); ++ it, n ++){
         if(!it->readed){
-            putValue(&(*it));
+            putValue(n);
             it->elapsedTimer.start();
         }
         it->readed = false;
@@ -129,9 +136,10 @@ void SDOValuePlot::sdovalsUpdating()
     replot();
 }
 
-void SDOValuePlot::putValue(SDOValItem* sdoItem)
+void SDOValuePlot::putValue(int n)
 {
+    SDOValItem& sdoItem = m_sdoValues[n];
     qreal dt = 0.0;
-    if(sdoItem->elapsedTimer.isValid()) dt = static_cast<qreal>(sdoItem->elapsedTimer.elapsed()) / 1000;
-    putSample(sdoItem->signal_num, COValue::valueAs<qreal>(sdoItem->sdoval->data(), sdoItem->type, 0.0), dt);
+    if(sdoItem.elapsedTimer.isValid()) dt = static_cast<qreal>(sdoItem.elapsedTimer.elapsed()) / 1000;
+    putSample(n, COValue::valueAs<qreal>(sdoItem.sdoval->data(), sdoItem.type, 0.0), dt);
 }

@@ -27,9 +27,9 @@ public:
                      const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1);
     int SDOValuesCount() const;
     CoValuesHolder::HoldedSDOValuePtr SDOValue(int n) const;
+    void delSDOValue(int n);
     void delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval);
     COValue::Type SDValueType(int n) const;
-    int SDOValueSignalNumber(int n) const;
 
 private slots:
     void sdovalueReaded();
@@ -42,13 +42,12 @@ protected:
         CoValuesHolder::HoldedSDOValuePtr sdoval;
         bool readed;
         COValue::Type type;
-        int signal_num;
         QElapsedTimer elapsedTimer;
     };
 
     QList<SDOValItem> m_sdoValues;
 
-    void putValue(SDOValItem* sdoItem);
+    void putValue(int n);
 };
 
 #endif // SDOVALUEPLOT_H

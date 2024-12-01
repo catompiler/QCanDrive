@@ -28,7 +28,7 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     centralWidget()->setLayout(m_layout);
 
     m_plotsMenu = new QMenu();
-    //m_plotsMenu->addAction(ui->actEditPlot);
+    m_plotsMenu->addAction(ui->actEditPlot);
 
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
@@ -163,19 +163,17 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
                 continue;
             }
 
-            int n = plt->SDOValueSignalNumber(static_cast<size_t>(i));
-
             QPen pen;
             pen.setStyle(sig.penStyle);
             pen.setColor(sig.penColor);
-            plt->setPen(n, pen);
+            plt->setPen(i, pen);
 
             QBrush brush;
             brush.setStyle(sig.brushStyle);
             brush.setColor(sig.brushColor);
-            plt->setBrush(n, brush);
+            plt->setBrush(i, brush);
 
-            plt->setZ(n, i);
+            plt->setZ(i, i);
         }
 
         plt->clear();
@@ -192,9 +190,22 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    qDebug() << sender();
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_plotsMenu->pos());
 
-    auto plt = qobject_cast<SDOValuePlot*>(sender());
+    //qDebug() << pos;
+
+    SDOValuePlot* plt = nullptr;
+
+    for(int i = 0; i < m_layout->count(); i ++){
+        auto item = m_layout->itemAt(i);
+        if(QWidget* wgt = item->widget()){
+            if(wgt->rect().contains(pos)){
+                plt = qobject_cast<SDOValuePlot*>(wgt);
+                if(plt != nullptr) break;
+            }
+        }
+    }
+
     if(plt == nullptr) return;
 
     int row = 0;
@@ -217,29 +228,34 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
     m_trendDlg->setTransparency(static_cast<int>(plt->defaultAlpha() * 100));
     m_trendDlg->setSamplesCount(static_cast<int>(plt->bufferSize()));
 
-    m_trendDlg->setSignalsCount(plt->signalsCount());
+    m_trendDlg->setSignalsCount(plt->SDOValuesCount());
 
-    for(int i = 0; i < plt->signalsCount(); i ++){
+    for(int i = 0; i < plt->SDOValuesCount(); i ++){
         SignalCurveProp sig;
         auto sdoval = plt->SDOValue(i);
-        int n = plt->SDOValueSignalNumber(i);
 
         sig.nodeId = sdoval->nodeId();
         sig.index = sdoval->index();
         sig.subIndex = sdoval->subIndex();
         sig.type = plt->SDValueType(i);
 
-        sig.name = plt->signalName(n);
-        sig.penColor = plt->pen(n).color();
-        sig.penStyle = plt->pen(n).style();
-        sig.brushColor = plt->brush(n).color();
-        sig.brushStyle = plt->brush(n).style();
+        sig.name = plt->signalName(i);
+        sig.penColor = plt->pen(i).color();
+        sig.penStyle = plt->pen(i).style();
+        sig.brushColor = plt->brush(i).color();
+        sig.brushStyle = plt->brush(i).style();
 
         m_trendDlg->setSignalCurveProp(i, sig);
     }
 
     if(m_trendDlg->exec()){
         if(m_trendDlg->signalsCount() <= 0) return;
+
+        while(plt->SDOValuesCount() != 0){
+            plt->delSDOValue(0);
+        }
+
+        //qDebug() << m_trendDlg->signalsCount() << plt->signalsCount() << plt->SDOValuesCount();
 
         plt->setPeriod(static_cast<qreal>(m_updIntervalms) / 1000);
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
@@ -257,19 +273,17 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
                 continue;
             }
 
-            int n = plt->SDOValueSignalNumber(static_cast<size_t>(i));
-
             QPen pen;
             pen.setStyle(sig.penStyle);
             pen.setColor(sig.penColor);
-            plt->setPen(n, pen);
+            plt->setPen(i, pen);
 
             QBrush brush;
             brush.setStyle(sig.brushStyle);
             brush.setColor(sig.brushColor);
-            plt->setBrush(n, brush);
+            plt->setBrush(i, brush);
 
-            plt->setZ(n, i);
+            plt->setZ(i, i);
         }
 
         plt->clear();
