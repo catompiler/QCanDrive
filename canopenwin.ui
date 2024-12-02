@@ -33,6 +33,8 @@
     <property name="title">
      <string>&amp;Соединение</string>
     </property>
+    <addaction name="actConnect"/>
+    <addaction name="actDisconnect"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
