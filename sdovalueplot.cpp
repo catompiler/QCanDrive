@@ -96,6 +96,13 @@ void SDOValuePlot::delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval)
     }
 }
 
+void SDOValuePlot::delAllSDOValues()
+{
+    while(SDOValuesCount() > 0){
+        delSDOValue(0);
+    }
+}
+
 COValue::Type SDOValuePlot::SDValueType(int n) const
 {
     if(n < 0 || n >= m_sdoValues.size()) return COValue::Type();

@@ -29,6 +29,7 @@ public:
     CoValuesHolder::HoldedSDOValuePtr SDOValue(int n) const;
     void delSDOValue(int n);
     void delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval);
+    void delAllSDOValues();
     COValue::Type SDValueType(int n) const;
 
 private slots:

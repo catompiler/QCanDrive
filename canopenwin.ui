@@ -120,6 +120,14 @@
     <string>Редактировать график</string>
    </property>
   </action>
+  <action name="actDelPlot">
+   <property name="text">
+    <string>&amp;Удалить</string>
+   </property>
+   <property name="toolTip">
+    <string>Удалить график</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="res.qrc"/>

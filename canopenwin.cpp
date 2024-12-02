@@ -29,6 +29,7 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 
     m_plotsMenu = new QMenu();
     m_plotsMenu->addAction(ui->actEditPlot);
+    m_plotsMenu->addAction(ui->actDelPlot);
 
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
@@ -66,6 +67,7 @@ CanOpenWin::~CanOpenWin()
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
 
+    m_plotsMenu->removeAction(ui->actDelPlot);
     m_plotsMenu->removeAction(ui->actEditPlot);
     delete m_plotsMenu;
 
@@ -194,17 +196,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
 
     //qDebug() << pos;
 
-    SDOValuePlot* plt = nullptr;
-
-    for(int i = 0; i < m_layout->count(); i ++){
-        auto item = m_layout->itemAt(i);
-        if(QWidget* wgt = item->widget()){
-            if(wgt->rect().contains(pos)){
-                plt = qobject_cast<SDOValuePlot*>(wgt);
-                if(plt != nullptr) break;
-            }
-        }
-    }
+    auto plt = findSDOValuePlotAt(pos);
 
     if(plt == nullptr) return;
 
@@ -251,9 +243,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
     if(m_trendDlg->exec()){
         if(m_trendDlg->signalsCount() <= 0) return;
 
-        while(plt->SDOValuesCount() != 0){
-            plt->delSDOValue(0);
-        }
+        plt->delAllSDOValues();
 
         //qDebug() << m_trendDlg->signalsCount() << plt->signalsCount() << plt->SDOValuesCount();
 
@@ -293,6 +283,27 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
     }
 }
 
+void CanOpenWin::on_actDelPlot_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_plotsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto plt = findSDOValuePlotAt(pos);
+
+    if(plt == nullptr) return;
+
+    int pltLayIndex = m_layout->indexOf(plt);
+    if(pltLayIndex == -1) return;
+
+    m_layout->takeAt(pltLayIndex);
+
+    plt->delAllSDOValues();
+    delete plt;
+}
+
 void CanOpenWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
@@ -301,6 +312,23 @@ void CanOpenWin::CANopen_connected()
 void CanOpenWin::CANopen_disconnected()
 {
     qDebug() << "CANopen_disconnected()";
+}
+
+SDOValuePlot* CanOpenWin::findSDOValuePlotAt(const QPoint& pos)
+{
+    SDOValuePlot* plt = nullptr;
+
+    for(int i = 0; i < m_layout->count(); i ++){
+        auto item = m_layout->itemAt(i);
+        if(QWidget* wgt = item->widget()){
+            if(wgt->rect().contains(pos)){
+                plt = qobject_cast<SDOValuePlot*>(wgt);
+                if(plt != nullptr) break;
+            }
+        }
+    }
+
+    return plt;
 }
 
 void CanOpenWin::showPlotContextMenu(const QPoint& pos)

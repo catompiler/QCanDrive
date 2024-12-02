@@ -34,12 +34,13 @@ private slots:
     void on_actDisconnect_triggered(bool checked);
     void on_actAddPlot_triggered(bool checked);
     void on_actEditPlot_triggered(bool checked);
+    void on_actDelPlot_triggered(bool checked);
 
     void CANopen_connected();
     void CANopen_disconnected();
 private:
     Ui::CanOpenWin *ui;
-    SDOValuePlot* m_plot;
+    //SDOValuePlot* m_plot;
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;
     QGridLayout* m_layout;
@@ -50,6 +51,7 @@ private:
     TrendPlotEditDlg* m_trendDlg;
     SignalCurveEditDlg* m_signalCurveEditDlg;
 
+    SDOValuePlot* findSDOValuePlotAt(const QPoint& pos);
     void showPlotContextMenu(const QPoint& pos);
 };
 #endif // CANOPENWIN_H
