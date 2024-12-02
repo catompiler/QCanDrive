@@ -106,6 +106,16 @@ void SignalCurveEditDlg::setPenStyle(Qt::PenStyle newPenStyle)
     ui->cbPenStyle->setCurrentIndex(ui->cbPenStyle->findData(static_cast<int>(newPenStyle)));
 }
 
+qreal SignalCurveEditDlg::penWidth() const
+{
+    return ui->sbLineWidth->value();
+}
+
+void SignalCurveEditDlg::setPenWidth(qreal newPenWidth)
+{
+    ui->sbLineWidth->setValue(newPenWidth);
+}
+
 QColor SignalCurveEditDlg::brushColor() const
 {
     const QPalette& pal = ui->frBrushColor->palette();

@@ -43,6 +43,9 @@ public:
     Qt::PenStyle penStyle() const;
     void setPenStyle(Qt::PenStyle newPenStyle);
 
+    qreal penWidth() const;
+    void setPenWidth(qreal newPenWidth);
+
     QColor brushColor() const;
     void setBrushColor(const QColor& newBrushColor);
 

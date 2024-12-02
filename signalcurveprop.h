@@ -16,6 +16,7 @@ struct SignalCurveProp
     COValue::Type type;
     QColor penColor;
     Qt::PenStyle penStyle;
+    qreal penWidth;
     QColor brushColor;
     Qt::BrushStyle brushStyle;
 };

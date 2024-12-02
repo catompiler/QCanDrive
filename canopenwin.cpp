@@ -168,6 +168,7 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
             QPen pen;
             pen.setStyle(sig.penStyle);
             pen.setColor(sig.penColor);
+            pen.setWidthF(sig.penWidth);
             plt->setPen(i, pen);
 
             QBrush brush;
@@ -234,6 +235,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
         sig.name = plt->signalName(i);
         sig.penColor = plt->pen(i).color();
         sig.penStyle = plt->pen(i).style();
+        sig.penWidth = plt->pen(i).widthF();
         sig.brushColor = plt->brush(i).color();
         sig.brushStyle = plt->brush(i).style();
 
@@ -266,6 +268,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
             QPen pen;
             pen.setStyle(sig.penStyle);
             pen.setColor(sig.penColor);
+            pen.setWidthF(sig.penWidth);
             plt->setPen(i, pen);
 
             QBrush brush;

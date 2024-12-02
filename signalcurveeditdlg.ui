@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>357</width>
-    <height>286</height>
+    <height>309</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -127,13 +127,17 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QFrame" name="frPenColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblPenStyle">
+        <property name="text">
+         <string>Стиль</string>
         </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblLineWidth">
+        <property name="text">
+         <string>Толщина</string>
         </property>
        </widget>
       </item>
@@ -144,15 +148,34 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lblPenStyle">
-        <property name="text">
-         <string>Стиль</string>
+      <item row="1" column="1" colspan="2">
+       <widget class="QComboBox" name="cbPenStyle"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QFrame" name="frPenColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QComboBox" name="cbPenStyle"/>
+      <item row="3" column="1" colspan="2">
+       <widget class="QDoubleSpinBox" name="sbLineWidth">
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.500000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -79,6 +79,7 @@ void TrendPlotEditDlg::on_pbAdd_clicked(bool checked)
         p.type = d->type();
         p.penColor = d->penColor();
         p.penStyle = d->penStyle();
+        p.penWidth = d->penWidth();
         p.brushColor = d->brushColor();
         p.brushStyle = d->brushStyle();
 
@@ -105,6 +106,7 @@ void TrendPlotEditDlg::on_pbEdit_clicked(bool checked)
     d->setType(p.type);
     d->setPenColor(p.penColor);
     d->setPenStyle(p.penStyle);
+    d->setPenWidth(p.penWidth);
     d->setBrushColor(p.brushColor);
     d->setBrushStyle(p.brushStyle);
 
@@ -117,6 +119,7 @@ void TrendPlotEditDlg::on_pbEdit_clicked(bool checked)
         p.type = d->type();
         p.penColor = d->penColor();
         p.penStyle = d->penStyle();
+        p.penWidth = d->penWidth();
         p.brushColor = d->brushColor();
         p.brushStyle = d->brushStyle();
 
