@@ -16,7 +16,8 @@ TrendPlotEditDlg::TrendPlotEditDlg(QWidget *parent) :
     m_signalCurvePropMdl = new SignalCurvePropModel();
     ui->lvSignals->setModel(m_signalCurvePropMdl);
 
-    setBackColor(Qt::darkGray);
+    setBackColor(QColor(Qt::darkGray).darker(225));
+    setTextColor(Qt::white);
     setPlotName(tr("График"));
     setTransparency(-1);
 }
@@ -47,6 +48,20 @@ void TrendPlotEditDlg::on_tbColorSel_clicked(bool checked)
     if(col.isValid()){
         pal.setColor(QPalette::Window, col);
         ui->frBackColor->setPalette(pal);
+    }
+}
+
+void TrendPlotEditDlg::on_tbTextColorSel_clicked(bool checked)
+{
+    Q_UNUSED(checked)
+
+    QPalette pal = ui->frTextColor->palette();
+    QColor curCol = pal.window().color();
+
+    QColor col = QColorDialog::getColor(curCol, this, tr("Выбор цвета текста"));
+    if(col.isValid()){
+        pal.setColor(QPalette::Window, col);
+        ui->frTextColor->setPalette(pal);
     }
 }
 
@@ -199,6 +214,19 @@ void TrendPlotEditDlg::setBackColor(const QColor& newBackColor)
     QPalette pal = ui->frBackColor->palette();
     pal.setColor(QPalette::Window, newBackColor);
     ui->frBackColor->setPalette(pal);
+}
+
+QColor TrendPlotEditDlg::textColor() const
+{
+    const QPalette& pal = ui->frTextColor->palette();
+    return pal.window().color();
+}
+
+void TrendPlotEditDlg::setTextColor(const QColor& newTextColor)
+{
+    QPalette pal = ui->frTextColor->palette();
+    pal.setColor(QPalette::Window, newTextColor);
+    ui->frTextColor->setPalette(pal);
 }
 
 int TrendPlotEditDlg::transparency() const

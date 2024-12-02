@@ -24,6 +24,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QPalette darkPal(palette());
+    darkPal.setColor(QPalette::Window, QColor(Qt::darkGray).darker(240));
+    setPalette(darkPal);
+
     m_updIntervalms = 100;
 
     m_layout = new QGridLayout();
@@ -32,6 +36,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_plotsMenu = new QMenu();
     m_plotsMenu->addAction(ui->actEditPlot);
     m_plotsMenu->addAction(ui->actDelPlot);
+
+    m_dialsMenu = new QMenu();
+    m_dialsMenu->addAction(ui->actEditDial);
+    m_dialsMenu->addAction(ui->actDelDial);
 
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
@@ -72,6 +80,10 @@ CanOpenWin::~CanOpenWin()
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
+
+    m_dialsMenu->removeAction(ui->actDelDial);
+    m_dialsMenu->removeAction(ui->actEditDial);
+    delete m_dialsMenu;
 
     m_plotsMenu->removeAction(ui->actDelPlot);
     m_plotsMenu->removeAction(ui->actEditPlot);
@@ -158,6 +170,7 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
         plt->setPeriod(static_cast<qreal>(m_updIntervalms) / 1000);
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
         plt->setBackground(m_trendDlg->backColor());
+        plt->setTextColor(m_trendDlg->textColor());
 
         int transp = m_trendDlg->transparency();
         plt->setDefaultAlpha( (transp > 0) ? static_cast<qreal>(transp) / 100 : -1.0);
@@ -187,11 +200,11 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
 
         plt->clear();
 
-        connect(m_slcon, &SLCanOpenNode::connected, plt, &SDOValuePlot::clear);
-        m_layout->addWidget(plt, m_trendDlg->posRow(), m_trendDlg->posColumn(), m_trendDlg->sizeRows(), m_trendDlg->sizeColumns());
-
         plt->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(plt, &SDOValuePlot::customContextMenuRequested, this, &CanOpenWin::showPlotContextMenu);
+        connect(m_slcon, &SLCanOpenNode::connected, plt, &SDOValuePlot::clear);
+
+        m_layout->addWidget(plt, m_trendDlg->posRow(), m_trendDlg->posColumn(), m_trendDlg->sizeRows(), m_trendDlg->sizeColumns());
     }
 }
 
@@ -203,7 +216,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
 
     //qDebug() << pos;
 
-    auto plt = findSDOValuePlotAt(pos);
+    auto plt = findWidgetTypeAt<SDOValuePlot>(pos);
 
     if(plt == nullptr) return;
 
@@ -224,6 +237,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
 
     m_trendDlg->setPlotName(plt->name());
     m_trendDlg->setBackColor(plt->background().color());
+    m_trendDlg->setTextColor(plt->textColor());
     m_trendDlg->setTransparency(static_cast<int>(plt->defaultAlpha() * 100));
     m_trendDlg->setSamplesCount(static_cast<int>(plt->bufferSize()));
 
@@ -258,6 +272,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
         plt->setPeriod(static_cast<qreal>(m_updIntervalms) / 1000);
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
         plt->setBackground(m_trendDlg->backColor());
+        plt->setTextColor(m_trendDlg->textColor());
 
         int transp = m_trendDlg->transparency();
         plt->setDefaultAlpha( (transp > 0) ? static_cast<qreal>(transp) / 100 : -1.0);
@@ -300,7 +315,7 @@ void CanOpenWin::on_actDelPlot_triggered(bool checked)
 
     //qDebug() << pos;
 
-    auto plt = findSDOValuePlotAt(pos);
+    auto plt = findWidgetTypeAt<SDOValuePlot>(pos);
 
     if(plt == nullptr) return;
 
@@ -324,20 +339,113 @@ void CanOpenWin::on_actAddDial_triggered(bool checked)
 
         bool added = dial->setSDOValue(m_dialDlg->nodeId(), m_dialDlg->index(), m_dialDlg->subIndex(), m_dialDlg->type(), m_dialDlg->rangeMin(), m_dialDlg->rangeMax());
         if(!added){
-            QMessageBox::critical(this, tr("Ошибка добавления сигнала!"), tr("Невозможно добавить сигнал: \"%1\"").arg(m_dialDlg->name()));
+            QMessageBox::critical(this, tr("Ошибка добавления показометра!"), tr("Невозможно добавить показометр: \"%1\"").arg(m_dialDlg->name()));
             return;
         }
 
+        dial->setName(m_dialDlg->name());
         dial->setInsideBackColor(m_dialDlg->insideBackColor());
         dial->setOutsideBackColor(m_dialDlg->outsideBackColor());
         dial->setInsideScaleBackColor(m_dialDlg->insideScaleBackColor());
         dial->setTextScaleColor(m_dialDlg->textScaleColor());
         dial->setNeedleColor(m_dialDlg->needleColor());
-
         dial->setPenWidth(m_dialDlg->penWidth());
+
+        dial->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(dial, &SDOValueDial::customContextMenuRequested, this, &CanOpenWin::showDialsContextMenu);
 
         m_layout->addWidget(dial, m_dialDlg->posRow(), m_dialDlg->posColumn(), m_dialDlg->sizeRows(), m_dialDlg->sizeColumns());
     }
+}
+
+void CanOpenWin::on_actEditDial_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_dialsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto dial = findWidgetTypeAt<SDOValueDial>(pos);
+
+    //qDebug() << dial;
+
+    if(dial == nullptr) return;
+
+    int row = 0;
+    int col = 0;
+    int rowSpan = 1;
+    int colSpan = 1;
+
+    int dialLayIndex = m_layout->indexOf(dial);
+    if(dialLayIndex == -1) return;
+
+    m_layout->getItemPosition(dialLayIndex, &row, &col, &rowSpan, &colSpan);
+
+    m_dialDlg->setPosRow(row);
+    m_dialDlg->setPosColumn(col);
+    m_dialDlg->setSizeRows(rowSpan);
+    m_dialDlg->setSizeColumns(colSpan);
+
+    m_dialDlg->setName(dial->name());
+    m_dialDlg->setOutsideBackColor(dial->outsideBackColor());
+    m_dialDlg->setInsideBackColor(dial->insideBackColor());
+    m_dialDlg->setInsideScaleBackColor(dial->insideScaleBackColor());
+    m_dialDlg->setTextScaleColor(dial->textScaleColor());
+    m_dialDlg->setNeedleColor(dial->needleColor());
+    m_dialDlg->setPenWidth(dial->penWidth());
+
+    m_dialDlg->setRangeMin(dial->rangeMin());
+    m_dialDlg->setRangeMax(dial->rangeMax());
+
+    auto sdoval = dial->SDOValue();
+
+    m_dialDlg->setNodeId(sdoval->nodeId());
+    m_dialDlg->setIndex(sdoval->index());
+    m_dialDlg->setSubIndex(sdoval->subIndex());
+    m_dialDlg->setType(dial->SDOValueType());
+
+    if(m_dialDlg->exec()){
+        dial->resetSDOValue();
+
+        bool added = dial->setSDOValue(m_dialDlg->nodeId(), m_dialDlg->index(), m_dialDlg->subIndex(), m_dialDlg->type(), m_dialDlg->rangeMin(), m_dialDlg->rangeMax());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка изменения показометра!"), tr("Невозможно изменить показометр: \"%1\"").arg(m_dialDlg->name()));
+            return;
+        }
+
+        dial->setName(m_dialDlg->name());
+        dial->setInsideBackColor(m_dialDlg->insideBackColor());
+        dial->setOutsideBackColor(m_dialDlg->outsideBackColor());
+        dial->setInsideScaleBackColor(m_dialDlg->insideScaleBackColor());
+        dial->setTextScaleColor(m_dialDlg->textScaleColor());
+        dial->setNeedleColor(m_dialDlg->needleColor());
+        dial->setPenWidth(m_dialDlg->penWidth());
+
+        m_layout->takeAt(dialLayIndex);
+        m_layout->addWidget(dial, m_dialDlg->posRow(), m_dialDlg->posColumn(), m_dialDlg->sizeRows(), m_dialDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actDelDial_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_dialsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto dial = findWidgetTypeAt<SDOValueDial>(pos);
+
+    if(dial == nullptr) return;
+
+    int dialLayIndex = m_layout->indexOf(dial);
+    if(dialLayIndex == -1) return;
+
+    m_layout->takeAt(dialLayIndex);
+
+    dial->resetSDOValue();
+    delete dial;
 }
 
 void CanOpenWin::CANopen_connected()
@@ -350,28 +458,19 @@ void CanOpenWin::CANopen_disconnected()
     qDebug() << "CANopen_disconnected()";
 }
 
-SDOValuePlot* CanOpenWin::findSDOValuePlotAt(const QPoint& pos)
-{
-    SDOValuePlot* plt = nullptr;
-
-    for(int i = 0; i < m_layout->count(); i ++){
-        auto item = m_layout->itemAt(i);
-        if(QWidget* wgt = item->widget()){
-            if(wgt->rect().contains(pos)){
-                plt = qobject_cast<SDOValuePlot*>(wgt);
-                if(plt != nullptr) break;
-            }
-        }
-    }
-
-    return plt;
-}
-
 void CanOpenWin::showPlotContextMenu(const QPoint& pos)
 {
     auto plt = qobject_cast<SDOValuePlot*>(sender());
     if(plt == nullptr) return;
 
     m_plotsMenu->exec(plt->mapToGlobal(pos));
+}
+
+void CanOpenWin::showDialsContextMenu(const QPoint& pos)
+{
+    auto dial = qobject_cast<SDOValueDial*>(sender());
+    if(dial == nullptr) return;
+
+    m_dialsMenu->exec(dial->mapToGlobal(pos));
 }
 

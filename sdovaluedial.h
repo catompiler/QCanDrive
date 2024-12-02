@@ -19,6 +19,9 @@ public:
     SDOValueDial(CoValuesHolder* newValsHolder = nullptr, QWidget* parent = nullptr);
     ~SDOValueDial();
 
+    QString name() const;
+    void setName(const QString& newName);
+
     CoValuesHolder* valuesHolder() const;
     void setValuesHolder(CoValuesHolder* newValuesHolder);
 
@@ -40,7 +43,16 @@ public:
     qreal penWidth() const;
     void setPenWidth(qreal newPenWidth);
 
+    qreal rangeMin() const;
+    void setRangeMin(qreal newRangeMin);
+
+    qreal rangeMax() const;
+    void setRangeMax(qreal newRangeMax);
+
     bool setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType, qreal newMin = 0.0, qreal newMax = 1.0);
+    CoValuesHolder::HoldedSDOValuePtr SDOValue();
+    CoValuesHolder::HoldedSDOValuePtr SDOValue() const;
+    COValue::Type SDOValueType() const;
     void resetSDOValue();
 
 private slots:
@@ -51,7 +63,9 @@ protected:
     CoValuesHolder::HoldedSDOValuePtr m_sdoValue;
     COValue::Type m_sdoValueType;
 
-    qreal m_penWidth;
+    QString m_name;
+
+    void drawScaleContents(QPainter* painter, const QPointF& center, double radius) const override;
 };
 
 #endif // SDOVALUEDIAL_H

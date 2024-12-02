@@ -3,6 +3,7 @@
 #include <QwtDialSimpleNeedle>
 #include <QwtRoundScaleDraw>
 #include <QwtAbstractScaleDraw>
+#include <QPainter>
 
 
 
@@ -37,6 +38,16 @@ SDOValueDial::~SDOValueDial()
         resetSDOValue();
         delete m_sdoValue;
     }
+}
+
+QString SDOValueDial::name() const
+{
+    return m_name;
+}
+
+void SDOValueDial::setName(const QString& newName)
+{
+    m_name = newName;
 }
 
 CoValuesHolder* SDOValueDial::valuesHolder() const
@@ -137,6 +148,26 @@ void SDOValueDial::setPenWidth(qreal newPenWidth)
     scaleDraw->setPenWidthF(newPenWidth);
 }
 
+qreal SDOValueDial::rangeMin() const
+{
+    return lowerBound();
+}
+
+void SDOValueDial::setRangeMin(qreal newRangeMin)
+{
+    setLowerBound(newRangeMin);
+}
+
+qreal SDOValueDial::rangeMax() const
+{
+    return upperBound();
+}
+
+void SDOValueDial::setRangeMax(qreal newRangeMax)
+{
+    setUpperBound(newRangeMax);
+}
+
 bool SDOValueDial::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType, qreal newMin, qreal newMax)
 {
     if(m_valsHolder == nullptr) return false;
@@ -157,6 +188,21 @@ bool SDOValueDial::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::Sub
     return true;
 }
 
+CoValuesHolder::HoldedSDOValuePtr SDOValueDial::SDOValue()
+{
+    return m_sdoValue;
+}
+
+CoValuesHolder::HoldedSDOValuePtr SDOValueDial::SDOValue() const
+{
+    return m_sdoValue;
+}
+
+COValue::Type SDOValueDial::SDOValueType() const
+{
+    return m_sdoValueType;
+}
+
 void SDOValueDial::resetSDOValue()
 {
     if(m_valsHolder == nullptr) return;
@@ -174,4 +220,18 @@ void SDOValueDial::sdovalueReaded()
     if(sdoval == nullptr) return;
 
     setValue(COValue::valueAs<qreal>(sdoval->data(), m_sdoValueType, 0.0));
+}
+
+
+// From Qwt Dials example.
+void SDOValueDial::drawScaleContents(QPainter* painter, const QPointF& center, double radius) const
+{
+    QRectF rect( 0.0, 0.0, 2.0 * radius, 2.0 * radius - 10.0 );
+    rect.moveCenter( center );
+
+    const QColor color = palette().color( QPalette::Text );
+    painter->setPen( color );
+
+    const int flags = Qt::AlignBottom | Qt::AlignHCenter;
+    painter->drawText( rect, flags, m_name );
 }

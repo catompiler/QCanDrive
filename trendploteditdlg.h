@@ -32,6 +32,9 @@ public:
     QColor backColor() const;
     void setBackColor(const QColor& newBackColor);
 
+    QColor textColor() const;
+    void setTextColor(const QColor& newTextColor);
+
     int transparency() const;
     void setTransparency(int newTransparency);
 
@@ -57,6 +60,7 @@ public:
 private slots:
     void on_slTransp_valueChanged(int value);
     void on_tbColorSel_clicked(bool checked = false);
+    void on_tbTextColorSel_clicked(bool checked = false);
     void on_pbAdd_clicked(bool checked = false);
     void on_pbEdit_clicked(bool checked = false);
     void on_pbUp_clicked(bool checked = false);

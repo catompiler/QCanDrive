@@ -126,6 +126,18 @@ void SignalPlot::setBackground(const QBrush& newBrush)
     setCanvasBackground(newBrush);
 }
 
+QColor SignalPlot::textColor() const
+{
+    return palette().color(QPalette::Text);
+}
+
+void SignalPlot::setTextColor(const QColor& newColor)
+{
+    QPalette pal(palette());
+    pal.setColor(QPalette::Text, newColor);
+    setPalette(pal);
+}
+
 QString SignalPlot::name() const
 {
     return title().text();

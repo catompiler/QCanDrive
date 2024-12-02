@@ -2,6 +2,7 @@
 #define CANOPENWIN_H
 
 #include <QMainWindow>
+#include <QGridLayout>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class CanOpenWin; }
@@ -10,7 +11,7 @@ QT_END_NAMESPACE
 
 class QMenu;
 class QPoint;
-class QGridLayout;
+//class QGridLayout;
 class SLCanOpenNode;
 class CoValuesHolder;
 class SDOValue;
@@ -37,6 +38,8 @@ private slots:
     void on_actEditPlot_triggered(bool checked);
     void on_actDelPlot_triggered(bool checked);
     void on_actAddDial_triggered(bool checked);
+    void on_actEditDial_triggered(bool checked);
+    void on_actDelDial_triggered(bool checked);
 
     void CANopen_connected();
     void CANopen_disconnected();
@@ -47,6 +50,7 @@ private:
     CoValuesHolder* m_valsHolder;
     QGridLayout* m_layout;
     QMenu* m_plotsMenu;
+    QMenu* m_dialsMenu;
 
     int m_updIntervalms;
 
@@ -54,7 +58,33 @@ private:
     SignalCurveEditDlg* m_signalCurveEditDlg;
     SDOValueDialEditDlg* m_dialDlg;
 
-    SDOValuePlot* findSDOValuePlotAt(const QPoint& pos);
+    template <typename WidgetType>
+    WidgetType* findWidgetTypeAt(const QPoint& pos);
+
     void showPlotContextMenu(const QPoint& pos);
+    void showDialsContextMenu(const QPoint& pos);
 };
+
+template <typename WidgetType>
+WidgetType* CanOpenWin::findWidgetTypeAt(const QPoint& pos)
+{
+    WidgetType* wt = nullptr;
+
+    for(int i = 0; i < m_layout->count(); i ++){
+
+        auto item = m_layout->itemAt(i);
+
+        if(QWidget* wgt = item->widget()){
+
+            if(wgt->rect().contains(wgt->mapFromParent(pos))){
+
+                wt = qobject_cast<WidgetType*>(wgt);
+                if(wt != nullptr) break;
+            }
+        }
+    }
+
+    return wt;
+}
+
 #endif // CANOPENWIN_H

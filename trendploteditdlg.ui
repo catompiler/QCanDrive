@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>322</width>
-    <height>498</height>
+    <width>289</width>
+    <height>532</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,49 +20,15 @@
       <string>График</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblTransp">
-        <property name="text">
-         <string>Прозрачность</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QSlider" name="slTransp">
-          <property name="minimum">
-           <number>-1</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="value">
-           <number>100</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lblTranspVal">
-          <property name="text">
-           <string>100%</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lblPlotColor">
-        <property name="text">
-         <string>Цвет фона</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
+      <item row="0" column="1" colspan="3">
        <widget class="QLineEdit" name="lePlotName"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QToolButton" name="tbColorSel">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="lblPlotName">
@@ -71,35 +37,85 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="QFrame" name="frBackColor">
-          <property name="autoFillBackground">
-           <bool>true</bool>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Panel</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QToolButton" name="tbColorSel">
-          <property name="text">
-           <string>...</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblTransp">
+        <property name="text">
+         <string>Прозрачность</string>
+        </property>
+       </widget>
       </item>
-      <item row="3" column="0">
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblPlotColor">
+        <property name="text">
+         <string>Цвет фона</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblTextColor">
+        <property name="text">
+         <string>Цвет текста</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
        <widget class="QLabel" name="lblSamplesCount">
         <property name="text">
          <string>Число точек</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="3">
+       <widget class="QLabel" name="lblTranspVal">
+        <property name="text">
+         <string>100%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="2">
+       <widget class="QSlider" name="slTransp">
+        <property name="minimum">
+         <number>-1</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QFrame" name="frTextColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QFrame" name="frBackColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QToolButton" name="tbTextColorSel">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="3">
        <widget class="QSpinBox" name="sbSamplesCount">
         <property name="minimum">
          <number>1</number>

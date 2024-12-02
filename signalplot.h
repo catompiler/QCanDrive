@@ -30,6 +30,9 @@ public:
     QBrush background() const;
     void setBackground(const QBrush& newBrush);
 
+    QColor textColor() const;
+    void setTextColor(const QColor& newColor);
+
     QString name() const;
     void setName(const QString& newName);
 

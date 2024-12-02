@@ -139,6 +139,22 @@
     <string>Добавить показометр</string>
    </property>
   </action>
+  <action name="actEditDial">
+   <property name="text">
+    <string>&amp;Редактировать</string>
+   </property>
+   <property name="toolTip">
+    <string>Редактировать показометр</string>
+   </property>
+  </action>
+  <action name="actDelDial">
+   <property name="text">
+    <string>&amp;Удалить</string>
+   </property>
+   <property name="toolTip">
+    <string>Удалить показометр</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="res.qrc"/>
