@@ -4,9 +4,11 @@
 #include "covaluesholder.h"
 #include "covaluetypes.h"
 #include "sdovalueplot.h"
+#include "sdovaluedial.h"
 #include "signalcurveprop.h"
 #include "trendploteditdlg.h"
 #include "signalcurveeditdlg.h"
+#include "sdovaluedialeditdlg.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
@@ -44,6 +46,8 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_trendDlg = new TrendPlotEditDlg();
     m_trendDlg->setSignalCurveEditDialog(m_signalCurveEditDlg);
 
+    m_dialDlg = new SDOValueDialEditDlg();
+
     /*m_plot = new SDOValuePlot[2];
     m_plot[0].setTitle("Sine");
     m_plot[0].setValuesHolder(m_valsHolder);
@@ -63,6 +67,8 @@ CanOpenWin::~CanOpenWin()
 {
     m_slcon->destroyCO();
     m_slcon->closePort();
+
+    delete m_dialDlg;
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
@@ -305,6 +311,33 @@ void CanOpenWin::on_actDelPlot_triggered(bool checked)
 
     plt->delAllSDOValues();
     delete plt;
+}
+
+void CanOpenWin::on_actAddDial_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    m_dialDlg->setName(tr("Прибор %1").arg(m_layout->count() + 1));
+
+    if(m_dialDlg->exec()){
+        auto dial = new SDOValueDial(m_valsHolder, nullptr);
+
+        bool added = dial->setSDOValue(m_dialDlg->nodeId(), m_dialDlg->index(), m_dialDlg->subIndex(), m_dialDlg->type(), m_dialDlg->rangeMin(), m_dialDlg->rangeMax());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка добавления сигнала!"), tr("Невозможно добавить сигнал: \"%1\"").arg(m_dialDlg->name()));
+            return;
+        }
+
+        dial->setInsideBackColor(m_dialDlg->insideBackColor());
+        dial->setOutsideBackColor(m_dialDlg->outsideBackColor());
+        dial->setInsideScaleBackColor(m_dialDlg->insideScaleBackColor());
+        dial->setTextScaleColor(m_dialDlg->textScaleColor());
+        dial->setNeedleColor(m_dialDlg->needleColor());
+
+        dial->setPenWidth(m_dialDlg->penWidth());
+
+        m_layout->addWidget(dial, m_dialDlg->posRow(), m_dialDlg->posColumn(), m_dialDlg->sizeRows(), m_dialDlg->sizeColumns());
+    }
 }
 
 void CanOpenWin::CANopen_connected()

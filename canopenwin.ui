@@ -41,6 +41,7 @@
      <string>&amp;Добавить</string>
     </property>
     <addaction name="actAddPlot"/>
+    <addaction name="actAddDial"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -128,6 +129,14 @@
    </property>
    <property name="toolTip">
     <string>Удалить график</string>
+   </property>
+  </action>
+  <action name="actAddDial">
+   <property name="text">
+    <string>&amp;Показометр</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить показометр</string>
    </property>
   </action>
  </widget>

@@ -6,8 +6,10 @@
 #include <string.h>
 #include <array>
 #include <utility>
-#include <tuple>
 #include <variant>
+#include <QPair>
+#include <QString>
+#include <QList>
 
 
 
@@ -27,6 +29,9 @@ enum Type {
     STR = 9,
     MEM = 10
 };
+
+
+extern QList<QPair<QString, Type>> getTypesNames();
 
 
 template <int N, typename ET, ET first, ET next, ET... other>

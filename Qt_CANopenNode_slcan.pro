@@ -39,11 +39,14 @@ SOURCES += \
     OD.c \
     coobjectdict.cpp \
     covaluesholder.cpp \
+    covaluetypes.cpp \
     main.cpp \
     canopenwin.cpp \
     reg_data.c \
     sdocomm.cpp \
     sdovalue.cpp \
+    sdovaluedial.cpp \
+    sdovaluedialeditdlg.cpp \
     sdovalueplot.cpp \
     sequentialbuffer.cpp \
     signalcurveeditdlg.cpp \
@@ -92,6 +95,8 @@ HEADERS += \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \
+    sdovaluedial.h \
+    sdovaluedialeditdlg.h \
     sdovalueplot.h \
     sequentialbuffer.h \
     signalcurveeditdlg.h \
@@ -125,6 +130,7 @@ HEADERS += \
 
 FORMS += \
     canopenwin.ui \
+    sdovaluedialeditdlg.ui \
     signalcurveeditdlg.ui \
     trendploteditdlg.ui
 

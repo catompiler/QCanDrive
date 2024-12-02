@@ -17,6 +17,7 @@ class SDOValue;
 class SDOValuePlot;
 class TrendPlotEditDlg;
 class SignalCurveEditDlg;
+class SDOValueDialEditDlg;
 
 
 class CanOpenWin : public QMainWindow
@@ -35,6 +36,7 @@ private slots:
     void on_actAddPlot_triggered(bool checked);
     void on_actEditPlot_triggered(bool checked);
     void on_actDelPlot_triggered(bool checked);
+    void on_actAddDial_triggered(bool checked);
 
     void CANopen_connected();
     void CANopen_disconnected();
@@ -50,6 +52,7 @@ private:
 
     TrendPlotEditDlg* m_trendDlg;
     SignalCurveEditDlg* m_signalCurveEditDlg;
+    SDOValueDialEditDlg* m_dialDlg;
 
     SDOValuePlot* findSDOValuePlotAt(const QPoint& pos);
     void showPlotContextMenu(const QPoint& pos);

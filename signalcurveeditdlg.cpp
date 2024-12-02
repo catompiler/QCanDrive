@@ -172,18 +172,7 @@ void SignalCurveEditDlg::on_tbBrushColorSel_clicked(bool checked)
 
 void SignalCurveEditDlg::populateTypes()
 {
-
-    QList<QPair<QString, COValue::Type>> types;
-
-    types << qMakePair(tr("I32"), COValue::I32)
-          << qMakePair(tr("I16"), COValue::I16)
-          << qMakePair(tr("I8"), COValue::I8)
-          << qMakePair(tr("U32"), COValue::U32)
-          << qMakePair(tr("U16"), COValue::U16)
-          << qMakePair(tr("U8"), COValue::U8)
-          << qMakePair(tr("IQ24"), COValue::IQ24)
-          << qMakePair(tr("IQ15"), COValue::IQ15)
-          << qMakePair(tr("IQ7"), COValue::IQ7);
+   auto types = COValue::getTypesNames();
 
     ui->cbType->clear();
 
