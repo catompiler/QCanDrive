@@ -19,6 +19,7 @@ class SDOValuePlot;
 class TrendPlotEditDlg;
 class SignalCurveEditDlg;
 class SDOValueDialEditDlg;
+class SDOValueSliderEditDlg;
 
 
 class CanOpenWin : public QMainWindow
@@ -40,6 +41,9 @@ private slots:
     void on_actAddDial_triggered(bool checked);
     void on_actEditDial_triggered(bool checked);
     void on_actDelDial_triggered(bool checked);
+    void on_actAddSlider_triggered(bool checked);
+    void on_actEditSlider_triggered(bool checked);
+    void on_actDelSlider_triggered(bool checked);
 
     void CANopen_connected();
     void CANopen_disconnected();
@@ -51,18 +55,21 @@ private:
     QGridLayout* m_layout;
     QMenu* m_plotsMenu;
     QMenu* m_dialsMenu;
+    QMenu* m_slidersMenu;
 
     int m_updIntervalms;
 
     TrendPlotEditDlg* m_trendDlg;
     SignalCurveEditDlg* m_signalCurveEditDlg;
     SDOValueDialEditDlg* m_dialDlg;
+    SDOValueSliderEditDlg* m_sliderDlg;
 
     template <typename WidgetType>
     WidgetType* findWidgetTypeAt(const QPoint& pos);
 
     void showPlotContextMenu(const QPoint& pos);
     void showDialsContextMenu(const QPoint& pos);
+    void showSlidersContextMenu(const QPoint& pos);
 };
 
 template <typename WidgetType>

@@ -206,12 +206,12 @@ bool SDOValueDial::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::Sub
     return true;
 }
 
-CoValuesHolder::HoldedSDOValuePtr SDOValueDial::SDOValue()
+CoValuesHolder::HoldedSDOValuePtr SDOValueDial::getSDOValue()
 {
     return m_sdoValue;
 }
 
-CoValuesHolder::HoldedSDOValuePtr SDOValueDial::SDOValue() const
+CoValuesHolder::HoldedSDOValuePtr SDOValueDial::getSDOValue() const
 {
     return m_sdoValue;
 }
@@ -237,7 +237,7 @@ void SDOValueDial::sdovalueReaded()
     auto sdoval = qobject_cast<CoValuesHolder::HoldedSDOValuePtr>(sender());
     if(sdoval == nullptr) return;
 
-    setValue(COValue::valueAs<qreal>(sdoval->data(), m_sdoValueType, 0.0));
+    setValue(COValue::valueFrom<qreal>(sdoval->data(), m_sdoValueType, 0.0));
 }
 
 

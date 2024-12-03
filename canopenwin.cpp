@@ -5,10 +5,12 @@
 #include "covaluetypes.h"
 #include "sdovalueplot.h"
 #include "sdovaluedial.h"
+#include "sdovalueslider.h"
 #include "signalcurveprop.h"
 #include "trendploteditdlg.h"
 #include "signalcurveeditdlg.h"
 #include "sdovaluedialeditdlg.h"
+#include "sdovalueslidereditdlg.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
@@ -41,6 +43,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_dialsMenu->addAction(ui->actEditDial);
     m_dialsMenu->addAction(ui->actDelDial);
 
+    m_slidersMenu = new QMenu();
+    m_slidersMenu->addAction(ui->actEditSlider);
+    m_slidersMenu->addAction(ui->actDelSlider);
+
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
     connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
@@ -56,19 +62,7 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 
     m_dialDlg = new SDOValueDialEditDlg();
 
-    /*m_plot = new SDOValuePlot[2];
-    m_plot[0].setTitle("Sine");
-    m_plot[0].setValuesHolder(m_valsHolder);
-    m_plot[0].setBufferSize(100);
-    m_plot[0].addSDOValue(1, 0x2002, 1, COValue::I32, "Value", Qt::blue, 1);
-    connect(m_slcon, &SLCanOpenNode::connected, &m_plot[0], &SDOValuePlot::clear);
-    m_plot[1].setTitle("JAS");
-    m_plot[1].setValuesHolder(m_valsHolder);
-    m_plot[1].setBufferSize(100);
-    m_plot[1].addSDOValue(1, 0x2002, 2, COValue::I32, "", Qt::red, 2);
-    connect(m_slcon, &SLCanOpenNode::connected, &m_plot[1], &SDOValuePlot::clear);
-    m_layout->addWidget(&m_plot[0], 0, 0, 1, 1);
-    m_layout->addWidget(&m_plot[1], 0, 1, 2, 1);*/
+    m_sliderDlg = new SDOValueSliderEditDlg();
 }
 
 CanOpenWin::~CanOpenWin()
@@ -76,10 +70,16 @@ CanOpenWin::~CanOpenWin()
     m_slcon->destroyCO();
     m_slcon->closePort();
 
+    delete m_sliderDlg;
+
     delete m_dialDlg;
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
+
+    m_slidersMenu->removeAction(ui->actDelSlider);
+    m_slidersMenu->removeAction(ui->actEditSlider);
+    delete m_slidersMenu;
 
     m_dialsMenu->removeAction(ui->actDelDial);
     m_dialsMenu->removeAction(ui->actEditDial);
@@ -400,7 +400,7 @@ void CanOpenWin::on_actEditDial_triggered(bool checked)
     m_dialDlg->setRangeMin(dial->rangeMin());
     m_dialDlg->setRangeMax(dial->rangeMax());
 
-    auto sdoval = dial->SDOValue();
+    auto sdoval = dial->getSDOValue();
 
     m_dialDlg->setNodeId(sdoval->nodeId());
     m_dialDlg->setIndex(sdoval->index());
@@ -451,6 +451,138 @@ void CanOpenWin::on_actDelDial_triggered(bool checked)
     delete dial;
 }
 
+void CanOpenWin::on_actAddSlider_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    m_sliderDlg->setName(tr("Прибор %1").arg(m_layout->count() + 1));
+
+    if(m_sliderDlg->exec()){
+        auto slider = new SDOValueSlider(m_valsHolder, nullptr);
+
+        bool added = slider->setSDOValue(m_sliderDlg->nodeId(), m_sliderDlg->index(), m_sliderDlg->subIndex(), m_sliderDlg->type(), m_sliderDlg->rangeMin(), m_sliderDlg->rangeMax());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка добавления слайдера!"), tr("Невозможно добавить слайдер: \"%1\"").arg(m_sliderDlg->name()));
+            return;
+        }
+
+        slider->setName(m_sliderDlg->name());
+        slider->setTroughColor(m_sliderDlg->troughColor());
+        slider->setGrooveColor(m_sliderDlg->grooveColor());
+        slider->setHandleColor(m_sliderDlg->handleColor());
+        slider->setScaleColor(m_sliderDlg->scaleColor());
+        slider->setTextColor(m_sliderDlg->textColor());
+        slider->setPenWidth(m_sliderDlg->penWidth());
+        slider->setSteps(m_sliderDlg->steps());
+        slider->setHasTrough(m_sliderDlg->hasTrough());
+        slider->setHasGroove(m_sliderDlg->hasGroove());
+        slider->setOrientation(m_sliderDlg->orientation());
+
+        slider->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(slider, &SDOValueSlider::customContextMenuRequested, this, &CanOpenWin::showSlidersContextMenu);
+
+        m_layout->addWidget(slider, m_sliderDlg->posRow(), m_sliderDlg->posColumn(), m_sliderDlg->sizeRows(), m_sliderDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actEditSlider_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_slidersMenu->pos());
+
+    //qDebug() << pos;
+
+    auto slider = findWidgetTypeAt<SDOValueSlider>(pos);
+
+    //qDebug() << slider;
+
+    if(slider == nullptr) return;
+
+    int row = 0;
+    int col = 0;
+    int rowSpan = 1;
+    int colSpan = 1;
+
+    int sliderLayIndex = m_layout->indexOf(slider);
+    if(sliderLayIndex == -1) return;
+
+    m_layout->getItemPosition(sliderLayIndex, &row, &col, &rowSpan, &colSpan);
+
+    m_sliderDlg->setPosRow(row);
+    m_sliderDlg->setPosColumn(col);
+    m_sliderDlg->setSizeRows(rowSpan);
+    m_sliderDlg->setSizeColumns(colSpan);
+
+    m_sliderDlg->setName(slider->name());
+    m_sliderDlg->setTroughColor(slider->troughColor());
+    m_sliderDlg->setGrooveColor(slider->grooveColor());
+    m_sliderDlg->setHandleColor(slider->handleColor());
+    m_sliderDlg->setScaleColor(slider->scaleColor());
+    m_sliderDlg->setTextColor(slider->textColor());
+    m_sliderDlg->setPenWidth(slider->penWidth());
+    m_sliderDlg->setSteps(slider->steps());
+    m_sliderDlg->setHasTrough(slider->hasTrough());
+    m_sliderDlg->setHasGroove(slider->hasGroove());
+    m_sliderDlg->setOrientation(slider->orientation());
+
+    m_sliderDlg->setRangeMin(slider->rangeMin());
+    m_sliderDlg->setRangeMax(slider->rangeMax());
+
+    auto sdoval = slider->getSDOValue();
+
+    m_sliderDlg->setNodeId(sdoval->nodeId());
+    m_sliderDlg->setIndex(sdoval->index());
+    m_sliderDlg->setSubIndex(sdoval->subIndex());
+    m_sliderDlg->setType(slider->SDOValueType());
+
+    if(m_sliderDlg->exec()){
+        slider->resetSDOValue();
+
+        bool added = slider->setSDOValue(m_sliderDlg->nodeId(), m_sliderDlg->index(), m_sliderDlg->subIndex(), m_sliderDlg->type(), m_sliderDlg->rangeMin(), m_sliderDlg->rangeMax());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка изменения слайдера!"), tr("Невозможно изменить слайдер: \"%1\"").arg(m_sliderDlg->name()));
+            return;
+        }
+
+        slider->setName(m_sliderDlg->name());
+        slider->setTroughColor(m_sliderDlg->troughColor());
+        slider->setGrooveColor(m_sliderDlg->grooveColor());
+        slider->setHandleColor(m_sliderDlg->handleColor());
+        slider->setScaleColor(m_sliderDlg->scaleColor());
+        slider->setTextColor(m_sliderDlg->textColor());
+        slider->setPenWidth(m_sliderDlg->penWidth());
+        slider->setSteps(m_sliderDlg->steps());
+        slider->setHasTrough(m_sliderDlg->hasTrough());
+        slider->setHasGroove(m_sliderDlg->hasGroove());
+        slider->setOrientation(m_sliderDlg->orientation());
+
+        m_layout->takeAt(sliderLayIndex);
+        m_layout->addWidget(slider, m_sliderDlg->posRow(), m_sliderDlg->posColumn(), m_sliderDlg->sizeRows(), m_sliderDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actDelSlider_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_slidersMenu->pos());
+
+    //qDebug() << pos;
+
+    auto slider = findWidgetTypeAt<SDOValueSlider>(pos);
+
+    if(slider == nullptr) return;
+
+    int sliderLayIndex = m_layout->indexOf(slider);
+    if(sliderLayIndex == -1) return;
+
+    m_layout->takeAt(sliderLayIndex);
+
+    slider->resetSDOValue();
+    delete slider;
+}
+
 void CanOpenWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
@@ -475,5 +607,13 @@ void CanOpenWin::showDialsContextMenu(const QPoint& pos)
     if(dial == nullptr) return;
 
     m_dialsMenu->exec(dial->mapToGlobal(pos));
+}
+
+void CanOpenWin::showSlidersContextMenu(const QPoint& pos)
+{
+    auto slider = qobject_cast<SDOValueSlider*>(sender());
+    if(slider == nullptr) return;
+
+    m_slidersMenu->exec(slider->mapToGlobal(pos));
 }
 

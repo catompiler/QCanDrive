@@ -148,5 +148,5 @@ void SDOValuePlot::putValue(int n)
     SDOValItem& sdoItem = m_sdoValues[n];
     qreal dt = 0.0;
     if(sdoItem.elapsedTimer.isValid()) dt = static_cast<qreal>(sdoItem.elapsedTimer.elapsed()) / 1000;
-    putSample(n, COValue::valueAs<qreal>(sdoItem.sdoval->data(), sdoItem.type, 0.0), dt);
+    putSample(n, COValue::valueFrom<qreal>(sdoItem.sdoval->data(), sdoItem.type, 0.0), dt);
 }

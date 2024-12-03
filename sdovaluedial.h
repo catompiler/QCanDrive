@@ -53,8 +53,8 @@ public:
     void setRangeMax(qreal newRangeMax);
 
     bool setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType, qreal newMin = 0.0, qreal newMax = 1.0);
-    CoValuesHolder::HoldedSDOValuePtr SDOValue();
-    CoValuesHolder::HoldedSDOValuePtr SDOValue() const;
+    CoValuesHolder::HoldedSDOValuePtr getSDOValue();
+    CoValuesHolder::HoldedSDOValuePtr getSDOValue() const;
     COValue::Type SDOValueType() const;
     void resetSDOValue();
 

@@ -48,6 +48,8 @@ SOURCES += \
     sdovaluedial.cpp \
     sdovaluedialeditdlg.cpp \
     sdovalueplot.cpp \
+    sdovalueslider.cpp \
+    sdovalueslidereditdlg.cpp \
     sequentialbuffer.cpp \
     signalcurveeditdlg.cpp \
     signalcurveprop.cpp \
@@ -98,6 +100,8 @@ HEADERS += \
     sdovaluedial.h \
     sdovaluedialeditdlg.h \
     sdovalueplot.h \
+    sdovalueslider.h \
+    sdovalueslidereditdlg.h \
     sequentialbuffer.h \
     signalcurveeditdlg.h \
     signalcurveprop.h \
@@ -131,6 +135,7 @@ HEADERS += \
 FORMS += \
     canopenwin.ui \
     sdovaluedialeditdlg.ui \
+    sdovalueslidereditdlg.ui \
     signalcurveeditdlg.ui \
     trendploteditdlg.ui
 

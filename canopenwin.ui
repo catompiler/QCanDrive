@@ -42,6 +42,7 @@
     </property>
     <addaction name="actAddPlot"/>
     <addaction name="actAddDial"/>
+    <addaction name="actAddSlider"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -153,6 +154,30 @@
    </property>
    <property name="toolTip">
     <string>Удалить показометр</string>
+   </property>
+  </action>
+  <action name="actAddSlider">
+   <property name="text">
+    <string>&amp;Слайдер</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить слайдер</string>
+   </property>
+  </action>
+  <action name="actEditSlider">
+   <property name="text">
+    <string>&amp;Редактировать</string>
+   </property>
+   <property name="toolTip">
+    <string>Редактировать слайдер</string>
+   </property>
+  </action>
+  <action name="actDelSlider">
+   <property name="text">
+    <string>&amp;Удалить</string>
+   </property>
+   <property name="toolTip">
+    <string>Удалить слайдер</string>
    </property>
   </action>
  </widget>

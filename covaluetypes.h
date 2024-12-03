@@ -66,7 +66,7 @@ constexpr size_t typeSize(const ET target, const int defSize = 0)
 
 
 template <typename Type>
-Type valueAs(const void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const Type& defVal = Type())
+Type valueFrom(const void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const Type& defVal = Type())
 {
     const auto pType = std::get_if<COValue::Type>(&typeOrSize);
     const auto pSize = std::get_if<size_t>(&typeOrSize);
@@ -94,9 +94,8 @@ Type valueAs(const void* valueData, const std::variant<COValue::Type, size_t> ty
         case IQ7:
             return Type(*static_cast<const int32_t*>(valueData)) / (1<<7);
         case STR:
-            break;
         case MEM:
-            return *static_cast<const Type*>(valueData);
+            break;
         }
     }else if(pSize){
         if(*pSize == sizeof(Type)){
@@ -105,6 +104,60 @@ Type valueAs(const void* valueData, const std::variant<COValue::Type, size_t> ty
     }
 
     return defVal;
+}
+
+
+template <typename Type>
+bool valueTo(void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const Type& val)
+{
+    const auto pType = std::get_if<COValue::Type>(&typeOrSize);
+    const auto pSize = std::get_if<size_t>(&typeOrSize);
+
+    if(pType){
+        switch(*pType){
+        default:
+            return false;
+        case I32:
+            *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val);
+            break;
+        case I16:
+            *static_cast<int16_t*>(valueData) = static_cast<int16_t>(val);
+            break;
+        case I8:
+            *static_cast<int8_t*>(valueData) = static_cast<int8_t>(val);
+            break;
+        case U32:
+            *static_cast<uint32_t*>(valueData) = static_cast<uint32_t>(val);
+            break;
+        case U16:
+            *static_cast<uint16_t*>(valueData) = static_cast<uint16_t>(val);
+            break;
+        case U8:
+            *static_cast<uint8_t*>(valueData) = static_cast<uint8_t>(val);
+            break;
+        case IQ24:
+            *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val * (1<<24));
+            break;
+        case IQ15:
+            *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val * (1<<15));
+            break;
+        case IQ7:
+            *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val * (1<<7));
+            break;
+        case STR:
+        case MEM:
+            return false;
+        }
+    }else if(pSize){
+        if(*pSize == sizeof(Type)){
+            *static_cast<Type*>(valueData) = val;
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+    return true;
 }
 
 }

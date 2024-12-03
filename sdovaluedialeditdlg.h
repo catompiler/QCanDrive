@@ -83,7 +83,6 @@ private slots:
 private:
     Ui::SDOValueDialEditDlg *ui;
 
-
     void peekColor(QWidget* colHolder);
     void populateTypes();
 };
