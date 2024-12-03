@@ -5,7 +5,11 @@
 #include <QPainter>
 #include <QFont>
 #include <QFontMetrics>
+#include <QMessageBox>
 #include <QDebug>
+
+
+//#define SDOVALUESLIDER_MESSAGE_ON_WRITE_ERROR 0
 
 
 
@@ -216,6 +220,12 @@ bool SDOValueSlider::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::S
     m_wrSdoValue->setSubIndex(newSubIndex);
     m_wrSdoValue->setDataSize(typeSize);
 
+#if defined(SDOVALUESLIDER_MESSAGE_ON_WRITE_ERROR) && SDOVALUESLIDER_MESSAGE_ON_WRITE_ERROR == 1
+    connect(m_wrSdoValue, &SDOValue::errorOccured, this, [this](){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать значение!"));
+    });
+#endif
+
     m_rdSdoValue = m_valsHolder->addSdoValue(newNodeId, newIndex, newSubIndex, typeSize);
     if(m_rdSdoValue == nullptr){
         resetSDOValue();
@@ -258,6 +268,9 @@ void SDOValueSlider::resetSDOValue()
     }
 
     if(m_wrSdoValue != nullptr){
+#if defined(SDOVALUESLIDER_MESSAGE_ON_WRITE_ERROR) && SDOVALUESLIDER_MESSAGE_ON_WRITE_ERROR == 1
+        disconnect(m_wrSdoValue, &SDOValue::errorOccured, nullptr, nullptr);
+#endif
         delete m_wrSdoValue;
         m_wrSdoValue = nullptr;
     }
