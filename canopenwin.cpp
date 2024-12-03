@@ -350,6 +350,7 @@ void CanOpenWin::on_actAddDial_triggered(bool checked)
         dial->setTextScaleColor(m_dialDlg->textScaleColor());
         dial->setNeedleColor(m_dialDlg->needleColor());
         dial->setPenWidth(m_dialDlg->penWidth());
+        dial->setPrecision(m_dialDlg->precision());
 
         dial->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(dial, &SDOValueDial::customContextMenuRequested, this, &CanOpenWin::showDialsContextMenu);
@@ -394,6 +395,7 @@ void CanOpenWin::on_actEditDial_triggered(bool checked)
     m_dialDlg->setTextScaleColor(dial->textScaleColor());
     m_dialDlg->setNeedleColor(dial->needleColor());
     m_dialDlg->setPenWidth(dial->penWidth());
+    m_dialDlg->setPrecision(dial->precision());
 
     m_dialDlg->setRangeMin(dial->rangeMin());
     m_dialDlg->setRangeMax(dial->rangeMax());
@@ -421,6 +423,7 @@ void CanOpenWin::on_actEditDial_triggered(bool checked)
         dial->setTextScaleColor(m_dialDlg->textScaleColor());
         dial->setNeedleColor(m_dialDlg->needleColor());
         dial->setPenWidth(m_dialDlg->penWidth());
+        dial->setPrecision(m_dialDlg->precision());
 
         m_layout->takeAt(dialLayIndex);
         m_layout->addWidget(dial, m_dialDlg->posRow(), m_dialDlg->posColumn(), m_dialDlg->sizeRows(), m_dialDlg->sizeColumns());

@@ -70,6 +70,9 @@ public:
     qreal penWidth() const;
     void setPenWidth(qreal newPenWidth);
 
+    uint precision() const;
+    void setPrecision(uint newPrecision);
+
 private slots:
     void on_tbOutsideBackColorSel_clicked(bool checked = false);
     void on_tbInsideBackColorSel_clicked(bool checked = false);

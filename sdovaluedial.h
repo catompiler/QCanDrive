@@ -43,6 +43,9 @@ public:
     qreal penWidth() const;
     void setPenWidth(qreal newPenWidth);
 
+    uint precision() const;
+    void setPrecision(uint newPrecision);
+
     qreal rangeMin() const;
     void setRangeMin(qreal newRangeMin);
 
@@ -64,8 +67,10 @@ protected:
     COValue::Type m_sdoValueType;
 
     QString m_name;
+    uint m_precision;
 
     void drawScaleContents(QPainter* painter, const QPointF& center, double radius) const override;
+    void drawNeedle(QPainter* painter, const QPointF& center, double radius, double direction, QPalette::ColorGroup colorGroup) const override;
 };
 
 #endif // SDOVALUEDIAL_H

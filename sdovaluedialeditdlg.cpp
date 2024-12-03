@@ -213,6 +213,16 @@ void SDOValueDialEditDlg::setPenWidth(qreal newPenWidth)
     ui->sbPenWidth->setValue(newPenWidth);
 }
 
+uint SDOValueDialEditDlg::precision() const
+{
+    return static_cast<uint>(ui->sbPrecision->value());
+}
+
+void SDOValueDialEditDlg::setPrecision(uint newPrecision)
+{
+    ui->sbPrecision->setValue(static_cast<int>(newPrecision));
+}
+
 void SDOValueDialEditDlg::on_tbOutsideBackColorSel_clicked(bool checked)
 {
     Q_UNUSED(checked)

@@ -4,6 +4,9 @@
 #include <QwtRoundScaleDraw>
 #include <QwtAbstractScaleDraw>
 #include <QPainter>
+#include <QFont>
+#include <QFontMetrics>
+#include <QDebug>
 
 
 
@@ -13,6 +16,9 @@ SDOValueDial::SDOValueDial(CoValuesHolder* newValsHolder, QWidget* parent)
     m_valsHolder = newValsHolder;
     m_sdoValue = nullptr;
     m_sdoValueType = COValue::Type();
+
+    m_name = QString();
+    m_precision = 0;
 
     auto scaleDraw = new QwtRoundScaleDraw();
     scaleDraw->enableComponent(QwtRoundScaleDraw::Backbone, false);
@@ -146,6 +152,18 @@ void SDOValueDial::setPenWidth(qreal newPenWidth)
     if(scaleDraw == nullptr) return;
 
     scaleDraw->setPenWidthF(newPenWidth);
+
+    scaleChange();
+}
+
+uint SDOValueDial::precision() const
+{
+    return m_precision;
+}
+
+void SDOValueDial::setPrecision(uint newPrecision)
+{
+    m_precision = newPrecision;
 }
 
 qreal SDOValueDial::rangeMin() const
@@ -226,12 +244,47 @@ void SDOValueDial::sdovalueReaded()
 // From Qwt Dials example.
 void SDOValueDial::drawScaleContents(QPainter* painter, const QPointF& center, double radius) const
 {
-    QRectF rect( 0.0, 0.0, 2.0 * radius, 2.0 * radius - 10.0 );
-    rect.moveCenter( center );
+    const int fontHeight = fontMetrics().height();
+
+    QRect inrect = innerRect();
+    qreal innerRadius = static_cast<qreal>(qMin(inrect.width(), inrect.height())) * 0.5;
+
+    painter->save();
 
     const QColor color = palette().color( QPalette::Text );
     painter->setPen( color );
 
+    QRectF rect( 0.0, 0.0, 2.0 * radius, radius + innerRadius + 0.5 * fontHeight );
+    rect.moveCenter( center );
+
     const int flags = Qt::AlignBottom | Qt::AlignHCenter;
     painter->drawText( rect, flags, m_name );
+
+    painter->restore();
+}
+
+
+void SDOValueDial::drawNeedle(QPainter* painter, const QPointF& center, double radius, double direction, QPalette::ColorGroup colorGroup) const
+{
+    const int fontHeight = fontMetrics().height();
+
+    painter->save();
+
+    const QColor color = needleColor();
+    painter->setPen( color );
+
+    QRectF rect_value( 0.0, 0.0, 2.0 * radius, radius );
+    rect_value.moveLeft( center.x() - radius );
+    rect_value.moveTop(center.y());
+
+    QFont font_value(font());
+    font_value.setPixelSize(fontHeight * 1.5);
+
+    const int flags_value = Qt::AlignVCenter | Qt::AlignHCenter;
+    painter->setFont(font_value);
+    painter->drawText( rect_value, flags_value, QString::number(value(), 'f', m_precision) );
+
+    painter->restore();
+
+    QwtDial::drawNeedle(painter, center, radius, direction, colorGroup);
 }

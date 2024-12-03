@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
-    <height>465</height>
+    <width>405</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -144,7 +144,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1" colspan="2">
+      <item row="0" column="1">
        <widget class="QFrame" name="frOutsideBackColor">
         <property name="autoFillBackground">
          <bool>true</bool>
@@ -154,7 +154,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
+      <item row="0" column="2">
        <widget class="QToolButton" name="tbOutsideBackColorSel">
         <property name="text">
          <string>...</string>
@@ -168,7 +168,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1" colspan="2">
+      <item row="1" column="1">
        <widget class="QFrame" name="frInsideBackColor">
         <property name="autoFillBackground">
          <bool>true</bool>
@@ -178,7 +178,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
+      <item row="1" column="2">
        <widget class="QToolButton" name="tbInsideBackColorSel">
         <property name="text">
          <string>...</string>
@@ -192,7 +192,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
+      <item row="2" column="1">
        <widget class="QFrame" name="frInsideScaleBackColor">
         <property name="autoFillBackground">
          <bool>true</bool>
@@ -202,7 +202,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="3">
+      <item row="2" column="2">
        <widget class="QToolButton" name="tbInsideScaleBackColorSel">
         <property name="text">
          <string>...</string>
@@ -216,7 +216,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="1" colspan="2">
+      <item row="3" column="1">
        <widget class="QFrame" name="frTextScaleColor">
         <property name="autoFillBackground">
          <bool>true</bool>
@@ -226,7 +226,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="3">
+      <item row="3" column="2">
        <widget class="QToolButton" name="tbTextScaleColorSel">
         <property name="text">
          <string>...</string>
@@ -240,7 +240,17 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
+      <item row="4" column="1">
+       <widget class="QFrame" name="frNeedleColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
        <widget class="QToolButton" name="tbNeedleColorSel">
         <property name="text">
          <string>...</string>
@@ -254,17 +264,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1" colspan="2">
-       <widget class="QFrame" name="frNeedleColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1" colspan="3">
+      <item row="5" column="1" colspan="2">
        <widget class="QDoubleSpinBox" name="sbPenWidth">
         <property name="decimals">
          <number>1</number>
@@ -277,6 +277,23 @@
         </property>
         <property name="value">
          <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="lblPrecision">
+        <property name="text">
+         <string>Точность</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbPrecision">
+        <property name="maximum">
+         <number>6</number>
+        </property>
+        <property name="value">
+         <number>1</number>
         </property>
        </widget>
       </item>
