@@ -184,6 +184,8 @@ Qt::Orientation SDOValueSlider::orientation() const
 void SDOValueSlider::setOrientation(Qt::Orientation newOrientation)
 {
     QwtSlider::setOrientation(newOrientation);
+
+    updateContentMargins();
 }
 
 qreal SDOValueSlider::rangeMin() const
