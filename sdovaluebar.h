@@ -76,7 +76,7 @@ private slots:
 
 protected:
     CoValuesHolder* m_valsHolder;
-    CoValuesHolder::HoldedSDOValuePtr m_rdSdoValue;
+    CoValuesHolder::HoldedSDOValuePtr m_sdoValue;
     COValue::Type m_sdoValueType;
     QString m_name;
 

@@ -17,7 +17,7 @@ SDOValueBar::SDOValueBar(CoValuesHolder* newValsHolder, QWidget* parent)
     :QwtThermo(parent)
 {
     m_valsHolder = newValsHolder;
-    m_rdSdoValue = nullptr;
+    m_sdoValue = nullptr;
     m_sdoValueType = COValue::Type();
     m_name = QString("");
 
@@ -26,9 +26,9 @@ SDOValueBar::SDOValueBar(CoValuesHolder* newValsHolder, QWidget* parent)
 
 SDOValueBar::~SDOValueBar()
 {
-    if(m_rdSdoValue){
+    if(m_sdoValue){
         resetSDOValue();
-        delete m_rdSdoValue;
+        delete m_sdoValue;
     }
 }
 
@@ -192,13 +192,13 @@ void SDOValueBar::setRangeMax(qreal newRangeMax)
 bool SDOValueBar::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType, qreal newMin, qreal newMax)
 {
     if(m_valsHolder == nullptr) return false;
-    if(m_rdSdoValue) resetSDOValue();
+    if(m_sdoValue) resetSDOValue();
 
     size_t typeSize = COValue::typeSize(newType);
     if(typeSize == 0) return false;
 
-    m_rdSdoValue = m_valsHolder->addSdoValue(newNodeId, newIndex, newSubIndex, typeSize);
-    if(m_rdSdoValue == nullptr){
+    m_sdoValue = m_valsHolder->addSdoValue(newNodeId, newIndex, newSubIndex, typeSize);
+    if(m_sdoValue == nullptr){
         return false;
     }
 
@@ -206,19 +206,19 @@ bool SDOValueBar::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubI
 
     setScale(newMin, newMax);
 
-    connect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueBar::sdovalueReaded);
+    connect(m_sdoValue, &SDOValue::readed, this, &SDOValueBar::sdovalueReaded);
 
     return true;
 }
 
 CoValuesHolder::HoldedSDOValuePtr SDOValueBar::getSDOValue()
 {
-    return m_rdSdoValue;
+    return m_sdoValue;
 }
 
 CoValuesHolder::HoldedSDOValuePtr SDOValueBar::getSDOValue() const
 {
-    return m_rdSdoValue;
+    return m_sdoValue;
 }
 
 COValue::Type SDOValueBar::SDOValueType() const
@@ -230,11 +230,11 @@ void SDOValueBar::resetSDOValue()
 {
     if(m_valsHolder == nullptr) return;
 
-    if(m_rdSdoValue != nullptr){
-        disconnect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueBar::sdovalueReaded);
+    if(m_sdoValue != nullptr){
+        disconnect(m_sdoValue, &SDOValue::readed, this, &SDOValueBar::sdovalueReaded);
 
-        m_valsHolder->delSdoValue(m_rdSdoValue);
-        m_rdSdoValue = nullptr;
+        m_valsHolder->delSdoValue(m_sdoValue);
+        m_sdoValue = nullptr;
     }
 }
 
