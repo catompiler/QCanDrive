@@ -45,6 +45,8 @@ SOURCES += \
     reg_data.c \
     sdocomm.cpp \
     sdovalue.cpp \
+    sdovaluebar.cpp \
+    sdovaluebareditdlg.cpp \
     sdovaluedial.cpp \
     sdovaluedialeditdlg.cpp \
     sdovalueplot.cpp \
@@ -97,6 +99,8 @@ HEADERS += \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \
+    sdovaluebar.h \
+    sdovaluebareditdlg.h \
     sdovaluedial.h \
     sdovaluedialeditdlg.h \
     sdovalueplot.h \
@@ -134,6 +138,7 @@ HEADERS += \
 
 FORMS += \
     canopenwin.ui \
+    sdovaluebareditdlg.ui \
     sdovaluedialeditdlg.ui \
     sdovalueslidereditdlg.ui \
     signalcurveeditdlg.ui \

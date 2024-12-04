@@ -6,11 +6,13 @@
 #include "sdovalueplot.h"
 #include "sdovaluedial.h"
 #include "sdovalueslider.h"
+#include "sdovaluebar.h"
 #include "signalcurveprop.h"
 #include "trendploteditdlg.h"
 #include "signalcurveeditdlg.h"
 #include "sdovaluedialeditdlg.h"
 #include "sdovalueslidereditdlg.h"
+#include "sdovaluebareditdlg.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
@@ -47,6 +49,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_slidersMenu->addAction(ui->actEditSlider);
     m_slidersMenu->addAction(ui->actDelSlider);
 
+    m_barsMenu = new QMenu();
+    m_barsMenu->addAction(ui->actEditBar);
+    m_barsMenu->addAction(ui->actDelBar);
+
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
     connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
@@ -63,6 +69,8 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_dialDlg = new SDOValueDialEditDlg();
 
     m_sliderDlg = new SDOValueSliderEditDlg();
+
+    m_barDlg = new SDOValueBarEditDlg();
 }
 
 CanOpenWin::~CanOpenWin()
@@ -70,12 +78,18 @@ CanOpenWin::~CanOpenWin()
     m_slcon->destroyCO();
     m_slcon->closePort();
 
+    delete m_barDlg;
+
     delete m_sliderDlg;
 
     delete m_dialDlg;
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
+
+    m_barsMenu->removeAction(ui->actDelBar);
+    m_barsMenu->removeAction(ui->actEditBar);
+    delete m_barsMenu;
 
     m_slidersMenu->removeAction(ui->actDelSlider);
     m_slidersMenu->removeAction(ui->actEditSlider);
@@ -583,6 +597,144 @@ void CanOpenWin::on_actDelSlider_triggered(bool checked)
     delete slider;
 }
 
+void CanOpenWin::on_actAddBar_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    m_barDlg->setName(tr("Прибор %1").arg(m_layout->count() + 1));
+
+    if(m_barDlg->exec()){
+        auto bar = new SDOValueBar(m_valsHolder, nullptr);
+
+        bool added = bar->setSDOValue(m_barDlg->nodeId(), m_barDlg->index(), m_barDlg->subIndex(), m_barDlg->type(), m_barDlg->rangeMin(), m_barDlg->rangeMax());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка добавления бара!"), tr("Невозможно добавить бар: \"%1\"").arg(m_barDlg->name()));
+            return;
+        }
+
+        bar->setName(m_barDlg->name());
+        bar->setBarBackColor(m_barDlg->barBackColor());
+        bar->setBarColor(m_barDlg->barColor());
+        bar->setBarAlarmColor(m_barDlg->barAlarmColor());
+        bar->setScaleColor(m_barDlg->scaleColor());
+        bar->setTextColor(m_barDlg->textColor());
+        bar->setPenWidth(m_barDlg->penWidth());
+        bar->setBarWidth(m_barDlg->barWidth());
+        bar->setBorderWidth(m_barDlg->borderWidth());
+        bar->setAlarmEnabled(m_barDlg->alarmEnabled());
+        bar->setAlarmLevel(m_barDlg->alarmLevel());
+        bar->setScalePosition(m_barDlg->scalePosition());
+        bar->setOrientation(m_barDlg->orientation());
+
+        bar->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(bar, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showBarsContextMenu);
+
+        m_layout->addWidget(bar, m_barDlg->posRow(), m_barDlg->posColumn(), m_barDlg->sizeRows(), m_barDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actEditBar_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_barsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto bar = findWidgetTypeAt<SDOValueBar>(pos);
+
+    //qDebug() << bar;
+
+    if(bar == nullptr) return;
+
+    int row = 0;
+    int col = 0;
+    int rowSpan = 1;
+    int colSpan = 1;
+
+    int barLayIndex = m_layout->indexOf(bar);
+    if(barLayIndex == -1) return;
+
+    m_layout->getItemPosition(barLayIndex, &row, &col, &rowSpan, &colSpan);
+
+    m_barDlg->setPosRow(row);
+    m_barDlg->setPosColumn(col);
+    m_barDlg->setSizeRows(rowSpan);
+    m_barDlg->setSizeColumns(colSpan);
+
+    m_barDlg->setName(bar->name());
+    m_barDlg->setBarBackColor(bar->barBackColor());
+    m_barDlg->setBarColor(bar->barColor());
+    m_barDlg->setBarAlarmColor(bar->barAlarmColor());
+    m_barDlg->setScaleColor(bar->scaleColor());
+    m_barDlg->setTextColor(bar->textColor());
+    m_barDlg->setPenWidth(bar->penWidth());
+    m_barDlg->setBarWidth(bar->barWidth());
+    m_barDlg->setBorderWidth(bar->borderWidth());
+    m_barDlg->setAlarmEnabled(bar->alarmEnabled());
+    m_barDlg->setAlarmLevel(bar->alarmLevel());
+    m_barDlg->setScalePosition(bar->scalePosition());
+    m_barDlg->setOrientation(bar->orientation());
+
+    m_barDlg->setRangeMin(bar->rangeMin());
+    m_barDlg->setRangeMax(bar->rangeMax());
+
+    auto sdoval = bar->getSDOValue();
+
+    m_barDlg->setNodeId(sdoval->nodeId());
+    m_barDlg->setIndex(sdoval->index());
+    m_barDlg->setSubIndex(sdoval->subIndex());
+    m_barDlg->setType(bar->SDOValueType());
+
+    if(m_barDlg->exec()){
+        bar->resetSDOValue();
+
+        bool added = bar->setSDOValue(m_barDlg->nodeId(), m_barDlg->index(), m_barDlg->subIndex(), m_barDlg->type(), m_barDlg->rangeMin(), m_barDlg->rangeMax());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка изменения бара!"), tr("Невозможно изменить бар: \"%1\"").arg(m_barDlg->name()));
+            return;
+        }
+
+        bar->setName(m_barDlg->name());
+        bar->setBarBackColor(m_barDlg->barBackColor());
+        bar->setBarColor(m_barDlg->barColor());
+        bar->setBarAlarmColor(m_barDlg->barAlarmColor());
+        bar->setScaleColor(m_barDlg->scaleColor());
+        bar->setTextColor(m_barDlg->textColor());
+        bar->setPenWidth(m_barDlg->penWidth());
+        bar->setBarWidth(m_barDlg->barWidth());
+        bar->setBorderWidth(m_barDlg->borderWidth());
+        bar->setAlarmEnabled(m_barDlg->alarmEnabled());
+        bar->setAlarmLevel(m_barDlg->alarmLevel());
+        bar->setScalePosition(m_barDlg->scalePosition());
+        bar->setOrientation(m_barDlg->orientation());
+
+        m_layout->takeAt(barLayIndex);
+        m_layout->addWidget(bar, m_barDlg->posRow(), m_barDlg->posColumn(), m_barDlg->sizeRows(), m_barDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actDelBar_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_barsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto bar = findWidgetTypeAt<SDOValueBar>(pos);
+
+    if(bar == nullptr) return;
+
+    int barLayIndex = m_layout->indexOf(bar);
+    if(barLayIndex == -1) return;
+
+    m_layout->takeAt(barLayIndex);
+
+    bar->resetSDOValue();
+    delete bar;
+}
+
 void CanOpenWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
@@ -615,5 +767,13 @@ void CanOpenWin::showSlidersContextMenu(const QPoint& pos)
     if(slider == nullptr) return;
 
     m_slidersMenu->exec(slider->mapToGlobal(pos));
+}
+
+void CanOpenWin::showBarsContextMenu(const QPoint& pos)
+{
+    auto bar = qobject_cast<SDOValueBar*>(sender());
+    if(bar == nullptr) return;
+
+    m_barsMenu->exec(bar->mapToGlobal(pos));
 }
 
