@@ -7,6 +7,7 @@
 #include "sdovaluedial.h"
 #include "sdovalueslider.h"
 #include "sdovaluebar.h"
+#include "sdovaluebutton.h"
 #include "signalcurveprop.h"
 #include "trendploteditdlg.h"
 #include "signalcurveeditdlg.h"
@@ -71,6 +72,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_sliderDlg = new SDOValueSliderEditDlg();
 
     m_barDlg = new SDOValueBarEditDlg();
+
+    auto btn = new SDOValueButton(m_valsHolder);
+    btn->setText("Test");
+    m_layout->addWidget(btn);
 }
 
 CanOpenWin::~CanOpenWin()

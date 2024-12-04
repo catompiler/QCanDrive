@@ -47,6 +47,7 @@ SOURCES += \
     sdovalue.cpp \
     sdovaluebar.cpp \
     sdovaluebareditdlg.cpp \
+    sdovaluebutton.cpp \
     sdovaluedial.cpp \
     sdovaluedialeditdlg.cpp \
     sdovalueplot.cpp \
@@ -101,6 +102,7 @@ HEADERS += \
     sdovalue.h \
     sdovaluebar.h \
     sdovaluebareditdlg.h \
+    sdovaluebutton.h \
     sdovaluedial.h \
     sdovaluedialeditdlg.h \
     sdovalueplot.h \
