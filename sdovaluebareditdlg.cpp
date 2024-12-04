@@ -20,6 +20,8 @@ SDOValueBarEditDlg::SDOValueBarEditDlg(QWidget *parent) :
     populateTypes();
     populateOrientations();
     populateScalePositions();
+
+    setScalePosition(QwtThermo::LeadingScale);
 }
 
 SDOValueBarEditDlg::~SDOValueBarEditDlg()
