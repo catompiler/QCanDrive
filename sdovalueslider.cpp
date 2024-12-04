@@ -353,3 +353,18 @@ void SDOValueSlider::mouseReleaseEvent(QMouseEvent* event)
 
     m_updateMask = false;
 }
+
+
+void SDOValueSlider::changeEvent(QEvent* event)
+{
+    QwtSlider::changeEvent(event);
+
+    switch(event->type()){
+    default:
+        break;
+    case QEvent::StyleChange:
+    case QEvent::FontChange:
+        updateContentMargins();
+        break;
+    }
+}
