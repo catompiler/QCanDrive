@@ -18,7 +18,7 @@ SDOValueSliderEditDlg::SDOValueSliderEditDlg(QWidget *parent) :
     setTextColor(QColor(Qt::white));
 
     populateTypes();
-    populateAlignments();
+    populateOrientations();
 }
 
 SDOValueSliderEditDlg::~SDOValueSliderEditDlg()
@@ -315,7 +315,7 @@ void SDOValueSliderEditDlg::populateTypes()
     }
 }
 
-void SDOValueSliderEditDlg::populateAlignments()
+void SDOValueSliderEditDlg::populateOrientations()
 {
     ui->cbOrientation->clear();
 

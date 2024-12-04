@@ -94,7 +94,7 @@ private:
 
     void peekColor(QWidget* colHolder);
     void populateTypes();
-    void populateAlignments();
+    void populateOrientations();
 };
 
 #endif // SDOVALUESLIDEREDITDLG_H
