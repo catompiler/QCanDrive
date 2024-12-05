@@ -253,6 +253,9 @@ void SDOValueButton::paintEvent(QPaintEvent* event)
     painter.setClipRegion( event->region() );
 
     drawButton(&painter);
+
+    /*painter.fillRect(rect(), Qt::magenta);
+    drawHighlight(&painter);*/
 }
 
 QColor SDOValueButton::lerpColor(const QColor& ca, const QColor& cb, int t)
@@ -279,53 +282,54 @@ QColor SDOValueButton::lerpColor(const QColor& ca, const QColor& cb, int t)
 
 void SDOValueButton::createImages()
 {
-    int w = width();
-    int h = height();
+    auto cr = contentsRect();
+
+    int w = cr.width();
+    int h = cr.height();
 
     auto pfmt = QImage::Format_ARGB32_Premultiplied;
 
+    m_imgBuffer = new QImage(w, h, pfmt);
+    m_imgBorder = new QImage(w, h, pfmt);
     m_imgNormal = new QImage(w, h, pfmt);
     m_imgChecked = new QImage(w, h, pfmt);
-    m_imgNormalClicked = new QImage(w, h, pfmt);
-    m_imgCheckedClicked = new QImage(w, h, pfmt);
+    m_imgClicked = new QImage(w, h, pfmt);
     m_imgMouse = new QImage(w, h, pfmt);
     m_imgFocus = new QImage(w, h, pfmt);
 
+    m_imgBuffer->fill(0);
+    m_imgBorder->fill(0);
     m_imgNormal->fill(0);
     m_imgChecked->fill(0);
-    m_imgNormalClicked->fill(0);
-    m_imgCheckedClicked->fill(0);
+    m_imgClicked->fill(0);
     m_imgMouse->fill(0);
     m_imgFocus->fill(0);
 }
 
 void SDOValueButton::deleteImages()
 {
+    delete m_imgBuffer;
+    delete m_imgBorder;
     delete m_imgNormal;
     delete m_imgChecked;
-    delete m_imgNormalClicked;
-    delete m_imgCheckedClicked;
+    delete m_imgClicked;
     delete m_imgMouse;
     delete m_imgFocus;
 }
 
 void SDOValueButton::updateImages()
 {
+    QPainter p_border(m_imgBorder);
+    drawBorder(&p_border);
+
     QPainter p_normal(m_imgNormal);
     drawNormal(&p_normal);
-    drawBorder(&p_normal);
 
     QPainter p_checked(m_imgChecked);
     drawChecked(&p_checked);
-    drawBorder(&p_checked);
 
-    QPainter p_click(m_imgNormalClicked);
-    drawNormalClicked(&p_click);
-    drawBorder(&p_click);
-
-    QPainter p_ch_click(m_imgCheckedClicked);
-    drawCheckedClicked(&p_ch_click);
-    drawBorder(&p_ch_click);
+    QPainter p_click(m_imgClicked);
+    drawClicked(&p_click);
 
     QPainter p_mouse(m_imgMouse);
     drawMouse(&p_mouse);
@@ -336,35 +340,33 @@ void SDOValueButton::updateImages()
 
 void SDOValueButton::drawButton(QPainter* p)
 {
-    //drawBack(p);
+    QPainter pi(m_imgBuffer);
 
-    auto cr = contentsRect();
+    pi.fillRect(m_imgBuffer->rect(), palette().button().color());
 
     if(isChecked()){
-        if(m_clickFlag){
-            p->drawImage(cr, *m_imgCheckedClicked, cr);
-        }else{
-            p->drawImage(cr, *m_imgChecked, cr);
-        }
+        pi.drawImage(0, 0, *m_imgChecked);
     }else{
-        if(m_clickFlag){
-            p->drawImage(cr, *m_imgNormalClicked, cr);
-        }else{
-            p->drawImage(cr, *m_imgNormal, cr);
-        }
+        pi.drawImage(0, 0, *m_imgNormal);
     }
 
-    //qDebug() << m_clickFlag;
+    if(m_clickFlag){
+        pi.drawImage(0, 0, *m_imgClicked);
+    }
+
+    pi.drawImage(0, 0, *m_imgBorder);
 
     if(m_mouseFlag){
-        p->drawImage(cr, *m_imgMouse, cr);
+        pi.drawImage(0, 0, *m_imgMouse);
     }
 
     if(hasFocus()){
-        p->drawImage(cr, *m_imgFocus, cr);
+        pi.drawImage(0, 0, *m_imgFocus);
     }
 
-    drawText(p);
+    drawText(&pi);
+
+    p->drawImage(contentsRect(), *m_imgBuffer);
 
 //    p->setPen(Qt::magenta);
 //    p->setBrush(Qt::NoBrush);
@@ -376,36 +378,17 @@ void SDOValueButton::drawButton(QPainter* p)
 
 void SDOValueButton::drawText(QPainter* p)
 {
-    p->setPen(palette().buttonText().color());
-    p->drawText(contentsRect(), Qt::AlignHCenter | Qt::AlignVCenter, text());
-}
+    QColor fc = palette().buttonText().color();
+    fc.setAlpha(224);
 
-void SDOValueButton::drawChecked(QPainter* p)
-{
-    //p->fillRect(rect(), QColor(0, 0, 0, 0));
-
-    const QColor& fc = palette().light().color();
-    const QColor& bc = palette().button().color();
-    //const QColor& bc = QColor(fc.red(), fc.green(), fc.blue(), 0);//palette().button().color();
-
-    int bw = qMin(width(), height());
-
-    QRadialGradient grr;
-    grr.setSpread(QRadialGradient::PadSpread);
-    grr.setColorAt(0, fc);
-    grr.setColorAt(1.0, bc);
-    grr.setRadius(bw);
-
-    QRect cr = contentsRect();
-
-    grr.setCenter(cr.center());
-    grr.setFocalPoint(grr.center());
-    p->fillRect(cr, grr);
+    p->setFont(font());
+    p->setPen(fc);
+    p->drawText(p->viewport(), Qt::AlignHCenter | Qt::AlignVCenter, text());
 }
 
 void SDOValueButton::drawBorder(QPainter* p)
 {
-    const int border_k = 4;
+    const int border_k = 2;
     const int bw_lrg = m_borderWidth;
     const int bw_sml = m_borderWidth / border_k;
     const QColor& glare_col = palette().midlight().color();
@@ -415,7 +398,7 @@ void SDOValueButton::drawBorder(QPainter* p)
     QColor border_small_col = lerpColor(border_col, button_col, 128);
     QColor glare_small_col_transp = lerpColor(border_small_col, glare_col, 96);
 
-    QRect r = contentsRect();
+    QRect r = p->viewport();
     QPoint grad_center;
 
     if(r.width() == 0){
@@ -450,22 +433,18 @@ void SDOValueButton::drawBorder(QPainter* p)
 
     drawTickRect(p, r, bw_lrg);
 
-    grl.setStart(r.topLeft() + QPoint(bw_lrg + bw_sml, bw_lrg + bw_sml));
+    grl.setStart(r.topLeft() + QPoint(bw_lrg, bw_lrg));
     grl.setColorAt(0, glare_small_col_transp);
     grl.setColorAt(1.0, border_small_col);
     pen.setBrush(QBrush(grl));
     p->setPen(pen);
 
-    r.moveLeft(r.left() + bw_lrg + bw_sml);
-    r.moveTop(r.top() + bw_lrg + bw_sml);
-    r.setWidth(r.width() - 2 * (bw_lrg + bw_sml));
-    r.setHeight(r.height() - 2 * (bw_lrg + bw_sml));
+    r.moveLeft(r.left() + bw_lrg);
+    r.moveTop(r.top() + bw_lrg);
+    r.setWidth(r.width() - 2 * (bw_lrg));
+    r.setHeight(r.height() - 2 * (bw_lrg));
 
     drawTickRect(p, r, bw_sml);
-
-    //p->setBrush(Qt::magenta);
-    //p->drawEllipse(grad_center, 5, 5);
-    //p->drawLine(contentsRect().bottomLeft(), contentsRect().topRight());
 }
 
 void SDOValueButton::drawTickRect(QPainter* p, const QRect& r, int w)
@@ -487,10 +466,10 @@ void SDOValueButton::drawNormal(QPainter* p)
 {
     //p->fillRect(rect(), QColor(0, 0, 0, 0));
 
-    auto cr = contentsRect();
+    auto cr = p->viewport();
 
     const QColor& fc = palette().midlight().color();
-    const QColor& bc = palette().button().color();
+    QColor bc = Qt::transparent; //palette().button().color();
 
     int bw = qMin(cr.width(), cr.height());
 
@@ -505,9 +484,87 @@ void SDOValueButton::drawNormal(QPainter* p)
     p->fillRect(cr, grr);
 }
 
+void SDOValueButton::drawChecked(QPainter* p)
+{
+    //p->fillRect(rect(), QColor(0, 0, 0, 0));
+
+    QRect cr = p->viewport();
+
+    const QColor& fc = palette().light().color();
+    QColor bc = Qt::transparent; //palette().button().color();
+
+    int bw = qMin(width(), height());
+
+    QRadialGradient grr;
+    grr.setSpread(QRadialGradient::PadSpread);
+    grr.setColorAt(0, fc);
+    grr.setColorAt(1.0, bc);
+    grr.setRadius(bw);
+
+    grr.setCenter(cr.center());
+    grr.setFocalPoint(grr.center());
+    p->fillRect(cr, grr);
+}
+
+void SDOValueButton::drawClicked(QPainter* p)
+{
+    //p->fillRect(rect(), QColor(0, 0, 0, 0));
+
+    auto cr = p->viewport();
+
+    const QColor& fc = palette().midlight().color();
+    QColor bc = Qt::transparent; //palette().button().color();
+
+    int bw = qMin(cr.width(), cr.height());
+
+    QRadialGradient grr;
+    grr.setSpread(QRadialGradient::PadSpread);
+    grr.setColorAt(0, fc);
+    grr.setColorAt(1.0, bc);
+    grr.setRadius(bw);
+
+    grr.setCenter(cr.center());
+    grr.setFocalPoint(grr.center());
+    p->fillRect(cr, grr);
+}
+
+void SDOValueButton::drawMouse(QPainter* p)
+{
+    //p->fillRect(rect(), QColor(0, 0, 0, 0));
+
+    auto cr = p->viewport();
+
+    QColor fc = palette().highlight().color();
+    QColor bc = Qt::transparent; //palette().button().color();
+    fc.setAlpha(96);
+
+    int bw = qMin(cr.width(), cr.height());
+
+    QRadialGradient grr;
+    grr.setSpread(QRadialGradient::PadSpread);
+    grr.setColorAt(0, fc);
+    grr.setColorAt(1.0, bc);
+    grr.setRadius(bw);
+
+    grr.setCenter(cr.left() + cr.width() / 2, cr.bottom());
+    grr.setFocalPoint(grr.center());
+    p->fillRect(cr, grr);
+}
+
+void SDOValueButton::drawHighlight(QPainter* p)
+{
+    //p->fillRect(rect(), QColor(0, 0, 0, 0));
+
+    QColor fc = palette().highlight().color();
+    QColor bc = Qt::transparent; //palette().button().color();
+    fc.setAlpha(96);
+
+    drawBorderGrad(p, m_borderWidth / 2, bc, fc);
+}
+
 void SDOValueButton::drawBorderGrad(QPainter* p, int borderWidth, const QColor& btnCol, const QColor& brdrCol)
 {
-    auto cr = contentsRect();
+    auto cr = p->viewport();
 
     int left = cr.left();
     int right = cr.right();
@@ -572,84 +629,4 @@ void SDOValueButton::drawBorderGrad(QPainter* p, int borderWidth, const QColor& 
     grr.setCenter(right - bw + 1, bottom - bw + 1);
     grr.setFocalPoint(grr.center());
     p->fillRect(right - bw + 1, bottom - bw + 1, bw, bw, grr);
-}
-
-void SDOValueButton::drawHighlight(QPainter* p)
-{
-    //p->fillRect(rect(), QColor(0, 0, 0, 0));
-
-    QColor btn_col = palette().button().color();
-    QColor hl_col = palette().highlight().color();
-    btn_col.setAlpha(0);
-    hl_col.setAlpha(96);
-    drawBorderGrad(p, m_borderWidth / 2, btn_col, hl_col);
-}
-
-void SDOValueButton::drawMouse(QPainter* p)
-{
-    //p->fillRect(rect(), QColor(0, 0, 0, 0));
-
-    auto cr = contentsRect();
-
-    QColor front_col = palette().highlight().color();
-    QColor back_col = palette().button().color();
-    front_col.setAlpha(96);
-    back_col.setAlpha(0);
-
-    int bw = qMin(cr.width(), cr.height());
-
-    QRadialGradient grr;
-    grr.setSpread(QRadialGradient::PadSpread);
-    grr.setColorAt(0, front_col);
-    grr.setColorAt(1.0, back_col);
-    grr.setRadius(bw);
-
-    grr.setCenter(cr.left() + cr.width() / 2, cr.bottom());
-    grr.setFocalPoint(grr.center());
-    p->fillRect(cr, grr);
-}
-
-void SDOValueButton::drawNormalClicked(QPainter* p)
-{
-    //p->fillRect(rect(), QColor(0, 0, 0, 0));
-
-    auto cr = contentsRect();
-
-    const QColor& bc = palette().midlight().color();
-    const QColor& fc = palette().button().color();
-
-    int bw = qMin(cr.width(), cr.height());
-
-    QRadialGradient grr;
-    grr.setSpread(QRadialGradient::PadSpread);
-    grr.setColorAt(0, fc);
-    grr.setColorAt(1.0, bc);
-    grr.setRadius(bw);
-
-    grr.setCenter(cr.center());
-    grr.setFocalPoint(grr.center());
-    p->fillRect(cr, grr);
-}
-
-void SDOValueButton::drawCheckedClicked(QPainter* p)
-{
-    //p->fillRect(rect(), QColor(0, 0, 0, 0));
-
-    const QColor& bc = palette().light().color();
-    const QColor& fc = palette().button().color();
-    //const QColor& bc = QColor(fc.red(), fc.green(), fc.blue(), 0);//palette().button().color();
-
-    int bw = qMin(width(), height());
-
-    QRadialGradient grr;
-    grr.setSpread(QRadialGradient::PadSpread);
-    grr.setColorAt(0, fc);
-    grr.setColorAt(1.0, bc);
-    grr.setRadius(bw);
-
-    QRect cr = contentsRect();
-
-    grr.setCenter(cr.center());
-    grr.setFocalPoint(grr.center());
-    p->fillRect(cr, grr);
 }

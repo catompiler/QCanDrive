@@ -53,10 +53,11 @@ protected:
     CoValuesHolder::HoldedSDOValuePtr m_sdoValue;
     COValue::Type m_sdoValueType;
 
+    QImage* m_imgBuffer;
+    QImage* m_imgBorder;
     QImage* m_imgNormal;
     QImage* m_imgChecked;
-    QImage* m_imgNormalClicked;
-    QImage* m_imgCheckedClicked;
+    QImage* m_imgClicked;
     QImage* m_imgMouse;
     QImage* m_imgFocus;
 
@@ -93,8 +94,7 @@ protected:
     void drawHighlight(QPainter* p);
 
     void drawMouse(QPainter* p);
-    void drawNormalClicked(QPainter* p);
-    void drawCheckedClicked(QPainter* p);
+    void drawClicked(QPainter* p);
 };
 
 #endif // SDOVALUEBUTTON_H
