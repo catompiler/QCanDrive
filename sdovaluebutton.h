@@ -8,6 +8,7 @@
 
 
 class SDOValue;
+class QImage;
 
 
 class SDOValueButton : public QAbstractButton
@@ -52,15 +53,48 @@ protected:
     CoValuesHolder::HoldedSDOValuePtr m_sdoValue;
     COValue::Type m_sdoValueType;
 
+    QImage* m_imgNormal;
+    QImage* m_imgChecked;
+    QImage* m_imgNormalClicked;
+    QImage* m_imgCheckedClicked;
+    QImage* m_imgMouse;
+    QImage* m_imgFocus;
+
     int m_borderWidth;
 
+    bool m_mouseFlag;
+    bool m_clickFlag;
+
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void enterEvent(QEvent* event) override;
+    void leaveEvent(QEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
+    QColor lerpColor(const QColor& ca, const QColor& cb, int t = 256);
+
+    void createImages();
+    void deleteImages();
+    void updateImages();
+
     void drawButton(QPainter* p);
-    void drawButtonIdle(QPainter* p);
-    void drawBorder(QPainter* p, int borderWidth, const QColor& btnCol, const QColor& brdrCol);
-    void drawCenter(QPainter* p);
+
+    void drawText(QPainter* p);
+
+    void drawChecked(QPainter* p);
+
+    void drawBorder(QPainter* p);
+    void drawTickRect(QPainter* p, const QRect& r, int w);
+
+    void drawNormal(QPainter* p);
+
+    void drawBorderGrad(QPainter* p, int borderWidth, const QColor& btnCol, const QColor& brdrCol);
     void drawHighlight(QPainter* p);
+
+    void drawMouse(QPainter* p);
+    void drawNormalClicked(QPainter* p);
+    void drawCheckedClicked(QPainter* p);
 };
 
 #endif // SDOVALUEBUTTON_H
