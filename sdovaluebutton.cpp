@@ -196,6 +196,16 @@ void SDOValueButton::sdovalueReaded()
     //setValue(COValue::valueFrom<qreal>(sdoval->data(), m_sdoValueType, 0.0));
 }
 
+void SDOValueButton::onClick()
+{
+    qDebug() << "onClick()";
+
+    if(m_valsHolder == nullptr) return;
+    if(m_sdoValue == nullptr) return;
+
+    //
+}
+
 void SDOValueButton::mousePressEvent(QMouseEvent* event)
 {
     //qDebug() << "mousePressEvent";
@@ -215,6 +225,10 @@ void SDOValueButton::mouseReleaseEvent(QMouseEvent* event)
 
     if (event->button() == Qt::LeftButton && m_clickFlag){
         m_clickFlag = false;
+
+        if(rect().contains(event->pos())){
+            onClick();
+        }
     }
 
     QAbstractButton::mouseReleaseEvent(event);

@@ -66,6 +66,8 @@ protected:
     bool m_mouseFlag;
     bool m_clickFlag;
 
+    void onClick();
+
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void enterEvent(QEvent* event) override;
