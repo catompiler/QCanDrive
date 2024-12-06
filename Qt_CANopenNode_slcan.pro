@@ -36,13 +36,11 @@ SOURCES += \
     CANopenNode/301/crc16-ccitt.c \
     CANopenNode/CANopen.c \
     CO_driver_slcan_master.c \
-    OD.c \
     coobjectdict.cpp \
     covaluesholder.cpp \
     covaluetypes.cpp \
     main.cpp \
     canopenwin.cpp \
-    reg_data.c \
     sdocomm.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
@@ -91,13 +89,11 @@ HEADERS += \
     CANopenNode/301/crc16-ccitt.h \
     CANopenNode/CANopen.h \
     CO_driver_target.h \
-    OD.h \
     canopenwin.h \
     coobjectdict.h \
     cotypes.h \
     covaluesholder.h \
     covaluetypes.h \
-    reg_data.h \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \
