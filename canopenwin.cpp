@@ -14,6 +14,7 @@
 #include "sdovaluedialeditdlg.h"
 #include "sdovalueslidereditdlg.h"
 #include "sdovaluebareditdlg.h"
+#include "sdovaluebuttoneditdlg.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
@@ -38,6 +39,14 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_layout = new QGridLayout();
     centralWidget()->setLayout(m_layout);
 
+    addAction(ui->actAddPlot);
+    addAction(ui->actAddDial);
+    addAction(ui->actAddSlider);
+    addAction(ui->actAddBar);
+    addAction(ui->actAddButton);
+    //addAction(ui->actAdd);
+    setContextMenuPolicy(Qt::ActionsContextMenu);
+
     m_plotsMenu = new QMenu();
     m_plotsMenu->addAction(ui->actEditPlot);
     m_plotsMenu->addAction(ui->actDelPlot);
@@ -53,6 +62,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_barsMenu = new QMenu();
     m_barsMenu->addAction(ui->actEditBar);
     m_barsMenu->addAction(ui->actDelBar);
+
+    m_buttonsMenu = new QMenu();
+    m_buttonsMenu->addAction(ui->actEditButton);
+    m_buttonsMenu->addAction(ui->actDelButton);
 
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
@@ -73,15 +86,15 @@ CanOpenWin::CanOpenWin(QWidget *parent)
 
     m_barDlg = new SDOValueBarEditDlg();
 
-    auto btn = new SDOValueButton(m_valsHolder);
-    btn->setText("Test");
-    m_layout->addWidget(btn);
+    m_buttonDlg = new SDOValueButtonEditDlg();
 }
 
 CanOpenWin::~CanOpenWin()
 {
     m_slcon->destroyCO();
     m_slcon->closePort();
+
+    delete m_buttonDlg;
 
     delete m_barDlg;
 
@@ -91,6 +104,10 @@ CanOpenWin::~CanOpenWin()
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
+
+    m_buttonsMenu->removeAction(ui->actDelButton);
+    m_buttonsMenu->removeAction(ui->actEditButton);
+    delete m_buttonsMenu;
 
     m_barsMenu->removeAction(ui->actDelBar);
     m_barsMenu->removeAction(ui->actEditBar);
@@ -740,6 +757,141 @@ void CanOpenWin::on_actDelBar_triggered(bool checked)
     delete bar;
 }
 
+void CanOpenWin::on_actAddButton_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    m_buttonDlg->setText(tr("Кнопка %1").arg(m_layout->count() + 1));
+
+    if(m_buttonDlg->exec()){
+        auto button = new SDOValueButton(m_valsHolder, nullptr);
+
+        bool added = button->setSDOValue(m_buttonDlg->nodeId(), m_buttonDlg->index(), m_buttonDlg->subIndex(), m_buttonDlg->type());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка добавления кнопки!"), tr("Невозможно добавить кнопку: \"%1\"").arg(m_buttonDlg->text()));
+            return;
+        }
+
+        button->setText(m_buttonDlg->text());
+        button->setButtonColor(m_buttonDlg->buttonColor());
+        button->setBorderColor(m_buttonDlg->borderColor());
+        button->setIndicatorColor(m_buttonDlg->indicatorColor());
+        button->setActivateColor(m_buttonDlg->activateColor());
+        button->setHighlightColor(m_buttonDlg->highlightColor());
+        button->setTextColor(m_buttonDlg->textColor());
+        button->setBorderWidth(m_buttonDlg->borderWidth());
+        button->setIndicatorEnabled(m_buttonDlg->indicatorEnabled());
+        button->setFontPointSize(m_buttonDlg->fontPointSize());
+        button->setFontCapitalization(m_buttonDlg->fontCapitalization());
+        button->setFontBold(m_buttonDlg->fontBold());
+        button->setActivatedValueMask(m_buttonDlg->activatedValueMask());
+
+        button->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(button, &SDOValueButton::customContextMenuRequested, this, &CanOpenWin::showButtonsContextMenu);
+
+        m_layout->addWidget(button, m_buttonDlg->posRow(), m_buttonDlg->posColumn(), m_buttonDlg->sizeRows(), m_buttonDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actEditButton_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_buttonsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto button = findWidgetTypeAt<SDOValueButton>(pos);
+
+    //qDebug() << button;
+
+    if(button == nullptr) return;
+
+    int row = 0;
+    int col = 0;
+    int rowSpan = 1;
+    int colSpan = 1;
+
+    int buttonLayIndex = m_layout->indexOf(button);
+    if(buttonLayIndex == -1) return;
+
+    m_layout->getItemPosition(buttonLayIndex, &row, &col, &rowSpan, &colSpan);
+
+    m_buttonDlg->setPosRow(row);
+    m_buttonDlg->setPosColumn(col);
+    m_buttonDlg->setSizeRows(rowSpan);
+    m_buttonDlg->setSizeColumns(colSpan);
+
+    m_buttonDlg->setText(button->text());
+    m_buttonDlg->setButtonColor(button->buttonColor());
+    m_buttonDlg->setBorderColor(button->borderColor());
+    m_buttonDlg->setIndicatorColor(button->indicatorColor());
+    m_buttonDlg->setActivateColor(button->activateColor());
+    m_buttonDlg->setHighlightColor(button->highlightColor());
+    m_buttonDlg->setTextColor(button->textColor());
+    m_buttonDlg->setBorderWidth(button->borderWidth());
+    m_buttonDlg->setIndicatorEnabled(button->indicatorEnabled());
+    m_buttonDlg->setFontPointSize(button->fontPointSize());
+    m_buttonDlg->setFontCapitalization(button->fontCapitalization());
+    m_buttonDlg->setFontBold(button->fontBold());
+    m_buttonDlg->setActivatedValueMask(button->activatedValueMask());
+
+    auto sdoval = button->getSDOValue();
+
+    m_buttonDlg->setNodeId(sdoval->nodeId());
+    m_buttonDlg->setIndex(sdoval->index());
+    m_buttonDlg->setSubIndex(sdoval->subIndex());
+    m_buttonDlg->setType(button->SDOValueType());
+
+    if(m_buttonDlg->exec()){
+        button->resetSDOValue();
+
+        bool added = button->setSDOValue(m_buttonDlg->nodeId(), m_buttonDlg->index(), m_buttonDlg->subIndex(), m_buttonDlg->type());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка изменения кнопки!"), tr("Невозможно изменить кнопку: \"%1\"").arg(m_buttonDlg->text()));
+            return;
+        }
+
+        button->setText(m_buttonDlg->text());
+        button->setButtonColor(m_buttonDlg->buttonColor());
+        button->setBorderColor(m_buttonDlg->borderColor());
+        button->setIndicatorColor(m_buttonDlg->indicatorColor());
+        button->setActivateColor(m_buttonDlg->activateColor());
+        button->setHighlightColor(m_buttonDlg->highlightColor());
+        button->setTextColor(m_buttonDlg->textColor());
+        button->setBorderWidth(m_buttonDlg->borderWidth());
+        button->setIndicatorEnabled(m_buttonDlg->indicatorEnabled());
+        button->setFontPointSize(m_buttonDlg->fontPointSize());
+        button->setFontCapitalization(m_buttonDlg->fontCapitalization());
+        button->setFontBold(m_buttonDlg->fontBold());
+        button->setActivatedValueMask(m_buttonDlg->activatedValueMask());
+
+        m_layout->takeAt(buttonLayIndex);
+        m_layout->addWidget(button, m_buttonDlg->posRow(), m_buttonDlg->posColumn(), m_buttonDlg->sizeRows(), m_buttonDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actDelButton_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_buttonsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto button = findWidgetTypeAt<SDOValueButton>(pos);
+
+    if(button == nullptr) return;
+
+    int buttonLayIndex = m_layout->indexOf(button);
+    if(buttonLayIndex == -1) return;
+
+    m_layout->takeAt(buttonLayIndex);
+
+    button->resetSDOValue();
+    delete button;
+}
+
 void CanOpenWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
@@ -780,5 +932,13 @@ void CanOpenWin::showBarsContextMenu(const QPoint& pos)
     if(bar == nullptr) return;
 
     m_barsMenu->exec(bar->mapToGlobal(pos));
+}
+
+void CanOpenWin::showButtonsContextMenu(const QPoint& pos)
+{
+    auto btn = qobject_cast<SDOValueButton*>(sender());
+    if(btn == nullptr) return;
+
+    m_buttonsMenu->exec(btn->mapToGlobal(pos));
 }
 

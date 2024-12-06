@@ -84,6 +84,8 @@ CoValuesHolder::HoldedSDOValuePtr CoValuesHolder::addSdoValue(CO::NodeId valNode
         return HoldedSDOValuePtr(it->first);
     }
 
+    if(dataSize == 0) return nullptr;
+
     SDOValue* sdoval = new SDOValue(m_slcon);
     sdoval->setNodeId(valNodeId);
     sdoval->setIndex(valIndex);

@@ -169,6 +169,16 @@ void SDOValueBar::setScalePosition(ScalePosition newPos)
     updateContentMargins();
 }
 
+bool SDOValueBar::alarmEnabled() const
+{
+    return !QwtThermo::alarmEnabled();
+}
+
+void SDOValueBar::setAlarmEnabled(bool newEnabled)
+{
+    QwtThermo::setAlarmEnabled(!newEnabled);
+}
+
 qreal SDOValueBar::rangeMin() const
 {
     return lowerBound();

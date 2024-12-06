@@ -20,7 +20,7 @@ SDOValueSlider::SDOValueSlider(CoValuesHolder* newValsHolder, QWidget* parent)
     m_rdSdoValue = nullptr;
     m_wrSdoValue = nullptr;
     m_sdoValueType = COValue::Type();
-    m_name = QString("");
+    m_name = tr("Слайдер");
     m_updateMask = false;
 
     setWrapping(false);
@@ -34,13 +34,7 @@ SDOValueSlider::SDOValueSlider(CoValuesHolder* newValsHolder, QWidget* parent)
 
 SDOValueSlider::~SDOValueSlider()
 {
-    if(m_rdSdoValue){
-        resetSDOValue();
-        delete m_rdSdoValue;
-    }
-    if(m_wrSdoValue){
-        delete m_wrSdoValue;
-    }
+    resetSDOValue();
 }
 
 QString SDOValueSlider::name() const
@@ -245,12 +239,12 @@ bool SDOValueSlider::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::S
 
 CoValuesHolder::HoldedSDOValuePtr SDOValueSlider::getSDOValue()
 {
-    return m_rdSdoValue;
+    return m_wrSdoValue;
 }
 
 CoValuesHolder::HoldedSDOValuePtr SDOValueSlider::getSDOValue() const
 {
-    return m_rdSdoValue;
+    return m_wrSdoValue;
 }
 
 COValue::Type SDOValueSlider::SDOValueType() const
@@ -260,12 +254,10 @@ COValue::Type SDOValueSlider::SDOValueType() const
 
 void SDOValueSlider::resetSDOValue()
 {
-    if(m_valsHolder == nullptr) return;
-
     if(m_rdSdoValue != nullptr){
         disconnect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueSlider::sdovalueReaded);
 
-        m_valsHolder->delSdoValue(m_rdSdoValue);
+        if(m_valsHolder != nullptr) m_valsHolder->delSdoValue(m_rdSdoValue);
         m_rdSdoValue = nullptr;
     }
 

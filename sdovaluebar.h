@@ -56,8 +56,8 @@ public:
     using QwtThermo::setAlarmLevel;
     using QwtThermo::alarmLevel;
 
-    using QwtThermo::setAlarmEnabled;
-    using QwtThermo::alarmEnabled;
+    bool alarmEnabled() const;
+    void setAlarmEnabled(bool newEnabled);
 
     qreal rangeMin() const;
     void setRangeMin(qreal newRangeMin);

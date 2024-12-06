@@ -20,17 +20,23 @@ SDOValueButton::SDOValueButton(CoValuesHolder* newValsHolder, QWidget* parent)
     :QAbstractButton(parent)
 {
     m_valsHolder = newValsHolder;
-    m_sdoValue = nullptr;
+    m_rdSdoValue = nullptr;
+    m_wrSdoValue = nullptr;
     m_sdoValueType = COValue::Type();
+    m_updateMask = false;
 
     createImages();
 
     m_borderWidth = 5;
 
+    m_activatedValueMask = 1;
+
     m_mouseFlag = false;
     m_clickFlag = false;
 
-    setCheckable(true);
+    //setCheckable(true);
+    //setChecked(true);
+    //setEnabled(false);
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
@@ -58,10 +64,7 @@ SDOValueButton::SDOValueButton(CoValuesHolder* newValsHolder, QWidget* parent)
 
 SDOValueButton::~SDOValueButton()
 {
-    if(m_sdoValue){
-        resetSDOValue();
-        delete m_sdoValue;
-    }
+    resetSDOValue();
 
     deleteImages();
 }
@@ -76,99 +79,209 @@ void SDOValueButton::setValuesHolder(CoValuesHolder* newValuesHolder)
     m_valsHolder = newValuesHolder;
 }
 
-QColor SDOValueButton::buttonBackColor() const
-{
-    const QPalette& pal = palette();
-    return pal.base().color();
-}
-
-void SDOValueButton::setButtonBackColor(const QColor& newButtonBackColor)
-{
-    QPalette pal = palette();
-    pal.setColor(QPalette::Base, newButtonBackColor);
-    setPalette(pal);
-}
-
 QColor SDOValueButton::buttonColor() const
 {
     const QPalette& pal = palette();
-    return pal.buttonText().color();
+    return pal.button().color();
 }
 
 void SDOValueButton::setButtonColor(const QColor& newButtonColor)
 {
     QPalette pal = palette();
-    pal.setColor(QPalette::ButtonText, newButtonColor);
+    pal.setColor(QPalette::Button, newButtonColor);
     setPalette(pal);
 }
 
-QColor SDOValueButton::buttonAlarmColor() const
+QColor SDOValueButton::borderColor() const
+{
+    const QPalette& pal = palette();
+    return pal.shadow().color();
+}
+
+void SDOValueButton::setBorderColor(const QColor& newBorderColor)
+{
+    QPalette pal = palette();
+    pal.setColor(QPalette::Shadow, newBorderColor);
+    setPalette(pal);
+}
+
+QColor SDOValueButton::indicatorColor() const
+{
+    const QPalette& pal = palette();
+    return pal.light().color();
+}
+
+void SDOValueButton::setIndicatorColor(const QColor& newIndicatorColor)
+{
+    QPalette pal = palette();
+    pal.setColor(QPalette::Light, newIndicatorColor);
+    setPalette(pal);
+}
+
+QColor SDOValueButton::activateColor() const
+{
+    const QPalette& pal = palette();
+    return pal.midlight().color();
+}
+
+void SDOValueButton::setActivateColor(const QColor& newActivateColor)
+{
+    QPalette pal = palette();
+    pal.setColor(QPalette::Midlight, newActivateColor);
+    setPalette(pal);
+}
+
+QColor SDOValueButton::highlightColor() const
 {
     const QPalette& pal = palette();
     return pal.highlight().color();
 }
 
-void SDOValueButton::setButtonAlarmColor(const QColor& newButtonAlarmColor)
+void SDOValueButton::setHighlightColor(const QColor& newHlColor)
 {
     QPalette pal = palette();
-    pal.setColor(QPalette::Highlight, newButtonAlarmColor);
-    setPalette(pal);
-}
-
-QColor SDOValueButton::scaleColor() const
-{
-    const QPalette& pal = palette();
-    return pal.windowText().color();
-}
-
-void SDOValueButton::setScaleColor(const QColor& newScaleColor)
-{
-    QPalette pal = palette();
-    pal.setColor(QPalette::WindowText, newScaleColor);
+    pal.setColor(QPalette::Highlight, newHlColor);
     setPalette(pal);
 }
 
 QColor SDOValueButton::textColor() const
 {
     const QPalette& pal = palette();
-    return pal.text().color();
+    return pal.buttonText().color();
 }
 
 void SDOValueButton::setTextColor(const QColor& newTextColor)
 {
     QPalette pal = palette();
-    pal.setColor(QPalette::Text, newTextColor);
+    pal.setColor(QPalette::ButtonText, newTextColor);
     setPalette(pal);
+}
+
+int SDOValueButton::borderWidth() const
+{
+    return m_borderWidth;
+}
+
+void SDOValueButton::setBorderWidth(int newBorderWidth)
+{
+    m_borderWidth = newBorderWidth;
+}
+
+bool SDOValueButton::indicatorEnabled() const
+{
+    return isCheckable();
+}
+
+void SDOValueButton::setIndicatorEnabled(bool newEnabled)
+{
+    setCheckable(newEnabled);
+
+    setupRdSdoValue();
+}
+
+bool SDOValueButton::indicatorActive() const
+{
+    return isChecked();
+}
+
+void SDOValueButton::setIndicatorActive(bool newActive)
+{
+    setChecked(newActive);
+}
+
+int SDOValueButton::fontPointSize() const
+{
+    return font().pointSize();
+}
+
+void SDOValueButton::setFontPointSize(int newSize)
+{
+    QFont fnt = font();
+
+    fnt.setPointSize(newSize);
+
+    setFont(fnt);
+}
+
+bool SDOValueButton::fontCapitalization() const
+{
+    return font().capitalization();
+}
+
+void SDOValueButton::setFontCapitalization(bool newCap)
+{
+    QFont fnt = font();
+
+    fnt.setCapitalization(newCap ? (QFont::AllUppercase) : (QFont::MixedCase));
+
+    setFont(fnt);
+}
+
+bool SDOValueButton::fontBold() const
+{
+    return font().bold();
+}
+
+void SDOValueButton::setFontBold(bool newBold)
+{
+    QFont fnt = font();
+
+    fnt.setBold(newBold);
+
+    setFont(fnt);
+}
+
+uint32_t SDOValueButton::activatedValueMask() const
+{
+    return m_activatedValueMask;
+}
+
+void SDOValueButton::setActivatedValueMask(uint32_t newActivatedValueMask)
+{
+    m_activatedValueMask = newActivatedValueMask;
 }
 
 bool SDOValueButton::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType)
 {
     if(m_valsHolder == nullptr) return false;
-    if(m_sdoValue) resetSDOValue();
+    if(m_rdSdoValue || m_wrSdoValue) resetSDOValue();
 
     size_t typeSize = COValue::typeSize(newType);
     if(typeSize == 0) return false;
 
-    m_sdoValue = m_valsHolder->addSdoValue(newNodeId, newIndex, newSubIndex, typeSize);
-    if(m_sdoValue == nullptr){
-        return false;
-    }
+    m_wrSdoValue = new SDOValue(m_valsHolder->getSLCanOpenNode(), nullptr);
+    m_wrSdoValue->setNodeId(newNodeId);
+    m_wrSdoValue->setIndex(newIndex);
+    m_wrSdoValue->setSubIndex(newSubIndex);
+    m_wrSdoValue->setDataSize(typeSize);
+
+#if defined(SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR) && SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR == 1
+    connect(m_wrSdoValue, &SDOValue::errorOccured, this, [this](){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать значение!"));
+    });
+#endif
 
     m_sdoValueType = newType;
 
-    connect(m_sdoValue, &SDOValue::readed, this, &SDOValueButton::sdovalueReaded);
+    m_rdSdoValue = m_valsHolder->addSdoValue(newNodeId, newIndex, newSubIndex, typeSize);
+    if(m_rdSdoValue == nullptr){
+        resetSDOValue();
+        return false;
+    }
+
+    connect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueButton::sdovalueReaded);
 
     return true;
 }
 
 CoValuesHolder::HoldedSDOValuePtr SDOValueButton::getSDOValue()
 {
-    return m_sdoValue;
+    return m_wrSdoValue;
 }
 
 CoValuesHolder::HoldedSDOValuePtr SDOValueButton::getSDOValue() const
 {
-    return m_sdoValue;
+    return m_wrSdoValue;
 }
 
 COValue::Type SDOValueButton::SDOValueType() const
@@ -178,32 +291,90 @@ COValue::Type SDOValueButton::SDOValueType() const
 
 void SDOValueButton::resetSDOValue()
 {
-    if(m_valsHolder == nullptr) return;
+    if(m_rdSdoValue != nullptr){
+        disconnect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueButton::sdovalueReaded);
 
-    if(m_sdoValue != nullptr){
-        disconnect(m_sdoValue, &SDOValue::readed, this, &SDOValueButton::sdovalueReaded);
+        if(m_valsHolder != nullptr) m_valsHolder->delSdoValue(m_rdSdoValue);
+        m_rdSdoValue = nullptr;
+    }
 
-        m_valsHolder->delSdoValue(m_sdoValue);
-        m_sdoValue = nullptr;
+    if(m_wrSdoValue != nullptr){
+#if defined(SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR) && SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR == 1
+        disconnect(m_wrSdoValue, &SDOValue::errorOccured, nullptr, nullptr);
+#endif
+        delete m_wrSdoValue;
+        m_wrSdoValue = nullptr;
     }
 }
 
 void SDOValueButton::sdovalueReaded()
 {
+    if(m_updateMask) return;
+    if(!indicatorEnabled()) return;
+
     auto sdoval = qobject_cast<CoValuesHolder::HoldedSDOValuePtr>(sender());
     if(sdoval == nullptr) return;
 
-    //setValue(COValue::valueFrom<qreal>(sdoval->data(), m_sdoValueType, 0.0));
+    uint32_t value = COValue::valueFrom<uint32_t>(sdoval->data(), m_sdoValueType, 0);
+
+    if(m_activatedValueMask != 0){
+        setChecked((value & m_activatedValueMask) == m_activatedValueMask);
+    }else{
+        setChecked(value != m_activatedValueMask);
+    }
+}
+
+void SDOValueButton::setupRdSdoValue()
+{
+    if(indicatorEnabled() && isEnabled()){
+        if(m_rdSdoValue == nullptr){
+            if(m_valsHolder != nullptr && m_wrSdoValue != nullptr){
+
+                m_rdSdoValue = m_valsHolder->addSdoValue(m_wrSdoValue->nodeId(),
+                                                         m_wrSdoValue->index(),
+                                                         m_wrSdoValue->subIndex(),
+                                                         COValue::typeSize(m_sdoValueType));
+
+                if(m_rdSdoValue){
+                    connect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueButton::sdovalueReaded);
+                }
+            }
+        }
+    }else{
+        if(m_rdSdoValue != nullptr){
+            disconnect(m_rdSdoValue, &SDOValue::readed, this, &SDOValueButton::sdovalueReaded);
+
+            if(m_valsHolder != nullptr) m_valsHolder->delSdoValue(m_rdSdoValue);
+            m_rdSdoValue = nullptr;
+        }
+    }
 }
 
 void SDOValueButton::onClick()
 {
-    qDebug() << "onClick()";
+    //qDebug() << "onClick";
 
     if(m_valsHolder == nullptr) return;
-    if(m_sdoValue == nullptr) return;
+    if(m_wrSdoValue == nullptr) return;
 
-    //
+    if(!COValue::valueTo(m_wrSdoValue->data(), m_sdoValueType, m_activatedValueMask) || !m_wrSdoValue->write()){
+#if defined(SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR) && SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR == 1
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно начать запись значения!"));
+#endif
+    }
+}
+
+bool SDOValueButton::event(QEvent* event)
+{
+    //qDebug() << "event";
+
+    if(event->type() == QEvent::EnabledChange){
+        //qDebug() << "QEvent::EnabledChange";
+
+        setupRdSdoValue();
+    }
+
+    return QAbstractButton::event(event);
 }
 
 void SDOValueButton::mousePressEvent(QMouseEvent* event)
@@ -211,6 +382,7 @@ void SDOValueButton::mousePressEvent(QMouseEvent* event)
     //qDebug() << "mousePressEvent";
 
     if (event->button() == Qt::LeftButton){
+        m_updateMask = true;
         m_clickFlag = true;
     }
 
@@ -224,6 +396,7 @@ void SDOValueButton::mouseReleaseEvent(QMouseEvent* event)
     //qDebug() << "mouseReleaseEvent";
 
     if (event->button() == Qt::LeftButton && m_clickFlag){
+        m_updateMask = false;
         m_clickFlag = false;
 
         if(rect().contains(event->pos())){
@@ -234,6 +407,17 @@ void SDOValueButton::mouseReleaseEvent(QMouseEvent* event)
     QAbstractButton::mouseReleaseEvent(event);
 
     //update();
+}
+
+void SDOValueButton::mouseMoveEvent(QMouseEvent* event)
+{
+    //qDebug() << "mouseMoveEvent" << event->pos() << event->button();
+
+    if (event->buttons() & Qt::LeftButton){
+        m_clickFlag = rect().contains(event->pos());
+    }
+
+    QAbstractButton::mouseMoveEvent(event);
 }
 
 void SDOValueButton::enterEvent(QEvent* event)
@@ -263,8 +447,11 @@ void SDOValueButton::paintEvent(QPaintEvent* event)
 {
     //QAbstractButton::paintEvent(event);
 
+    if(contentsRect().isNull()) return;
+    if(event->region().isNull()) return;
+
     QPainter painter(this);
-    painter.setClipRegion( event->region() );
+    painter.setClipRegion(event->region());
 
     drawButton(&painter);
 
@@ -298,8 +485,8 @@ void SDOValueButton::createImages()
 {
     auto cr = contentsRect();
 
-    int w = cr.width();
-    int h = cr.height();
+    int w = qMax(cr.width(), 1);
+    int h = qMax(cr.height(), 1);
 
     auto pfmt = QImage::Format_ARGB32_Premultiplied;
 
@@ -358,10 +545,12 @@ void SDOValueButton::drawButton(QPainter* p)
 
     pi.fillRect(m_imgBuffer->rect(), palette().button().color());
 
-    if(isChecked()){
-        pi.drawImage(0, 0, *m_imgChecked);
-    }else{
-        pi.drawImage(0, 0, *m_imgNormal);
+    if(isEnabled()){
+        if(isChecked()){
+            pi.drawImage(0, 0, *m_imgChecked);
+        }else{
+            pi.drawImage(0, 0, *m_imgNormal);
+        }
     }
 
     if(m_clickFlag){
@@ -644,3 +833,5 @@ void SDOValueButton::drawBorderGrad(QPainter* p, int borderWidth, const QColor& 
     grr.setFocalPoint(grr.center());
     p->fillRect(right - bw + 1, bottom - bw + 1, bw, bw, grr);
 }
+
+

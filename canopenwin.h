@@ -21,6 +21,7 @@ class SignalCurveEditDlg;
 class SDOValueDialEditDlg;
 class SDOValueSliderEditDlg;
 class SDOValueBarEditDlg;
+class SDOValueButtonEditDlg;
 
 
 class CanOpenWin : public QMainWindow
@@ -48,6 +49,9 @@ private slots:
     void on_actAddBar_triggered(bool checked);
     void on_actEditBar_triggered(bool checked);
     void on_actDelBar_triggered(bool checked);
+    void on_actAddButton_triggered(bool checked);
+    void on_actEditButton_triggered(bool checked);
+    void on_actDelButton_triggered(bool checked);
 
     void CANopen_connected();
     void CANopen_disconnected();
@@ -57,10 +61,12 @@ private:
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;
     QGridLayout* m_layout;
+    QMenu* m_cockpitMenu;
     QMenu* m_plotsMenu;
     QMenu* m_dialsMenu;
     QMenu* m_slidersMenu;
     QMenu* m_barsMenu;
+    QMenu* m_buttonsMenu;
 
     int m_updIntervalms;
 
@@ -69,6 +75,7 @@ private:
     SDOValueDialEditDlg* m_dialDlg;
     SDOValueSliderEditDlg* m_sliderDlg;
     SDOValueBarEditDlg* m_barDlg;
+    SDOValueButtonEditDlg* m_buttonDlg;
 
     template <typename WidgetType>
     WidgetType* findWidgetTypeAt(const QPoint& pos);
@@ -77,6 +84,7 @@ private:
     void showDialsContextMenu(const QPoint& pos);
     void showSlidersContextMenu(const QPoint& pos);
     void showBarsContextMenu(const QPoint& pos);
+    void showButtonsContextMenu(const QPoint& pos);
 };
 
 template <typename WidgetType>

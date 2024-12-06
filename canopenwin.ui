@@ -44,6 +44,7 @@
     <addaction name="actAddDial"/>
     <addaction name="actAddSlider"/>
     <addaction name="actAddBar"/>
+    <addaction name="actAddButton"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -203,6 +204,30 @@
    </property>
    <property name="toolTip">
     <string>Удалить бар</string>
+   </property>
+  </action>
+  <action name="actAddButton">
+   <property name="text">
+    <string>&amp;Кнопка</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить кнопку</string>
+   </property>
+  </action>
+  <action name="actEditButton">
+   <property name="text">
+    <string>&amp;Редактировать</string>
+   </property>
+   <property name="toolTip">
+    <string>Редактировать кнопку</string>
+   </property>
+  </action>
+  <action name="actDelButton">
+   <property name="text">
+    <string>&amp;Удалить</string>
+   </property>
+   <property name="toolTip">
+    <string>Удалить кнопку</string>
    </property>
   </action>
  </widget>

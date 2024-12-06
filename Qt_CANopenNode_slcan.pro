@@ -48,6 +48,7 @@ SOURCES += \
     sdovaluebar.cpp \
     sdovaluebareditdlg.cpp \
     sdovaluebutton.cpp \
+    sdovaluebuttoneditdlg.cpp \
     sdovaluedial.cpp \
     sdovaluedialeditdlg.cpp \
     sdovalueplot.cpp \
@@ -103,6 +104,7 @@ HEADERS += \
     sdovaluebar.h \
     sdovaluebareditdlg.h \
     sdovaluebutton.h \
+    sdovaluebuttoneditdlg.h \
     sdovaluedial.h \
     sdovaluedialeditdlg.h \
     sdovalueplot.h \
@@ -141,6 +143,7 @@ HEADERS += \
 FORMS += \
     canopenwin.ui \
     sdovaluebareditdlg.ui \
+    sdovaluebuttoneditdlg.ui \
     sdovaluedialeditdlg.ui \
     sdovalueslidereditdlg.ui \
     signalcurveeditdlg.ui \
