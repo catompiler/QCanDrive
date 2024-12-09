@@ -1,6 +1,7 @@
 #include "sdovaluebuttoneditdlg.h"
 #include "ui_sdovaluebuttoneditdlg.h"
 #include "covaluetypes.h"
+#include <stdint.h>
 #include <QColorDialog>
 #include <QDebug>
 
@@ -20,6 +21,7 @@ SDOValueButtonEditDlg::SDOValueButtonEditDlg(QWidget *parent) :
     setTextColor(QColor(Qt::black));
 
     populateTypes();
+    populateCompares();
 }
 
 SDOValueButtonEditDlg::~SDOValueButtonEditDlg()
@@ -248,12 +250,25 @@ void SDOValueButtonEditDlg::setFontBold(bool newBold)
     ui->cbFontBold->setChecked(newBold);
 }
 
-uint32_t SDOValueButtonEditDlg::activatedValueMask() const
+SDOValueButton::CompareType SDOValueButtonEditDlg::indicatorCompare() const
 {
-    QString valueStr = ui->leValueMask->text().trimmed();
+    bool ok = false;
+    auto res =  static_cast<SDOValueButton::CompareType>(ui->cbIndicatorCompare->currentData().toInt(&ok));
+    if(ok) return res;
+    return SDOValueButton::EQUAL;
+}
+
+void SDOValueButtonEditDlg::setIndicatorCompare(SDOValueButton::CompareType newIndicatorCompare)
+{
+    ui->cbIndicatorCompare->setCurrentIndex(ui->cbIndicatorCompare->findData(static_cast<int>(newIndicatorCompare)));
+}
+
+uint32_t SDOValueButtonEditDlg::indicatorValue() const
+{
+    QString valueStr = ui->leIndicatorValue->text().trimmed();
 
     if(valueStr.isEmpty()){
-        valueStr = ui->leValueMask->placeholderText();
+        valueStr = ui->leIndicatorValue->placeholderText();
     }
 
     //qDebug() << valueStr;
@@ -269,11 +284,37 @@ uint32_t SDOValueButtonEditDlg::activatedValueMask() const
     return 0;
 }
 
-void SDOValueButtonEditDlg::setActivatedValueMask(uint32_t newActivatedValueMask)
+void SDOValueButtonEditDlg::setIndicatorValue(uint32_t newIndicatorValue)
 {
-    //qDebug() << newActivatedValueMask;
+    ui->leIndicatorValue->setText(QStringLiteral("0x%1").arg(newIndicatorValue, 0, 16));
+}
 
-    ui->leValueMask->setText(QStringLiteral("0x%1").arg(newActivatedValueMask, 0, 16));
+uint32_t SDOValueButtonEditDlg::activateValue() const
+{
+    QString valueStr = ui->leActivateValue->text().trimmed();
+
+    if(valueStr.isEmpty()){
+        valueStr = ui->leActivateValue->placeholderText();
+    }
+
+    //qDebug() << valueStr;
+
+    bool isOk = false;
+
+    auto val = valueStr.toUInt(&isOk, 0);
+
+    //qDebug() << val;
+
+    if(isOk) return val;
+
+    return 0;
+}
+
+void SDOValueButtonEditDlg::setActivateValue(uint32_t newActivateValue)
+{
+    //qDebug() << newActivateValue;
+
+    ui->leActivateValue->setText(QStringLiteral("0x%1").arg(newActivateValue, 0, 16));
 }
 
 void SDOValueButtonEditDlg::on_tbButtonColorSel_clicked(bool checked)
@@ -339,4 +380,16 @@ void SDOValueButtonEditDlg::populateTypes()
     for(auto& type: types){
         ui->cbType->addItem(type.first, static_cast<int>(type.second));
     }
+}
+
+void SDOValueButtonEditDlg::populateCompares()
+{
+    ui->cbIndicatorCompare->addItem(tr("Равно"), static_cast<int>(SDOValueButton::EQUAL));
+    ui->cbIndicatorCompare->addItem(tr("Не равно"), static_cast<int>(SDOValueButton::NOT_EQUAL));
+    ui->cbIndicatorCompare->addItem(tr("Меньше"), static_cast<int>(SDOValueButton::LESS));
+    ui->cbIndicatorCompare->addItem(tr("Меньше или равно"), static_cast<int>(SDOValueButton::LESS_EQUAL));
+    ui->cbIndicatorCompare->addItem(tr("Больше"), static_cast<int>(SDOValueButton::GREATER_EQUAL));
+    ui->cbIndicatorCompare->addItem(tr("Больше или равно"), static_cast<int>(SDOValueButton::GREATER_EQUAL));
+    ui->cbIndicatorCompare->addItem(tr("Маска, равно"), static_cast<int>(SDOValueButton::MASK));
+    ui->cbIndicatorCompare->addItem(tr("Маска, ноль"), static_cast<int>(SDOValueButton::MASK_ZERO));
 }

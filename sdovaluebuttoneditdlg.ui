@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>419</width>
+    <width>423</width>
     <height>514</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="1" colspan="3">
+   <item row="0" column="1">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -115,23 +115,10 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="2" rowspan="2" colspan="2">
+   <item row="1" column="1" rowspan="2">
     <widget class="QGroupBox" name="gbPen">
      <property name="title">
       <string>Внешний вид</string>
@@ -344,17 +331,73 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="3">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="gbActivation">
+     <property name="title">
+      <string>Переключение</string>
      </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="leIndicatorValue">
+        <property name="maxLength">
+         <number>16</number>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="placeholderText">
+         <string>0x1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="cbIndicationEnabled">
+        <property name="text">
+         <string>Индикация</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="cbIndicatorCompare"/>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="leActivateValue">
+        <property name="maxLength">
+         <number>16</number>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="placeholderText">
+         <string>0x1</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblIndicatorValue">
+        <property name="text">
+         <string>Значение индикации</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblActivateValue">
+        <property name="text">
+         <string>Значение команды</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblIndicatorCompare">
+        <property name="text">
+         <string>Сравнение индикации</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="3" column="0">
     <widget class="QGroupBox" name="gbPos">
      <property name="title">
       <string>Расположение</string>
@@ -419,40 +462,14 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QGroupBox" name="gbActivation">
-     <property name="title">
-      <string>Переключение</string>
+   <item row="4" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblValueMask">
-        <property name="text">
-         <string>Значение / маска</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="leValueMask">
-        <property name="maxLength">
-         <number>16</number>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="placeholderText">
-         <string>0x1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbIndicationEnabled">
-        <property name="text">
-         <string>Индикация</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
     </widget>
    </item>
   </layout>

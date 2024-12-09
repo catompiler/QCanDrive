@@ -29,7 +29,7 @@ SDOValueButton::SDOValueButton(CoValuesHolder* newValsHolder, QWidget* parent)
 
     m_borderWidth = 5;
 
-    m_activatedValueMask = 1;
+    m_activateValue = 1;
 
     m_mouseFlag = false;
     m_clickFlag = false;
@@ -231,14 +231,34 @@ void SDOValueButton::setFontBold(bool newBold)
     setFont(fnt);
 }
 
-uint32_t SDOValueButton::activatedValueMask() const
+SDOValueButton::CompareType SDOValueButton::indicatorCompare() const
 {
-    return m_activatedValueMask;
+    return m_indicatorCompare;
 }
 
-void SDOValueButton::setActivatedValueMask(uint32_t newActivatedValueMask)
+void SDOValueButton::setIndicatorCompare(CompareType newIndicatorCompare)
 {
-    m_activatedValueMask = newActivatedValueMask;
+    m_indicatorCompare = newIndicatorCompare;
+}
+
+uint32_t SDOValueButton::indicatorValue() const
+{
+    return m_indicatorValue;
+}
+
+void SDOValueButton::setIndicatorValue(uint32_t newIndicatorValue)
+{
+    m_indicatorValue = newIndicatorValue;
+}
+
+uint32_t SDOValueButton::activateValue() const
+{
+    return m_activateValue;
+}
+
+void SDOValueButton::setActivateValue(uint32_t newActivateValue)
+{
+    m_activateValue = newActivateValue;
 }
 
 bool SDOValueButton::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType)
@@ -315,12 +335,36 @@ void SDOValueButton::sdovalueReaded()
     auto sdoval = qobject_cast<CoValuesHolder::HoldedSDOValuePtr>(sender());
     if(sdoval == nullptr) return;
 
-    uint32_t value = COValue::valueFrom<uint32_t>(sdoval->data(), m_sdoValueType, 0);
+    auto value = COValue::valueFrom<uint32_t>(sdoval->data(), m_sdoValueType, 0);
 
-    if(m_activatedValueMask != 0){
-        setChecked((value & m_activatedValueMask) == m_activatedValueMask);
-    }else{
-        setChecked(value != m_activatedValueMask);
+    switch(m_indicatorCompare){
+    case NOT_EQUAL:
+        setChecked(value != m_indicatorValue);
+        break;
+    default:
+        m_indicatorCompare = EQUAL;
+    [[fallthrough]];
+    case EQUAL:
+        setChecked(value == m_indicatorValue);
+        break;
+    case LESS:
+        setChecked(value < m_indicatorValue);
+        break;
+    case LESS_EQUAL:
+        setChecked(value <= m_indicatorValue);
+        break;
+    case GREATER:
+        setChecked(value > m_indicatorValue);
+        break;
+    case GREATER_EQUAL:
+        setChecked(value >= m_indicatorValue);
+        break;
+    case MASK:
+        setChecked((value & m_indicatorValue) == m_indicatorValue);
+        break;
+    case MASK_ZERO:
+        setChecked((value & m_indicatorValue) == 0);
+        break;
     }
 }
 
@@ -357,7 +401,7 @@ void SDOValueButton::onClick()
     if(m_valsHolder == nullptr) return;
     if(m_wrSdoValue == nullptr) return;
 
-    if(!COValue::valueTo(m_wrSdoValue->data(), m_sdoValueType, m_activatedValueMask) || !m_wrSdoValue->write()){
+    if(!COValue::valueTo(m_wrSdoValue->data(), m_sdoValueType, m_activateValue) || !m_wrSdoValue->write()){
 #if defined(SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR) && SDOVALUEBUTTON_MESSAGE_ON_WRITE_ERROR == 1
         QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно начать запись значения!"));
 #endif

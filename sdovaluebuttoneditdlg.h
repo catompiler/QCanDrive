@@ -5,6 +5,7 @@
 #include <QColor>
 #include "cotypes.h"
 #include "covaluetypes.h"
+#include "sdovaluebutton.h"
 
 
 namespace Ui {
@@ -79,8 +80,14 @@ public:
     bool fontBold() const;
     void setFontBold(bool newBold);
 
-    uint32_t activatedValueMask() const;
-    void setActivatedValueMask(uint32_t newActivatedValueMask);
+    SDOValueButton::CompareType indicatorCompare() const;
+    void setIndicatorCompare(SDOValueButton::CompareType newIndicatorCompare);
+
+    uint32_t indicatorValue() const;
+    void setIndicatorValue(uint32_t newIndicatorValue);
+
+    uint32_t activateValue() const;
+    void setActivateValue(uint32_t newActivateValue);
 
 private slots:
     void on_tbButtonColorSel_clicked(bool checked = false);
@@ -95,7 +102,7 @@ private:
 
     void peekColor(QWidget* colHolder);
     void populateTypes();
-    void populateOrientations();
+    void populateCompares();
 };
 
 #endif // SDOVALUEBUTTONEDITDLG_H

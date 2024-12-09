@@ -784,7 +784,9 @@ void CanOpenWin::on_actAddButton_triggered(bool checked)
         button->setFontPointSize(m_buttonDlg->fontPointSize());
         button->setFontCapitalization(m_buttonDlg->fontCapitalization());
         button->setFontBold(m_buttonDlg->fontBold());
-        button->setActivatedValueMask(m_buttonDlg->activatedValueMask());
+        button->setActivateValue(m_buttonDlg->activateValue());
+        button->setIndicatorValue(m_buttonDlg->indicatorValue());
+        button->setIndicatorCompare(m_buttonDlg->indicatorCompare());
 
         button->setContextMenuPolicy(Qt::CustomContextMenu);
         connect(button, &SDOValueButton::customContextMenuRequested, this, &CanOpenWin::showButtonsContextMenu);
@@ -834,7 +836,9 @@ void CanOpenWin::on_actEditButton_triggered(bool checked)
     m_buttonDlg->setFontPointSize(button->fontPointSize());
     m_buttonDlg->setFontCapitalization(button->fontCapitalization());
     m_buttonDlg->setFontBold(button->fontBold());
-    m_buttonDlg->setActivatedValueMask(button->activatedValueMask());
+    m_buttonDlg->setActivateValue(button->activateValue());
+    m_buttonDlg->setIndicatorValue(button->indicatorValue());
+    m_buttonDlg->setIndicatorCompare(button->indicatorCompare());
 
     auto sdoval = button->getSDOValue();
 
@@ -864,7 +868,10 @@ void CanOpenWin::on_actEditButton_triggered(bool checked)
         button->setFontPointSize(m_buttonDlg->fontPointSize());
         button->setFontCapitalization(m_buttonDlg->fontCapitalization());
         button->setFontBold(m_buttonDlg->fontBold());
-        button->setActivatedValueMask(m_buttonDlg->activatedValueMask());
+        button->setActivateValue(m_buttonDlg->activateValue());
+        button->setIndicatorValue(m_buttonDlg->indicatorValue());
+        button->setIndicatorCompare(m_buttonDlg->indicatorCompare());
+
 
         m_layout->takeAt(buttonLayIndex);
         m_layout->addWidget(button, m_buttonDlg->posRow(), m_buttonDlg->posColumn(), m_buttonDlg->sizeRows(), m_buttonDlg->sizeColumns());

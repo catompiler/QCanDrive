@@ -57,8 +57,25 @@ public:
     bool fontBold() const;
     void setFontBold(bool newBold);
 
-    uint32_t activatedValueMask() const;
-    void setActivatedValueMask(uint32_t newActivatedValueMask);
+    enum CompareType : uint {
+        NOT_EQUAL = 0,
+        EQUAL = 1,
+        LESS = 2,
+        LESS_EQUAL = 3,
+        GREATER = 4,
+        GREATER_EQUAL = 5,
+        MASK = 6,
+        MASK_ZERO = 7
+    };
+
+    CompareType indicatorCompare() const;
+    void setIndicatorCompare(CompareType newIndicatorCompare);
+
+    uint32_t indicatorValue() const;
+    void setIndicatorValue(uint32_t newIndicatorValue);
+
+    uint32_t activateValue() const;
+    void setActivateValue(uint32_t newActivateValue);
 
     bool setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType);
     CoValuesHolder::HoldedSDOValuePtr getSDOValue();
@@ -85,7 +102,10 @@ protected:
     QImage* m_imgFocus;
 
     int m_borderWidth;
-    uint32_t m_activatedValueMask;
+
+    CompareType m_indicatorCompare;
+    uint32_t m_indicatorValue;
+    uint32_t m_activateValue;
 
     bool m_mouseFlag;
     bool m_clickFlag;
