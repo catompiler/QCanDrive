@@ -14,6 +14,7 @@ SLCanOpenNode::SLCanOpenNode(QObject *parent)
 {
     slcan_init(&m_sc);
     slcan_master_init(&m_scm, &m_sc);
+    slcan_master_set_no_answers(&m_scm, true);
     m_co = nullptr;
 
     m_firstHBTime = 100;
