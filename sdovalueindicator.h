@@ -1,7 +1,7 @@
-#ifndef SDOVALUEBUTTON_H
-#define SDOVALUEBUTTON_H
+#ifndef SDOVALUEINDICATOR_H
+#define SDOVALUEINDICATOR_H
 
-#include <QAbstractButton>
+#include <QWidget>
 #include "cotypes.h"
 #include "covaluetypes.h"
 #include "covaluesholder.h"
@@ -11,39 +11,36 @@ class SDOValue;
 class QImage;
 
 
-class SDOValueButton : public QAbstractButton
+class SDOValueIndicator : public QWidget
 {
     Q_OBJECT
 public:
-    SDOValueButton(CoValuesHolder* newValsHolder = nullptr, QWidget* parent = nullptr);
-    ~SDOValueButton();
+    SDOValueIndicator(CoValuesHolder* newValsHolder = nullptr, QWidget* parent = nullptr);
+    ~SDOValueIndicator();
 
     CoValuesHolder* valuesHolder() const;
     void setValuesHolder(CoValuesHolder* newValuesHolder);
 
-    QColor buttonColor() const;
-    void setButtonColor(const QColor& newButtonColor);
+    QString text() const;
+    void setText(const QString& newText);
 
-    QColor borderColor() const;
-    void setBorderColor(const QColor& newBorderColor);
+    QColor backColor() const;
+    void setBackColor(const QColor& newBackColor);
+
+    QColor shadowColor() const;
+    void setShadowColor(const QColor& newShadowColor);
 
     QColor indicatorColor() const;
     void setIndicatorColor(const QColor& newIndicatorColor);
 
-    QColor activateColor() const;
-    void setActivateColor(const QColor& newActivateColor);
-
-    QColor highlightColor() const;
-    void setHighlightColor(const QColor& newHlColor);
+    QColor glareColor() const;
+    void setGlareColor(const QColor& newGlareColor);
 
     QColor textColor() const;
     void setTextColor(const QColor& newTextColor);
 
     int borderWidth() const;
     void setBorderWidth(int newBorderWidth);
-
-    bool indicatorEnabled() const;
-    void setIndicatorEnabled(bool newEnabled);
 
     bool indicatorActive() const;
     void setIndicatorActive(bool newActive);
@@ -74,9 +71,6 @@ public:
     uint32_t indicatorValue() const;
     void setIndicatorValue(uint32_t newIndicatorValue);
 
-    uint32_t activateValue() const;
-    void setActivateValue(uint32_t newActivateValue);
-
     bool setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType);
     CoValuesHolder::HoldedSDOValuePtr getSDOValue();
     CoValuesHolder::HoldedSDOValuePtr getSDOValue() const;
@@ -90,38 +84,20 @@ private slots:
 
 protected:
     CoValuesHolder* m_valsHolder;
-    CoValuesHolder::HoldedSDOValuePtr m_rdSdoValue;
-    SDOValue* m_wrSdoValue;
+    CoValuesHolder::HoldedSDOValuePtr m_sdoValue;
     COValue::Type m_sdoValueType;
-    bool m_updateMask;
 
     QImage* m_imgBuffer;
-    QImage* m_imgBorder;
     QImage* m_imgNormal;
-    QImage* m_imgChecked;
-    QImage* m_imgClicked;
-    QImage* m_imgMouse;
-    QImage* m_imgFocus;
+    QImage* m_imgActive;
 
+    QString m_text;
     int m_borderWidth;
 
     CompareType m_indicatorCompare;
     uint32_t m_indicatorValue;
-    uint32_t m_activateValue;
+    bool m_indicatorActive;
 
-    bool m_mouseFlag;
-    bool m_clickFlag;
-
-    void setupRdSdoValue();
-
-    void onClick();
-
-    bool event(QEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void enterEvent(QEvent* event) override;
-    void leaveEvent(QEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
@@ -131,22 +107,15 @@ protected:
     void deleteImages();
     void updateImages();
 
-    void drawButton(QPainter* p);
+    void drawIndicator(QPainter* p);
 
     void drawText(QPainter* p);
 
-    void drawChecked(QPainter* p);
-
-    void drawBorder(QPainter* p);
-    void drawTickRect(QPainter* p, const QRect& r, int w);
-
     void drawNormal(QPainter* p);
 
-    void drawBorderGrad(QPainter* p, int borderWidth, const QColor& btnCol, const QColor& brdrCol);
-    void drawHighlight(QPainter* p);
+    void drawActive(QPainter* p);
 
-    void drawMouse(QPainter* p);
-    void drawClicked(QPainter* p);
+    void drawGrad(QPainter* p, int borderWidth, const QColor& glareCol, const QColor& shadowCol, qreal glarePos = 0.25);
 };
 
-#endif // SDOVALUEBUTTON_H
+#endif // SDOVALUEINDICATOR_H

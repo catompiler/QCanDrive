@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SDOValueButtonEditDlg</class>
- <widget class="QDialog" name="SDOValueButtonEditDlg">
+ <class>SDOValueIndicatorEditDlg</class>
+ <widget class="QDialog" name="SDOValueIndicatorEditDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>423</width>
-    <height>514</height>
+    <height>485</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Кнопка</string>
+   <string>Индикатор</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_5">
    <item row="0" column="0">
@@ -118,45 +118,21 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="1" rowspan="2">
+   <item row="1" column="1" rowspan="3">
     <widget class="QGroupBox" name="gbPen">
      <property name="title">
       <string>Внешний вид</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblButtonColor">
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblTextColor">
         <property name="text">
-         <string>Цвет кнопки</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QFrame" name="frButtonColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QToolButton" name="tbButtonColorSel">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="lblBorderColor">
-        <property name="text">
-         <string>Цвет границы</string>
+         <string>Цвет текста</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QFrame" name="frBorderColor">
+       <widget class="QFrame" name="frShadowColor">
         <property name="autoFillBackground">
          <bool>true</bool>
         </property>
@@ -165,17 +141,17 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QToolButton" name="tbBorderColorSel">
+      <item row="3" column="2">
+       <widget class="QToolButton" name="tbGlareColorSel">
         <property name="text">
          <string>...</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblIndicatorColor">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblBackColor">
         <property name="text">
-         <string>Цвет индикации</string>
+         <string>Цвет кнопки</string>
         </property>
        </widget>
       </item>
@@ -189,6 +165,54 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="2">
+       <widget class="QToolButton" name="tbBackColorSel">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QFrame" name="frGlareColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QFrame" name="frBackColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QToolButton" name="tbShadowColorSel">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblGlareColor">
+        <property name="text">
+         <string>Цвет блика</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblShadowColor">
+        <property name="text">
+         <string>Цвет тени</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="2">
        <widget class="QToolButton" name="tbIndicatorColorSel">
         <property name="text">
@@ -196,106 +220,31 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lblActivateColor">
+      <item row="8" column="0" colspan="2">
+       <widget class="QCheckBox" name="cbFontCapitalization">
         <property name="text">
-         <string>Цвет клика</string>
+         <string>Заглавные буквы</string>
         </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QFrame" name="frActivateColor">
-        <property name="autoFillBackground">
+        <property name="checked">
          <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QToolButton" name="tbActivateColorSel">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lblHighlightColor">
-        <property name="text">
-         <string>Цвет наведения</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QFrame" name="frHighlightColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
         </property>
        </widget>
       </item>
       <item row="4" column="2">
-       <widget class="QToolButton" name="tbHighlightColorSel">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="lblTextColor">
-        <property name="text">
-         <string>Цвет текста</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QFrame" name="frTextColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
        <widget class="QToolButton" name="tbTextColorSel">
         <property name="text">
          <string>...</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="lblBorderWidth">
         <property name="text">
          <string>Ширина рамки</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="lblFontSize">
-        <property name="text">
-         <string>Размер шрифта</string>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="1" colspan="2">
-       <widget class="QSpinBox" name="sbBorderWidth">
-        <property name="minimum">
-         <number>4</number>
-        </property>
-        <property name="maximum">
-         <number>64</number>
-        </property>
-        <property name="value">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1" colspan="2">
        <widget class="QSpinBox" name="sbFontSize">
         <property name="minimum">
          <number>4</number>
@@ -308,7 +257,14 @@
         </property>
        </widget>
       </item>
-      <item row="8" column="0" colspan="2">
+      <item row="6" column="0">
+       <widget class="QLabel" name="lblFontSize">
+        <property name="text">
+         <string>Размер шрифта</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="2">
        <widget class="QCheckBox" name="cbFontBold">
         <property name="text">
          <string>Жирный шрифт</string>
@@ -318,13 +274,33 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="0" colspan="2">
-       <widget class="QCheckBox" name="cbFontCapitalization">
-        <property name="text">
-         <string>Заглавные буквы</string>
+      <item row="5" column="1" colspan="2">
+       <widget class="QSpinBox" name="sbBorderWidth">
+        <property name="minimum">
+         <number>3</number>
         </property>
-        <property name="checked">
+        <property name="maximum">
+         <number>64</number>
+        </property>
+        <property name="value">
+         <number>11</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QFrame" name="frTextColor">
+        <property name="autoFillBackground">
          <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblIndicatorColor">
+        <property name="text">
+         <string>Цвет индикации</string>
         </property>
        </widget>
       </item>
@@ -337,7 +313,14 @@
       <string>Переключение</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
-      <item row="3" column="1">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblIndicatorCompare">
+        <property name="text">
+         <string>Сравнение индикации</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
        <widget class="QLineEdit" name="leIndicatorValue">
         <property name="maxLength">
          <number>16</number>
@@ -351,53 +334,32 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="cbIndicationEnabled">
-        <property name="text">
-         <string>Индикация</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="cbIndicatorCompare"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="leActivateValue">
-        <property name="maxLength">
-         <number>16</number>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="placeholderText">
-         <string>0x1</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
        <widget class="QLabel" name="lblIndicatorValue">
         <property name="text">
          <string>Значение индикации</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblActivateValue">
-        <property name="text">
-         <string>Значение команды</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblIndicatorCompare">
-        <property name="text">
-         <string>Сравнение индикации</string>
-        </property>
-       </widget>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbIndicatorCompare"/>
       </item>
      </layout>
     </widget>
    </item>
    <item row="3" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="0">
     <widget class="QGroupBox" name="gbPos">
      <property name="title">
       <string>Расположение</string>
@@ -462,7 +424,7 @@
      </layout>
     </widget>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -479,7 +441,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SDOValueButtonEditDlg</receiver>
+   <receiver>SDOValueIndicatorEditDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -495,7 +457,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SDOValueButtonEditDlg</receiver>
+   <receiver>SDOValueIndicatorEditDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

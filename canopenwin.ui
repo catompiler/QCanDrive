@@ -45,6 +45,7 @@
     <addaction name="actAddSlider"/>
     <addaction name="actAddBar"/>
     <addaction name="actAddButton"/>
+    <addaction name="actAddIndicator"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -228,6 +229,30 @@
    </property>
    <property name="toolTip">
     <string>Удалить кнопку</string>
+   </property>
+  </action>
+  <action name="actAddIndicator">
+   <property name="text">
+    <string>&amp;Индикатор</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить индикатор</string>
+   </property>
+  </action>
+  <action name="actEditIndicator">
+   <property name="text">
+    <string>&amp;Редактировать</string>
+   </property>
+   <property name="toolTip">
+    <string>Редактировать индикатор</string>
+   </property>
+  </action>
+  <action name="actDelIndicator">
+   <property name="text">
+    <string>&amp;Удалить</string>
+   </property>
+   <property name="toolTip">
+    <string>Удалить индикатор</string>
    </property>
   </action>
  </widget>

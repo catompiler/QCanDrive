@@ -20,6 +20,8 @@ SDOValueDial::SDOValueDial(CoValuesHolder* newValsHolder, QWidget* parent)
     m_name = QString();
     m_precision = 0;
 
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
     auto scaleDraw = new QwtRoundScaleDraw();
     scaleDraw->enableComponent(QwtRoundScaleDraw::Backbone, false);
     setScaleDraw(scaleDraw);

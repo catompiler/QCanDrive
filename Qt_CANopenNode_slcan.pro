@@ -49,6 +49,8 @@ SOURCES += \
     sdovaluebuttoneditdlg.cpp \
     sdovaluedial.cpp \
     sdovaluedialeditdlg.cpp \
+    sdovalueindicator.cpp \
+    sdovalueindicatoreditdlg.cpp \
     sdovalueplot.cpp \
     sdovalueslider.cpp \
     sdovalueslidereditdlg.cpp \
@@ -103,6 +105,8 @@ HEADERS += \
     sdovaluebuttoneditdlg.h \
     sdovaluedial.h \
     sdovaluedialeditdlg.h \
+    sdovalueindicator.h \
+    sdovalueindicatoreditdlg.h \
     sdovalueplot.h \
     sdovalueslider.h \
     sdovalueslidereditdlg.h \
@@ -141,6 +145,7 @@ FORMS += \
     sdovaluebareditdlg.ui \
     sdovaluebuttoneditdlg.ui \
     sdovaluedialeditdlg.ui \
+    sdovalueindicatoreditdlg.ui \
     sdovalueslidereditdlg.ui \
     signalcurveeditdlg.ui \
     trendploteditdlg.ui

@@ -8,6 +8,7 @@
 #include "sdovalueslider.h"
 #include "sdovaluebar.h"
 #include "sdovaluebutton.h"
+#include "sdovalueindicator.h"
 #include "signalcurveprop.h"
 #include "trendploteditdlg.h"
 #include "signalcurveeditdlg.h"
@@ -15,6 +16,7 @@
 #include "sdovalueslidereditdlg.h"
 #include "sdovaluebareditdlg.h"
 #include "sdovaluebuttoneditdlg.h"
+#include "sdovalueindicatoreditdlg.h"
 #include <QTimer>
 #include <QString>
 #include <QStringList>
@@ -44,6 +46,7 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     addAction(ui->actAddSlider);
     addAction(ui->actAddBar);
     addAction(ui->actAddButton);
+    addAction(ui->actAddIndicator);
     //addAction(ui->actAdd);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -67,6 +70,10 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_buttonsMenu->addAction(ui->actEditButton);
     m_buttonsMenu->addAction(ui->actDelButton);
 
+    m_indicatorsMenu = new QMenu();
+    m_indicatorsMenu->addAction(ui->actEditIndicator);
+    m_indicatorsMenu->addAction(ui->actDelIndicator);
+
     m_slcon = new SLCanOpenNode(nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, this, &CanOpenWin::CANopen_connected);
     connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
@@ -87,12 +94,20 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_barDlg = new SDOValueBarEditDlg();
 
     m_buttonDlg = new SDOValueButtonEditDlg();
+
+    m_indicatorDlg = new SDOValueIndicatorEditDlg();
+
+    //auto svi = new SDOValueIndicator();
+    //svi->setIndicatorActive(true);
+    //m_layout->addWidget(svi);
 }
 
 CanOpenWin::~CanOpenWin()
 {
     m_slcon->destroyCO();
     m_slcon->closePort();
+
+    delete m_indicatorDlg;
 
     delete m_buttonDlg;
 
@@ -104,6 +119,10 @@ CanOpenWin::~CanOpenWin()
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
+
+    m_indicatorsMenu->removeAction(ui->actDelIndicator);
+    m_indicatorsMenu->removeAction(ui->actEditIndicator);
+    delete m_indicatorsMenu;
 
     m_buttonsMenu->removeAction(ui->actDelButton);
     m_buttonsMenu->removeAction(ui->actEditButton);
@@ -899,6 +918,139 @@ void CanOpenWin::on_actDelButton_triggered(bool checked)
     delete button;
 }
 
+void CanOpenWin::on_actAddIndicator_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    m_indicatorDlg->setText(tr("Индикатор %1").arg(m_layout->count() + 1));
+
+    if(m_indicatorDlg->exec()){
+        auto indicator = new SDOValueIndicator(m_valsHolder, nullptr);
+
+        bool added = indicator->setSDOValue(m_indicatorDlg->nodeId(), m_indicatorDlg->index(), m_indicatorDlg->subIndex(), m_indicatorDlg->type());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка добавления индикатора!"), tr("Невозможно добавить индикатор: \"%1\"").arg(m_indicatorDlg->text()));
+            return;
+        }
+
+        indicator->setText(m_indicatorDlg->text());
+        indicator->setBackColor(m_indicatorDlg->backColor());
+        indicator->setShadowColor(m_indicatorDlg->shadowColor());
+        indicator->setIndicatorColor(m_indicatorDlg->indicatorColor());
+        indicator->setGlareColor(m_indicatorDlg->glareColor());
+        indicator->setTextColor(m_indicatorDlg->textColor());
+        indicator->setBorderWidth(m_indicatorDlg->borderWidth());
+        indicator->setFontPointSize(m_indicatorDlg->fontPointSize());
+        indicator->setFontCapitalization(m_indicatorDlg->fontCapitalization());
+        indicator->setFontBold(m_indicatorDlg->fontBold());
+        indicator->setIndicatorValue(m_indicatorDlg->indicatorValue());
+        indicator->setIndicatorCompare(m_indicatorDlg->indicatorCompare());
+
+        indicator->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(indicator, &SDOValueIndicator::customContextMenuRequested, this, &CanOpenWin::showIndicatorsContextMenu);
+
+        m_layout->addWidget(indicator, m_indicatorDlg->posRow(), m_indicatorDlg->posColumn(), m_indicatorDlg->sizeRows(), m_indicatorDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actEditIndicator_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_indicatorsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto indicator = findWidgetTypeAt<SDOValueIndicator>(pos);
+
+    //qDebug() << indicator;
+
+    if(indicator == nullptr) return;
+
+    int row = 0;
+    int col = 0;
+    int rowSpan = 1;
+    int colSpan = 1;
+
+    int indicatorLayIndex = m_layout->indexOf(indicator);
+    if(indicatorLayIndex == -1) return;
+
+    m_layout->getItemPosition(indicatorLayIndex, &row, &col, &rowSpan, &colSpan);
+
+    m_indicatorDlg->setPosRow(row);
+    m_indicatorDlg->setPosColumn(col);
+    m_indicatorDlg->setSizeRows(rowSpan);
+    m_indicatorDlg->setSizeColumns(colSpan);
+
+    m_indicatorDlg->setText(indicator->text());
+    m_indicatorDlg->setBackColor(indicator->backColor());
+    m_indicatorDlg->setShadowColor(indicator->shadowColor());
+    m_indicatorDlg->setIndicatorColor(indicator->indicatorColor());
+    m_indicatorDlg->setGlareColor(indicator->glareColor());
+    m_indicatorDlg->setTextColor(indicator->textColor());
+    m_indicatorDlg->setBorderWidth(indicator->borderWidth());
+    m_indicatorDlg->setFontPointSize(indicator->fontPointSize());
+    m_indicatorDlg->setFontCapitalization(indicator->fontCapitalization());
+    m_indicatorDlg->setFontBold(indicator->fontBold());
+    m_indicatorDlg->setIndicatorValue(indicator->indicatorValue());
+    m_indicatorDlg->setIndicatorCompare(indicator->indicatorCompare());
+
+    auto sdoval = indicator->getSDOValue();
+
+    m_indicatorDlg->setNodeId(sdoval->nodeId());
+    m_indicatorDlg->setIndex(sdoval->index());
+    m_indicatorDlg->setSubIndex(sdoval->subIndex());
+    m_indicatorDlg->setType(indicator->SDOValueType());
+
+    if(m_indicatorDlg->exec()){
+        indicator->resetSDOValue();
+
+        bool added = indicator->setSDOValue(m_indicatorDlg->nodeId(), m_indicatorDlg->index(), m_indicatorDlg->subIndex(), m_indicatorDlg->type());
+        if(!added){
+            QMessageBox::critical(this, tr("Ошибка изменения индикатора!"), tr("Невозможно изменить индикатор: \"%1\"").arg(m_indicatorDlg->text()));
+            return;
+        }
+
+        indicator->setText(m_indicatorDlg->text());
+        indicator->setBackColor(m_indicatorDlg->backColor());
+        indicator->setShadowColor(m_indicatorDlg->shadowColor());
+        indicator->setIndicatorColor(m_indicatorDlg->indicatorColor());
+        indicator->setGlareColor(m_indicatorDlg->glareColor());
+        indicator->setTextColor(m_indicatorDlg->textColor());
+        indicator->setBorderWidth(m_indicatorDlg->borderWidth());
+        indicator->setFontPointSize(m_indicatorDlg->fontPointSize());
+        indicator->setFontCapitalization(m_indicatorDlg->fontCapitalization());
+        indicator->setFontBold(m_indicatorDlg->fontBold());
+        indicator->setIndicatorValue(m_indicatorDlg->indicatorValue());
+        indicator->setIndicatorCompare(m_indicatorDlg->indicatorCompare());
+
+
+        m_layout->takeAt(indicatorLayIndex);
+        m_layout->addWidget(indicator, m_indicatorDlg->posRow(), m_indicatorDlg->posColumn(), m_indicatorDlg->sizeRows(), m_indicatorDlg->sizeColumns());
+    }
+}
+
+void CanOpenWin::on_actDelIndicator_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    const QPoint& pos = centralWidget()->mapFromGlobal(m_indicatorsMenu->pos());
+
+    //qDebug() << pos;
+
+    auto indicator = findWidgetTypeAt<SDOValueIndicator>(pos);
+
+    if(indicator == nullptr) return;
+
+    int indicatorLayIndex = m_layout->indexOf(indicator);
+    if(indicatorLayIndex == -1) return;
+
+    m_layout->takeAt(indicatorLayIndex);
+
+    indicator->resetSDOValue();
+    delete indicator;
+}
+
 void CanOpenWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
@@ -947,5 +1099,13 @@ void CanOpenWin::showButtonsContextMenu(const QPoint& pos)
     if(btn == nullptr) return;
 
     m_buttonsMenu->exec(btn->mapToGlobal(pos));
+}
+
+void CanOpenWin::showIndicatorsContextMenu(const QPoint& pos)
+{
+    auto btn = qobject_cast<SDOValueIndicator*>(sender());
+    if(btn == nullptr) return;
+
+    m_indicatorsMenu->exec(btn->mapToGlobal(pos));
 }
 

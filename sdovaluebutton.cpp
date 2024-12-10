@@ -327,6 +327,14 @@ void SDOValueButton::resetSDOValue()
     }
 }
 
+QSize SDOValueButton::sizeHint() const
+{
+    QFontMetrics fm(font());
+    QRect r = fm.tightBoundingRect(text());
+
+    return QSize(m_borderWidth * 4 + r.width(), m_borderWidth * 4 + r.height());
+}
+
 void SDOValueButton::sdovalueReaded()
 {
     if(m_updateMask) return;
@@ -626,11 +634,19 @@ void SDOValueButton::drawButton(QPainter* p)
 void SDOValueButton::drawText(QPainter* p)
 {
     QColor fc = palette().buttonText().color();
-    fc.setAlpha(224);
+    fc.setAlpha(192); //224
+
+    const int tflags = Qt::TextWordWrap | //Qt::TextWrapAnywhere |
+                 Qt::AlignHCenter | Qt::AlignVCenter;
+
+    QRect r = p->viewport();
+    r.moveTo(m_borderWidth * 2, m_borderWidth * 2);
+    r.setWidth(r.width() - 4 * m_borderWidth);
+    r.setHeight(r.height() - 4 * m_borderWidth);
 
     p->setFont(font());
     p->setPen(fc);
-    p->drawText(p->viewport(), Qt::AlignHCenter | Qt::AlignVCenter, text());
+    p->drawText(r, tflags, text());
 }
 
 void SDOValueButton::drawBorder(QPainter* p)
@@ -877,5 +893,6 @@ void SDOValueButton::drawBorderGrad(QPainter* p, int borderWidth, const QColor& 
     grr.setFocalPoint(grr.center());
     p->fillRect(right - bw + 1, bottom - bw + 1, bw, bw, grr);
 }
+
 
 
