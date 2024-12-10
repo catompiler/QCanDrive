@@ -477,6 +477,8 @@ void SDOValueButton::enterEvent(QEvent* event)
     m_mouseFlag = true;
 
     QAbstractButton::enterEvent(event);
+
+    update();
 }
 
 void SDOValueButton::leaveEvent(QEvent* event)
@@ -484,6 +486,8 @@ void SDOValueButton::leaveEvent(QEvent* event)
     m_mouseFlag = false;
 
     QAbstractButton::leaveEvent(event);
+
+    update();
 }
 
 void SDOValueButton::resizeEvent(QResizeEvent* event)
