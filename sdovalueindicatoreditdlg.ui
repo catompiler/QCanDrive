@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>423</width>
-    <height>485</height>
+    <width>421</width>
+    <height>459</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -310,13 +310,13 @@
    <item row="2" column="0">
     <widget class="QGroupBox" name="gbActivation">
      <property name="title">
-      <string>Переключение</string>
+      <string>Индикация</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="0" column="0">
        <widget class="QLabel" name="lblIndicatorCompare">
         <property name="text">
-         <string>Сравнение индикации</string>
+         <string>Сравнение</string>
         </property>
        </widget>
       </item>
@@ -336,7 +336,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="lblIndicatorValue">
         <property name="text">
-         <string>Значение индикации</string>
+         <string>Значение</string>
         </property>
        </widget>
       </item>
@@ -346,7 +346,17 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="5" column="1">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -359,7 +369,7 @@
      </property>
     </spacer>
    </item>
-   <item row="4" column="0">
+   <item row="3" column="0">
     <widget class="QGroupBox" name="gbPos">
      <property name="title">
       <string>Расположение</string>
@@ -422,16 +432,6 @@
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>
