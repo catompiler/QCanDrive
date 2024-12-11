@@ -27,6 +27,7 @@
     <property name="title">
      <string>&amp;Файл</string>
     </property>
+    <addaction name="actSettings"/>
     <addaction name="actQuit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -253,6 +254,14 @@
    </property>
    <property name="toolTip">
     <string>Удалить индикатор</string>
+   </property>
+  </action>
+  <action name="actSettings">
+   <property name="text">
+    <string>&amp;Параметры</string>
+   </property>
+   <property name="toolTip">
+    <string>Параметры</string>
    </property>
   </action>
  </widget>

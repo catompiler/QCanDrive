@@ -10,6 +10,8 @@
 #include "sdovaluebutton.h"
 #include "sdovalueindicator.h"
 #include "signalcurveprop.h"
+#include "settings.h"
+#include "settingsdlg.h"
 #include "trendploteditdlg.h"
 #include "signalcurveeditdlg.h"
 #include "sdovaluedialeditdlg.h"
@@ -31,6 +33,9 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     , ui(new Ui::CanOpenWin)
 {
     ui->setupUi(this);
+
+    m_settings = new Settings();
+    m_settings->load();
 
     QPalette darkPal(palette());
     darkPal.setColor(QPalette::Window, QColor(Qt::darkGray).darker(240));
@@ -83,6 +88,8 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
 
+    m_settingsDlg = new SettingsDlg();
+
     m_signalCurveEditDlg = new SignalCurveEditDlg();
     m_trendDlg = new TrendPlotEditDlg();
     m_trendDlg->setSignalCurveEditDialog(m_signalCurveEditDlg);
@@ -96,6 +103,8 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     m_buttonDlg = new SDOValueButtonEditDlg();
 
     m_indicatorDlg = new SDOValueIndicatorEditDlg();
+
+    applySettings();
 
     //auto svi = new SDOValueIndicator();
     //svi->setIndicatorActive(true);
@@ -119,6 +128,8 @@ CanOpenWin::~CanOpenWin()
 
     delete m_trendDlg;
     delete m_signalCurveEditDlg;
+
+    delete m_settingsDlg;
 
     m_indicatorsMenu->removeAction(ui->actDelIndicator);
     m_indicatorsMenu->removeAction(ui->actEditIndicator);
@@ -156,6 +167,9 @@ CanOpenWin::~CanOpenWin()
 
     delete m_valsHolder;
     delete m_slcon;
+
+    m_settings->save();
+    delete m_settings;
 }
 
 void CanOpenWin::on_actQuit_triggered(bool checked)
@@ -170,6 +184,56 @@ void CanOpenWin::on_actDebugExec_triggered(bool checked)
     Q_UNUSED(checked)
 }
 
+void CanOpenWin::on_actSettings_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    m_settingsDlg->setUpdatePeriod(m_settings->general.updatePeriod);
+    m_settingsDlg->setPortName(m_settings->conn.portName);
+    m_settingsDlg->setPortBaud(m_settings->conn.portBaud);
+    m_settingsDlg->setPortParity(m_settings->conn.portParity);
+    m_settingsDlg->setPortStopBits(m_settings->conn.portStopBits);
+    m_settingsDlg->setChinaAdapter(m_settings->conn.chinaAdapter);
+    m_settingsDlg->setCanBitrate(m_settings->conn.canBitrate);
+    m_settingsDlg->setProcessInterval(m_settings->conn.processInterval);
+    m_settingsDlg->setNodeId(m_settings->co.nodeId);
+    m_settingsDlg->setClientNodeId(m_settings->co.clientId);
+    m_settingsDlg->setCobidCliToSrv(m_settings->co.cobidCliToSrv);
+    m_settingsDlg->setCobidSrvToCli(m_settings->co.cobidSrvToCli);
+    m_settingsDlg->setUseSdoBlockTransfer(m_settings->co.useSdoBlockTransfer);
+    m_settingsDlg->setClientTimeout(m_settings->co.cliTimeout);
+    m_settingsDlg->setServerTimeout(m_settings->co.srvTimeout);
+    m_settingsDlg->setSdoTimeout(m_settings->co.sdoTimeout);
+    m_settingsDlg->setHbFirstTime(m_settings->co.hbFirstTime);
+    m_settingsDlg->setHbPeriod(m_settings->co.hbPeriod);
+    m_settingsDlg->setWindowColor(m_settings->appear.windowColor);
+    //m_settingsDlg->set(m_settings->);
+
+    if(m_settingsDlg->exec()){
+        m_settings->general.updatePeriod = m_settingsDlg->updatePeriod();
+        m_settings->conn.portName = m_settingsDlg->portName();
+        m_settings->conn.portBaud = m_settingsDlg->portBaud();
+        m_settings->conn.portParity = m_settingsDlg->portParity();
+        m_settings->conn.portStopBits = m_settingsDlg->portStopBits();
+        m_settings->conn.chinaAdapter = m_settingsDlg->chinaAdapter();
+        m_settings->conn.canBitrate = m_settingsDlg->canBitrate();
+        m_settings->conn.processInterval = m_settingsDlg->processInterval();
+        m_settings->co.nodeId = m_settingsDlg->nodeId();
+        m_settings->co.clientId = m_settingsDlg->clientNodeId();
+        m_settings->co.cobidCliToSrv = m_settingsDlg->cobidCliToSrv();
+        m_settings->co.cobidSrvToCli = m_settingsDlg->cobidSrvToCli();
+        m_settings->co.useSdoBlockTransfer = m_settingsDlg->useSdoBlockTransfer();
+        m_settings->co.cliTimeout = m_settingsDlg->clientTimeout();
+        m_settings->co.srvTimeout = m_settingsDlg->serverTimeout();
+        m_settings->co.sdoTimeout = m_settingsDlg->sdoTimeout();
+        m_settings->co.hbFirstTime = m_settingsDlg->hbFirstTime();
+        m_settings->co.hbPeriod = m_settingsDlg->hbPeriod();
+        m_settings->appear.windowColor = m_settingsDlg->windowColor();
+
+        applySettings();
+    }
+}
+
 void CanOpenWin::on_actConnect_triggered(bool checked)
 {
     Q_UNUSED(checked)
@@ -179,11 +243,11 @@ void CanOpenWin::on_actConnect_triggered(bool checked)
         return;
     }
 
-    bool is_open = m_slcon->openPort("COM23", QSerialPort::Baud115200, QSerialPort::NoParity, QSerialPort::OneStop);
+    bool is_open = m_slcon->openPort(m_settings->conn.portName, m_settings->conn.portBaud, m_settings->conn.portParity, m_settings->conn.portStopBits);
     if(is_open){
         qDebug() << "Port opened!";
 
-        bool co_created = m_slcon->createCO();
+        bool co_created = m_slcon->createCO(m_settings->conn.canBitrate);
         if(co_created){
             qDebug() << "Connected!";
         }else{
@@ -1059,6 +1123,34 @@ void CanOpenWin::CANopen_connected()
 void CanOpenWin::CANopen_disconnected()
 {
     qDebug() << "CANopen_disconnected()";
+}
+
+void CanOpenWin::applySettings()
+{
+    m_valsHolder->setUpdateInterval(m_settings->general.updatePeriod);
+    m_slcon->setAdapterNoAnswers(m_settings->conn.chinaAdapter);
+    m_slcon->setCoTimerInterval(m_settings->conn.processInterval);
+    m_slcon->setFirstHBTime(m_settings->co.hbFirstTime);
+    m_slcon->setHeartbeatTime(m_settings->co.hbPeriod);
+    m_slcon->setSDOserverTimeout(m_settings->co.srvTimeout);
+    m_slcon->setSDOclientTimeout(m_settings->co.cliTimeout);
+    m_slcon->setDefaultTimeout(m_settings->co.sdoTimeout);
+    m_slcon->setCobidClientToServer(m_settings->co.cobidCliToSrv);
+    m_slcon->setCobidServerToClient(m_settings->co.cobidSrvToCli);
+    m_slcon->setSDOclientBlockTransfer(m_settings->co.useSdoBlockTransfer);
+    m_slcon->setNodeId(m_settings->co.clientId);
+    //m_->set(m_settings->);
+
+    m_signalCurveEditDlg->setNodeId(m_settings->co.nodeId);
+    m_dialDlg->setNodeId(m_settings->co.nodeId);
+    m_sliderDlg->setNodeId(m_settings->co.nodeId);
+    m_barDlg->setNodeId(m_settings->co.nodeId);
+    m_buttonDlg->setNodeId(m_settings->co.nodeId);
+    m_indicatorDlg->setNodeId(m_settings->co.nodeId);
+
+    QPalette pal(palette());
+    pal.setColor(QPalette::Window, m_settings->appear.windowColor);
+    setPalette(pal);
 }
 
 void CanOpenWin::showPlotContextMenu(const QPoint& pos)

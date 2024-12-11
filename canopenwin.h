@@ -11,7 +11,8 @@ QT_END_NAMESPACE
 
 class QMenu;
 class QPoint;
-//class QGridLayout;
+class Settings;
+class SettingsDlg;
 class SLCanOpenNode;
 class CoValuesHolder;
 class SDOValue;
@@ -36,6 +37,7 @@ public:
 private slots:
     void on_actQuit_triggered(bool checked);
     void on_actDebugExec_triggered(bool checked);
+    void on_actSettings_triggered(bool checked);
     void on_actConnect_triggered(bool checked);
     void on_actDisconnect_triggered(bool checked);
     void on_actAddPlot_triggered(bool checked);
@@ -75,6 +77,8 @@ private:
 
     int m_updIntervalms;
 
+    Settings* m_settings;
+    SettingsDlg* m_settingsDlg;
     TrendPlotEditDlg* m_trendDlg;
     SignalCurveEditDlg* m_signalCurveEditDlg;
     SDOValueDialEditDlg* m_dialDlg;
@@ -82,6 +86,8 @@ private:
     SDOValueBarEditDlg* m_barDlg;
     SDOValueButtonEditDlg* m_buttonDlg;
     SDOValueIndicatorEditDlg* m_indicatorDlg;
+
+    void applySettings();
 
     template <typename WidgetType>
     WidgetType* findWidgetTypeAt(const QPoint& pos);

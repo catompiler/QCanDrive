@@ -31,7 +31,7 @@ public:
                   QSerialPort::Parity parity, QSerialPort::StopBits stopBits);
     void closePort();
 
-    bool createCO();
+    bool createCO(uint newBitrate = 125);
     void destroyCO();
 
     bool isConnected() const;
@@ -60,11 +60,17 @@ public:
     uint16_t heartbeatTime() const;
     void setHeartbeatTime(uint16_t newHeartbeatTime);
 
-    bool updateOd();
-
     // SLCan poll & CO process timer interval in ms.
     int coTimerInterval() const;
     void setCoTimerInterval(int newCoTimerInterval);
+
+    int defaultTimeout() const;
+    void setDefaultTimeout(int newDefaultTimeout);
+
+    bool adapterNoAnswers() const;
+    void setAdapterNoAnswers(bool newNoAnswers);
+
+    bool updateOd();
 
     /*
      * read & write:
@@ -85,9 +91,6 @@ public:
     // return true if sdoc removed(not in) from queue and can be deleted or reused.
     // when return true - not finish sdo comm.
     bool cancel(SDOComm* sdoc);
-
-    int defaultTimeout() const;
-    void setDefaultTimeout(int newDefaultTimeout);
 
 signals:
     void connected();

@@ -55,6 +55,8 @@ SOURCES += \
     sdovalueslider.cpp \
     sdovalueslidereditdlg.cpp \
     sequentialbuffer.cpp \
+    settings.cpp \
+    settingsdlg.cpp \
     signalcurveeditdlg.cpp \
     signalcurveprop.cpp \
     signalcurvepropmodel.cpp \
@@ -111,6 +113,8 @@ HEADERS += \
     sdovalueslider.h \
     sdovalueslidereditdlg.h \
     sequentialbuffer.h \
+    settings.h \
+    settingsdlg.h \
     signalcurveeditdlg.h \
     signalcurveprop.h \
     signalcurvepropmodel.h \
@@ -147,6 +151,7 @@ FORMS += \
     sdovaluedialeditdlg.ui \
     sdovalueindicatoreditdlg.ui \
     sdovalueslidereditdlg.ui \
+    settingsdlg.ui \
     signalcurveeditdlg.ui \
     trendploteditdlg.ui
 

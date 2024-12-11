@@ -134,7 +134,7 @@ void SLCanOpenNode::closePort()
     slcan_reset(&m_sc);
 }
 
-bool SLCanOpenNode::createCO()
+bool SLCanOpenNode::createCO(uint newBitrate)
 {
     if(!slcan_opened(&m_sc)) return false;
 
@@ -150,7 +150,7 @@ bool SLCanOpenNode::createCO()
 
     CO_ReturnError_t co_err = CO_ERROR_NO;
 
-    uint16_t bitRate = 125;
+    uint16_t bitRate = newBitrate;
 
     co_err = CO_CANinit(m_co, &m_scm, bitRate);
     if(co_err != CO_ERROR_NO){
@@ -301,14 +301,14 @@ void SLCanOpenNode::setHeartbeatTime(uint16_t newHeartbeatTime)
     m_heartbeatTime = newHeartbeatTime;
 }
 
-bool SLCanOpenNode::updateOd()
+int SLCanOpenNode::coTimerInterval() const
 {
-    if(isConnected()) return false;
+    return m_coProcessTimer->interval();
+}
 
-    // clear in function.
-    createOd();
-
-    return true;
+void SLCanOpenNode::setCoTimerInterval(int newCoTimerInterval)
+{
+    m_coProcessTimer->setInterval(newCoTimerInterval);
 }
 
 int SLCanOpenNode::defaultTimeout() const
@@ -319,6 +319,26 @@ int SLCanOpenNode::defaultTimeout() const
 void SLCanOpenNode::setDefaultTimeout(int newDefaultTimeout)
 {
     m_defaultTimeout = newDefaultTimeout;
+}
+
+bool SLCanOpenNode::adapterNoAnswers() const
+{
+    return slcan_master_no_answers(&m_scm);
+}
+
+void SLCanOpenNode::setAdapterNoAnswers(bool newNoAnswers)
+{
+    slcan_master_set_no_answers(&m_scm, newNoAnswers);
+}
+
+bool SLCanOpenNode::updateOd()
+{
+    if(isConnected()) return false;
+
+    // clear in function.
+    createOd();
+
+    return true;
 }
 
 void SLCanOpenNode::slcanSerialReadyRead()
@@ -652,16 +672,6 @@ SDOComm::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
     }
 
     return SDOComm::ERROR_UNKNOWN;
-}
-
-int SLCanOpenNode::coTimerInterval() const
-{
-    return m_coProcessTimer->interval();
-}
-
-void SLCanOpenNode::setCoTimerInterval(int newCoTimerInterval)
-{
-    m_coProcessTimer->setInterval(newCoTimerInterval);
 }
 
 SDOComm* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubIndex, void* data, size_t dataSize, SDOComm* sdocomm, int timeout)
