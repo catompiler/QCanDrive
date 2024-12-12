@@ -194,7 +194,9 @@ qreal SDOValueBarEditDlg::rangeMin() const
 
 void SDOValueBarEditDlg::setRangeMin(qreal newRangeMin)
 {
+    ui->sbRangeMin->blockSignals(true);
     ui->sbRangeMin->setValue(newRangeMin);
+    ui->sbRangeMin->blockSignals(false);
 }
 
 qreal SDOValueBarEditDlg::rangeMax() const
@@ -204,7 +206,9 @@ qreal SDOValueBarEditDlg::rangeMax() const
 
 void SDOValueBarEditDlg::setRangeMax(qreal newRangeMax)
 {
+    ui->sbRangeMax->blockSignals(true);
     ui->sbRangeMax->setValue(newRangeMax);
+    ui->sbRangeMax->blockSignals(false);
 }
 
 int SDOValueBarEditDlg::barWidth() const
