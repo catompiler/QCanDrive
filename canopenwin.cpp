@@ -317,10 +317,15 @@ void CanOpenWin::on_actConnect_triggered(bool checked)
             qDebug() << "Connected!";
         }else{
             qDebug() << "CO Fail :(";
+
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка открытия порта!"));
+
             m_slcon->closePort();
         }
     }else{
         qDebug() << "Fail :(";
+
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка инициализации CANopen!"));
     }
 }
 
@@ -879,7 +884,7 @@ void CanOpenWin::on_actEditBar_triggered(bool checked)
         bar->setScalePosition(m_barDlg->scalePosition());
         bar->setOrientation(m_barDlg->orientation());
 
-        qDebug() << m_barDlg->alarmEnabled() << bar->alarmEnabled();
+        //qDebug() << m_barDlg->alarmEnabled() << bar->alarmEnabled();
 
         m_layout->takeAt(barLayIndex);
         m_layout->addWidget(bar, m_barDlg->posRow(), m_barDlg->posColumn(), m_barDlg->sizeRows(), m_barDlg->sizeColumns());
