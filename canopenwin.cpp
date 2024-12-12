@@ -26,7 +26,7 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QDebug>
-#include <QFileDialog>>
+#include <QFileDialog>
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
