@@ -23,8 +23,6 @@ bool Settings::save() const
     saveCo(s);
     saveAppear(s);
 
-    s.sync();
-
     return s.status() == QSettings::NoError;
 }
 
@@ -42,7 +40,7 @@ bool Settings::load()
 
 void Settings::saveGeneral(QSettings& s) const
 {
-    s.beginGroup("general");
+    s.beginGroup("common");
 
     s.setValue("updatePeriod", general.updatePeriod);
 
@@ -93,7 +91,7 @@ void Settings::saveAppear(QSettings& s) const
 
 void Settings::loadGeneral(QSettings& s)
 {
-    s.beginGroup("general");
+    s.beginGroup("common");
 
     general.updatePeriod = s.value("updatePeriod", 0).toUInt();
 
