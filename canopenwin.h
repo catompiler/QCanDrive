@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
+#include "cockpitserializer.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class CanOpenWin; }
@@ -37,6 +39,8 @@ public:
 private slots:
     void on_actQuit_triggered(bool checked);
     void on_actDebugExec_triggered(bool checked);
+    void on_actSaveCockpit_triggered(bool checked);
+    void on_actOpenCockpit_triggered(bool checked);
     void on_actSettings_triggered(bool checked);
     void on_actConnect_triggered(bool checked);
     void on_actDisconnect_triggered(bool checked);
@@ -75,8 +79,6 @@ private:
     QMenu* m_buttonsMenu;
     QMenu* m_indicatorsMenu;
 
-    int m_updIntervalms;
-
     Settings* m_settings;
     SettingsDlg* m_settingsDlg;
     TrendPlotEditDlg* m_trendDlg;
@@ -88,11 +90,14 @@ private:
     SDOValueIndicatorEditDlg* m_indicatorDlg;
 
     void applySettings();
+    void clearCockpitWidgets();
+    CockpitSerializer::CockpitWidgets collectCockpitWidgets();
+    void appendCockpitWidgets(const CockpitSerializer::CockpitWidgets& widgets);
 
     template <typename WidgetType>
     WidgetType* findWidgetTypeAt(const QPoint& pos);
 
-    void showPlotContextMenu(const QPoint& pos);
+    void showPlotsContextMenu(const QPoint& pos);
     void showDialsContextMenu(const QPoint& pos);
     void showSlidersContextMenu(const QPoint& pos);
     void showBarsContextMenu(const QPoint& pos);

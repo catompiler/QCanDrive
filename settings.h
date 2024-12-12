@@ -5,6 +5,8 @@
 #include <QString>
 #include <QColor>
 #include <QSerialPort>
+#include "cotypes.h"
+#include "covaluetypes.h"
 
 
 class QSettings;
@@ -47,6 +49,32 @@ public:
     struct Appearance {
         QColor windowColor;
     } appear;
+
+    struct SDOValuePlot {
+        uint samplesCount;
+        QString plotName;
+        QColor backColor;
+        QColor textColor;
+        int transparency;
+        int posRow;
+        int posColumn;
+        int sizeRows;
+        int sizeColumns;
+        int signalsCount;
+    };
+
+    struct SDOValuePlotCurve {
+        QString name;
+        CO::NodeId nodeId;
+        CO::Index index;
+        CO::SubIndex subIndex;
+        COValue::Type type;
+        QColor penColor;
+        Qt::PenStyle penStyle;
+        qreal penWidth;
+        QColor brushColor;
+        Qt::BrushStyle brushStyle;
+    };
 
 public:
     bool save() const;

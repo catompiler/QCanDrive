@@ -42,9 +42,6 @@ public:
     int borderWidth() const;
     void setBorderWidth(int newBorderWidth);
 
-    bool indicatorActive() const;
-    void setIndicatorActive(bool newActive);
-
     int fontPointSize() const;
     void setFontPointSize(int newSize);
 
@@ -77,7 +74,12 @@ public:
     COValue::Type SDOValueType() const;
     void resetSDOValue();
 
+    bool indicatorActive() const;
+    void setIndicatorActive(bool newActive);
+
     QSize sizeHint() const override;
+
+    void applyAppearance();
 
 private slots:
     void sdovalueReaded();

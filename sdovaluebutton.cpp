@@ -179,16 +179,6 @@ void SDOValueButton::setIndicatorEnabled(bool newEnabled)
     setupRdSdoValue();
 }
 
-bool SDOValueButton::indicatorActive() const
-{
-    return isChecked();
-}
-
-void SDOValueButton::setIndicatorActive(bool newActive)
-{
-    setChecked(newActive);
-}
-
 int SDOValueButton::fontPointSize() const
 {
     return font().pointSize();
@@ -327,12 +317,28 @@ void SDOValueButton::resetSDOValue()
     }
 }
 
+bool SDOValueButton::indicatorActive() const
+{
+    return isChecked();
+}
+
+void SDOValueButton::setIndicatorActive(bool newActive)
+{
+    setChecked(newActive);
+}
+
 QSize SDOValueButton::sizeHint() const
 {
     QFontMetrics fm(font());
     QRect r = fm.tightBoundingRect(text());
 
     return QSize(m_borderWidth * 4 + r.width(), m_borderWidth * 4 + r.height());
+}
+
+void SDOValueButton::applyAppearance()
+{
+    updateImages();
+    update();
 }
 
 void SDOValueButton::sdovalueReaded()
@@ -553,14 +559,6 @@ void SDOValueButton::createImages()
     m_imgClicked = new QImage(w, h, pfmt);
     m_imgMouse = new QImage(w, h, pfmt);
     m_imgFocus = new QImage(w, h, pfmt);
-
-    m_imgBuffer->fill(0);
-    m_imgBorder->fill(0);
-    m_imgNormal->fill(0);
-    m_imgChecked->fill(0);
-    m_imgClicked->fill(0);
-    m_imgMouse->fill(0);
-    m_imgFocus->fill(0);
 }
 
 void SDOValueButton::deleteImages()
@@ -576,6 +574,14 @@ void SDOValueButton::deleteImages()
 
 void SDOValueButton::updateImages()
 {
+    m_imgBuffer->fill(0);
+    m_imgBorder->fill(0);
+    m_imgNormal->fill(0);
+    m_imgChecked->fill(0);
+    m_imgClicked->fill(0);
+    m_imgMouse->fill(0);
+    m_imgFocus->fill(0);
+
     QPainter p_border(m_imgBorder);
     drawBorder(&p_border);
 

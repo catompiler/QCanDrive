@@ -88,6 +88,16 @@ SignalPlot::~SignalPlot()
 
 }
 
+QString SignalPlot::name() const
+{
+    return title().text();
+}
+
+void SignalPlot::setName(const QString& newName)
+{
+    setTitle(newName);
+}
+
 size_t SignalPlot::bufferSize() const
 {
     return m_size;
@@ -136,16 +146,6 @@ void SignalPlot::setTextColor(const QColor& newColor)
     QPalette pal(palette());
     pal.setColor(QPalette::Text, newColor);
     setPalette(pal);
-}
-
-QString SignalPlot::name() const
-{
-    return title().text();
-}
-
-void SignalPlot::setName(const QString& newName)
-{
-    setTitle(newName);
 }
 
 int SignalPlot::addSignal(const QString& newName, const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)

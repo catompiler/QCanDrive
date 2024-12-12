@@ -22,10 +22,15 @@
 #include <QTimer>
 #include <QString>
 #include <QStringList>
-#include <QDebug>
 #include <QGridLayout>
 #include <QMessageBox>
 #include <QMenu>
+#include <QDebug>
+#include <QFileDialog>>
+#include <QFile>
+#include <QFileInfo>
+#include <QBuffer>
+#include <QByteArray>
 
 
 CanOpenWin::CanOpenWin(QWidget *parent)
@@ -40,8 +45,6 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     QPalette darkPal(palette());
     darkPal.setColor(QPalette::Window, QColor(Qt::darkGray).darker(240));
     setPalette(darkPal);
-
-    m_updIntervalms = 100;
 
     m_layout = new QGridLayout();
     centralWidget()->setLayout(m_layout);
@@ -84,7 +87,6 @@ CanOpenWin::CanOpenWin(QWidget *parent)
     connect(m_slcon, &SLCanOpenNode::disconnected, this, &CanOpenWin::CANopen_disconnected);
 
     m_valsHolder = new CoValuesHolder(m_slcon, nullptr);
-    m_valsHolder->setUpdateInterval(m_updIntervalms);
     connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
 
@@ -182,6 +184,69 @@ void CanOpenWin::on_actQuit_triggered(bool checked)
 void CanOpenWin::on_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked)
+}
+
+void CanOpenWin::on_actSaveCockpit_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Открыть cockpit"), QString(), tr("Cockpit (*.cpxml)"));
+
+    if(fileName.isEmpty()) return;
+
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл: %1").arg(fileName));
+        return;
+    }
+
+    CockpitSerializer ser;
+
+    auto widgets = collectCockpitWidgets();
+
+    bool isOk = ser.serialize(&file, widgets);
+
+    if(!isOk){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно сохранить файл: %1").arg(fileName));
+        file.close();
+        return;
+    }
+
+    file.close();
+}
+
+void CanOpenWin::on_actOpenCockpit_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть cockpit"), QString(), tr("Cockpit (*.cpxml)"));
+
+    if(fileName.isEmpty()) return;
+
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл: %1").arg(fileName));
+        return;
+    }
+
+    CockpitSerializer ser;
+    ser.setSdoValuesHolder(m_valsHolder);
+
+    bool isOk = false;
+    auto widgets = ser.deserialize(&file, &isOk);
+
+    if(!isOk){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно загрузить файл: %1").arg(fileName));
+        file.close();
+        return;
+    }
+
+    file.close();
+
+    clearCockpitWidgets();
+    appendCockpitWidgets(widgets);
 }
 
 void CanOpenWin::on_actSettings_triggered(bool checked)
@@ -286,12 +351,12 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
 
         SDOValuePlot* plt = new SDOValuePlot(m_trendDlg->plotName(), m_valsHolder);
 
-        plt->setPeriod(static_cast<qreal>(m_updIntervalms) / 1000);
+        plt->setPeriod(static_cast<qreal>(m_settings->general.updatePeriod) / 1000);
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
         plt->setBackground(m_trendDlg->backColor());
         plt->setTextColor(m_trendDlg->textColor());
 
-        int transp = m_trendDlg->transparency();
+        int transp = m_trendDlg->defaultAlpha();
         plt->setDefaultAlpha( (transp > 0) ? static_cast<qreal>(transp) / 100 : -1.0);
 
         for(int i = 0; i < m_trendDlg->signalsCount(); i ++){
@@ -320,7 +385,7 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
         plt->clear();
 
         plt->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(plt, &SDOValuePlot::customContextMenuRequested, this, &CanOpenWin::showPlotContextMenu);
+        connect(plt, &SDOValuePlot::customContextMenuRequested, this, &CanOpenWin::showPlotsContextMenu);
         connect(m_slcon, &SLCanOpenNode::connected, plt, &SDOValuePlot::clear);
 
         m_layout->addWidget(plt, m_trendDlg->posRow(), m_trendDlg->posColumn(), m_trendDlg->sizeRows(), m_trendDlg->sizeColumns());
@@ -357,19 +422,19 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
     m_trendDlg->setPlotName(plt->name());
     m_trendDlg->setBackColor(plt->background().color());
     m_trendDlg->setTextColor(plt->textColor());
-    m_trendDlg->setTransparency(static_cast<int>(plt->defaultAlpha() * 100));
+    m_trendDlg->setDefaultAlpha(static_cast<int>(plt->defaultAlpha() * 100));
     m_trendDlg->setSamplesCount(static_cast<int>(plt->bufferSize()));
 
     m_trendDlg->setSignalsCount(plt->SDOValuesCount());
 
     for(int i = 0; i < plt->SDOValuesCount(); i ++){
         SignalCurveProp sig;
-        auto sdoval = plt->SDOValue(i);
+        auto sdoval = plt->getSDOValue(i);
 
         sig.nodeId = sdoval->nodeId();
         sig.index = sdoval->index();
         sig.subIndex = sdoval->subIndex();
-        sig.type = plt->SDValueType(i);
+        sig.type = plt->SDOValueType(i);
 
         sig.name = plt->signalName(i);
         sig.penColor = plt->pen(i).color();
@@ -388,12 +453,12 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
 
         //qDebug() << m_trendDlg->signalsCount() << plt->signalsCount() << plt->SDOValuesCount();
 
-        plt->setPeriod(static_cast<qreal>(m_updIntervalms) / 1000);
+        plt->setPeriod(static_cast<qreal>(m_settings->general.updatePeriod) / 1000);
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
         plt->setBackground(m_trendDlg->backColor());
         plt->setTextColor(m_trendDlg->textColor());
 
-        int transp = m_trendDlg->transparency();
+        int transp = m_trendDlg->defaultAlpha();
         plt->setDefaultAlpha( (transp > 0) ? static_cast<qreal>(transp) / 100 : -1.0);
 
         for(int i = 0; i < m_trendDlg->signalsCount(); i ++){
@@ -955,6 +1020,7 @@ void CanOpenWin::on_actEditButton_triggered(bool checked)
         button->setIndicatorValue(m_buttonDlg->indicatorValue());
         button->setIndicatorCompare(m_buttonDlg->indicatorCompare());
 
+        button->applyAppearance();
 
         m_layout->takeAt(buttonLayIndex);
         m_layout->addWidget(button, m_buttonDlg->posRow(), m_buttonDlg->posColumn(), m_buttonDlg->sizeRows(), m_buttonDlg->sizeColumns());
@@ -1088,6 +1154,7 @@ void CanOpenWin::on_actEditIndicator_triggered(bool checked)
         indicator->setIndicatorValue(m_indicatorDlg->indicatorValue());
         indicator->setIndicatorCompare(m_indicatorDlg->indicatorCompare());
 
+        indicator->applyAppearance();
 
         m_layout->takeAt(indicatorLayIndex);
         m_layout->addWidget(indicator, m_indicatorDlg->posRow(), m_indicatorDlg->posColumn(), m_indicatorDlg->sizeRows(), m_indicatorDlg->sizeColumns());
@@ -1153,7 +1220,62 @@ void CanOpenWin::applySettings()
     setPalette(pal);
 }
 
-void CanOpenWin::showPlotContextMenu(const QPoint& pos)
+void CanOpenWin::clearCockpitWidgets()
+{
+    for(int i = 0; i < m_layout->count();){
+        if(auto w = m_layout->itemAt(i)->widget()){
+            m_layout->removeWidget(w);
+            delete w;
+        }else{
+            i ++;
+        }
+    }
+}
+
+CockpitSerializer::CockpitWidgets CanOpenWin::collectCockpitWidgets()
+{
+    CockpitSerializer::CockpitWidgets widgets;
+
+    int row, col, rowSpan, colSpan;
+
+    for(int i = 0; i < m_layout->count(); i ++){
+        if(auto w = m_layout->itemAt(i)->widget()){
+            m_layout->getItemPosition(i, &row, &col, &rowSpan, &colSpan);
+            widgets.append(qMakePair(w, QRect(row, col, rowSpan, colSpan)));
+        }
+    }
+
+    return widgets;
+}
+
+void CanOpenWin::appendCockpitWidgets(const CockpitSerializer::CockpitWidgets& widgets)
+{
+    for(auto& p: widgets){
+        QWidget* w = p.first;
+        const QRect& r = p.second;
+
+        w->setContextMenuPolicy(Qt::CustomContextMenu);
+
+        if(auto wgt = qobject_cast<SDOValuePlot*>(w)){
+            connect(wgt, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showPlotsContextMenu);
+            wgt->setPeriod(static_cast<qreal>(m_settings->general.updatePeriod) / 1000);
+        }else if(auto wgt = qobject_cast<SDOValueDial*>(w)){
+            connect(wgt, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showDialsContextMenu);
+        }else if(auto wgt = qobject_cast<SDOValueSlider*>(w)){
+            connect(wgt, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showSlidersContextMenu);
+        }else if(auto wgt = qobject_cast<SDOValueBar*>(w)){
+            connect(wgt, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showBarsContextMenu);
+        }else if(auto wgt = qobject_cast<SDOValueButton*>(w)){
+            connect(wgt, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showButtonsContextMenu);
+        }else if(auto wgt = qobject_cast<SDOValueIndicator*>(w)){
+            connect(wgt, &SDOValueBar::customContextMenuRequested, this, &CanOpenWin::showIndicatorsContextMenu);
+        }
+
+        m_layout->addWidget(w, r.x(), r.y(), r.width(), r.height());
+    }
+}
+
+void CanOpenWin::showPlotsContextMenu(const QPoint& pos)
 {
     auto plt = qobject_cast<SDOValuePlot*>(sender());
     if(plt == nullptr) return;

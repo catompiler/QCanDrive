@@ -45,9 +45,6 @@ public:
     bool indicatorEnabled() const;
     void setIndicatorEnabled(bool newEnabled);
 
-    bool indicatorActive() const;
-    void setIndicatorActive(bool newActive);
-
     int fontPointSize() const;
     void setFontPointSize(int newSize);
 
@@ -83,7 +80,12 @@ public:
     COValue::Type SDOValueType() const;
     void resetSDOValue();
 
+    bool indicatorActive() const;
+    void setIndicatorActive(bool newActive);
+
     QSize sizeHint() const override;
+
+    void applyAppearance();
 
 private slots:
     void sdovalueReaded();

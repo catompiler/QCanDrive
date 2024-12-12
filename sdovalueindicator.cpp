@@ -154,16 +154,6 @@ void SDOValueIndicator::setBorderWidth(int newBorderWidth)
     m_borderWidth = newBorderWidth;
 }
 
-bool SDOValueIndicator::indicatorActive() const
-{
-    return m_indicatorActive;
-}
-
-void SDOValueIndicator::setIndicatorActive(bool newActive)
-{
-    m_indicatorActive = newActive;
-}
-
 int SDOValueIndicator::fontPointSize() const
 {
     return font().pointSize();
@@ -272,12 +262,28 @@ void SDOValueIndicator::resetSDOValue()
     }
 }
 
+bool SDOValueIndicator::indicatorActive() const
+{
+    return m_indicatorActive;
+}
+
+void SDOValueIndicator::setIndicatorActive(bool newActive)
+{
+    m_indicatorActive = newActive;
+}
+
 QSize SDOValueIndicator::sizeHint() const
 {
     QFontMetrics fm(font());
     QRect r = fm.tightBoundingRect(text());
 
     return QSize(m_borderWidth * 2 + r.width(), m_borderWidth * 2 + r.height());
+}
+
+void SDOValueIndicator::applyAppearance()
+{
+    updateImages();
+    update();
 }
 
 void SDOValueIndicator::sdovalueReaded()
@@ -386,10 +392,6 @@ void SDOValueIndicator::createImages()
     m_imgBuffer = new QImage(w, h, pfmt);
     m_imgNormal = new QImage(w, h, pfmt);
     m_imgActive = new QImage(w, h, pfmt);
-
-    m_imgBuffer->fill(0);
-    m_imgNormal->fill(0);
-    m_imgActive->fill(0);
 }
 
 void SDOValueIndicator::deleteImages()
@@ -401,6 +403,10 @@ void SDOValueIndicator::deleteImages()
 
 void SDOValueIndicator::updateImages()
 {
+    m_imgBuffer->fill(0);
+    m_imgNormal->fill(0);
+    m_imgActive->fill(0);
+
     QPainter p_normal(m_imgNormal);
     drawNormal(&p_normal);
 

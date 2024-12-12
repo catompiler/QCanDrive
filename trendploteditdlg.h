@@ -35,8 +35,8 @@ public:
     QColor textColor() const;
     void setTextColor(const QColor& newTextColor);
 
-    int transparency() const;
-    void setTransparency(int newTransparency);
+    int defaultAlpha() const;
+    void setDefaultAlpha(int defaultAlpha);
 
     int posRow() const;
     void setPosRow(int newPosRow);

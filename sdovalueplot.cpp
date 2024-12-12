@@ -68,7 +68,7 @@ int SDOValuePlot::SDOValuesCount() const
     return m_sdoValues.size();
 }
 
-CoValuesHolder::HoldedSDOValuePtr SDOValuePlot::SDOValue(int n) const
+CoValuesHolder::HoldedSDOValuePtr SDOValuePlot::getSDOValue(int n) const
 {
     if(n < 0 || n >= m_sdoValues.size()) return nullptr;
 
@@ -103,7 +103,7 @@ void SDOValuePlot::delAllSDOValues()
     }
 }
 
-COValue::Type SDOValuePlot::SDValueType(int n) const
+COValue::Type SDOValuePlot::SDOValueType(int n) const
 {
     if(n < 0 || n >= m_sdoValues.size()) return COValue::Type();
 

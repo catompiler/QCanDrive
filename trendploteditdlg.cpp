@@ -19,7 +19,7 @@ TrendPlotEditDlg::TrendPlotEditDlg(QWidget *parent) :
     setBackColor(QColor(Qt::darkGray).darker(225));
     setTextColor(Qt::white);
     setPlotName(tr("График"));
-    setTransparency(-1);
+    setDefaultAlpha(-1);
 }
 
 TrendPlotEditDlg::~TrendPlotEditDlg()
@@ -229,14 +229,14 @@ void TrendPlotEditDlg::setTextColor(const QColor& newTextColor)
     ui->frTextColor->setPalette(pal);
 }
 
-int TrendPlotEditDlg::transparency() const
+int TrendPlotEditDlg::defaultAlpha() const
 {
     return ui->slTransp->value();
 }
 
-void TrendPlotEditDlg::setTransparency(int newTransparency)
+void TrendPlotEditDlg::setDefaultAlpha(int defaultAlpha)
 {
-    ui->slTransp->setValue(newTransparency);
+    ui->slTransp->setValue(defaultAlpha);
 }
 
 int TrendPlotEditDlg::posRow() const

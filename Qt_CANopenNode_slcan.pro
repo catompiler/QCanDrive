@@ -36,6 +36,7 @@ SOURCES += \
     CANopenNode/301/crc16-ccitt.c \
     CANopenNode/CANopen.c \
     CO_driver_slcan_master.c \
+    cockpitserializer.cpp \
     coobjectdict.cpp \
     covaluesholder.cpp \
     covaluetypes.cpp \
@@ -94,6 +95,7 @@ HEADERS += \
     CANopenNode/CANopen.h \
     CO_driver_target.h \
     canopenwin.h \
+    cockpitserializer.h \
     coobjectdict.h \
     cotypes.h \
     covaluesholder.h \

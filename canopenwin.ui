@@ -27,7 +27,10 @@
     <property name="title">
      <string>&amp;Файл</string>
     </property>
+    <addaction name="actSaveCockpit"/>
+    <addaction name="actOpenCockpit"/>
     <addaction name="actSettings"/>
+    <addaction name="separator"/>
     <addaction name="actQuit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -262,6 +265,22 @@
    </property>
    <property name="toolTip">
     <string>Параметры</string>
+   </property>
+  </action>
+  <action name="actSaveCockpit">
+   <property name="text">
+    <string>Сохранить приборы</string>
+   </property>
+   <property name="toolTip">
+    <string>Сохранить при&amp;боры</string>
+   </property>
+  </action>
+  <action name="actOpenCockpit">
+   <property name="text">
+    <string>&amp;Загрузить приборы</string>
+   </property>
+   <property name="toolTip">
+    <string>Загрузить приборы</string>
    </property>
   </action>
  </widget>

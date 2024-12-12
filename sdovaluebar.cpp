@@ -323,3 +323,15 @@ void SDOValueBar::changeEvent(QEvent* event)
         break;
     }
 }
+
+
+void SDOValueBar::resizeEvent(QResizeEvent* event)
+{
+    QwtThermo::resizeEvent(event);
+
+    /*if(orientation() == Qt::Vertical){
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    }else{ // Qt::Horizontal
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    }*/
+}

@@ -21,6 +21,9 @@ public:
     SignalPlot(const QString& newName = QString(), QWidget* parent = nullptr);
     ~SignalPlot();
 
+    QString name() const;
+    void setName(const QString& newName);
+
     size_t bufferSize() const;
     void setBufferSize(size_t newSize);
 
@@ -32,9 +35,6 @@ public:
 
     QColor textColor() const;
     void setTextColor(const QColor& newColor);
-
-    QString name() const;
-    void setName(const QString& newName);
 
     // takes ownership of the newBuffer
     int addSignal(const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1, SequentialBuffer* newBuffer = nullptr);

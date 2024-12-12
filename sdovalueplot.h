@@ -26,11 +26,11 @@ public:
     bool addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type type,
                      const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1);
     int SDOValuesCount() const;
-    CoValuesHolder::HoldedSDOValuePtr SDOValue(int n) const;
+    CoValuesHolder::HoldedSDOValuePtr getSDOValue(int n) const;
     void delSDOValue(int n);
     void delSDOValue(CoValuesHolder::HoldedSDOValuePtr sdoval);
     void delAllSDOValues();
-    COValue::Type SDValueType(int n) const;
+    COValue::Type SDOValueType(int n) const;
 
 private slots:
     void sdovalueReaded();

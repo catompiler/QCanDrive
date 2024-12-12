@@ -84,6 +84,7 @@ protected:
 
     void paintEvent(QPaintEvent* event) override;
     void changeEvent(QEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 };
 
 #endif // SDOVALUEBAR_H
