@@ -171,12 +171,12 @@ void SDOValueBar::setScalePosition(ScalePosition newPos)
 
 bool SDOValueBar::alarmEnabled() const
 {
-    return !QwtThermo::alarmEnabled();
+    return QwtThermo::alarmEnabled();
 }
 
 void SDOValueBar::setAlarmEnabled(bool newEnabled)
 {
-    QwtThermo::setAlarmEnabled(!newEnabled);
+    QwtThermo::setAlarmEnabled(newEnabled);
 }
 
 qreal SDOValueBar::rangeMin() const

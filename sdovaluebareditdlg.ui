@@ -349,6 +349,12 @@
       </item>
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="sbAlarmLevel">
+        <property name="minimum">
+         <double>-2147483648.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>2147483647.000000000000000</double>
+        </property>
         <property name="value">
          <double>0.800000000000000</double>
         </property>

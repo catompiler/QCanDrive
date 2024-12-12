@@ -791,8 +791,8 @@ void CanOpenWin::on_actAddBar_triggered(bool checked)
         bar->setPenWidth(m_barDlg->penWidth());
         bar->setBarWidth(m_barDlg->barWidth());
         bar->setBorderWidth(m_barDlg->borderWidth());
-        bar->setAlarmEnabled(m_barDlg->alarmEnabled());
         bar->setAlarmLevel(m_barDlg->alarmLevel());
+        bar->setAlarmEnabled(m_barDlg->alarmEnabled());
         bar->setScalePosition(m_barDlg->scalePosition());
         bar->setOrientation(m_barDlg->orientation());
 
@@ -841,8 +841,8 @@ void CanOpenWin::on_actEditBar_triggered(bool checked)
     m_barDlg->setPenWidth(bar->penWidth());
     m_barDlg->setBarWidth(bar->barWidth());
     m_barDlg->setBorderWidth(bar->borderWidth());
-    m_barDlg->setAlarmEnabled(bar->alarmEnabled());
     m_barDlg->setAlarmLevel(bar->alarmLevel());
+    m_barDlg->setAlarmEnabled(bar->alarmEnabled());
     m_barDlg->setScalePosition(bar->scalePosition());
     m_barDlg->setOrientation(bar->orientation());
 
@@ -874,10 +874,12 @@ void CanOpenWin::on_actEditBar_triggered(bool checked)
         bar->setPenWidth(m_barDlg->penWidth());
         bar->setBarWidth(m_barDlg->barWidth());
         bar->setBorderWidth(m_barDlg->borderWidth());
-        bar->setAlarmEnabled(m_barDlg->alarmEnabled());
         bar->setAlarmLevel(m_barDlg->alarmLevel());
+        bar->setAlarmEnabled(m_barDlg->alarmEnabled());
         bar->setScalePosition(m_barDlg->scalePosition());
         bar->setOrientation(m_barDlg->orientation());
+
+        qDebug() << m_barDlg->alarmEnabled() << bar->alarmEnabled();
 
         m_layout->takeAt(barLayIndex);
         m_layout->addWidget(bar, m_barDlg->posRow(), m_barDlg->posColumn(), m_barDlg->sizeRows(), m_barDlg->sizeColumns());
