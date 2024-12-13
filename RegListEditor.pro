@@ -30,6 +30,7 @@ SOURCES += \
     reglistmodel.cpp \
     reglistregsexporter.cpp \
     reglistserializer.cpp \
+    reglistxml2serializer.cpp \
     reglistxmlserializer.cpp \
     regobject.cpp \
     regselectdlg.cpp \
@@ -58,6 +59,7 @@ HEADERS += \
     reglistmodel.h \
     reglistregsexporter.h \
     reglistserializer.h \
+    reglistxml2serializer.h \
     reglistxmlserializer.h \
     regobject.h \
     regselectdlg.h \

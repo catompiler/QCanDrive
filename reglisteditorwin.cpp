@@ -12,6 +12,7 @@
 #include "regtypes.h"
 #include "regutils.h"
 #include "reglistxmlserializer.h"
+#include "reglistxml2serializer.h"
 #include "reglistregsexporter.h"
 #include "reglistdataexporter.h"
 #include "reglistcoexporter.h"
@@ -27,6 +28,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFileDialog>
+#include <QScopedPointer>
 #include <QDebug>
 
 
@@ -121,7 +123,8 @@ void RegListEditorWin::on_actOpen_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Открыть файлы"), m_curDir, tr("Файлы списка регистров (*.regxml)"));
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Открыть файлы"), m_curDir,
+                                                          tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
 
     if(filenames.isEmpty()) return;
 
@@ -138,7 +141,8 @@ void RegListEditorWin::on_actOpenAppend_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Добавить файлы"), m_curDir, tr("Файлы списка регистров (*.regxml)"));
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Добавить файлы"), m_curDir,
+                                                          tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
 
     if(filenames.isEmpty()) return;
 
@@ -153,7 +157,8 @@ void RegListEditorWin::on_actSaveAs_triggered(bool checked)
 {
     Q_UNUSED(checked);
 
-    QString filename = QFileDialog::getSaveFileName(this, tr("Сохранить файл"), m_curDir, tr("Файлы списка регистров (*.regxml)"));
+    QString filename = QFileDialog::getSaveFileName(this, tr("Сохранить файл"), m_curDir,
+                                                    tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
 
     if(filename.isEmpty()) return;
 
@@ -166,9 +171,15 @@ void RegListEditorWin::on_actSaveAs_triggered(bool checked)
         return;
     }
 
-    RegListXmlSerializer ser;
+    QScopedPointer<RegListSerializer> ser;
 
-    if(!ser.serialize(&file, m_regsListModel->regEntryList())){
+    if(filename.endsWith(".regxml2")){
+        ser.reset(new RegListXml2Serializer());
+    }else{
+        ser.reset(new RegListXmlSerializer());
+    }
+
+    if(!ser->serialize(&file, m_regsListModel->regEntryList())){
         QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
     }
 
@@ -519,10 +530,17 @@ void RegListEditorWin::appendFile(const QString& fileName)
         return;
     }
 
-    RegListXmlSerializer ser;
+    QScopedPointer<RegListSerializer> ser;
+
+    if(fileName.endsWith(".regxml2")){
+        ser.reset(new RegListXml2Serializer());
+    }else{
+        ser.reset(new RegListXmlSerializer());
+    }
+
     RegEntryList reglist;
 
-    if(!ser.deserialize(&file, &reglist)){
+    if(!ser->deserialize(&file, &reglist)){
         QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла: %1").arg(QFileInfo(fileName).fileName()));
     }else{
         m_regsListModel->addRegList(reglist);
