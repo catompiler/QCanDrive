@@ -748,7 +748,11 @@ bool RegListCoExporter::writeOd(QTextStream& out_stream, const RegEntryList* reg
         }else{
             std::for_each(re->cbegin(), re->cend(), [&count](const RegVar* rv){
                 if(!(rv->eflags() & RegEFlag::CO_HIDE)){
-                    count += rv->count();
+                    if(RegTypes::isMemory(rv->dataType()) || RegTypes::isString(rv->dataType())){
+                        count ++;
+                    }else{
+                        count += rv->count();
+                    }
                 }
             });
         }
