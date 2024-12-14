@@ -95,10 +95,11 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         QSpinBox* sb = new QSpinBox(parent);
         if(rv && RegTypes::isMemory(rv->dataType())){
             sb->setMinimum(0);
+            sb->setMaximum(INT32_MAX);
         }else{
             sb->setMinimum(1);
+            sb->setMaximum(254);
         }
-        sb->setMaximum(254);
         res_widget = sb;
     }break;
     case RegListModel::COL_MEM_ADDR:{
