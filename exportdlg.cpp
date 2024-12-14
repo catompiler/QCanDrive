@@ -141,6 +141,35 @@ void ExportDlg::setOdName(const QString& newOdName)
     ui->leOdName->setText(newOdName);
 }
 
+void ExportDlg::on_pbDefault_clicked(bool checked)
+{
+    Q_UNUSED(checked)
+
+    //ui->lePath->setText(QDir::currentPath());
+    ui->leRegIds->setText("reg_ids.h");
+    ui->leRegList->setText("reg_list_data.h");
+    ui->leDataDecl->setText("$(DATA_NAME).h");
+    ui->leDataImpl->setText("$(DATA_NAME).c");
+    ui->leCOC->setText("$(OD_NAME).c");
+    ui->leCOH->setText("$(OD_NAME).h");
+    ui->leEds->setText("reg_list.eds");
+    ui->cbExportRegs->setChecked(true);
+    ui->cbExportData->setChecked(true);
+    ui->cbExportCO->setChecked(true);
+    ui->cbExportEds->setChecked(true);
+    /*ui->pteUCRegIds->clear();
+    ui->pteUCRegList->clear();
+    ui->pteUCDataDecl->clear();
+    ui->pteUCDataImpl->clear();
+    ui->pteUCCOc->clear();
+    ui->pteUCCOh->clear();
+    ui->leDataName->setText("regs_data");
+    ui->leOdName->setText("OD");
+    ui->leEdsProductName->clear();
+    ui->leEdsVendorName->clear();
+    ui->leEdsAuthor->clear();*/
+}
+
 void ExportDlg::on_tbPath_clicked(bool checked)
 {
     Q_UNUSED(checked);

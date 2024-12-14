@@ -93,6 +93,7 @@ public:
     void setEdsAuthor(const QString& newEdsAuthor);
 
 private slots:
+    void on_pbDefault_clicked(bool checked = false);
     void on_tbPath_clicked(bool checked = false);
     void on_tbRegIdsSel_clicked(bool checked = false);
     void on_tbRegListSel_clicked(bool checked = false);
