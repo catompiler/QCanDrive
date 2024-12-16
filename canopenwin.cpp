@@ -318,14 +318,14 @@ void CanOpenWin::on_actConnect_triggered(bool checked)
         }else{
             qDebug() << "CO Fail :(";
 
-            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка открытия порта!"));
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка инициализации CANopen!"));
 
             m_slcon->closePort();
         }
     }else{
         qDebug() << "Fail :(";
 
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка инициализации CANopen!"));
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка открытия порта!"));
     }
 }
 
