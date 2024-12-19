@@ -1166,9 +1166,6 @@ SDOValueIndicator* CockpitSerializer::readSDOValueIndicator(QXmlStreamReader& xm
                 ind->setText(xml.readElementText());
             }
             else if(name == "backColor"){
-                ind->setIndicatorColor(QColor::fromRgb(uintValue(xml.readElementText(), 0)));
-            }
-            else if(name == "borderColor"){
                 ind->setBackColor(QColor::fromRgb(uintValue(xml.readElementText(), 0)));
             }
             else if(name == "shadowColor"){
