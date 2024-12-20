@@ -43,12 +43,11 @@ protected:
         CoValuesHolder::HoldedSDOValuePtr sdoval;
         bool readed;
         COValue::Type type;
-        QElapsedTimer elapsedTimer;
+        qreal value;
     };
 
     QList<SDOValItem> m_sdoValues;
-
-    void putValue(int n);
+    QElapsedTimer m_elapsedTimer;
 };
 
 #endif // SDOVALUEPLOT_H

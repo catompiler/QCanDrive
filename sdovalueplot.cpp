@@ -4,6 +4,9 @@
 #include <QDebug>
 
 
+#define SDOVALUEPLOT_FALLBACK_VALUE 0.0
+#define SDOVALUEPLOT_TIMEOUT_VALUE it->value
+
 
 SDOValuePlot::SDOValuePlot(const QString& newName, CoValuesHolder* valsHolder, QWidget* parent)
     :SignalPlot(newName, parent)
@@ -56,7 +59,7 @@ bool SDOValuePlot::addSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::Sub
         return false;
     }
 
-    m_sdoValues.append({sdoValPtr, true, type, QElapsedTimer()});
+    m_sdoValues.append({sdoValPtr, true, type, 0.0});
 
     connect(sdoValPtr, &SDOValue::readed, this, &SDOValuePlot::sdovalueReaded);
 
@@ -122,8 +125,7 @@ void SDOValuePlot::sdovalueReaded()
     }
 
     if(it != m_sdoValues.end()){
-        putValue(n);
-        it->elapsedTimer.start();
+        it->value = COValue::valueFrom<qreal>(it->sdoval->data(), it->type, SDOVALUEPLOT_FALLBACK_VALUE);
         it->readed = true;
     }
 }
@@ -131,22 +133,17 @@ void SDOValuePlot::sdovalueReaded()
 void SDOValuePlot::sdovalsUpdating()
 {
     //qDebug() << "sdovalsUpdating";
+
+    qreal dt = 0.0;
+    if(m_elapsedTimer.isValid()) dt = static_cast<qreal>(m_elapsedTimer.elapsed()) / 1000;
+    m_elapsedTimer.start();
+
     int n = 0;
     for(auto it = m_sdoValues.begin(); it != m_sdoValues.end(); ++ it, n ++){
-        if(!it->readed){
-            putValue(n);
-            it->elapsedTimer.start();
-        }
+        putSample(n, it->readed ? it->value : SDOVALUEPLOT_TIMEOUT_VALUE, dt);
         it->readed = false;
     }
 
     replot();
 }
 
-void SDOValuePlot::putValue(int n)
-{
-    SDOValItem& sdoItem = m_sdoValues[n];
-    qreal dt = 0.0;
-    if(sdoItem.elapsedTimer.isValid()) dt = static_cast<qreal>(sdoItem.elapsedTimer.elapsed()) / 1000;
-    putSample(n, COValue::valueFrom<qreal>(sdoItem.sdoval->data(), sdoItem.type, 0.0), dt);
-}
