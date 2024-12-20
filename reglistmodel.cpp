@@ -892,6 +892,18 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
         }break;
         case COL_TYPE:
             rv->setDataType(static_cast<DataType>(value.toUInt()));
+            if(pe->type() == ObjectType::ARR && rv->subIndex() != 0){
+                auto pIndex = index.parent();
+                for(int i = 0; i < pe->count(); i ++){
+                    RegVar* v = pe->at(i);
+                    if(v == rv || v->subIndex() == 0) continue;
+
+                    v->setDataType(rv->dataType());
+
+                    auto vIndex = RegListModel::index(i, 0, pIndex);
+                    emit dataChanged(vIndex, vIndex);
+                }
+            }
             break;
         case COL_COUNT:
             if(pe->type() != ObjectType::ARR && !RegTypes::isMemory(rv->dataType())) return false;

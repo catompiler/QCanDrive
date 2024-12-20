@@ -433,10 +433,16 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
         }
 
         RegVar* rv = nullptr;
+
         if(orig_rv){
             rv = new RegVar(*orig_rv);
         }else{
             rv = new RegVar();
+        }
+
+        if(re->type() == ObjectType::ARR && re->count() > 1){
+            RegVar* v = re->at(re->count() - 1);
+            rv->setDataType(v->dataType());
         }
 
         rv->setSubIndex(m_regEntryDlg->index());
