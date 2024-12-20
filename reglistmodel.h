@@ -87,6 +87,7 @@ private:
     QVariant dataSizeHintRole(const QModelIndex &index) const;
 
     void fixCountVar(RegEntry* re, const QModelIndex& parent);
+    void fixArrSubIndices(RegEntry* re, const QModelIndex& parent);
     void fixSortingAll();
     void fixSortingModelIndex(const QModelIndex& parent);
     void fixSortingEntries();

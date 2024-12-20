@@ -411,7 +411,12 @@ void RegListEditorWin::on_actAddSubItem_triggered(bool checked)
     }
 
     m_regEntryDlg->setIndexEditable(true);
-    m_regEntryDlg->setIndex(re->countAll());
+    reg_index_t newIndex = re->countAll();
+    if(newIndex != 0 && re->type() == ObjectType::ARR){
+        RegVar* rv = re->lastVar();
+        newIndex = rv->subIndex() + qMax(1U, rv->count());
+    }
+    m_regEntryDlg->setIndex(newIndex);
     m_regEntryDlg->setObjectTypeEditable(false);
     m_regEntryDlg->setObjectType(ObjectType::VAR);
 

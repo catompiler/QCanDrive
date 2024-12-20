@@ -147,6 +147,12 @@ RegEntry::ConstVarListIterator RegEntry::cend() const
     return m_vars.cend();
 }
 
+RegVar* RegEntry::lastVar() const
+{
+    if(m_vars.isEmpty()) return nullptr;
+    return m_vars.last();
+}
+
 bool RegEntry::hasVarBySubIndex(reg_subindex_t subIndex) const
 {
     return varBySubIndex(subIndex) != nullptr;

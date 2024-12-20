@@ -241,6 +241,9 @@ bool RegListModel::addSubObject(RegVar* r, const QModelIndex& parent)
         if(r->subIndex() < last_subindex){
             fixSortingVars(re);
         }
+        if(re->type() == ObjectType::ARR){
+            fixArrSubIndices(re, parent);
+        }
         emit layoutChanged(parents);
     }
 
@@ -673,6 +676,28 @@ void RegListModel::fixCountVar(RegEntry* re, const QModelIndex& parent)
     });
 }
 
+void RegListModel::fixArrSubIndices(RegEntry* re, const QModelIndex& parent)
+{
+    if(re->count() == 0) return;
+
+    reg_subindex_t oldSubIndex;
+    reg_subindex_t subIndex = 0;
+    int row = 0;
+    for(auto it = re->begin(); it != re->end(); ++ it){
+        oldSubIndex = (*it)->subIndex();
+        if(oldSubIndex != subIndex){
+            (*it)->setSubIndex(subIndex);
+
+            QModelIndex subIndex_index = index(row, COL_INDEX, parent);
+            emit dataChanged(subIndex_index, subIndex_index);
+
+            fixBaseSubIndex(re->index(), oldSubIndex, subIndex);
+        }
+        subIndex += static_cast<reg_subindex_t>(qMax(1U, (*it)->count()));
+        row ++;
+    }
+}
+
 void RegListModel::fixSortingAll()
 {
     fixSortingEntries();
@@ -880,9 +905,13 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
                 reg_subindex_t oldSubIndex = rv->subIndex();
 
                 rv->setSubIndex(newSubIndex);
+                fixBaseSubIndex(pe->index(), oldSubIndex, newSubIndex);
 
                 fixSortingModelIndex(index.parent());
-                fixBaseSubIndex(pe->index(), oldSubIndex, newSubIndex);
+
+                if(pe->type() == ObjectType::ARR){
+                    fixArrSubIndices(pe, index.parent());
+                }
             }
         }break;
         case COL_NAME:{
@@ -893,14 +922,14 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
         case COL_TYPE:
             rv->setDataType(static_cast<DataType>(value.toUInt()));
             if(pe->type() == ObjectType::ARR && rv->subIndex() != 0){
-                auto pIndex = index.parent();
+                auto parent_index = index.parent();
                 for(int i = 0; i < pe->count(); i ++){
                     RegVar* v = pe->at(i);
                     if(v == rv || v->subIndex() == 0) continue;
 
                     v->setDataType(rv->dataType());
 
-                    auto vIndex = RegListModel::index(i, 0, pIndex);
+                    auto vIndex = RegListModel::index(i, 0, parent_index);
                     emit dataChanged(vIndex, vIndex);
                 }
             }
@@ -909,6 +938,9 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
             if(pe->type() != ObjectType::ARR && !RegTypes::isMemory(rv->dataType())) return false;
             rv->setCount(value.toUInt());
             fixCountVar(pe, index.parent());
+            if(pe->type() == ObjectType::ARR){
+                fixArrSubIndices(pe, index.parent());
+            }
             break;
         case COL_MEM_ADDR:
             rv->setMemAddr(value.toString().trimmed());

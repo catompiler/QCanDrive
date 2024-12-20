@@ -49,6 +49,8 @@ public:
     ConstVarListIterator end() const;
     ConstVarListIterator cend() const;
 
+    RegVar* lastVar() const;
+
     bool hasVarBySubIndex(reg_subindex_t subIndex) const;
     RegVar* varBySubIndex(reg_subindex_t subIndex) const;
     reg_subindex_t lastVarSubIndex() const;
