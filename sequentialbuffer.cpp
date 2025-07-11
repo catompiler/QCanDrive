@@ -1,5 +1,9 @@
 #include "sequentialbuffer.h"
 
+
+#define SEQ_BUF_TOP_SCALE 0.1
+
+
 SequentialBuffer::SequentialBuffer()
 {
     m_d = new Data();
@@ -180,13 +184,13 @@ void SequentialBuffer::putAndUpd(const qreal& new_y, const qreal& new_dx)
 
     // Координаты старой точки.
     //int old_x;
-    int old_y;
-    {
-        // Старая точка.
-        QPointF& old_p = m_samples[i];
-        //old_x = old_p.x();
-        old_y = old_p.y();
-    }
+//    int old_y;
+//    {
+//        // Старая точка.
+//        QPointF& old_p = m_samples[i];
+//        //old_x = old_p.x();
+//        old_y = old_p.y();
+//    }
 
     // Добавим точку.
     m_samples[i] = p;
@@ -205,12 +209,12 @@ void SequentialBuffer::putAndUpd(const qreal& new_y, const qreal& new_dx)
     bounds.setCoords(left, bottom, right, top);
 
     //Если старая точка была граничной по вертикали.
-    if((old_y <= bottom && old_y < y) || (old_y >= top && old_y > y)){
+//    if((old_y <= bottom && old_y < y) || (old_y >= top && old_y > y)){
 
         // Пересчитаем вертикальные границы.
         updateVerticalBounds();
-        return;
-    }
+//        return;
+//    }
 }
 
 int SequentialBuffer::transIndex(int i, int ref_i) const
@@ -287,6 +291,10 @@ void SequentialBuffer::updateVerticalBounds() const
         bottom = std::min(bottom, y);
     }
 
+#if defined(SEQ_BUF_TOP_SCALE)
+    top = top + (top - bottom) * SEQ_BUF_TOP_SCALE;
+#endif
+
     bounds.setCoords(left, bottom, right, top);
 }
 
@@ -322,6 +330,10 @@ void SequentialBuffer::recalBounds()
         bottom = std::min(bottom, y);
         top = std::max(top, y);
     }
+
+#if defined(SEQ_BUF_TOP_SCALE)
+    top = top + (top - bottom) * SEQ_BUF_TOP_SCALE;
+#endif
 
     m_d->boundingRect.setCoords(left, top, right, bottom);
 }
