@@ -10,6 +10,7 @@
 
 
 class QwtPlotCurve;
+class QwtPlotLegendItem;
 class SequentialBuffer;
 
 
@@ -70,6 +71,9 @@ public:
     qreal period() const;
     void setPeriod(qreal newPeriod);
 
+    bool legendItemEnabled() const;
+    void setLegendItemEnabled(bool newEnabled);
+
 public slots:
     void clear();
 
@@ -78,9 +82,13 @@ protected:
     qreal m_defaultAlpha;
     qreal m_period;
 
+    QwtPlotLegendItem* m_legendItem;
+
     int findCurve(const QwtPlotCurve* findCurv) const;
     QwtPlotCurve* getCurve(int n);
     const QwtPlotCurve* getCurve(int n) const;
+
+    void updateLegendItem();
 };
 
 #endif // SIGNALPLOT_H

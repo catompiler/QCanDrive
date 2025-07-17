@@ -328,6 +328,7 @@ bool CockpitSerializer::writeSDOValuePlot(QXmlStreamWriter& xml, const SDOValueP
     xml.writeTextElement("backgroundColor", QString::number(plt->background().color().rgb()));
     xml.writeTextElement("backgroundStyle", QString::number(plt->background().style()));
     xml.writeTextElement("textColor", QString::number(plt->textColor().rgb()));
+    xml.writeTextElement("legendEnabled", QString::number(plt->legendItemEnabled()));
     xml.writeTextElement("signalsCount", QString::number(plt->signalsCount()));
     //xml.writeTextElement("period", QString::number(plt->period()));
     //xml.writeTextElement("", QString::number(plt->));
@@ -405,6 +406,9 @@ SDOValuePlot* CockpitSerializer::readSDOValuePlot(QXmlStreamReader& xml) const
             }
             else if(name == "textColor"){
                 plt->setTextColor(QColor::fromRgb(uintValue(xml.readElementText(), 0)));
+            }
+            else if(name == "legendEnabled"){
+                plt->setLegendItemEnabled(uintValue(xml.readElementText(), 0));
             }
             else if(name == "signalsCount"){
                 countOfSignals = intValue(xml.readElementText(), 0);

@@ -360,6 +360,7 @@ void CanOpenWin::on_actAddPlot_triggered(bool checked)
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
         plt->setBackground(m_trendDlg->backColor());
         plt->setTextColor(m_trendDlg->textColor());
+        plt->setLegendItemEnabled(m_trendDlg->legendEnabled());
 
         int transp = m_trendDlg->defaultAlpha();
         plt->setDefaultAlpha( (transp > 0) ? static_cast<qreal>(transp) / 100 : -1.0);
@@ -428,6 +429,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
     m_trendDlg->setBackColor(plt->background().color());
     m_trendDlg->setTextColor(plt->textColor());
     m_trendDlg->setDefaultAlpha(static_cast<int>(plt->defaultAlpha() * 100));
+    m_trendDlg->setLegendEnabled(plt->legendItemEnabled());
     m_trendDlg->setSamplesCount(static_cast<int>(plt->bufferSize()));
 
     m_trendDlg->setSignalsCount(plt->SDOValuesCount());
@@ -462,6 +464,7 @@ void CanOpenWin::on_actEditPlot_triggered(bool checked)
         plt->setBufferSize(static_cast<size_t>(m_trendDlg->samplesCount()));
         plt->setBackground(m_trendDlg->backColor());
         plt->setTextColor(m_trendDlg->textColor());
+        plt->setLegendItemEnabled(m_trendDlg->legendEnabled());
 
         int transp = m_trendDlg->defaultAlpha();
         plt->setDefaultAlpha( (transp > 0) ? static_cast<qreal>(transp) / 100 : -1.0);

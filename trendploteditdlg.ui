@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>289</width>
-    <height>532</height>
+    <width>297</width>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,41 +20,10 @@
       <string>График</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="1" colspan="3">
-       <widget class="QLineEdit" name="lePlotName"/>
-      </item>
-      <item row="1" column="3">
-       <widget class="QToolButton" name="tbColorSel">
-        <property name="text">
-         <string>...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="lblPlotName">
-        <property name="text">
-         <string>Название</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lblTransp">
-        <property name="text">
-         <string>Прозрачность</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="lblPlotColor">
         <property name="text">
          <string>Цвет фона</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lblTextColor">
-        <property name="text">
-         <string>Цвет текста</string>
         </property>
        </widget>
       </item>
@@ -65,10 +34,51 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="3">
+       <widget class="QToolButton" name="tbTextColorSel">
+        <property name="text">
+         <string>...</string>
+        </property>
+       </widget>
+      </item>
       <item row="4" column="3">
        <widget class="QLabel" name="lblTranspVal">
         <property name="text">
          <string>100%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QFrame" name="frBackColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblPlotName">
+        <property name="text">
+         <string>Название</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblTextColor">
+        <property name="text">
+         <string>Цвет текста</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QFrame" name="frTextColor">
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
         </property>
        </widget>
       </item>
@@ -88,28 +98,11 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QFrame" name="frTextColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-       </widget>
+      <item row="0" column="1" colspan="3">
+       <widget class="QLineEdit" name="lePlotName"/>
       </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QFrame" name="frBackColor">
-        <property name="autoFillBackground">
-         <bool>true</bool>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QToolButton" name="tbTextColorSel">
+      <item row="1" column="3">
+       <widget class="QToolButton" name="tbColorSel">
         <property name="text">
          <string>...</string>
         </property>
@@ -125,6 +118,23 @@
         </property>
         <property name="value">
          <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblTransp">
+        <property name="text">
+         <string>Прозрачность</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1" colspan="2">
+       <widget class="QCheckBox" name="cbLegendEnabled">
+        <property name="text">
+         <string>Показывать легенду</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

@@ -173,6 +173,16 @@ void TrendPlotEditDlg::on_pbDel_clicked(bool checked)
     m_signalCurvePropMdl->removeRow(curmi.row());
 }
 
+bool TrendPlotEditDlg::legendEnabled() const
+{
+    return ui->cbLegendEnabled->isChecked();
+}
+
+void TrendPlotEditDlg::setLegendEnabled(bool newLegendEnabled)
+{
+    ui->cbLegendEnabled->setChecked(newLegendEnabled);
+}
+
 SignalCurveEditDlg* TrendPlotEditDlg::signalCurveEditDialog() const
 {
     return m_signalCurveEditDlg;

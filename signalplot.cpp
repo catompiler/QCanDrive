@@ -6,6 +6,7 @@
 #include <QwtSeriesData>
 #include <QwtScaleEngine>
 #include <QwtScaleWidget>
+#include <QwtPlotLegendItem>
 #include <QFontMetrics>
 #include "sequentialbuffer.h"
 #include "signalseriesdata.h"
@@ -40,6 +41,8 @@ SignalPlot::SignalPlot(const QString& newName, QWidget* parent)
 
     m_size = 0;
     m_defaultAlpha = 0.75;
+
+    m_legendItem = nullptr;
 
     setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Ignored );
 
@@ -134,6 +137,8 @@ QBrush SignalPlot::background() const
 void SignalPlot::setBackground(const QBrush& newBrush)
 {
     setCanvasBackground(newBrush);
+
+    updateLegendItem();
 }
 
 QColor SignalPlot::textColor() const
@@ -146,6 +151,8 @@ void SignalPlot::setTextColor(const QColor& newColor)
     QPalette pal(palette());
     pal.setColor(QPalette::Text, newColor);
     setPalette(pal);
+
+    updateLegendItem();
 }
 
 int SignalPlot::addSignal(const QString& newName, const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)
@@ -384,6 +391,28 @@ void SignalPlot::setPeriod(qreal newPeriod)
     m_period = newPeriod;
 }
 
+bool SignalPlot::legendItemEnabled() const
+{
+    return m_legendItem != nullptr;
+}
+
+void SignalPlot::setLegendItemEnabled(bool newEnabled)
+{
+    if(newEnabled){
+        if(m_legendItem == nullptr){
+            m_legendItem = new QwtPlotLegendItem();
+            m_legendItem->attach(this);
+            // setup.
+            updateLegendItem();
+        }
+    }else{
+        if(m_legendItem != nullptr){
+            delete m_legendItem;
+            m_legendItem = nullptr;
+        }
+    }
+}
+
 void SignalPlot::putSample(int n, const qreal& newY, const qreal& newDx)
 {
     QwtPlotCurve* curv = getCurve(n);
@@ -438,4 +467,28 @@ const QwtPlotCurve* SignalPlot::getCurve(int n) const
     if(n >= items.count()) return nullptr;
 
     return static_cast<QwtPlotCurve*>(items.at(n));
+}
+
+void SignalPlot::updateLegendItem()
+{
+    if(m_legendItem == nullptr) return;
+
+    m_legendItem->setMaxColumns(1);
+    m_legendItem->setAlignmentInCanvas(Qt::AlignRight | Qt::AlignVCenter);
+    m_legendItem->setBackgroundMode(QwtPlotLegendItem::LegendBackground);
+
+    m_legendItem->setBorderRadius(8);
+    m_legendItem->setMargin(4);
+    m_legendItem->setSpacing(2);
+    m_legendItem->setItemMargin(0);
+
+    QFont font = m_legendItem->font();
+    font.setPointSize(font.pointSize());
+    m_legendItem->setFont( font );
+
+    m_legendItem->setTextPen(textColor());
+    QColor bgCol = background().color();
+    bgCol.setAlpha(200);
+    m_legendItem->setBackgroundBrush(bgCol);
+    m_legendItem->setBorderPen(bgCol);
 }

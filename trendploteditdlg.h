@@ -57,6 +57,9 @@ public:
 
     void setSignalsCount(int newSignalsCount);
 
+    bool legendEnabled() const;
+    void setLegendEnabled(bool newLegendEnabled);
+
 private slots:
     void on_slTransp_valueChanged(int value);
     void on_tbColorSel_clicked(bool checked = false);
