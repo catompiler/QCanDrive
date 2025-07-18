@@ -214,7 +214,7 @@ FORMS += \
     regselectdlg.ui
 
 RESOURCES += \
-    res.qrc \
+    qt_canopennode_slcan.qrc \
     reglisteditor.qrc
 
 # Default rules for deployment.

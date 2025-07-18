@@ -75,8 +75,8 @@
   </widget>
   <action name="actDebugExec">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/images/res/icons/Engineering-48.png</normaloff>:/images/res/icons/Engineering-48.png</iconset>
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Engineering-48.png</normaloff>:/images/icons/Engineering-48.png</iconset>
    </property>
    <property name="text">
     <string>Debug</string>
@@ -84,8 +84,8 @@
   </action>
   <action name="actConnect">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/images/res/icons/Connected-48.png</normaloff>:/images/res/icons/Connected-48.png</iconset>
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Connected-48.png</normaloff>:/images/icons/Connected-48.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Соединить</string>
@@ -96,8 +96,8 @@
   </action>
   <action name="actDisconnect">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/images/res/icons/Disconnected-48.png</normaloff>:/images/res/icons/Disconnected-48.png</iconset>
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Disconnected-48.png</normaloff>:/images/icons/Disconnected-48.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Разъединить</string>
@@ -108,8 +108,8 @@
   </action>
   <action name="actQuit">
    <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/images/res/icons/Shutdown-48.png</normaloff>:/images/res/icons/Shutdown-48.png</iconset>
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Shutdown-48.png</normaloff>:/images/icons/Shutdown-48.png</iconset>
    </property>
    <property name="text">
     <string>В&amp;ыход</string>
@@ -285,7 +285,7 @@
   </action>
  </widget>
  <resources>
-  <include location="res.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
  </resources>
  <connections/>
 </ui>

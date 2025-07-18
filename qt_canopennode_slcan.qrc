@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>icons/Connected-48.png</file>
+        <file>icons/Disconnected-48.png</file>
+        <file>icons/Engineering-48.png</file>
+        <file>icons/Shutdown-48.png</file>
+    </qresource>
+</RCC>
