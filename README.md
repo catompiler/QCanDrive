@@ -1,2 +1,2 @@
-# Qt slcan CANopenNode
-Qt project with slcan master driver and CANopenNode.
+# QCanDrive
+Tool to minotor and configure devices and drives.
