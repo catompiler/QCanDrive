@@ -71,7 +71,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
     ui->setupUi(this);
 
     m_settings = new Settings();
-    m_settings->read();
+    m_settings->load();
 
     m_regEntryDlg = new RegEntryDlg();
     m_regSelectDlg = new RegSelectDlg();
@@ -107,7 +107,7 @@ RegListEditorWin::RegListEditorWin(QWidget *parent)
 RegListEditorWin::~RegListEditorWin()
 {
     storeSettings();
-    m_settings->write();
+    m_settings->save();
 
     delete m_exportDlg;
     delete m_flagsEditDlg;
