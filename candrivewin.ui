@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CanDriveWin</class>
+ <widget class="QMainWindow" name="CanDriveWin">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>836</width>
+    <height>533</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Привод</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="twMain">
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabCockpit">
+       <property name="autoFillBackground">
+        <bool>true</bool>
+       </property>
+       <attribute name="title">
+        <string>Приборы</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="CockpitWgt" name="cockpitWgt" native="true">
+          <property name="autoFillBackground">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabRegs">
+       <attribute name="title">
+        <string>Регистры</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>836</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="mnuProgram">
+    <property name="title">
+     <string>&amp;Программа</string>
+    </property>
+    <addaction name="actQuit"/>
+   </widget>
+   <widget class="QMenu" name="mnuCockpit">
+    <property name="title">
+     <string>Приборы</string>
+    </property>
+    <addaction name="actOpenCockpit"/>
+    <addaction name="actSaveCockpit"/>
+    <addaction name="actClearCockpit"/>
+    <addaction name="separator"/>
+    <addaction name="actAddPlot"/>
+    <addaction name="actAddDial"/>
+    <addaction name="actAddSlider"/>
+    <addaction name="actAddBar"/>
+    <addaction name="actAddButton"/>
+    <addaction name="actAddIndicator"/>
+   </widget>
+   <addaction name="mnuProgram"/>
+   <addaction name="mnuCockpit"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="tbCockpit">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actConnect"/>
+   <addaction name="actDisconnect"/>
+  </widget>
+  <widget class="QToolBar" name="tbRegsEdit">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QToolBar" name="tbMain">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actQuit"/>
+   <addaction name="separator"/>
+   <addaction name="actSettings"/>
+  </widget>
+  <action name="actDebugExec">
+   <property name="icon">
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Engineering-48.png</normaloff>:/images/icons/Engineering-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+  <action name="actConnect">
+   <property name="icon">
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Connected-48.png</normaloff>:/images/icons/Connected-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Соединить</string>
+   </property>
+   <property name="toolTip">
+    <string>Соединить</string>
+   </property>
+  </action>
+  <action name="actDisconnect">
+   <property name="icon">
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Disconnected-48.png</normaloff>:/images/icons/Disconnected-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Разъединить</string>
+   </property>
+   <property name="toolTip">
+    <string>Разъединить</string>
+   </property>
+  </action>
+  <action name="actSettings">
+   <property name="icon">
+    <iconset resource="candrive.qrc">
+     <normaloff>:/images/icons/Settings 3-48.png</normaloff>:/images/icons/Settings 3-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Параметры</string>
+   </property>
+   <property name="toolTip">
+    <string>Параметры</string>
+   </property>
+  </action>
+  <action name="actQuit">
+   <property name="icon">
+    <iconset resource="qt_canopennode_slcan.qrc">
+     <normaloff>:/images/icons/Shutdown-48.png</normaloff>:/images/icons/Shutdown-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>В&amp;ыход</string>
+   </property>
+  </action>
+  <action name="actSaveCockpit">
+   <property name="text">
+    <string>Сохранить приборы</string>
+   </property>
+   <property name="toolTip">
+    <string>Сохранить при&amp;боры</string>
+   </property>
+  </action>
+  <action name="actAddPlot">
+   <property name="text">
+    <string>&amp;График</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить график</string>
+   </property>
+  </action>
+  <action name="actOpenCockpit">
+   <property name="text">
+    <string>&amp;Загрузить приборы</string>
+   </property>
+   <property name="toolTip">
+    <string>Загрузить приборы</string>
+   </property>
+  </action>
+  <action name="actAddDial">
+   <property name="text">
+    <string>&amp;Показометр</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить показометр</string>
+   </property>
+  </action>
+  <action name="actAddSlider">
+   <property name="text">
+    <string>&amp;Слайдер</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить слайдер</string>
+   </property>
+  </action>
+  <action name="actAddBar">
+   <property name="text">
+    <string>&amp;Бар</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить бар</string>
+   </property>
+  </action>
+  <action name="actAddButton">
+   <property name="text">
+    <string>&amp;Кнопка</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить кнопку</string>
+   </property>
+  </action>
+  <action name="actAddIndicator">
+   <property name="text">
+    <string>&amp;Индикатор</string>
+   </property>
+   <property name="toolTip">
+    <string>Добавить индикатор</string>
+   </property>
+  </action>
+  <action name="actClearCockpit">
+   <property name="text">
+    <string>Очистить приборы</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CockpitWgt</class>
+   <extends>QWidget</extends>
+   <header>cockpitwgt.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="candrive.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
+ </resources>
+ <connections/>
+</ui>

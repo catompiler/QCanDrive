@@ -21,7 +21,7 @@ class SLCanOpenNode : public QObject
 public:
 
     using NodeId = quint8;
-    using Index = quint16;;
+    using Index = quint16;
     using SubIndex = quint8;
 
     explicit SLCanOpenNode(QObject *parent = nullptr);

@@ -16,6 +16,7 @@ class Settings : public QObject
 {
     Q_OBJECT
 public:
+    // TODO: make ctor private
     explicit Settings(QObject *parent = nullptr);
     ~Settings();
 
@@ -76,23 +77,6 @@ public:
         Qt::BrushStyle brushStyle;
     };
 
-public:
-    bool save() const;
-    bool load();
-signals:
-
-private:
-    void saveGeneral(QSettings& s) const;
-    void savePort(QSettings& s) const;
-    void saveCo(QSettings& s) const;
-    void saveAppear(QSettings& s) const;
-
-    void loadGeneral(QSettings& s);
-    void loadPort(QSettings& s);
-    void loadCo(QSettings& s);
-    void loadAppear(QSettings& s);
-
-public:
     struct _S_Export{
         // general export.
         QString path;
@@ -128,7 +112,26 @@ public:
         bool edsExport;
     } exporting;
 
+    static Settings* get();
+
+    bool save() const;
+    bool load();
+
+signals:
+
 private:
+    //explicit Settings(QObject *parent = nullptr);
+
+    void saveGeneral(QSettings& s) const;
+    void savePort(QSettings& s) const;
+    void saveCo(QSettings& s) const;
+    void saveAppear(QSettings& s) const;
+
+    void loadGeneral(QSettings& s);
+    void loadPort(QSettings& s);
+    void loadCo(QSettings& s);
+    void loadAppear(QSettings& s);
+
     void readExporting(QSettings& settings);
     void writeExporting(QSettings& settings) const;
 };

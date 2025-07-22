@@ -4,5 +4,7 @@
         <file>icons/Disconnected-48.png</file>
         <file>icons/Engineering-48.png</file>
         <file>icons/Shutdown-48.png</file>
+        <file>icons/Connected-16.png</file>
+        <file>icons/Disconnected-16.png</file>
     </qresource>
 </RCC>

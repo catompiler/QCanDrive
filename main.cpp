@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "candrivewin.h"
 #include <QApplication>
 #include <QTextCodec>
 
@@ -94,7 +94,7 @@ static void testRegExpReplace()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
+    CanDriveWin w;
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 

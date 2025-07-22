@@ -12,6 +12,13 @@ Settings::~Settings()
 {
 }
 
+Settings* Settings::get()
+{
+    static Settings settings;
+
+    return &settings;
+}
+
 bool Settings::save() const
 {
     QSettings s("settings.ini", QSettings::IniFormat);

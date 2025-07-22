@@ -20,8 +20,9 @@ INCLUDEPATH += CANopenNode/ \
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    candrivewin.cpp \
+    cockpitwgt.cpp \
     main.cpp \
-    mainwindow.cpp \
     CANopenNode/301/CO_Emergency.c \
     CANopenNode/301/CO_HBconsumer.c \
     CANopenNode/301/CO_NMT_Heartbeat.c \
@@ -101,7 +102,6 @@ SOURCES += \
     sellineedit.cpp
 
 HEADERS += \
-    mainwindow.h \
     CANopenNode/301/CO_Emergency.h \
     CANopenNode/301/CO_HBconsumer.h \
     CANopenNode/301/CO_NMT_Heartbeat.h \
@@ -118,8 +118,10 @@ HEADERS += \
     CANopenNode/301/crc16-ccitt.h \
     CANopenNode/CANopen.h \
     CO_driver_target.h \
+    candrivewin.h \
     canopenwin.h \
     cockpitserializer.h \
+    cockpitwgt.h \
     coobjectdict.h \
     cotypes.h \
     covaluesholder.h \
@@ -197,7 +199,7 @@ HEADERS += \
     sellineedit.h
 
 FORMS += \
-    mainwindow.ui \
+    candrivewin.ui \
     canopenwin.ui \
     sdovaluebareditdlg.ui \
     sdovaluebuttoneditdlg.ui \
@@ -214,6 +216,7 @@ FORMS += \
     regselectdlg.ui
 
 RESOURCES += \
+    candrive.qrc \
     qt_canopennode_slcan.qrc \
     reglisteditor.qrc
 
