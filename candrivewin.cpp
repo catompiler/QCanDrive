@@ -5,6 +5,8 @@
 #include "slcanopennode.h"
 #include "covaluesholder.h"
 #include "covaluetypes.h"
+#include "cockpitwgt.h"
+#include "reglisteditorwgt.h"
 #include <QLabel>
 #include <QDebug>
 #include <QMessageBox>
@@ -15,7 +17,11 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     , ui(new Ui::CanDriveWin)
 {
     ui->setupUi(this);
-    ui->twMain->setStyleSheet("QTabWidget::pane { border: 1px solid #222222; }"); // none
+    ui->twMain->setStyleSheet(
+                "QTabWidget::pane { border: 1px solid #222222; }"
+                ); // none
+    //
+    ui->lRegList->insertWidget(0, ui->tbRegsEdit);
 
     // populate statusbar.
     m_sblblConStatus = new QLabel();
@@ -51,6 +57,21 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     connect(ui->actAddBar, &QAction::triggered, ui->cockpitWgt, &CockpitWgt::addBar);
     connect(ui->actAddButton, &QAction::triggered, ui->cockpitWgt, &CockpitWgt::addButton);
     connect(ui->actAddIndicator, &QAction::triggered, ui->cockpitWgt, &CockpitWgt::addIndicator);
+
+
+    connect(ui->actRegListOpen, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::openRegList);
+    connect(ui->actRegListOpenAppend, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::appendRegList);
+    connect(ui->actRegListSaveAs, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::saveAsRegList);
+    connect(ui->actRegListExport, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::exportRegList);
+    connect(ui->actRegListDelAll, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::delAll);
+    connect(ui->actRegListAddItem, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::addItem);
+    connect(ui->actRegListAddSubItem, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::addSubItem);
+    connect(ui->actRegListDuplicateItem, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::duplicateItem);
+    connect(ui->actRegListDelItem, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::delItem);
+    connect(ui->actRegListMoveUp, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::moveUp);
+    connect(ui->actRegListMoveDown, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::moveDown);
+    connect(ui->actRegListExpandTree, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::expandTree);
+    connect(ui->actRegListCollapseTree, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::collapseTree);
 
     //connect(ui->act, &QAction::triggered, this, &CanDriveWin::m_ui_act_triggered);
 

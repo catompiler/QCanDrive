@@ -42,6 +42,7 @@ SOURCES += \
     covaluesholder.cpp \
     covaluetypes.cpp \
     canopenwin.cpp \
+    reglisteditorwgt.cpp \
     sdocomm.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
@@ -126,6 +127,7 @@ HEADERS += \
     cotypes.h \
     covaluesholder.h \
     covaluetypes.h \
+    reglisteditorwgt.h \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \

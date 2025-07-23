@@ -1,0 +1,679 @@
+#include "reglisteditorwgt.h"
+#include "regdelegate.h"
+#include "regentrydlg.h"
+#include "regselectdlg.h"
+#include "flagseditdlg.h"
+#include "exportdlg.h"
+#include "reglistmodel.h"
+#include "regentry.h"
+#include "regobject.h"
+#include "regvar.h"
+#include "regtypes.h"
+#include "regutils.h"
+#include "reglistxmlserializer.h"
+#include "reglistxml2serializer.h"
+#include "reglistregsexporter.h"
+#include "reglistdataexporter.h"
+#include "reglistcoexporter.h"
+#include "reglistedsexporter.h"
+#include "settings.h"
+#include <QMessageBox>
+#include <QApplication>
+#include <QItemSelectionModel>
+#include <QIODevice>
+#include <QByteArray>
+#include <QBuffer>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QFileDialog>
+#include <QScopedPointer>
+#include <QDebug>
+
+
+#define COL_WIDTH_INDEX 75
+#define COL_WIDTH_NAME 150
+#define COL_WIDTH_TYPE 75
+#define COL_WIDTH_COUNT 75
+#define COL_WIDTH_MEM_ADDR 150
+#define COL_WIDTH_MIN_VAL 75
+#define COL_WIDTH_MAX_VAL 75
+#define COL_WIDTH_DEF_VAL 100
+#define COL_WIDTH_BASE 100
+#define COL_WIDTH_FLAGS 100
+#define COL_WIDTH_EXTFLAGS 150
+#define COL_WIDTH_DESCR 100
+//#define COL_WIDTH_ 50
+
+
+static const int col_width[] = {
+    COL_WIDTH_INDEX,
+    COL_WIDTH_NAME,
+    COL_WIDTH_TYPE,
+    COL_WIDTH_COUNT,
+    COL_WIDTH_MEM_ADDR,
+    COL_WIDTH_MIN_VAL,
+    COL_WIDTH_MAX_VAL,
+    COL_WIDTH_DEF_VAL,
+    COL_WIDTH_BASE,
+    COL_WIDTH_FLAGS,
+    COL_WIDTH_EXTFLAGS,
+    COL_WIDTH_DESCR
+};
+static const int col_width_len = ((sizeof(col_width))/(sizeof(col_width[0])));
+
+
+RegListEditorWgt::RegListEditorWgt(QWidget *parent)
+    : QTreeView(parent)
+{
+    m_regEntryDlg = new RegEntryDlg();
+    m_regSelectDlg = new RegSelectDlg();
+    m_flagsEditDlg = new FlagsEditDlg();
+    m_exportDlg = new ExportDlg();
+
+    m_regListDelegate = new RegDelegate();
+    m_regListDelegate->setRegSelectDialog(m_regSelectDlg);
+    m_regListDelegate->setFlagsEditDialog(m_flagsEditDlg);
+
+    m_regsListModel = new RegListModel();
+    getTreeView()->setModel(m_regsListModel);
+    getTreeView()->setItemDelegate(m_regListDelegate);
+
+    m_regSelectDlg->setRegListModel(m_regsListModel);
+
+    getTreeView()->setSelectionMode(QAbstractItemView::SingleSelection);
+    QItemSelectionModel* sel_model = getTreeView()->selectionModel();
+    if(sel_model == nullptr){
+        sel_model = new QItemSelectionModel();
+        sel_model->setParent(getTreeView());
+        getTreeView()->setSelectionModel(sel_model);
+    }
+    connect(sel_model, &QItemSelectionModel::selectionChanged, this, &RegListEditorWgt::m_tvRegList_selection_changed);
+    connect(this, &RegListEditorWgt::activated, this, &RegListEditorWgt::m_tvRegList_activated);
+
+    for(int i = 0; i < col_width_len; i ++){
+        getTreeView()->setColumnWidth(i, col_width[i]);
+    }
+
+    restoreSettings();
+}
+
+RegListEditorWgt::~RegListEditorWgt()
+{
+    storeSettings();
+
+    delete m_exportDlg;
+    delete m_flagsEditDlg;
+    delete m_regSelectDlg;
+    delete m_regEntryDlg;
+    delete m_regsListModel;
+    delete m_regListDelegate;
+}
+
+void RegListEditorWgt::openRegList()
+{
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Открыть файлы"), m_curDir,
+                                                          tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
+
+    if(filenames.isEmpty()) return;
+
+    m_curDir = QDir(filenames.front()).path();
+
+    m_regsListModel->setRegList(RegEntryList());
+
+    for(auto& filename: filenames){
+        appendFile(filename);
+    }
+}
+
+void RegListEditorWgt::appendRegList()
+{
+    QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Добавить файлы"), m_curDir,
+                                                          tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
+
+    if(filenames.isEmpty()) return;
+
+    m_curDir = QDir(filenames.front()).path();
+
+    for(auto& filename: filenames){
+        appendFile(filename);
+    }
+}
+
+void RegListEditorWgt::saveAsRegList()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("Сохранить файл"), m_curDir,
+                                                    tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
+
+    if(filename.isEmpty()) return;
+
+    m_curDir = QDir(filename).path();
+
+    QFile file(filename);
+
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно сохранить файл!"));
+        return;
+    }
+
+    QScopedPointer<RegListSerializer> ser;
+
+    if(filename.endsWith(".regxml2")){
+        ser.reset(new RegListXml2Serializer());
+    }else{
+        ser.reset(new RegListXmlSerializer());
+    }
+
+    if(!ser->serialize(&file, m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно записать данные в файл!"));
+    }
+
+    file.close();
+}
+
+void RegListEditorWgt::exportRegList()
+{
+    restoreExporting();
+
+    if(m_exportDlg->exec()){
+        storeExporting();
+        if(m_exportDlg->exportRegs()) doDlgExportRegs();
+        if(m_exportDlg->exportData()) doDlgExportData();
+        if(m_exportDlg->exportCO()) doDlgExportCo();
+        if(m_exportDlg->exportEds()) doDlgExportEds();
+        QMessageBox::information(this, tr("Экспорт"), tr("Завершено!"));
+    }
+}
+
+void RegListEditorWgt::expandTree()
+{
+    getTreeView()->expandAll();
+}
+
+void RegListEditorWgt::collapseTree()
+{
+    getTreeView()->collapseAll();
+}
+
+void RegListEditorWgt::moveUp()
+{
+    QModelIndex index = getTreeView()->currentIndex();
+
+    if(!index.isValid()) return;
+
+    if(m_regsListModel->moveRow(index.parent(), index.row(), index.parent(), index.row() - 1)){
+        getTreeView()->selectionModel()->setCurrentIndex(m_regsListModel->index(index.row() - 1, index.column(), index.parent()), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    }
+}
+
+void RegListEditorWgt::moveDown()
+{
+    QModelIndex index = getTreeView()->currentIndex();
+
+    if(!index.isValid()) return;
+
+    if(m_regsListModel->moveRow(index.parent(), index.row(), index.parent(), index.row() + 1)){
+        getTreeView()->selectionModel()->setCurrentIndex(m_regsListModel->index(index.row() + 1, index.column(), index.parent()), QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+    }
+}
+
+void RegListEditorWgt::addItem()
+{
+    //qDebug() << "on_pbAdd_clicked";
+
+    QModelIndex entry_index = m_regsListModel->entryModelIndexByModelIndex(getTreeView()->currentIndex());
+    RegEntry* re = m_regsListModel->entryByModelIndex(entry_index);
+    if(re != nullptr){
+        m_regEntryDlg->setIndex(re->index() + 1);
+        m_regEntryDlg->setObjectType(re->type());
+    }
+
+    m_regEntryDlg->setIndexEditable(true);
+    m_regEntryDlg->setObjectTypeEditable(true);
+    m_regEntryDlg->setName(QString("newObject"));
+    m_regEntryDlg->setDescription(QString());
+
+    if(m_regEntryDlg->exec()){
+
+        if(m_regsListModel->hasEntryByRegIndex(m_regEntryDlg->index())){
+            QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
+            return;
+        }
+
+        RegEntry* re = new RegEntry(m_regEntryDlg->index(), m_regEntryDlg->objectType());
+
+        re->setName(m_regEntryDlg->name());
+        re->setDescription(m_regEntryDlg->description());
+
+        if(!m_regsListModel->addEntry(re)){
+            qDebug() << "m_regsListModel->addEntry(...)";
+            delete re;
+            return;
+        }
+
+        QModelIndex entry_index = m_regsListModel->entryModelIndex(re);
+
+        if(!entry_index.isValid()){
+            qDebug() << "Invalid added entry model index";
+            return;
+        }
+
+        if((re->type() == ObjectType::REC || re->type() == ObjectType::ARR) /* && add count var */){
+            RegVar* count_var = new RegVar();
+
+            count_var->setSubIndex(0);
+            count_var->setDataType(DataType::U8);
+            count_var->setMinValue(0);
+            count_var->setMaxValue(254);
+            if(re->type() == ObjectType::ARR){
+                count_var->setDefaultValue(1);
+            }else{
+                count_var->setDefaultValue(0);
+            }
+            count_var->setName("count");
+            count_var->setDescription("Number of sub-entries");
+            count_var->setEFlags(RegEFlag::RL_HIDE | RegEFlag::CO_COUNT);
+
+            if(!m_regsListModel->addSubObject(count_var, entry_index)){
+                qDebug() << "m_regsListModel->addSubObject(count_var)";
+                delete count_var;
+            }
+
+            getTreeView()->expand(entry_index);
+        }
+
+        if((re->type() == ObjectType::VAR || re->type() == ObjectType::ARR) /* && add count var */){
+            RegVar* var = new RegVar();
+
+            if(re->type() == ObjectType::VAR){
+                var->setSubIndex(0);
+                var->setName("value");
+            }else if(re->type() == ObjectType::ARR){
+                var->setSubIndex(1);
+                var->setName("data");
+                //var->setCount(0);
+            }
+
+            if(!m_regsListModel->addSubObject(var, entry_index)){
+                qDebug() << "m_regsListModel->addSubObject(var)";
+                delete var;
+            }
+
+            getTreeView()->expand(entry_index);
+        }
+    }
+}
+
+void RegListEditorWgt::duplicateItem()
+{
+    //qDebug() << "on_pbAdd_clicked";
+
+    QModelIndex entry_index = m_regsListModel->entryModelIndexByModelIndex(getTreeView()->currentIndex());
+    if(!entry_index.isValid()) return;
+
+    RegEntry* orig_re = m_regsListModel->entryByModelIndex(entry_index);
+    if(orig_re == nullptr) return;
+
+    m_regEntryDlg->setIndex(orig_re->index() + 1);
+    m_regEntryDlg->setObjectType(orig_re->type());
+    m_regEntryDlg->setName(orig_re->name());
+    m_regEntryDlg->setDescription(orig_re->description());
+
+    m_regEntryDlg->setIndexEditable(true);
+    m_regEntryDlg->setObjectTypeEditable(true);
+
+    if(m_regEntryDlg->exec()){
+
+        if(m_regsListModel->hasEntryByRegIndex(m_regEntryDlg->index())){
+            QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
+            return;
+        }
+
+        RegEntry* re = new RegEntry(*orig_re);
+
+        re->setIndex(m_regEntryDlg->index());
+        re->setType(m_regEntryDlg->objectType());
+        re->setName(m_regEntryDlg->name());
+        re->setDescription(m_regEntryDlg->description());
+
+        if(!m_regsListModel->addEntry(re)){
+            qDebug() << "m_regsListModel->addEntry(...)";
+            delete re;
+            return;
+        }
+
+        QModelIndex entry_index = m_regsListModel->entryModelIndex(re);
+
+        if(!entry_index.isValid()){
+            qDebug() << "Invalid added entry model index";
+            return;
+        }
+        getTreeView()->expand(entry_index);
+    }
+}
+
+
+void RegListEditorWgt::addSubItem()
+{
+    //qDebug() << "on_pbAddSub_clicked";
+
+    QModelIndex entry_index = m_regsListModel->entryModelIndexByModelIndex(getTreeView()->currentIndex());
+    RegEntry* re = m_regsListModel->entryByModelIndex(entry_index);
+    if(re == nullptr) return;
+
+    switch(re->type()){
+    case ObjectType::VAR:
+        if(re->count() != 0){
+            QMessageBox::critical(this, tr("Ошибка"), tr("Внутри уже есть переменная!"));
+            return;
+        }
+    case ObjectType::ARR:
+    case ObjectType::REC:
+        break;
+    }
+
+    m_regEntryDlg->setIndexEditable(true);
+    reg_index_t newIndex = re->countAll();
+    if(newIndex != 0 && re->type() == ObjectType::ARR){
+        RegVar* rv = re->lastVar();
+        newIndex = rv->subIndex() + qMax(1U, rv->count());
+    }
+    m_regEntryDlg->setIndex(newIndex);
+    m_regEntryDlg->setObjectTypeEditable(false);
+    m_regEntryDlg->setObjectType(ObjectType::VAR);
+
+    RegVar* orig_rv = m_regsListModel->varByModelIndex(getTreeView()->currentIndex());
+
+    if(orig_rv){
+        m_regEntryDlg->setName(orig_rv->name());
+        m_regEntryDlg->setDescription(orig_rv->description());
+    }else{
+        m_regEntryDlg->setName(QString("newSubObject"));
+        m_regEntryDlg->setDescription(QString());
+    }
+
+    if(m_regEntryDlg->exec()){
+
+        if(re->hasVarBySubIndex(m_regEntryDlg->index())){
+            QMessageBox::critical(this, tr("Ошибка добавления."), tr("Элемент с данным индексом уже существует!"));
+            return;
+        }
+
+        RegVar* rv = nullptr;
+
+        if(orig_rv){
+            rv = new RegVar(*orig_rv);
+        }else{
+            rv = new RegVar();
+        }
+
+        if(re->type() == ObjectType::ARR && re->count() > 1){
+            RegVar* v = re->at(re->count() - 1);
+            rv->setDataType(v->dataType());
+        }
+
+        rv->setSubIndex(m_regEntryDlg->index());
+        rv->setName(m_regEntryDlg->name());
+        rv->setDescription(m_regEntryDlg->description());
+
+        if(!m_regsListModel->addSubObject(rv, entry_index)){
+            qDebug() << "m_regsListModel->addSubObject(...)";
+            delete rv;
+        }
+    }
+}
+
+void RegListEditorWgt::delItem()
+{
+    //qDebug() << "on_pbDel_clicked";
+
+    QModelIndex index = getTreeView()->currentIndex();
+
+    if(!index.isValid()) return;
+
+    getTreeView()->selectionModel()->clear();
+    m_regsListModel->removeRow(index.row(), index.parent());
+}
+
+void RegListEditorWgt::delAll()
+{
+    m_regsListModel->setRegList(RegEntryList());
+}
+
+void RegListEditorWgt::m_tvRegList_activated(const QModelIndex& index)
+{
+    //qDebug() << "on_tvRegList_activated";
+
+    if(!index.isValid()) return;
+
+    // entry.
+    if(!index.parent().isValid()){
+
+        RegEntry* re = m_regsListModel->entryByModelIndex(index);
+
+        if(re == nullptr) return;
+
+        m_regEntryDlg->setIndexEditable(true);
+        m_regEntryDlg->setIndex(re->index());
+        m_regEntryDlg->setObjectTypeEditable(true);
+        m_regEntryDlg->setObjectType(re->type());
+        m_regEntryDlg->setName(re->name());
+        m_regEntryDlg->setDescription(re->description());
+
+        if(m_regEntryDlg->exec()){
+
+            re->setIndex(m_regEntryDlg->index());
+            re->setType(m_regEntryDlg->objectType());
+            re->setName(m_regEntryDlg->name());
+            re->setDescription(m_regEntryDlg->description());
+
+            m_regsListModel->entryAtIndexModified(index);
+        }
+    }
+}
+
+void RegListEditorWgt::m_tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    Q_UNUSED(deselected);
+
+    //qDebug() << "on_tvRegList_activated";
+
+    if(selected.empty()){
+    }else{
+    }
+}
+
+void RegListEditorWgt::appendFile(const QString& fileName)
+{
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл: %1").arg(QFileInfo(fileName).fileName()));
+        return;
+    }
+
+    QScopedPointer<RegListSerializer> ser;
+
+    if(fileName.endsWith(".regxml2")){
+        ser.reset(new RegListXml2Serializer());
+    }else{
+        ser.reset(new RegListXmlSerializer());
+    }
+
+    RegEntryList reglist;
+
+    if(!ser->deserialize(&file, &reglist)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно прочитать данные из файла: %1").arg(QFileInfo(fileName).fileName()));
+    }else{
+        m_regsListModel->addRegList(reglist);
+        if(!reglist.isEmpty()){
+            QMessageBox::warning(this, tr("Предупреждение!"), tr("Часть данных не добавлена из-за совпадения индексов в файле: %1").arg(QFileInfo(fileName).fileName()));
+            qDeleteAll(reglist);
+        }
+    }
+
+    file.close();
+}
+
+void RegListEditorWgt::doDlgExportRegs()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListRegsExporter exporter;
+
+    exporter.setListFileName(m_exportDlg->regListFileName())
+            .setIdsFileName(m_exportDlg->regIdsFileName())
+            .setDataFileName(m_exportDlg->regDataDeclFileName())
+            .setUserCodeIds(m_exportDlg->userCodeRegIds())
+            .setUserCodeList(m_exportDlg->userCodeRegList())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+void RegListEditorWgt::doDlgExportData()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListDataExporter exporter;
+
+    exporter.setDeclFileName(m_exportDlg->regDataDeclFileName())
+            .setImplFileName(m_exportDlg->regDataImplFileName())
+            .setUserCodeDecl(m_exportDlg->userCodeDataDecl())
+            .setUserCodeImpl(m_exportDlg->userCodeDataImpl())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+void RegListEditorWgt::doDlgExportCo()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListCoExporter exporter;
+
+    exporter.setCOhFileName(m_exportDlg->cohFileName())
+            .setCOcFileName(m_exportDlg->cocFileName())
+            .setDataFileName(m_exportDlg->regDataDeclFileName())
+            .setUserCodeCOh(m_exportDlg->userCodeCOh())
+            .setUserCodeCOc(m_exportDlg->userCodeCOc())
+            .setODName(m_exportDlg->odName())
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+void RegListEditorWgt::doDlgExportEds()
+{
+    auto reglist = m_regsListModel->regEntryList();
+    auto entymapping = RegUtils::genRegDataEntryNameMapping(reglist);
+    auto varmapping = RegUtils::genRegDataVarsNameMapping(reglist);
+
+    RegListEdsExporter exporter;
+
+    exporter.setEdsFileName(m_exportDlg->edsFileName())
+            .setFileVersion(1, 0)
+            .setFileAuthor(m_exportDlg->edsAuthor())
+            .setOrderCode("")
+            .setVendorName(m_exportDlg->edsVendorName())
+            .setProductName(m_exportDlg->edsProductName())
+            .setGranularity(8)
+            .setDataName(m_exportDlg->dataName())
+            .setSyntaxType(RegUtils::SyntaxType::camelCase)
+            .setEntryNameMap(&entymapping)
+            .setVarNameMap(&varmapping);
+
+    if(!exporter.doExport(m_exportDlg->path(), m_regsListModel->regEntryList())){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка экспорта!"));
+    }
+}
+
+
+void RegListEditorWgt::restoreSettings()
+{
+    //restoreExporting();
+}
+
+void RegListEditorWgt::restoreExporting()
+{
+    auto& e = Settings::get()->exporting;
+    auto& d = *m_exportDlg;
+    d.setPath(e.path);
+    d.setDataName(e.dataName);
+    d.setOdName(e.odName);
+    d.setEdsVendorName(e.edsVendorName);
+    d.setEdsProductName(e.edsProductName);
+    d.setEdsAuthor(e.edsFileAuthor);
+    d.setRegListFileName(e.reglistFileName);
+    d.setRegIdsFileName(e.regIdsFileName);
+    d.setUserCodeRegList(e.reglistUserCode);
+    d.setUserCodeRegIds(e.regIdsUserCode);
+    d.setExportRegs(e.reglistExport);
+    d.setRegDataDeclFileName(e.regdataDeclFileName);
+    d.setRegDataImplFileName(e.regdataImplFileName);
+    d.setUserCodeDataDecl(e.regdataDeclUserCode);
+    d.setUserCodeDataImpl(e.regdataImplUserCode);
+    d.setExportData(e.regDataExport);
+    d.setCohFileName(e.cohFileName);
+    d.setCocFileName(e.cocFileName);
+    d.setUserCodeCOh(e.cohUserCode);
+    d.setUserCodeCOc(e.cocUserCode);
+    d.setExportCO(e.coExport);
+    d.setEdsFileName(e.edsFileName);
+    d.setExportEds(e.edsExport);
+}
+
+void RegListEditorWgt::storeSettings()
+{
+    //storeExporting();
+}
+
+void RegListEditorWgt::storeExporting()
+{
+    auto& e = Settings::get()->exporting;
+    auto& d = *m_exportDlg;
+    e.path = d.path();
+    e.dataName = d.dataName();
+    e.odName = d.odName();
+    e.edsVendorName = d.edsVendorName();
+    e.edsProductName = d.edsProductName();
+    e.edsFileAuthor = d.edsAuthor();
+    e.reglistFileName = d.regListFileName();
+    e.regIdsFileName = d.regIdsFileName();
+    e.reglistUserCode = d.userCodeRegList();
+    e.regIdsUserCode = d.userCodeRegIds();
+    e.reglistExport = d.exportRegs();
+    e.regdataDeclFileName = d.regDataDeclFileNameRaw();
+    e.regdataImplFileName = d.regDataImplFileNameRaw();
+    e.regdataDeclUserCode = d.userCodeDataDecl();
+    e.regdataImplUserCode = d.userCodeDataImpl();
+    e.regDataExport = d.exportData();
+    e.cohFileName = d.cohFileNameRaw();
+    e.cocFileName = d.cocFileNameRaw();
+    e.cohUserCode = d.userCodeCOh();
+    e.cocUserCode = d.userCodeCOc();
+    e.coExport = d.exportCO();
+    e.edsFileName = d.edsFileName();
+    e.edsExport = d.exportEds();
+}
