@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>836</width>
+    <width>758</width>
     <height>533</height>
    </rect>
   </property>
@@ -84,7 +84,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>836</width>
+     <width>758</width>
      <height>21</height>
     </rect>
    </property>
@@ -113,6 +113,20 @@
    <addaction name="mnuCockpit"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="tbMain">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actQuit"/>
+   <addaction name="separator"/>
+   <addaction name="actSettings"/>
+  </widget>
   <widget class="QToolBar" name="tbCockpit">
    <property name="windowTitle">
     <string>toolBar</string>
@@ -136,20 +150,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-  </widget>
-  <widget class="QToolBar" name="tbMain">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actQuit"/>
-   <addaction name="separator"/>
-   <addaction name="actSettings"/>
   </widget>
   <action name="actDebugExec">
    <property name="icon">
