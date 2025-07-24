@@ -36,7 +36,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabCockpit">
        <property name="autoFillBackground">
@@ -92,6 +92,31 @@
         </property>
         <item>
          <widget class="RegListEditorWgt" name="tvRegList"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabRegView">
+       <attribute name="title">
+        <string>Параметры</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="RegsViewWgt" name="tvRegView"/>
         </item>
        </layout>
       </widget>
@@ -492,6 +517,11 @@
    <class>RegListEditorWgt</class>
    <extends>QTreeView</extends>
    <header>reglisteditorwgt.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RegsViewWgt</class>
+   <extends>QTreeView</extends>
+   <header>regsviewwgt.h</header>
   </customwidget>
  </customwidgets>
  <resources>

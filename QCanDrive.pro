@@ -43,6 +43,8 @@ SOURCES += \
     covaluetypes.cpp \
     canopenwin.cpp \
     reglisteditorwgt.cpp \
+    regsviewmodel.cpp \
+    regsviewwgt.cpp \
     sdocomm.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
@@ -128,6 +130,8 @@ HEADERS += \
     covaluesholder.h \
     covaluetypes.h \
     reglisteditorwgt.h \
+    regsviewmodel.h \
+    regsviewwgt.h \
     sdocomm.h \
     sdocomm_data.h \
     sdovalue.h \
