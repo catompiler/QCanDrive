@@ -110,6 +110,16 @@ RegListEditorWgt::~RegListEditorWgt()
     delete m_regListDelegate;
 }
 
+const RegEntryList* RegListEditorWgt::regEntryList() const
+{
+    return m_regsListModel->regEntryList();
+}
+
+const RegListModel* RegListEditorWgt::regListModel() const
+{
+    return m_regsListModel;
+}
+
 void RegListEditorWgt::openRegList()
 {
     QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Открыть файлы"), m_curDir,

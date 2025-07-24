@@ -3,6 +3,7 @@
 
 #include <QTreeView>
 #include <QString>
+#include "reglistmodel.h"
 
 class QItemSelection;
 class QModelIndex;
@@ -23,6 +24,10 @@ class RegListEditorWgt : public QTreeView
 public:
     RegListEditorWgt(QWidget *parent = nullptr);
     ~RegListEditorWgt();
+
+    const RegEntryList* regEntryList() const;
+
+    const RegListModel* regListModel() const;
 
 public slots:
     void openRegList();
