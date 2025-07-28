@@ -67,6 +67,9 @@ void RegListModel::setRegList(const RegEntryList& reglist)
     fixSortingAll();
 
     endResetModel();
+
+    emit layoutAboutToBeChanged();
+    emit layoutChanged();
 }
 
 void RegListModel::addRegList(RegEntryList& reglist)
@@ -87,6 +90,9 @@ void RegListModel::addRegList(RegEntryList& reglist)
     fixSortingAll();
 
     endResetModel();
+
+    emit layoutAboutToBeChanged();
+    emit layoutChanged();
 }
 
 bool RegListModel::hasEntryByRegIndex(reg_index_t index) const
@@ -385,7 +391,7 @@ QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) 
     //qDebug() << "RegListModel::index(" << row << ", " << column << ", " << parent << ")";
 
     if(!parent.isValid()){
-        if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
+        //if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
         if(row < 0 || row >= m_reglist->count()) return QModelIndex();
 
         RegEntry* re = m_reglist->at(row);
@@ -393,7 +399,7 @@ QModelIndex RegListModel::index(int row, int column, const QModelIndex &parent) 
 
         return createIndex(row, column, static_cast<void*>(re));
     }else{ // parent is valid.
-        if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
+        //if(column < 0 || column >= static_cast<int>(col_count)) return QModelIndex();
 
         RegEntry* re = static_cast<RegEntry*>(parent.internalPointer());
         if(re == nullptr) return QModelIndex();

@@ -3,18 +3,13 @@
 
 #include <QTreeView>
 #include <QString>
-#include "reglistmodel.h"
+//#include "reglistmodel.h"
 #include "regsviewmodel.h"
 
 class QItemSelection;
 class QModelIndex;
-class RegEntryDlg;
 class RegListModel;
-class RegDelegate;
 class RegEntry;
-class RegSelectDlg;
-class FlagsEditDlg;
-class ExportDlg;
 class Settings;
 
 
@@ -26,19 +21,13 @@ public:
     RegsViewWgt(QWidget *parent = nullptr);
     ~RegsViewWgt();
 
+    const RegListModel* regListModel() const;
+    RegListModel* regListModel();
+    void setRegListModel(RegListModel* newRegListModel);
+
 public slots:
-    void openRegList();
-    void appendRegList();
-    void saveAsRegList();
     void expandTree();
     void collapseTree();
-    void moveUp();
-    void moveDown();
-    void addItem();
-    void duplicateItem();
-    void addSubItem();
-    void delItem();
-    void delAll();
 
 private slots:
     void m_tvRegList_activated(const QModelIndex &index);
@@ -47,18 +36,7 @@ private slots:
 private:
     QTreeView* getTreeView() { return this; }
 
-    RegEntryDlg* m_regEntryDlg;
-    RegSelectDlg* m_regSelectDlg;
-    FlagsEditDlg* m_flagsEditDlg;
-    ExportDlg* m_exportDlg;
-
-    RegListModel* m_regsViewModel;
-
-    RegDelegate* m_regListDelegate;
-
-    QString m_curDir;
-
-    void appendFile(const QString& fileName);
+    RegsViewModel* m_regsViewModel;
 
     void restoreSettings();
     void storeSettings();

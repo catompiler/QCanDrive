@@ -28,6 +28,7 @@ public:
     const RegEntryList* regEntryList() const;
 
     const RegListModel* regListModel() const;
+    RegListModel* regListModel();
 
 public slots:
     void openRegList();
