@@ -35,9 +35,10 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
-//    // QSortFilterProxyModel interface
-//protected:
-//    bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
+protected:
+    // QSortFilterProxyModel interface
+    bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
+    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
 };
 
 #endif // REGSVIEWMODEL_H
