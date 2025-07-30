@@ -314,7 +314,7 @@ void SDOValueIndicatorEditDlg::peekColor(QWidget* colHolder)
 
 void SDOValueIndicatorEditDlg::populateTypes()
 {
-    auto types = COValue::getTypesNames();
+    auto types = COValue::getNumericTypesNames();
 
     ui->cbType->clear();
 

@@ -172,7 +172,7 @@ void SignalCurveEditDlg::on_tbBrushColorSel_clicked(bool checked)
 
 void SignalCurveEditDlg::populateTypes()
 {
-   auto types = COValue::getTypesNames();
+   auto types = COValue::getNumericTypesNames();
 
     ui->cbType->clear();
 

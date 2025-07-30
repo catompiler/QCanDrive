@@ -346,7 +346,7 @@ void SDOValueBarEditDlg::peekColor(QWidget* colHolder)
 
 void SDOValueBarEditDlg::populateTypes()
 {
-    auto types = COValue::getTypesNames();
+    auto types = COValue::getNumericTypesNames();
 
     ui->cbType->clear();
 

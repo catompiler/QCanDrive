@@ -306,7 +306,7 @@ void SDOValueSliderEditDlg::peekColor(QWidget* colHolder)
 
 void SDOValueSliderEditDlg::populateTypes()
 {
-    auto types = COValue::getTypesNames();
+    auto types = COValue::getNumericTypesNames();
 
     ui->cbType->clear();
 

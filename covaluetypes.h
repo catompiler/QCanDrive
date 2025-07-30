@@ -46,7 +46,7 @@ const ::DataType STR  = ::DataType::STR;
 const ::DataType MEM  = ::DataType::MEM;
 
 
-extern QList<QPair<QString, Type>> getTypesNames();
+extern QList<QPair<QString, Type>> getNumericTypesNames();
 
 
 template <int N, typename ET, ET first>

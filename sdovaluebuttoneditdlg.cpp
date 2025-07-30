@@ -373,7 +373,7 @@ void SDOValueButtonEditDlg::peekColor(QWidget* colHolder)
 
 void SDOValueButtonEditDlg::populateTypes()
 {
-    auto types = COValue::getTypesNames();
+    auto types = COValue::getNumericTypesNames();
 
     ui->cbType->clear();
 

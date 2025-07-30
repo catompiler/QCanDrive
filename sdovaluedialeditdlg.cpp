@@ -272,7 +272,7 @@ void SDOValueDialEditDlg::peekColor(QWidget* colHolder)
 
 void SDOValueDialEditDlg::populateTypes()
 {
-    auto types = COValue::getTypesNames();
+    auto types = COValue::getNumericTypesNames();
 
     ui->cbType->clear();
 
