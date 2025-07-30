@@ -262,8 +262,8 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
         RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
         if(reglist_model != nullptr){
 
-            RegObject* ro = reglist_model->objectByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
-            if(ro != nullptr && ro->parent() != nullptr){
+            RegVar* rv = reglist_model->varByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
+            if(rv != nullptr){
 
                 switch(role){
                 default:
