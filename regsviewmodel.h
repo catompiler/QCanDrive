@@ -52,7 +52,7 @@ private slots:
     void m_modelReseted();
 
 private:
-    void update(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value = 0);
+    void updateValue(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value = 0) const;
 
     SLCanOpenNode* m_slcon;
 

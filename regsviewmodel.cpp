@@ -3,6 +3,7 @@
 #include "regentry.h"
 #include "regvar.h"
 #include "regutils.h"
+#include "covaluetypes.h"
 #include <QAbstractItemModel>
 #include <QDebug>
 
@@ -306,7 +307,19 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
                     //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
                     auto it = m_cache->find(val_fi);
                     if(it != m_cache->end()){
-                        //
+                        res = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&it.value().value), rv->dataType());
+                    }else{
+                        switch(role){
+                        default:
+                            res = QVariant();
+                            break;
+                        case Qt::DisplayRole:
+                            updateValue(re->index(), rv->subIndex(), false);
+                        __attribute__ ((fallthrough));
+                        case Qt::ToolTipRole:
+                            res = tr("updating...");
+                            break;
+                        }
                     }
                 }break;
                 }
@@ -368,7 +381,15 @@ void RegsViewModel::m_modelReseted()
     m_queue->clear();
 }
 
-void RegsViewModel::update(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value)
+void RegsViewModel::updateValue(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value) const
 {
+    UpdateCmd cmd;
+    cmd.index = index;
+    cmd.subindex = subIndex;
+    cmd.isWrite = isWrite;
+    cmd.data = value;
 
+    m_queue->enqueue(cmd);
+
+    // TODO: run processing cmd queue.
 }
