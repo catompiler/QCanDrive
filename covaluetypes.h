@@ -10,63 +10,73 @@
 #include <QPair>
 #include <QString>
 #include <QList>
+#include "regtypes.h"
 
 
 
 namespace COValue
 {
 
-enum Type {
-    I32 = 0,
-    I16 = 1,
-    I8 = 2,
-    U32 = 3,
-    U16 = 4,
-    U8 = 5,
-    IQ24 = 6,
-    IQ15 = 7,
-    IQ7 = 8,
-    STR = 9,
-    MEM = 10
-};
+//enum Type {
+//    I32 = 0,
+//    I16 = 1,
+//    I8 = 2,
+//    U32 = 3,
+//    U16 = 4,
+//    U8 = 5,
+//    IQ24 = 6,
+//    IQ15 = 7,
+//    IQ7 = 8,
+//    STR = 9,
+//    MEM = 10
+//};
+using Type = ::DataType;
+
+// for compatibility.
+const ::DataType I32  = ::DataType::I32;
+const ::DataType I16  = ::DataType::I16;
+const ::DataType I8   = ::DataType::I8;
+const ::DataType U32  = ::DataType::U32;
+const ::DataType U16  = ::DataType::U16;
+const ::DataType U8   = ::DataType::U8;
+const ::DataType IQ24 = ::DataType::IQ24;
+const ::DataType IQ15 = ::DataType::IQ15;
+const ::DataType IQ7  = ::DataType::IQ7;
+const ::DataType STR  = ::DataType::STR;
+const ::DataType MEM  = ::DataType::MEM;
 
 
 extern QList<QPair<QString, Type>> getTypesNames();
 
 
-template <int N, typename ET, ET first, ET next, ET... other>
-inline constexpr int FindEnumElement(const ET target)
-{
-    if(target == first){
-        return N;
-    }else{
-        return FindEnumElement<N + 1, ET, next, other...>(target);
-    }
-}
-
 template <int N, typename ET, ET first>
 inline constexpr int FindEnumElement(const ET target)
 {
-    if(target == first){
-        return N;
-    }else{
-        return -1;
-    }
+    return (target == first) ? N : -1;
+}
+
+template <int N, typename ET, ET first, ET next, ET... other>
+inline constexpr int FindEnumElement(const ET target)
+{
+    return (target == first) ? N : FindEnumElement<N + 1, ET, next, other...>(target);
 }
 
 template <typename ET>
 constexpr size_t typeSize(const ET target, const int defSize = 0)
 {
-    const auto sizes = std::array{4  , 2  , 1 , 4  , 2  , 1 , 4   , 4   , 4  , 0  , 0  };
+    const auto sizes = std::array{4, 2, 1, 4, 2, 1, 4, 4, 4, 0, 0};
 
-    const int N = FindEnumElement<0, ET, I32, I16, I8, U32, U16, U8, IQ24, IQ15, IQ7, STR, MEM>(target);
+    const int N = FindEnumElement<0, ET, Type::I32, Type::I16, Type::I8,
+                                         Type::U32, Type::U16, Type::U8,
+                                         Type::IQ24, Type::IQ15, Type::IQ7,
+                                         Type::STR, Type::MEM>(target);
 
     return (N >= 0) ? sizes[N] : defSize;
 }
 
 
-template <typename Type>
-Type valueFrom(const void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const Type& defVal = Type())
+template <typename ValType>
+ValType valueFrom(const void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const ValType& defVal = ValType())
 {
     const auto pType = std::get_if<COValue::Type>(&typeOrSize);
     const auto pSize = std::get_if<size_t>(&typeOrSize);
@@ -75,31 +85,31 @@ Type valueFrom(const void* valueData, const std::variant<COValue::Type, size_t> 
         switch(*pType){
         default:
             break;
-        case I32:
-            return Type(*static_cast<const int32_t*>(valueData));
-        case I16:
-            return Type(*static_cast<const int16_t*>(valueData));
-        case I8:
-            return Type(*static_cast<const int8_t*>(valueData));
-        case U32:
-            return Type(*static_cast<const uint32_t*>(valueData));
-        case U16:
-            return Type(*static_cast<const uint16_t*>(valueData));
-        case U8:
-            return Type(*static_cast<const uint8_t*>(valueData));
-        case IQ24:
-            return Type(*static_cast<const int32_t*>(valueData)) / (1<<24);
-        case IQ15:
-            return Type(*static_cast<const int32_t*>(valueData)) / (1<<15);
-        case IQ7:
-            return Type(*static_cast<const int32_t*>(valueData)) / (1<<7);
-        case STR:
-        case MEM:
+        case Type::I32:
+            return ValType(*static_cast<const int32_t*>(valueData));
+        case Type::I16:
+            return ValType(*static_cast<const int16_t*>(valueData));
+        case Type::I8:
+            return ValType(*static_cast<const int8_t*>(valueData));
+        case Type::U32:
+            return ValType(*static_cast<const uint32_t*>(valueData));
+        case Type::U16:
+            return ValType(*static_cast<const uint16_t*>(valueData));
+        case Type::U8:
+            return ValType(*static_cast<const uint8_t*>(valueData));
+        case Type::IQ24:
+            return ValType(*static_cast<const int32_t*>(valueData)) / (1<<24);
+        case Type::IQ15:
+            return ValType(*static_cast<const int32_t*>(valueData)) / (1<<15);
+        case Type::IQ7:
+            return ValType(*static_cast<const int32_t*>(valueData)) / (1<<7);
+        case Type::STR:
+        case Type::MEM:
             break;
         }
     }else if(pSize){
-        if(*pSize == sizeof(Type)){
-            return *static_cast<const Type*>(valueData);
+        if(*pSize == sizeof(ValType)){
+            return *static_cast<const ValType*>(valueData);
         }
     }
 
@@ -107,8 +117,8 @@ Type valueFrom(const void* valueData, const std::variant<COValue::Type, size_t> 
 }
 
 
-template <typename Type>
-bool valueTo(void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const Type& val)
+template <typename ValType>
+bool valueTo(void* valueData, const std::variant<COValue::Type, size_t> typeOrSize, const ValType& val)
 {
     const auto pType = std::get_if<COValue::Type>(&typeOrSize);
     const auto pSize = std::get_if<size_t>(&typeOrSize);
@@ -117,40 +127,40 @@ bool valueTo(void* valueData, const std::variant<COValue::Type, size_t> typeOrSi
         switch(*pType){
         default:
             return false;
-        case I32:
+        case Type::I32:
             *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val);
             break;
-        case I16:
+        case Type::I16:
             *static_cast<int16_t*>(valueData) = static_cast<int16_t>(val);
             break;
-        case I8:
+        case Type::I8:
             *static_cast<int8_t*>(valueData) = static_cast<int8_t>(val);
             break;
-        case U32:
+        case Type::U32:
             *static_cast<uint32_t*>(valueData) = static_cast<uint32_t>(val);
             break;
-        case U16:
+        case Type::U16:
             *static_cast<uint16_t*>(valueData) = static_cast<uint16_t>(val);
             break;
-        case U8:
+        case Type::U8:
             *static_cast<uint8_t*>(valueData) = static_cast<uint8_t>(val);
             break;
-        case IQ24:
+        case Type::IQ24:
             *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val * (1<<24));
             break;
-        case IQ15:
+        case Type::IQ15:
             *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val * (1<<15));
             break;
-        case IQ7:
+        case Type::IQ7:
             *static_cast<int32_t*>(valueData) = static_cast<int32_t>(val * (1<<7));
             break;
-        case STR:
-        case MEM:
+        case Type::STR:
+        case Type::MEM:
             return false;
         }
     }else if(pSize){
-        if(*pSize == sizeof(Type)){
-            *static_cast<Type*>(valueData) = val;
+        if(*pSize == sizeof(ValType)){
+            *static_cast<ValType*>(valueData) = val;
         }else{
             return false;
         }

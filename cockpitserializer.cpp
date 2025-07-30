@@ -314,7 +314,7 @@ void CockpitSerializer::writeCoAttribs(QXmlStreamWriter& xml, CO::NodeId nid, CO
     xml.writeAttribute("nodeId", QString::number(nid));
     xml.writeAttribute("index", QString::number(idx));
     xml.writeAttribute("subIndex", QString::number(sidx));
-    xml.writeAttribute("type", QString::number(valtype));
+    xml.writeAttribute("type", QString::number(static_cast<int>(valtype)));
 }
 
 bool CockpitSerializer::writeSDOValuePlot(QXmlStreamWriter& xml, const SDOValuePlot* plt, const QRect& pos) const
