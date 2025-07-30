@@ -113,22 +113,36 @@ QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
 
     QModelIndex parent = mapToSource(proxyIndex.parent());
 
+    int rows = model->rowCount(parent);
     int row = proxyIndex.row();
     {
-        int s_row = 0;
-        int i_row = 0;
-        do{
+        int f_row = -1; // finded row.
+        int s_row = 0; // accepted source row.
+        int i_row = 0; // iterator.
+        for(;i_row < rows; i_row ++){
             if(filterAcceptsRow(i_row, parent)){
                 if(s_row == row){
+                    f_row = i_row;
                     break;
                 }
                 s_row ++;
             }
-            i_row ++;
-        }while(s_row <= row);
-
-        row = i_row;
+        }
+        row = f_row;
+//        int s_row = 0;
+//        int i_row = 0;
+//        do{
+//            if(filterAcceptsRow(i_row, parent)){
+//                if(s_row == row){
+//                    break;
+//                }
+//                s_row ++;
+//            }
+//            i_row ++;
+//        }while(s_row <= row);
+//        row = i_row;
     }
+    if(row == -1) return QModelIndex();
 
     QModelIndex idx = model->index(row, col, parent);
 
@@ -209,10 +223,10 @@ Qt::ItemFlags RegsViewModel::flags(const QModelIndex& index) const
         RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
         if(reglist_model == nullptr) return flags;
 
-        RegObject* ro = reglist_model->objectByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
-        if(ro == nullptr) return flags;
+        RegVar* rv = reglist_model->varByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
+        if(rv == nullptr) return flags;
 
-        if(ro->parent() != nullptr){
+        if(!(rv->flags() & RegFlag::READONLY)){
             flags |= Qt::ItemIsEditable;
         }
         //qDebug() << "COL_VALUE is editable";
@@ -283,22 +297,31 @@ bool RegsViewModel::filterAcceptsColumn(int source_column, const QModelIndex& so
 
 bool RegsViewModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
-    Q_UNUSED(source_row);
+    //Q_UNUSED(source_row);
     //Q_UNUSED(source_parent);
 
+    //qDebug() << "RegsViewModel::filterAcceptsRow" << source_row << source_parent;
+
+    auto defRet = [&source_row, &source_parent, this]() -> bool {
+        return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
+    };
+
     QAbstractItemModel* model = sourceModel();
-    if(model == nullptr) return true;
+    if(model == nullptr) return defRet();
 
     RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
-    if(reglist_model == nullptr) return true;
+    if(reglist_model == nullptr) return defRet();
 
     RegEntry* re = reglist_model->entryByModelIndex(source_parent);
-    if(re == nullptr) return true;
+    // Reg entry.
+    if(re == nullptr){
+        return true;
+    }
 
     RegVar* rv = re->at(source_row);
-    if(rv == nullptr) return true;
+    if(rv == nullptr) return false;
 
     if(rv->eflags() & RegEFlag::CO_COUNT) return false;
 
-    return true;
+    return defRet();
 }
