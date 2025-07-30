@@ -100,6 +100,21 @@ void RegsViewWgt::setRegListModel(RegListModel* newRegListModel)
     m_regsViewModel->setSourceModel(newRegListModel);
 }
 
+SLCanOpenNode* RegsViewWgt::getSLCanOpenNode()
+{
+    return m_regsViewModel->getSLCanOpenNode();
+}
+
+const SLCanOpenNode* RegsViewWgt::getSLCanOpenNode() const
+{
+    return m_regsViewModel->getSLCanOpenNode();
+}
+
+void RegsViewWgt::setSLCanOpenNode(SLCanOpenNode* slcon)
+{
+    m_regsViewModel->setSLCanOpenNode(slcon);
+}
+
 void RegsViewWgt::expandTree()
 {
     getTreeView()->expandAll();

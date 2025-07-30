@@ -25,6 +25,10 @@ public:
     RegListModel* regListModel();
     void setRegListModel(RegListModel* newRegListModel);
 
+    SLCanOpenNode* getSLCanOpenNode();
+    const SLCanOpenNode* getSLCanOpenNode() const;
+    void setSLCanOpenNode(SLCanOpenNode* slcon);
+
 public slots:
     void expandTree();
     void collapseTree();

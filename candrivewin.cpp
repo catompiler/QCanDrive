@@ -42,6 +42,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     ui->cockpitWgt->setValsHolder(m_valsHolder);
 
     ui->tvRegView->setRegListModel(ui->tvRegList->regListModel());
+    ui->tvRegView->setSLCanOpenNode(m_slcon);
 
     connect(ui->actDebugExec, &QAction::triggered, this, &CanDriveWin::m_ui_actDebugExec_triggered);
     connect(ui->actQuit, &QAction::triggered, this, &CanDriveWin::m_ui_actQuit_triggered);

@@ -2,7 +2,8 @@
 #include "reglistmodel.h"
 #include "regentry.h"
 #include "regvar.h"
-#include "regobject.h"
+#include "regutils.h"
+#include <QAbstractItemModel>
 #include <QDebug>
 
 
@@ -30,10 +31,32 @@ static const auto col_count = sizeof(cols) / sizeof(cols[0]);
 RegsViewModel::RegsViewModel(QObject* parent)
     :QSortFilterProxyModel(parent)
 {
+    m_slcon = nullptr;
+    m_cache = new ValuesCache();
+    m_queue = new UpdateQueue();
+
+    connect(this, &QAbstractItemModel::modelReset, this, &RegsViewModel::m_modelReseted);
 }
 
 RegsViewModel::~RegsViewModel()
 {
+    delete m_queue;
+    delete m_cache;
+}
+
+SLCanOpenNode* RegsViewModel::getSLCanOpenNode()
+{
+    return m_slcon;
+}
+
+const SLCanOpenNode* RegsViewModel::getSLCanOpenNode() const
+{
+    return m_slcon;
+}
+
+void RegsViewModel::setSLCanOpenNode(SLCanOpenNode* slcon)
+{
+    m_slcon = slcon;
 }
 
 //qDebug() << "";
@@ -265,16 +288,27 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
             RegVar* rv = reglist_model->varByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
             if(rv != nullptr){
 
+                RegEntry* re = rv->parent();
+
                 switch(role){
                 default:
                     res = QVariant();
                     break;
-                case Qt::DisplayRole:
-                    res = tr("test");
-                    break;
+                case Qt::ToolTipRole:
                 case Qt::EditRole:
-                    res = tr("edit");
-                    break;
+                case Qt::DisplayRole:{
+                    if(re == nullptr){
+                        res = QVariant();
+                        break;
+                    }
+
+                    reg_fullindex_t val_fi = RegUtils::makeFullIndex(re->index(), rv->subIndex());
+                    //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
+                    auto it = m_cache->find(val_fi);
+                    if(it != m_cache->end()){
+                        //
+                    }
+                }break;
                 }
             }
         }
@@ -324,4 +358,17 @@ bool RegsViewModel::filterAcceptsRow(int source_row, const QModelIndex& source_p
     if(rv->eflags() & RegEFlag::CO_COUNT) return false;
 
     return defRet();
+}
+
+void RegsViewModel::m_modelReseted()
+{
+    //qDebug() << "RegsViewModel::m_modelReseted()";
+
+    m_cache->clear();
+    m_queue->clear();
+}
+
+void RegsViewModel::update(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value)
+{
+
 }

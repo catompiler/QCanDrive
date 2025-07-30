@@ -3,7 +3,11 @@
 
 //#include <QAbstractProxyModel>
 #include <QSortFilterProxyModel>
+#include <QHash>
+#include <QQueue>
 
+class SDOValue;
+class SLCanOpenNode;
 class RegListModel;
 
 class RegsViewModel : public QSortFilterProxyModel
@@ -25,6 +29,10 @@ public:
     explicit RegsViewModel(QObject* parent = nullptr);
     ~RegsViewModel();
 
+    SLCanOpenNode* getSLCanOpenNode();
+    const SLCanOpenNode* getSLCanOpenNode() const;
+    void setSLCanOpenNode(SLCanOpenNode* slcon);
+
     //QModelIndex index(int row, int column, const QModelIndex& parent) const override;
     //QModelIndex parent(const QModelIndex& child) const override;
     int rowCount(const QModelIndex& parent) const override;
@@ -39,6 +47,36 @@ protected:
     // QSortFilterProxyModel interface
     bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
     bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+
+private slots:
+    void m_modelReseted();
+
+private:
+    void update(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value = 0);
+
+    SLCanOpenNode* m_slcon;
+
+    typedef struct _S_CachedValue {
+        union _U_Value {
+            uint32_t _32;
+            uint16_t _16;
+            uint32_t _8;
+        } value;
+    } CachedValue;
+
+    typedef QHash<uint32_t, CachedValue> ValuesCache;
+
+    typedef struct _S_UpdateCmd {
+        uint16_t index;
+        uint8_t subindex;
+        bool isWrite;
+        uint32_t data;
+    } UpdateCmd;
+
+    typedef QQueue<UpdateCmd> UpdateQueue;
+
+    ValuesCache* m_cache;
+    UpdateQueue* m_queue;
 };
 
 #endif // REGSVIEWMODEL_H
