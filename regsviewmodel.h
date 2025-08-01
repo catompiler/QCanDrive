@@ -58,19 +58,26 @@ private slots:
     void m_valueUpdateFinished();
 
 private:
-    void updateValue(uint16_t index, uint16_t subIndex, bool isWrite, COValue::Type type, uint32_t value = 0) const;
-    bool processQueue() const;
+    void setCachedValue(uint16_t regIndex, uint16_t regSubIndex, const QVariant& val);
+    void refreshViewValue(uint16_t regIndex, uint16_t regSubIndex);
+    void applyUpdatedValue(uint16_t regIndex, uint16_t regSubIndex, const QVariant& val);
+
+    // 0 - нет ошибки, но и обновление не производится.
+    // 1 - обновление производится.
+    // -1 - ошибка.
+    int updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isWrite, COValue::Type type, uint32_t value = 0) const;
+    int processQueue() const;
 
     SLCanOpenNode* m_slcon;
     SDOValue* m_sdoval;
     CO::NodeId m_nodeId;
 
-    typedef struct _S_CachedValue {
-        uint32_t data;
-        COValue::Type type;
-    } CachedValue;
+//    typedef struct _S_CachedValue {
+//        uint32_t data;
+//        COValue::Type type;
+//    } CachedValue;
 
-    typedef QHash<uint32_t, CachedValue> ValuesCache;
+    typedef QHash<uint32_t, QVariant> ValuesCache; //CachedValue
 
     typedef struct _S_UpdateCmd {
         uint16_t index;

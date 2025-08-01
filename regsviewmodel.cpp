@@ -314,18 +314,21 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
                     //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
                     auto it = m_cache->find(val_fi);
                     if(it != m_cache->end()){
-                        res = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&it.value().data), it.value().type);
+                        res = it.value();
                     }else{
-                        switch(role){
-                        default:
+                        if(role == Qt::DisplayRole){
+                            if(m_slcon->isConnected()){
+                                int upd_res = updateValue(re->index(), rv->subIndex(), false, rv->dataType());
+                                if(upd_res == 1){
+                                    res = tr("updating...");
+                                }else if(upd_res == -1){
+                                    res = tr("error");
+                                }else{
+                                    res = tr("");
+                                }
+                            }
+                        }else{
                             res = QVariant();
-                            break;
-                        case Qt::DisplayRole:
-                            updateValue(re->index(), rv->subIndex(), false, rv->dataType());
-                        __attribute__ ((fallthrough));
-                        case Qt::ToolTipRole:
-                            res = tr("updating...");
-                            break;
                         }
                     }
                 }break;
@@ -395,60 +398,145 @@ void RegsViewModel::m_valueUpdateFinished()
     if(m_sdoval->running()) return;
     if(m_queue->isEmpty()) return;
 
-    // TODO: error handling.
+    QVariant val;
+
     UpdateCmd cmd = m_queue->takeFirst();
 
+    if(m_sdoval->error() == SDOComm::ERROR_NONE){
+
+        COValue::Type type = cmd.type;
+
+        if(!RegTypes::isMemory(type)){
+
+            int32_t data = 0;
+            size_t data_size = m_sdoval->dataSize();
+            if(data_size <= sizeof(data)){
+                std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&data));
+            }
+
+            if(RegTypes::isInteger(type)){
+                if(RegTypes::isSigned(type)){
+                    val = COValue::valueFrom<int32_t>(reinterpret_cast<const void*>(&data), type);
+                }else{
+                    val = COValue::valueFrom<uint32_t>(reinterpret_cast<const void*>(&data), type);
+                }
+            }else if(RegTypes::isFractional(type)){
+                val = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&data), type);// / RegTypes::iqBase(type);
+            }else if(RegTypes::isBoolean(type)){
+                val = COValue::valueFrom<bool>(reinterpret_cast<const void*>(&data), type);
+            }else{
+                val = tr("UNKNOWN");
+            }
+        }else{
+            val = tr("DATA");
+        }
+    }else{
+        switch(m_sdoval->error()){
+        case SDOComm::ERROR_IO:
+            val = tr("io error");
+            break;
+        case SDOComm::ERROR_TIMEOUT:
+            val = tr("timeout");
+            break;
+        case SDOComm::ERROR_CANCEL:
+            break;
+        case SDOComm::ERROR_INVALID_SIZE:
+            val = tr("invalid size");
+            break;
+        case SDOComm::ERROR_INVALID_VALUE:
+            val = tr("invalid value");
+            break;
+        case SDOComm::ERROR_ACCESS:
+            val = tr("access error");
+            break;
+        case SDOComm::ERROR_NOT_FOUND:
+            val = tr("not found");
+            break;
+        case SDOComm::ERROR_NO_DATA:
+            val = tr("no data");
+            break;
+        case SDOComm::ERROR_OUT_OF_MEM:
+            val = tr("out of mem");
+            break;
+        case SDOComm::ERROR_GENERAL:
+            val = tr("general error");
+            break;
+        case SDOComm::ERROR_UNKNOWN:
+            val = tr("unknown error");
+            break;
+        default:
+            break;
+        }
+    }
+
+    applyUpdatedValue(m_sdoval->index(), m_sdoval->subIndex(), val);
+
+    processQueue();
+}
+
+void RegsViewModel::setCachedValue(uint16_t regIndex, uint16_t regSubIndex, const QVariant& val)
+{
+    reg_fullindex_t fi = RegUtils::makeFullIndex(regIndex, regSubIndex);
+
+    m_cache->insert(fi, val);
+}
+
+void RegsViewModel::refreshViewValue(uint16_t regIndex, uint16_t regSubIndex)
+{
     QAbstractItemModel* model = sourceModel();
     if(model == nullptr) return;
 
     RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
     if(reglist_model == nullptr) return;
 
-    RegVar* rv = reglist_model->varByRegIndex(m_sdoval->index(), m_sdoval->subIndex());
-    if(rv == nullptr) return;
+//    RegVar* rv = reglist_model->varByRegIndex(m_sdoval->index(), m_sdoval->subIndex());
+//    if(rv == nullptr) return;
 
-//    RegEntry* re = rv->parent();
-//    if(re == nullptr) return;
-
-    reg_fullindex_t fi = RegUtils::makeFullIndex(m_sdoval->index(), m_sdoval->subIndex());
-
-    CachedValue cv;
-    cv.type = cmd.type;
-    cv.data = 0;
-    std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&cv.data));
-
-    m_cache->insert(fi, cv);
-
-    // inform view.
-    QModelIndex source_index = reglist_model->objectModelIndexByRegIndex(m_sdoval->index(), m_sdoval->subIndex());
+    QModelIndex source_index = reglist_model->objectModelIndexByRegIndex(regIndex, regSubIndex);
     QModelIndex idx = mapFromSource(source_index);
     QModelIndex valIdx = index(idx.row(), COL_VALUE, idx.parent());
-    emit dataChanged(valIdx, valIdx);
 
-    processQueue();
+    // inform view.
+    emit dataChanged(valIdx, valIdx);
 }
 
-void RegsViewModel::updateValue(uint16_t index, uint16_t subIndex, bool isWrite, COValue::Type type, uint32_t value) const
+void RegsViewModel::applyUpdatedValue(uint16_t regIndex, uint16_t regSubIndex, const QVariant& val)
 {
-    qDebug() << "RegsViewModel::updateValue" << Qt::hex << index << subIndex << isWrite << static_cast<int>(type) << value;
+    setCachedValue(regIndex, regSubIndex, val);
+    refreshViewValue(regIndex, regSubIndex);
+}
+
+int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isWrite, COValue::Type type, uint32_t value) const
+{
+    qDebug() << "RegsViewModel::updateValue" << Qt::hex << regIndex << regSubIndex << isWrite << static_cast<int>(type) << value;
+
+    if(!RegTypes::isNumeric(type)) return 0;
 
     UpdateCmd cmd;
-    cmd.index = index;
-    cmd.subindex = subIndex;
+    cmd.index = regIndex;
+    cmd.subindex = regSubIndex;
     cmd.isWrite = isWrite;
     cmd.type = type;
     cmd.data = value;
 
     m_queue->enqueue(cmd);
 
-    processQueue();
+    int res = processQueue();
+
+    if(res != 0){
+        while(processQueue() != 0){
+            //
+        }
+    }
+
+    return res;
 }
 
-bool RegsViewModel::processQueue() const
+int RegsViewModel::processQueue() const
 {
     // TODO: processing cmd queue.
-    if(m_sdoval->running()) return false;
-    if(m_queue->isEmpty()) return false;
+    if(m_sdoval->running()) return 0;
+    if(m_queue->isEmpty()) return 0;
 
     UpdateCmd& cmd = m_queue->first();
 
@@ -458,12 +546,11 @@ bool RegsViewModel::processQueue() const
     m_sdoval->setDataSize(COValue::typeSize(cmd.type));
     //m_sdoval->set
     if(!m_sdoval->read()){
-        // TODO: error handling.
         m_queue->pop_front();
-        return true;
+        return -1;
     }
 
-    return false;
+    return 1;
 }
 
 CO::NodeId RegsViewModel::nodeId() const

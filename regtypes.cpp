@@ -709,4 +709,27 @@ bool isMemory(DataType type)
     return false;
 }
 
+int32_t iqBase(DataType type)
+{
+    switch(type){
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+        break;
+    case DataType::IQ24:
+        return (1<<24);
+    case DataType::IQ15:
+        return (1<<15);
+    case DataType::IQ7:
+        return (1<<7);
+    case DataType::STR:
+    case DataType::MEM:
+        return 0;
+    }
+    return 1;
+}
+
 }

@@ -220,6 +220,8 @@ extern bool isSigned(DataType type);
 extern bool isUnsigned(DataType type);
 extern bool isFractional(DataType type);
 extern bool isMemory(DataType type);
+// Базовое значение фиксированной запятой.
+extern int32_t iqBase(DataType type);
 
 
 template <typename T, typename GetNameType>
