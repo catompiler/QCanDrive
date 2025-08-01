@@ -253,6 +253,8 @@ void CanDriveWin::applySettings()
     m_slcon->setNodeId(s->co.clientId);
     //m_->set(m_settings->);
 
+    ui->tvRegView->setNodeId(s->co.nodeId);
+
     QPalette pal(palette());
     pal.setColor(QPalette::Window, s->appear.windowColor);
     setPalette(pal);

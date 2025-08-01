@@ -3,7 +3,9 @@
 #include "regentry.h"
 #include "regvar.h"
 #include "regutils.h"
-#include "covaluetypes.h"
+#include "sdovalue.h"
+#include "slcanopennode.h"
+#include <algorithm>
 #include <QAbstractItemModel>
 #include <QDebug>
 
@@ -32,10 +34,13 @@ static const auto col_count = sizeof(cols) / sizeof(cols[0]);
 RegsViewModel::RegsViewModel(QObject* parent)
     :QSortFilterProxyModel(parent)
 {
+    m_nodeId = 0;
     m_slcon = nullptr;
+    m_sdoval = new SDOValue();
     m_cache = new ValuesCache();
     m_queue = new UpdateQueue();
 
+    connect(m_sdoval, &SDOValue::finished, this, &RegsViewModel::m_valueUpdateFinished);
     connect(this, &QAbstractItemModel::modelReset, this, &RegsViewModel::m_modelReseted);
 }
 
@@ -43,6 +48,7 @@ RegsViewModel::~RegsViewModel()
 {
     delete m_queue;
     delete m_cache;
+    delete m_sdoval;
 }
 
 SLCanOpenNode* RegsViewModel::getSLCanOpenNode()
@@ -58,6 +64,7 @@ const SLCanOpenNode* RegsViewModel::getSLCanOpenNode() const
 void RegsViewModel::setSLCanOpenNode(SLCanOpenNode* slcon)
 {
     m_slcon = slcon;
+    m_sdoval->setSLCanOpenNode(slcon);
 }
 
 //qDebug() << "";
@@ -307,14 +314,14 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
                     //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
                     auto it = m_cache->find(val_fi);
                     if(it != m_cache->end()){
-                        res = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&it.value().value), rv->dataType());
+                        res = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&it.value().data), it.value().type);
                     }else{
                         switch(role){
                         default:
                             res = QVariant();
                             break;
                         case Qt::DisplayRole:
-                            updateValue(re->index(), rv->subIndex(), false);
+                            updateValue(re->index(), rv->subIndex(), false, rv->dataType());
                         __attribute__ ((fallthrough));
                         case Qt::ToolTipRole:
                             res = tr("updating...");
@@ -381,15 +388,90 @@ void RegsViewModel::m_modelReseted()
     m_queue->clear();
 }
 
-void RegsViewModel::updateValue(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value) const
+void RegsViewModel::m_valueUpdateFinished()
 {
+    qDebug() << "RegsViewModel::m_valueUpdateFinished" << Qt::hex << m_sdoval->index() << m_sdoval->subIndex();
+
+    if(m_sdoval->running()) return;
+    if(m_queue->isEmpty()) return;
+
+    // TODO: error handling.
+    UpdateCmd cmd = m_queue->takeFirst();
+
+    QAbstractItemModel* model = sourceModel();
+    if(model == nullptr) return;
+
+    RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
+    if(reglist_model == nullptr) return;
+
+    RegVar* rv = reglist_model->varByRegIndex(m_sdoval->index(), m_sdoval->subIndex());
+    if(rv == nullptr) return;
+
+//    RegEntry* re = rv->parent();
+//    if(re == nullptr) return;
+
+    reg_fullindex_t fi = RegUtils::makeFullIndex(m_sdoval->index(), m_sdoval->subIndex());
+
+    CachedValue cv;
+    cv.type = cmd.type;
+    cv.data = 0;
+    std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&cv.data));
+
+    m_cache->insert(fi, cv);
+
+    // inform view.
+    QModelIndex source_index = reglist_model->objectModelIndexByRegIndex(m_sdoval->index(), m_sdoval->subIndex());
+    QModelIndex idx = mapFromSource(source_index);
+    QModelIndex valIdx = index(idx.row(), COL_VALUE, idx.parent());
+    emit dataChanged(valIdx, valIdx);
+
+    processQueue();
+}
+
+void RegsViewModel::updateValue(uint16_t index, uint16_t subIndex, bool isWrite, COValue::Type type, uint32_t value) const
+{
+    qDebug() << "RegsViewModel::updateValue" << Qt::hex << index << subIndex << isWrite << static_cast<int>(type) << value;
+
     UpdateCmd cmd;
     cmd.index = index;
     cmd.subindex = subIndex;
     cmd.isWrite = isWrite;
+    cmd.type = type;
     cmd.data = value;
 
     m_queue->enqueue(cmd);
 
-    // TODO: run processing cmd queue.
+    processQueue();
+}
+
+bool RegsViewModel::processQueue() const
+{
+    // TODO: processing cmd queue.
+    if(m_sdoval->running()) return false;
+    if(m_queue->isEmpty()) return false;
+
+    UpdateCmd& cmd = m_queue->first();
+
+    m_sdoval->setNodeId(m_nodeId); //m_slcon->nodeId()
+    m_sdoval->setIndex(cmd.index);
+    m_sdoval->setSubIndex(cmd.subindex);
+    m_sdoval->setDataSize(COValue::typeSize(cmd.type));
+    //m_sdoval->set
+    if(!m_sdoval->read()){
+        // TODO: error handling.
+        m_queue->pop_front();
+        return true;
+    }
+
+    return false;
+}
+
+CO::NodeId RegsViewModel::nodeId() const
+{
+    return m_nodeId;
+}
+
+void RegsViewModel::setNodeId(CO::NodeId newNodeId)
+{
+    m_nodeId = newNodeId;
 }

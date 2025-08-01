@@ -5,6 +5,7 @@
 #include <QString>
 //#include "reglistmodel.h"
 #include "regsviewmodel.h"
+#include "cotypes.h"
 
 class QItemSelection;
 class QModelIndex;
@@ -28,6 +29,9 @@ public:
     SLCanOpenNode* getSLCanOpenNode();
     const SLCanOpenNode* getSLCanOpenNode() const;
     void setSLCanOpenNode(SLCanOpenNode* slcon);
+
+    CO::NodeId nodeId() const;
+    void setNodeId(CO::NodeId newNodeId);
 
 public slots:
     void expandTree();

@@ -5,6 +5,8 @@
 #include <QSortFilterProxyModel>
 #include <QHash>
 #include <QQueue>
+#include "cotypes.h"
+#include "covaluetypes.h"
 
 class SDOValue;
 class SLCanOpenNode;
@@ -43,6 +45,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
+    CO::NodeId nodeId() const;
+    void setNodeId(CO::NodeId newNodeId);
+
 protected:
     // QSortFilterProxyModel interface
     bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
@@ -50,18 +55,19 @@ protected:
 
 private slots:
     void m_modelReseted();
+    void m_valueUpdateFinished();
 
 private:
-    void updateValue(uint16_t index, uint16_t subIndex, bool isWrite, uint32_t value = 0) const;
+    void updateValue(uint16_t index, uint16_t subIndex, bool isWrite, COValue::Type type, uint32_t value = 0) const;
+    bool processQueue() const;
 
     SLCanOpenNode* m_slcon;
+    SDOValue* m_sdoval;
+    CO::NodeId m_nodeId;
 
     typedef struct _S_CachedValue {
-        union _U_Value {
-            uint32_t _32;
-            uint16_t _16;
-            uint32_t _8;
-        } value;
+        uint32_t data;
+        COValue::Type type;
     } CachedValue;
 
     typedef QHash<uint32_t, CachedValue> ValuesCache;
@@ -70,6 +76,7 @@ private:
         uint16_t index;
         uint8_t subindex;
         bool isWrite;
+        COValue::Type type;
         uint32_t data;
     } UpdateCmd;
 

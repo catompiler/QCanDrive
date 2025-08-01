@@ -151,6 +151,16 @@ void RegsViewWgt::m_tvRegList_selection_changed(const QItemSelection &selected, 
     }
 }
 
+CO::NodeId RegsViewWgt::nodeId() const
+{
+    return m_regsViewModel->nodeId();
+}
+
+void RegsViewWgt::setNodeId(CO::NodeId newNodeId)
+{
+    m_regsViewModel->setNodeId(newNodeId);
+}
+
 
 void RegsViewWgt::restoreSettings()
 {
