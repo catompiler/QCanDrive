@@ -125,6 +125,11 @@ void RegsViewWgt::collapseTree()
     getTreeView()->collapseAll();
 }
 
+void RegsViewWgt::refreshRegs()
+{
+    m_regsViewModel->refreshRegs();
+}
+
 void RegsViewWgt::m_tvRegList_activated(const QModelIndex& index)
 {
     //qDebug() << "on_tvRegList_activated";

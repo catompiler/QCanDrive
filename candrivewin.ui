@@ -99,7 +99,7 @@
        <attribute name="title">
         <string>Параметры</string>
        </attribute>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="lRegView">
         <property name="spacing">
          <number>0</number>
         </property>
@@ -240,6 +240,18 @@
    <addaction name="separator"/>
    <addaction name="actRegListExpandTree"/>
    <addaction name="actRegListCollapseTree"/>
+  </widget>
+  <widget class="QToolBar" name="tbRegsView">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actRegsViewRefresh"/>
   </widget>
   <action name="actDebugExec">
    <property name="icon">
@@ -505,6 +517,18 @@
     <string>Дублировать элемент</string>
    </property>
   </action>
+  <action name="actRegsViewRefresh">
+   <property name="icon">
+    <iconset resource="candrive.qrc">
+     <normaloff>:/images/icons/Synchronize_blue-48.png</normaloff>:/images/icons/Synchronize_blue-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Обновить</string>
+   </property>
+   <property name="toolTip">
+    <string>Обновить отображённые регистры</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -525,9 +549,9 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="reglisteditor.qrc"/>
-  <include location="qt_canopennode_slcan.qrc"/>
   <include location="candrive.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
+  <include location="reglisteditor.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -36,6 +36,7 @@ public:
 public slots:
     void expandTree();
     void collapseTree();
+    void refreshRegs();
 
 private slots:
     void m_tvRegList_activated(const QModelIndex &index);

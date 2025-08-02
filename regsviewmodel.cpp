@@ -67,6 +67,17 @@ void RegsViewModel::setSLCanOpenNode(SLCanOpenNode* slcon)
     m_sdoval->setSLCanOpenNode(slcon);
 }
 
+void RegsViewModel::refreshRegs()
+{
+    QAbstractItemModel* model = sourceModel();
+    if(model == nullptr) return;
+
+    m_cache->clear();
+
+    // https://stackoverflow.com/questions/24001613/qt-make-view-to-update-visible-data
+    emit dataChanged( QModelIndex(), QModelIndex() );
+}
+
 //qDebug() << "";
 
 //QModelIndex RegsViewModel::index(int row, int column, const QModelIndex& parent) const
@@ -392,6 +403,9 @@ bool RegsViewModel::setData(const QModelIndex& index, const QVariant& value, int
 
     int res = updateValue(re->index(), rv->subIndex(), true, rv->dataType(), data);
     if(res != 1) return false;
+
+    // inform view.
+    emit dataChanged(index, index);
 
     return true;
 }

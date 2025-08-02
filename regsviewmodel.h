@@ -35,6 +35,8 @@ public:
     const SLCanOpenNode* getSLCanOpenNode() const;
     void setSLCanOpenNode(SLCanOpenNode* slcon);
 
+    void refreshRegs();
+
     //QModelIndex index(int row, int column, const QModelIndex& parent) const override;
     //QModelIndex parent(const QModelIndex& child) const override;
     int rowCount(const QModelIndex& parent) const override;

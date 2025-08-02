@@ -22,6 +22,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
                 ); // none
     //
     ui->lRegList->insertWidget(0, ui->tbRegsEdit);
+    ui->lRegView->insertWidget(0, ui->tbRegsView);
 
     // populate statusbar.
     m_sblblConStatus = new QLabel();
@@ -75,6 +76,8 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     connect(ui->actRegListMoveDown, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::moveDown);
     connect(ui->actRegListExpandTree, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::expandTree);
     connect(ui->actRegListCollapseTree, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::collapseTree);
+
+    connect(ui->actRegsViewRefresh, &QAction::triggered, ui->tvRegView, &RegsViewWgt::refreshRegs);
 
     //connect(ui->act, &QAction::triggered, this, &CanDriveWin::m_ui_act_triggered);
 
