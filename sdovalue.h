@@ -41,6 +41,9 @@ public:
     void* data();
     const void* data() const;
 
+    size_t copyDataFrom(const void* ptr, size_t sz);
+    size_t copyDataTo(void* ptr, size_t sz) const;
+
     size_t transferSize() const;
     bool setTransferSize(size_t newTransferSize);
 

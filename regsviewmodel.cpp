@@ -5,7 +5,7 @@
 #include "regutils.h"
 #include "sdovalue.h"
 #include "slcanopennode.h"
-#include <algorithm>
+//#include <algorithm>
 #include <QAbstractItemModel>
 #include <QDebug>
 
@@ -298,40 +298,40 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
 
                 RegEntry* re = rv->parent();
 
-                switch(role){
-                default:
-                    res = QVariant();
-                    break;
-                case Qt::ToolTipRole:
-                case Qt::EditRole:
-                case Qt::DisplayRole:{
-                    if(re == nullptr){
+                if(re != nullptr){
+                    switch(role){
+                    default:
                         res = QVariant();
                         break;
-                    }
+                    case Qt::ToolTipRole:
+                    case Qt::EditRole:{
 
-                    reg_fullindex_t val_fi = RegUtils::makeFullIndex(re->index(), rv->subIndex());
-                    //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
-                    auto it = m_cache->find(val_fi);
-                    if(it != m_cache->end()){
-                        res = it.value();
-                    }else{
-                        if(role == Qt::DisplayRole){
-                            if(m_slcon->isConnected()){
-                                int upd_res = updateValue(re->index(), rv->subIndex(), false, rv->dataType());
-                                if(upd_res == 1){
-                                    res = tr("updating...");
-                                }else if(upd_res == -1){
-                                    res = tr("error");
-                                }else{
-                                    res = tr("");
-                                }
-                            }
-                        }else{
-                            res = QVariant();
+                        reg_fullindex_t val_fi = RegUtils::makeFullIndex(re->index(), rv->subIndex());
+                        //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
+                        auto it = m_cache->find(val_fi);
+                        if(it != m_cache->end()){
+                            res = it.value();
                         }
+                    }break;
+                    case Qt::DisplayRole:{
+
+                        reg_fullindex_t val_fi = RegUtils::makeFullIndex(re->index(), rv->subIndex());
+                        //reg_fullindex_t base_fi = RegUtils::makeFullIndex(rv->baseIndex(), rv->baseSubIndex());
+                        auto it = m_cache->find(val_fi);
+                        if(it != m_cache->end()){
+                            res = it.value();
+                        }else if(m_slcon->isConnected()){
+                            int upd_res = updateValue(re->index(), rv->subIndex(), false, rv->dataType());
+                            if(upd_res == 1){
+                                res = tr("updating...");
+                            }else if(upd_res == -1){
+                                res = tr("error");
+                            }else{
+                                res = tr("");
+                            }
+                        }
+                    }break;
                     }
-                }break;
                 }
             }
         }
@@ -340,6 +340,60 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
     //qDebug() << index << res;
 
     return res;
+}
+
+bool RegsViewModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if(role != Qt::EditRole) return false;
+    if(!index.isValid()) return false;
+    if(index.column() != COL_VALUE) return false;
+
+    QAbstractItemModel* model = sourceModel();
+    if(model == nullptr) return false;
+
+    RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
+    if(reglist_model == nullptr) return false;
+
+    RegVar* rv = reglist_model->varByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
+    if(rv == nullptr) return false;
+
+    if(!RegTypes::isNumeric(rv->dataType())) return false;
+
+    RegEntry* re = rv->parent();
+    if(re == nullptr) return false;
+
+    COValue::Type type = rv->dataType();
+
+    int32_t data = 0;
+    size_t data_size = COValue::typeSize(type);
+    if(data_size > 4 || data_size == 0) return false;
+
+    if(RegTypes::isFractional(type)){
+        if(!COValue::valueTo(static_cast<void*>(&data), type, value.toDouble())){
+            return false;
+        }
+    }else if(RegTypes::isNumeric(type)){
+        if(RegTypes::isSigned(type)){
+            if(!COValue::valueTo(static_cast<void*>(&data), type, value.toInt())){
+                return false;
+            }
+        }else{
+            if(!COValue::valueTo(static_cast<void*>(&data), type, value.toUInt())){
+                return false;
+            }
+        }
+    }else if(RegTypes::isBoolean(type)){
+        if(!COValue::valueTo(static_cast<void*>(&data), type, value.toBool())){
+            return false;
+        }
+    }else{
+        return false;
+    }
+
+    int res = updateValue(re->index(), rv->subIndex(), true, rv->dataType(), data);
+    if(res != 1) return false;
+
+    return true;
 }
 
 
@@ -393,7 +447,7 @@ void RegsViewModel::m_modelReseted()
 
 void RegsViewModel::m_valueUpdateFinished()
 {
-    qDebug() << "RegsViewModel::m_valueUpdateFinished" << Qt::hex << m_sdoval->index() << m_sdoval->subIndex();
+    qDebug() << "RegsViewModel::m_valueUpdateFinished" << Qt::hex << m_sdoval->index() << Qt::dec << m_sdoval->subIndex();
 
     if(m_sdoval->running()) return;
     if(m_queue->isEmpty()) return;
@@ -411,7 +465,8 @@ void RegsViewModel::m_valueUpdateFinished()
             int32_t data = 0;
             size_t data_size = m_sdoval->dataSize();
             if(data_size <= sizeof(data)){
-                std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&data));
+                m_sdoval->copyDataTo(&data, data_size);
+                //std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&data));
             }
 
             if(RegTypes::isInteger(type)){
@@ -439,6 +494,7 @@ void RegsViewModel::m_valueUpdateFinished()
             val = tr("timeout");
             break;
         case SDOComm::ERROR_CANCEL:
+            val = tr("canceled");
             break;
         case SDOComm::ERROR_INVALID_SIZE:
             val = tr("invalid size");
@@ -508,7 +564,7 @@ void RegsViewModel::applyUpdatedValue(uint16_t regIndex, uint16_t regSubIndex, c
 
 int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isWrite, COValue::Type type, uint32_t value) const
 {
-    qDebug() << "RegsViewModel::updateValue" << Qt::hex << regIndex << regSubIndex << isWrite << static_cast<int>(type) << value;
+    qDebug() << "RegsViewModel::updateValue" << Qt::hex << regIndex << Qt::dec << regSubIndex << isWrite << static_cast<int>(type) << value;
 
     if(!RegTypes::isNumeric(type)) return 0;
 
@@ -539,13 +595,26 @@ int RegsViewModel::processQueue() const
     if(m_queue->isEmpty()) return 0;
 
     UpdateCmd& cmd = m_queue->first();
+    size_t data_size = COValue::typeSize(cmd.type);
 
     m_sdoval->setNodeId(m_nodeId); //m_slcon->nodeId()
     m_sdoval->setIndex(cmd.index);
     m_sdoval->setSubIndex(cmd.subindex);
-    m_sdoval->setDataSize(COValue::typeSize(cmd.type));
-    //m_sdoval->set
-    if(!m_sdoval->read()){
+    m_sdoval->setDataSize(data_size);
+
+    bool io_res = false;
+
+    if(cmd.isWrite){
+        if(data_size <= sizeof(cmd.data)){
+            if(m_sdoval->copyDataFrom(&cmd.data, data_size) == data_size){
+                io_res = m_sdoval->write();
+            }
+        }
+    }else{
+        io_res = m_sdoval->read();
+    }
+
+    if(!io_res){
         m_queue->pop_front();
         return -1;
     }

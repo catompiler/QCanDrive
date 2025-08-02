@@ -165,6 +165,40 @@ const void* SDOValue::data() const
     return m_sdoc->data();
 }
 
+size_t SDOValue::copyDataFrom(const void* ptr, size_t sz)
+{
+    if(ptr == nullptr || sz == 0) return 0;
+
+    if(m_sdoc->running()){
+        return 0;
+    }
+
+    void* dataPtr = m_sdoc->data();
+    if(dataPtr == nullptr) return 0;
+
+    size_t minSize = std::min(m_sdoc->dataSize(), sz);
+    memcpy(dataPtr, ptr, minSize);
+
+    return minSize;
+}
+
+size_t SDOValue::copyDataTo(void* ptr, size_t sz) const
+{
+    if(ptr == nullptr || sz == 0) return 0;
+
+    if(m_sdoc->running()){
+        return 0;
+    }
+
+    void* dataPtr = m_sdoc->data();
+    if(dataPtr == nullptr) return 0;
+
+    size_t minSize = std::min(m_sdoc->dataSize(), sz);
+    memcpy(ptr, dataPtr, minSize);
+
+    return minSize;
+}
+
 size_t SDOValue::transferSize() const
 {
     return m_sdoc->transferSize();
