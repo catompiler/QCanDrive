@@ -78,6 +78,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     connect(ui->actRegListCollapseTree, &QAction::triggered, ui->tvRegList, &RegListEditorWgt::collapseTree);
 
     connect(ui->actRegsViewRefresh, &QAction::triggered, ui->tvRegView, &RegsViewWgt::refreshRegs);
+    connect(ui->actRegsViewAutoRefresh, &QAction::toggled, ui->tvRegView, &RegsViewWgt::setRefreshingRegs);
 
     //connect(ui->act, &QAction::triggered, this, &CanDriveWin::m_ui_act_triggered);
 
@@ -184,6 +185,7 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
     Settings *s = Settings::get();
 
     m_settingsDlg->setUpdatePeriod(s->general.updatePeriod);
+    m_settingsDlg->setRegsRefreshPeriod(s->general.regsRefreshPeriod);
     m_settingsDlg->setPortName(s->conn.portName);
     m_settingsDlg->setPortBaud(s->conn.portBaud);
     m_settingsDlg->setPortParity(s->conn.portParity);
@@ -206,6 +208,7 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
 
     if(m_settingsDlg->exec()){
         s->general.updatePeriod = m_settingsDlg->updatePeriod();
+        s->general.regsRefreshPeriod = m_settingsDlg->regsRefreshPeriod();
         s->conn.portName = m_settingsDlg->portName();
         s->conn.portBaud = m_settingsDlg->portBaud();
         s->conn.portParity = m_settingsDlg->portParity();
@@ -257,6 +260,7 @@ void CanDriveWin::applySettings()
     //m_->set(m_settings->);
 
     ui->tvRegView->setNodeId(s->co.nodeId);
+    ui->tvRegView->setRegsRefreshPeriod(s->general.regsRefreshPeriod);
 
     QPalette pal(palette());
     pal.setColor(QPalette::Window, s->appear.windowColor);

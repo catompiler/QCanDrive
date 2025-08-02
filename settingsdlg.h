@@ -21,6 +21,9 @@ public:
     uint updatePeriod() const;
     void setUpdatePeriod(uint newUpdatePeriod);
 
+    uint regsRefreshPeriod() const;
+    void setRegsRefreshPeriod(uint newRegsRefreshPeriod);
+
     QString portName() const;
     void setPortName(const QString& newPortName);
 

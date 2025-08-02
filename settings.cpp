@@ -52,6 +52,7 @@ void Settings::saveGeneral(QSettings& s) const
     s.beginGroup("common");
 
     s.setValue("updatePeriod", general.updatePeriod);
+    s.setValue("regsRefreshPeriod", general.regsRefreshPeriod);
 
     s.endGroup();
 }
@@ -103,6 +104,7 @@ void Settings::loadGeneral(QSettings& s)
     s.beginGroup("common");
 
     general.updatePeriod = s.value("updatePeriod", 0).toUInt();
+    general.regsRefreshPeriod = s.value("regsRefreshPeriod", 1000).toUInt();
 
     s.endGroup();
 }

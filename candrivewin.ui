@@ -252,6 +252,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actRegsViewRefresh"/>
+   <addaction name="actRegsViewAutoRefresh"/>
   </widget>
   <action name="actDebugExec">
    <property name="icon">
@@ -527,6 +528,18 @@
    </property>
    <property name="toolTip">
     <string>Обновить отображённые регистры</string>
+   </property>
+  </action>
+  <action name="actRegsViewAutoRefresh">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="candrive.qrc">
+     <normaloff>:/images/icons/Synchronize_green-48.png</normaloff>:/images/icons/Synchronize_green-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Обновлять автоматически</string>
    </property>
   </action>
  </widget>

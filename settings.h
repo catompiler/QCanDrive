@@ -22,6 +22,7 @@ public:
 
     struct General {
         uint updatePeriod;
+        uint regsRefreshPeriod;
     } general;
 
     struct Connection {

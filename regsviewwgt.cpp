@@ -18,6 +18,7 @@
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QScopedPointer>
+#include <QTimer>
 #include <QDebug>
 
 
@@ -60,6 +61,9 @@ RegsViewWgt::RegsViewWgt(QWidget *parent)
     getTreeView()->setModel(m_regsViewModel);
     //getTreeView()->setItemDelegate(nullptr);
 
+    m_refreshTimer = new QTimer();
+    connect(m_refreshTimer, &QTimer::timeout, this, &RegsViewWgt::refreshRegs);
+
     /*getTreeView()->setSelectionMode(QAbstractItemView::SingleSelection);
     QItemSelectionModel* sel_model = getTreeView()->selectionModel();
     if(sel_model == nullptr){
@@ -82,6 +86,7 @@ RegsViewWgt::~RegsViewWgt()
 {
     storeSettings();
 
+    delete m_refreshTimer;
     delete m_regsViewModel;
 }
 
@@ -130,6 +135,15 @@ void RegsViewWgt::refreshRegs()
     m_regsViewModel->refreshRegs();
 }
 
+void RegsViewWgt::setRefreshingRegs(bool newRefreshing)
+{
+    if(newRefreshing){
+        m_refreshTimer->start();
+    }else{
+        m_refreshTimer->stop();
+    }
+}
+
 void RegsViewWgt::m_tvRegList_activated(const QModelIndex& index)
 {
     //qDebug() << "on_tvRegList_activated";
@@ -164,6 +178,21 @@ CO::NodeId RegsViewWgt::nodeId() const
 void RegsViewWgt::setNodeId(CO::NodeId newNodeId)
 {
     m_regsViewModel->setNodeId(newNodeId);
+}
+
+uint RegsViewWgt::regsRefreshPeriod() const
+{
+    return static_cast<uint>(m_refreshTimer->interval());
+}
+
+void RegsViewWgt::setRegsRefreshPeriod(uint newRegsRefreshPeriod)
+{
+    bool running = m_refreshTimer->isActive();
+
+    m_refreshTimer->stop();
+    m_refreshTimer->setInterval(static_cast<int>(newRegsRefreshPeriod));
+
+    if(running) m_refreshTimer->start();
 }
 
 

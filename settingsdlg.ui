@@ -23,11 +23,11 @@
       <attribute name="title">
        <string>Общие</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
+      <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
         <widget class="QLabel" name="lblUpdatePriod">
          <property name="text">
-          <string>Период обновления</string>
+          <string>Период обновления величин</string>
          </property>
         </widget>
        </item>
@@ -47,7 +47,24 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblRegsRefreshPeriod">
+         <property name="text">
+          <string>Период обновления регистров</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="1">
+        <widget class="QSpinBox" name="sbRegsRefreshPeriod">
+         <property name="suffix">
+          <string> мс</string>
+         </property>
+         <property name="maximum">
+          <number>10000</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

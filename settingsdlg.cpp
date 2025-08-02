@@ -36,6 +36,16 @@ void SettingsDlg::setUpdatePeriod(uint newUpdatePeriod)
     ui->sbUpdatePeriod->setValue(newUpdatePeriod);
 }
 
+uint SettingsDlg::regsRefreshPeriod() const
+{
+    return ui->sbRegsRefreshPeriod->value();
+}
+
+void SettingsDlg::setRegsRefreshPeriod(uint newRegsRefreshPeriod)
+{
+    ui->sbRegsRefreshPeriod->setValue(newRegsRefreshPeriod);
+}
+
 QString SettingsDlg::portName() const
 {
     return ui->cbPortName->currentText();

@@ -2,5 +2,6 @@
     <qresource prefix="/images">
         <file>icons/Settings 3-48.png</file>
         <file>icons/Synchronize_blue-48.png</file>
+        <file>icons/Synchronize_green-48.png</file>
     </qresource>
 </RCC>

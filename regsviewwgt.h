@@ -9,6 +9,7 @@
 
 class QItemSelection;
 class QModelIndex;
+class QTimer;
 class RegListModel;
 class RegEntry;
 class Settings;
@@ -33,10 +34,14 @@ public:
     CO::NodeId nodeId() const;
     void setNodeId(CO::NodeId newNodeId);
 
+    uint regsRefreshPeriod() const;
+    void setRegsRefreshPeriod(uint newRegsRefreshPeriod);
+
 public slots:
     void expandTree();
     void collapseTree();
     void refreshRegs();
+    void setRefreshingRegs(bool newRefreshing);
 
 private slots:
     void m_tvRegList_activated(const QModelIndex &index);
@@ -46,6 +51,8 @@ private:
     QTreeView* getTreeView() { return this; }
 
     RegsViewModel* m_regsViewModel;
+
+    QTimer* m_refreshTimer;
 
     void restoreSettings();
     void storeSettings();
