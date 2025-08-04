@@ -10,6 +10,18 @@
 #include <QDebug>
 
 
+#define MODEL_DEBUG 0
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#define INDEX_DEBUG 0
+#define PARENT_DEBUG 0
+#define MAP_DEBUG 0
+#define ROW_COUNT_DEBUG 0
+#define FLAGS_DEBUG 0
+#define FILTER_DEBUG 0
+#define DATA_DEBUG 0
+#endif
+
+
 typedef struct _Col_Mapping {
     const char* name;
     int sourceCol;
@@ -41,7 +53,6 @@ RegsViewModel::RegsViewModel(QObject* parent)
     m_queue = new UpdateQueue();
 
     connect(m_sdoval, &SDOValue::finished, this, &RegsViewModel::m_valueUpdateFinished);
-    connect(this, &QAbstractItemModel::modelReset, this, &RegsViewModel::m_modelReseted);
 }
 
 RegsViewModel::~RegsViewModel()
@@ -78,11 +89,22 @@ void RegsViewModel::refreshRegs()
     emit dataChanged( QModelIndex(), QModelIndex() );
 }
 
+QModelIndex RegsViewModel::buddy(const QModelIndex& index) const
+{
+    if(index.column() == COL_VALUE) return index;
+
+    return QAbstractProxyModel::buddy(index);
+}
+
 //qDebug() << "";
 
 QModelIndex RegsViewModel::index(int row, int column, const QModelIndex& parent) const
 {
-    //qDebug() << "RegsViewModel::index" << row << "," << column << "," << parent;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(INDEX_DEBUG) && INDEX_DEBUG == 1
+    qDebug() << "RegsViewModel::index" << row << "," << column << "," << parent;
+#endif
+#endif
 
     QAbstractItemModel* source_model = sourceModel();
     if(source_model == nullptr) return QModelIndex();
@@ -91,19 +113,32 @@ QModelIndex RegsViewModel::index(int row, int column, const QModelIndex& parent)
     if(reglist_model == nullptr) return QModelIndex();
 
     QModelIndex source_parent = mapToSource(parent);
+    if(!source_parent.isValid()) return createIndex(row, column, static_cast<quintptr>(-1));
 
     RegEntry* re = reglist_model->entryByModelIndex(source_parent);
-    if(re == nullptr) return createIndex(row, column, static_cast<quintptr>(-1));
+    if(re == nullptr) return QModelIndex();
 
     RegVar* rv = re->at(row);
     if(rv == nullptr) return QModelIndex();
 
-    return createIndex(row, column, static_cast<quintptr>(RegUtils::makeFullIndex(re->index(), rv->subIndex())));
+    QModelIndex res_index = createIndex(row, column, static_cast<quintptr>(RegUtils::makeFullIndex(re->index(), rv->subIndex())));
+
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(INDEX_DEBUG) && INDEX_DEBUG == 1
+    qDebug() << "RegsViewModel::index" << "return" << res_index;
+#endif
+#endif
+
+    return res_index;
 }
 
 QModelIndex RegsViewModel::parent(const QModelIndex& child) const
 {
-    //qDebug() << "RegsViewModel::parent" << child;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(PARENT_DEBUG) && PARENT_DEBUG == 1
+    qDebug() << "RegsViewModel::parent" << child;
+#endif
+#endif
 
     QAbstractItemModel* source_model = sourceModel();
     if(source_model == nullptr) return QModelIndex();
@@ -124,21 +159,44 @@ QModelIndex RegsViewModel::parent(const QModelIndex& child) const
 
     QModelIndex parent_index = mapFromSource(reglist_model->entryModelIndex(re));
 
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(PARENT_DEBUG) && PARENT_DEBUG == 1
+    qDebug() << "RegsViewModel::parent" << "return" << parent_index;
+#endif
+#endif
+
     return parent_index;
 }
 
 int RegsViewModel::rowCount(const QModelIndex& parent) const
 {
-    //qDebug() << "RegsViewModel::rowCount" << parent;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(ROW_COUNT_DEBUG) && ROW_COUNT_DEBUG == 1
+    qDebug() << "RegsViewModel::rowCount" << parent;
+#endif
+#endif
 
-    QAbstractItemModel* model = sourceModel();
-    if(model == nullptr) return 0;
+    QAbstractItemModel* source_model = sourceModel();
+    if(source_model == nullptr) return 0;
 
-    int rows = model->rowCount(mapToSource(parent));
+    QModelIndex source_parent = mapToSource(parent);
 
-    //qDebug() << "rows:" << rows;
+    int rows = source_model->rowCount(source_parent);
+    int s_row = 0;
 
-    return rows;
+    for(int i_row = 0; i_row < rows; i_row ++){
+        if(filterAcceptsRow(i_row, source_parent)){
+            s_row ++;
+        }
+    }
+
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(ROW_COUNT_DEBUG) && ROW_COUNT_DEBUG == 1
+    qDebug() << "RegsViewModel::rowCount" << "return" << s_row;
+#endif
+#endif
+
+    return s_row;
 }
 
 int RegsViewModel::columnCount(const QModelIndex& parent) const
@@ -154,7 +212,11 @@ int RegsViewModel::columnCount(const QModelIndex& parent) const
 
 QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
 {
-    //qDebug() << "RegsViewModel::mapToSource" << proxyIndex;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(MAP_DEBUG) && MAP_DEBUG == 1
+    qDebug() << "RegsViewModel::mapToSource" << proxyIndex;
+#endif
+#endif
 
     if(!proxyIndex.isValid()) return QModelIndex();
 
@@ -209,14 +271,22 @@ QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
     //if(!idx.isValid()) qDebug() << "source model index invalid!";
     //else qDebug() << idx;
 
-    //qDebug() << "RegsViewModel::mapToSource" << proxyIndex << idx;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(MAP_DEBUG) && MAP_DEBUG == 1
+    qDebug() << "RegsViewModel::mapToSource" << "return" << idx;
+#endif
+#endif
 
     return idx;
 }
 
 QModelIndex RegsViewModel::mapFromSource(const QModelIndex& sourceIndex) const
 {
-    //qDebug() << "RegsViewModel::mapFromSource" << sourceIndex;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(MAP_DEBUG) && MAP_DEBUG == 1
+    qDebug() << "RegsViewModel::mapFromSource" << sourceIndex;
+#endif
+#endif
 
     if(!sourceIndex.isValid()) return QModelIndex();
 
@@ -255,24 +325,34 @@ QModelIndex RegsViewModel::mapFromSource(const QModelIndex& sourceIndex) const
     //if(!idx.isValid()) qDebug() << "source model index invalid!";
     //else qDebug() << idx;
 
-    //qDebug() << "RegsViewModel::mapFromSource" << sourceIndex << idx;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(MAP_DEBUG) && MAP_DEBUG == 1
+    qDebug() << "RegsViewModel::mapFromSource" << "return" << idx;
+#endif
+#endif
 
     return idx;
 }
 
 Qt::ItemFlags RegsViewModel::flags(const QModelIndex& index) const
 {
-    //qDebug() << "RegsViewModel::flags" << index;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(FLAGS_DEBUG) && FLAGS_DEBUG == 1
+    qDebug() << "RegsViewModel::flags" << index;
+#endif
+#endif
 
     QAbstractItemModel* model = sourceModel();
     if(model == nullptr) return Qt::NoItemFlags;
 
     Qt::ItemFlags flags = Qt::NoItemFlags;
 
-    QModelIndex source_index = mapToSource(index);
 //    if(index.column() == COL_VALUE){
-//        qDebug() << "COL_VALUE" << source_index;
+//        qDebug() << "flags COL_VALUE";
 //    }
+
+    QModelIndex source_index = mapToSource(index);
+
     if(source_index.isValid()){
         flags = model->flags(source_index);
         flags &= ~Qt::ItemIsEditable;
@@ -284,7 +364,13 @@ Qt::ItemFlags RegsViewModel::flags(const QModelIndex& index) const
         RegListModel* reglist_model = qobject_cast<RegListModel*>(model);
         if(reglist_model == nullptr) return flags;
 
-        RegVar* rv = reglist_model->varByModelIndex(mapToSource(this->index(index.row(), 0, index.parent())));
+        QModelIndex idx = this->index(index.row(), 0, index.parent());
+        if(!idx.isValid()) return flags;
+
+        QModelIndex src_idx = mapToSource(idx);
+        if(!src_idx.isValid()) return flags;
+
+        RegVar* rv = reglist_model->varByModelIndex(src_idx);
         if(rv == nullptr) return flags;
 
         if(!(rv->flags() & RegFlag::READONLY)){
@@ -292,6 +378,12 @@ Qt::ItemFlags RegsViewModel::flags(const QModelIndex& index) const
         }
         //qDebug() << "COL_VALUE is editable";
     }
+
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(FLAGS_DEBUG) && FLAGS_DEBUG == 1
+    qDebug() << "RegsViewModel::flags" << "return" << flags;
+#endif
+#endif
 
     return flags;
 }
@@ -302,13 +394,19 @@ QVariant RegsViewModel::headerData(int section, Qt::Orientation orientation, int
     if(role != Qt::DisplayRole) return QVariant();
     if(section < 0 || section >= static_cast<int>(col_count)) return QVariant();
 
-    return tr(cols[section].name);
+    QVariant res = tr(cols[section].name);
+
+    return res;
 }
 
 
 QVariant RegsViewModel::data(const QModelIndex& index, int role) const
 {
-    //qDebug() << "RegsViewModel::data" << index << "," << role;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(DATA_DEBUG) && DATA_DEBUG == 1
+    qDebug() << "RegsViewModel::data" << index << "," << role;
+#endif
+#endif
 
     QAbstractItemModel* model = sourceModel();
     if(model == nullptr) return QVariant();
@@ -367,13 +465,23 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
         }
     }
 
-    //qDebug() << index << res;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(DATA_DEBUG) && DATA_DEBUG == 1
+    qDebug() << "RegsViewModel::data" << "return" << res;
+#endif
+#endif
 
     return res;
 }
 
 bool RegsViewModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(DATA_DEBUG) && DATA_DEBUG == 1
+    qDebug() << "RegsViewModel::setData" << index << "," << value << "," << role;
+#endif
+#endif
+
     if(role != Qt::EditRole) return false;
     if(!index.isValid()) return false;
     if(index.column() != COL_VALUE) return false;
@@ -426,6 +534,12 @@ bool RegsViewModel::setData(const QModelIndex& index, const QVariant& value, int
     // inform view.
     emit dataChanged(index, index);
 
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(DATA_DEBUG) && DATA_DEBUG == 1
+    qDebug() << "RegsViewModel::setData" << "return" << true;
+#endif
+#endif
+
     return true;
 }
 
@@ -434,6 +548,18 @@ bool RegsViewModel::filterAcceptsColumn(int source_column, const QModelIndex& so
 {
     Q_UNUSED(source_column);
     Q_UNUSED(source_parent);
+
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(FILTER_DEBUG) && FILTER_DEBUG == 1
+    qDebug() << "RegsViewModel::filterAcceptsColumn" << source_column << source_parent;
+#endif
+#endif
+
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(FILTER_DEBUG) && FILTER_DEBUG == 1
+    qDebug() << "RegsViewModel::filterAcceptsColumn" << "return" << true;
+#endif
+#endif
 
     return true;
 }
@@ -444,9 +570,15 @@ bool RegsViewModel::filterAcceptsRow(int source_row, const QModelIndex& source_p
     //Q_UNUSED(source_row);
     //Q_UNUSED(source_parent);
 
-    //qDebug() << "RegsViewModel::filterAcceptsRow" << source_row << source_parent;
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(FILTER_DEBUG) && FILTER_DEBUG == 1
+    qDebug() << "RegsViewModel::filterAcceptsRow" << source_row << source_parent;
+#endif
+#endif
 
-    auto defRet = [&source_row, &source_parent, this]() -> bool {
+    auto defRet = [&source_row, &source_parent]() -> bool {
+        (void) source_row;
+        (void) source_parent;
         return true; //QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
     };
 
@@ -467,15 +599,27 @@ bool RegsViewModel::filterAcceptsRow(int source_row, const QModelIndex& source_p
 
     if(rv->eflags() & RegEFlag::CO_COUNT) return false;
 
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+#if defined(FILTER_DEBUG) && FILTER_DEBUG == 1
+    qDebug() << "RegsViewModel::filterAcceptsRow" << "return" << defRet();
+#endif
+#endif
+
     return defRet();
 }
 
 void RegsViewModel::m_modelReseted()
 {
-    //qDebug() << "RegsViewModel::m_modelReseted()";
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+    qDebug() << "RegsViewModel::m_modelReseted()";
+#endif
+
+    beginResetModel();
 
     m_cache->clear();
     m_queue->clear();
+
+    endResetModel();
 }
 
 void RegsViewModel::m_valueUpdateFinished()
@@ -635,7 +779,6 @@ int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isW
 
 int RegsViewModel::processQueue() const
 {
-    // TODO: processing cmd queue.
     if(m_sdoval->running()) return 0;
     if(m_queue->isEmpty()) return 0;
 
@@ -683,12 +826,17 @@ void RegsViewModel::setNodeId(CO::NodeId newNodeId)
 
 void RegsViewModel::setSourceModel(QAbstractItemModel* sourceModel)
 {
-//    qDebug() << "RegsViewModel::setSourceModel" << this->sourceModel() << sourceModel;
-//    QAbstractItemModel* model = sourceModel();
-
-    beginResetModel();
+#if defined(MODEL_DEBUG) && MODEL_DEBUG == 1
+    qDebug() << "RegsViewModel::setSourceModel" << this->sourceModel() << sourceModel;
+#endif
+    QAbstractItemModel* cur_source_model = this->sourceModel();
+    if(cur_source_model){
+        disconnect(cur_source_model, nullptr, this, nullptr);
+    }
 
     QAbstractProxyModel::setSourceModel(sourceModel);
 
-    endResetModel();
+    if(sourceModel){
+        connect(sourceModel, &QAbstractItemModel::modelReset, this, &RegsViewModel::m_modelReseted);
+    }
 }
