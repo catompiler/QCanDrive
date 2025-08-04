@@ -660,3 +660,16 @@ void RegsViewModel::setNodeId(CO::NodeId newNodeId)
 {
     m_nodeId = newNodeId;
 }
+
+
+void RegsViewModel::setSourceModel(QAbstractItemModel* sourceModel)
+{
+//    qDebug() << "RegsViewModel::setSourceModel" << this->sourceModel() << sourceModel;
+//    QAbstractItemModel* model = sourceModel();
+
+    //beginResetModel();
+
+    QSortFilterProxyModel::setSourceModel(sourceModel);
+
+    //endResetModel();
+}

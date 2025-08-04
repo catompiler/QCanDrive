@@ -78,8 +78,16 @@ public:
     QColor windowColor() const;
     void setWindowColor(const QColor& newWindowColor);
 
+    QString cockpitFile() const;
+    void setCockpitFile(const QString& newCockpitFile);
+
+    QString reglistFile() const;
+    void setReglistFile(const QString& newReglistFile);
+
 private slots:
-    void on_tbWindowBackColorSel_clicked(bool checked = false);
+    void m_tbWindowBackColorSel_clicked(bool checked = false);
+    void m_tbCockpitFileSel_clicked(bool checked = false);
+    void m_tbRegListFileSel_clicked(bool checked = false);
 
 private:
     Ui::SettingsDlg *ui;

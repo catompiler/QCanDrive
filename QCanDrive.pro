@@ -10,6 +10,9 @@ CONFIG += debug
 # Qwt
 CONFIG += qwt
 
+# flags
+QMAKE_CXXFLAGS += -O0 -ggdb
+
 
 INCLUDEPATH += CANopenNode/ \
                slcan/ \

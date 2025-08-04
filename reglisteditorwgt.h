@@ -30,6 +30,8 @@ public:
     const RegListModel* regListModel() const;
     RegListModel* regListModel();
 
+    void openRegListFile(const QString& filename);
+
 public slots:
     void openRegList();
     void appendRegList();

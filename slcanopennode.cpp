@@ -38,6 +38,10 @@ SLCanOpenNode::SLCanOpenNode(QObject *parent)
 
 SLCanOpenNode::~SLCanOpenNode()
 {
+    m_sdoComms.clear();
+
+    if(m_co != nullptr) destroyCO();
+
     slcan_master_deinit(&m_scm);
     slcan_deinit(&m_sc);
 
@@ -128,7 +132,6 @@ bool SLCanOpenNode::openPort(const QString& name, QSerialPort::BaudRate baud, QS
 
 void SLCanOpenNode::closePort()
 {
-
     slcan_master_reset(&m_scm);
     slcan_close(&m_sc);
     slcan_reset(&m_sc);

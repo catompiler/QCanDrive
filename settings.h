@@ -23,6 +23,8 @@ public:
     struct General {
         uint updatePeriod;
         uint regsRefreshPeriod;
+        QString cockpitFile;
+        QString reglistFile;
     } general;
 
     struct Connection {

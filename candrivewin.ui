@@ -36,7 +36,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tabCockpit">
        <property name="autoFillBackground">
@@ -562,9 +562,9 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="candrive.qrc"/>
   <include location="qt_canopennode_slcan.qrc"/>
   <include location="reglisteditor.qrc"/>
+  <include location="candrive.qrc"/>
  </resources>
  <connections/>
 </ui>

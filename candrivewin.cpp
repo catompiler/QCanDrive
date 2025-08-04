@@ -42,8 +42,8 @@ CanDriveWin::CanDriveWin(QWidget *parent)
 
     ui->cockpitWgt->setValsHolder(m_valsHolder);
 
-    ui->tvRegView->setRegListModel(ui->tvRegList->regListModel());
     ui->tvRegView->setSLCanOpenNode(m_slcon);
+    ui->tvRegView->setRegListModel(ui->tvRegList->regListModel());
 
     connect(ui->actDebugExec, &QAction::triggered, this, &CanDriveWin::m_ui_actDebugExec_triggered);
     connect(ui->actQuit, &QAction::triggered, this, &CanDriveWin::m_ui_actQuit_triggered);
@@ -84,13 +84,18 @@ CanDriveWin::CanDriveWin(QWidget *parent)
 
     applySettings();
     updateStatusBar();
+
+    Settings* s = Settings::get();
+    if(!s->general.cockpitFile.isEmpty()){
+        ui->cockpitWgt->openCockpitFile(s->general.cockpitFile);
+    }
+    if(!s->general.reglistFile.isEmpty()){
+        ui->tvRegList->openRegListFile(s->general.reglistFile);
+    }
 }
 
 CanDriveWin::~CanDriveWin()
 {
-    m_slcon->destroyCO();
-    m_slcon->closePort();
-
     Settings::get()->save();
 
     delete m_settingsDlg;
@@ -99,9 +104,15 @@ CanDriveWin::~CanDriveWin()
     statusBar()->removeWidget(m_sblblConStatus);
     delete m_sblblConStatus;
 
+    delete ui->tvRegView;
+    delete ui->tvRegList;
+
     delete ui;
 
     delete m_valsHolder;
+
+    m_slcon->destroyCO();
+    m_slcon->closePort();
     delete m_slcon;
 }
 
@@ -186,6 +197,8 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
 
     m_settingsDlg->setUpdatePeriod(s->general.updatePeriod);
     m_settingsDlg->setRegsRefreshPeriod(s->general.regsRefreshPeriod);
+    m_settingsDlg->setCockpitFile(s->general.cockpitFile);
+    m_settingsDlg->setReglistFile(s->general.reglistFile);
     m_settingsDlg->setPortName(s->conn.portName);
     m_settingsDlg->setPortBaud(s->conn.portBaud);
     m_settingsDlg->setPortParity(s->conn.portParity);
@@ -209,6 +222,8 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
     if(m_settingsDlg->exec()){
         s->general.updatePeriod = m_settingsDlg->updatePeriod();
         s->general.regsRefreshPeriod = m_settingsDlg->regsRefreshPeriod();
+        s->general.cockpitFile = m_settingsDlg->cockpitFile();
+        s->general.reglistFile = m_settingsDlg->reglistFile();
         s->conn.portName = m_settingsDlg->portName();
         s->conn.portBaud = m_settingsDlg->portBaud();
         s->conn.portParity = m_settingsDlg->portParity();

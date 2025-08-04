@@ -141,6 +141,13 @@ void RegListEditorWgt::openRegList()
     }
 }
 
+void RegListEditorWgt::openRegListFile(const QString& filename)
+{
+    m_regsListModel->setRegList(RegEntryList());
+
+    appendFile(filename);
+}
+
 void RegListEditorWgt::appendRegList()
 {
     QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Добавить файлы"), m_curDir,

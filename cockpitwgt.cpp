@@ -135,6 +135,11 @@ void CockpitWgt::openCockpit()
 
     if(fileName.isEmpty()) return;
 
+    openCockpitFile(fileName);
+}
+
+void CockpitWgt::openCockpitFile(const QString& fileName)
+{
     QFile file(fileName);
 
     if(!file.open(QIODevice::ReadOnly)){

@@ -37,6 +37,8 @@ public:
     CoValuesHolder* valsHolder() const;
     void setValsHolder(CoValuesHolder* newValsHolder);
 
+    void openCockpitFile(const QString& fileName);
+
 public slots:
     void saveCockpit();
     void openCockpit();

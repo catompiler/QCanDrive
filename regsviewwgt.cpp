@@ -23,33 +23,25 @@
 
 
 #define COL_WIDTH_INDEX 75
-#define COL_WIDTH_NAME 150
+#define COL_WIDTH_NAME 100
+#define COL_WIDTH_DESCR 175
 #define COL_WIDTH_TYPE 75
-#define COL_WIDTH_COUNT 75
-#define COL_WIDTH_MEM_ADDR 150
 #define COL_WIDTH_MIN_VAL 75
 #define COL_WIDTH_MAX_VAL 75
 #define COL_WIDTH_DEF_VAL 100
-#define COL_WIDTH_BASE 100
-#define COL_WIDTH_FLAGS 100
-#define COL_WIDTH_EXTFLAGS 150
-#define COL_WIDTH_DESCR 100
+#define COL_WIDTH_VALUE 100
 //#define COL_WIDTH_ 50
 
 
 static const int col_width[] = {
     COL_WIDTH_INDEX,
     COL_WIDTH_NAME,
+    COL_WIDTH_DESCR,
     COL_WIDTH_TYPE,
-    COL_WIDTH_COUNT,
-    COL_WIDTH_MEM_ADDR,
     COL_WIDTH_MIN_VAL,
     COL_WIDTH_MAX_VAL,
     COL_WIDTH_DEF_VAL,
-    COL_WIDTH_BASE,
-    COL_WIDTH_FLAGS,
-    COL_WIDTH_EXTFLAGS,
-    COL_WIDTH_DESCR
+    COL_WIDTH_VALUE,
 };
 static const int col_width_len = ((sizeof(col_width))/(sizeof(col_width[0])));
 
@@ -75,9 +67,9 @@ RegsViewWgt::RegsViewWgt(QWidget *parent)
     */
     connect(this, &RegsViewWgt::activated, this, &RegsViewWgt::m_tvRegList_activated);
 
-    /*for(int i = 0; i < col_width_len; i ++){
+    for(int i = 0; i < col_width_len && i < getTreeView()->model()->columnCount(); i ++){
         getTreeView()->setColumnWidth(i, col_width[i]);
-    }*/
+    }
 
     restoreSettings();
 }

@@ -3,6 +3,7 @@
 #include <QColorDialog>
 #include <QColor>
 #include <QSerialPortInfo>
+#include <QFileDialog>
 
 
 
@@ -19,6 +20,10 @@ SettingsDlg::SettingsDlg(QWidget *parent) :
     populatePortParitys();
     populatePortStopBits();
     populateCanBitrates();
+
+    connect(ui->tbWindowBackColorSel, &QToolButton::clicked, this, &SettingsDlg::m_tbWindowBackColorSel_clicked);
+    connect(ui->tbCockpitFileSel, &QToolButton::clicked, this, &SettingsDlg::m_tbCockpitFileSel_clicked);
+    connect(ui->tbRegListFileSel, &QToolButton::clicked, this, &SettingsDlg::m_tbRegListFileSel_clicked);
 }
 
 SettingsDlg::~SettingsDlg()
@@ -241,11 +246,50 @@ void SettingsDlg::setWindowColor(const QColor& newWindowColor)
     ui->frWindowBackColor->setPalette(pal);
 }
 
-void SettingsDlg::on_tbWindowBackColorSel_clicked(bool checked)
+void SettingsDlg::m_tbWindowBackColorSel_clicked(bool checked)
 {
     Q_UNUSED(checked)
 
     peekColor(ui->frWindowBackColor);
+}
+
+void SettingsDlg::m_tbCockpitFileSel_clicked(bool checked)
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть cockpit"), QString(), tr("Cockpit (*.cpxml)"));
+
+    if(fileName.isEmpty()) return;
+
+    setCockpitFile(fileName);
+}
+
+void SettingsDlg::m_tbRegListFileSel_clicked(bool checked)
+{
+    QString filename = QFileDialog::getOpenFileName(this, tr("Список регистров"), QString(),
+                                                          tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
+
+    if(filename.isEmpty()) return;
+
+    setReglistFile(filename);
+}
+
+QString SettingsDlg::reglistFile() const
+{
+    return ui->leRegListFile->text();
+}
+
+void SettingsDlg::setReglistFile(const QString& newReglistFile)
+{
+    ui->leRegListFile->setText(newReglistFile);
+}
+
+QString SettingsDlg::cockpitFile() const
+{
+    return ui->leCockpitFile->text();
+}
+
+void SettingsDlg::setCockpitFile(const QString& newCockpitFile)
+{
+    ui->leCockpitFile->setText(newCockpitFile);
 }
 
 void SettingsDlg::peekColor(QWidget* colHolder)

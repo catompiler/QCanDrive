@@ -47,6 +47,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    void setSourceModel(QAbstractItemModel* sourceModel) override;
 
     CO::NodeId nodeId() const;
     void setNodeId(CO::NodeId newNodeId);

@@ -94,9 +94,10 @@ static void testRegExpReplace()
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    CanDriveWin w;
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
+    CanDriveWin w;
 
     w.show();
 

@@ -53,6 +53,8 @@ void Settings::saveGeneral(QSettings& s) const
 
     s.setValue("updatePeriod", general.updatePeriod);
     s.setValue("regsRefreshPeriod", general.regsRefreshPeriod);
+    s.setValue("cockpitFile", general.cockpitFile);
+    s.setValue("reglistFile", general.reglistFile);
 
     s.endGroup();
 }
@@ -105,6 +107,8 @@ void Settings::loadGeneral(QSettings& s)
 
     general.updatePeriod = s.value("updatePeriod", 0).toUInt();
     general.regsRefreshPeriod = s.value("regsRefreshPeriod", 1000).toUInt();
+    general.cockpitFile = s.value("cockpitFile").toString();
+    general.reglistFile = s.value("reglistFile").toString();
 
     s.endGroup();
 }
