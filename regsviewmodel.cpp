@@ -32,7 +32,7 @@ static const auto col_count = sizeof(cols) / sizeof(cols[0]);
 
 
 RegsViewModel::RegsViewModel(QObject* parent)
-    :QSortFilterProxyModel(parent)
+    :QAbstractProxyModel(parent)
 {
     m_nodeId = 0;
     m_slcon = nullptr;
@@ -80,34 +80,52 @@ void RegsViewModel::refreshRegs()
 
 //qDebug() << "";
 
-//QModelIndex RegsViewModel::index(int row, int column, const QModelIndex& parent) const
-//{
-//    qDebug() << "RegsViewModel::index" << row << "," << column << "," << parent;
+QModelIndex RegsViewModel::index(int row, int column, const QModelIndex& parent) const
+{
+    //qDebug() << "RegsViewModel::index" << row << "," << column << "," << parent;
 
-//    QAbstractItemModel* model = sourceModel();
-//    if(model == nullptr) return QModelIndex();
+    QAbstractItemModel* source_model = sourceModel();
+    if(source_model == nullptr) return QModelIndex();
 
-//    QModelIndex idx = model->index(row, column, parent);
-//    if(!idx.isValid()) qDebug() << "source model index invalid!";
-//    else qDebug() << idx;
+    RegListModel* reglist_model = qobject_cast<RegListModel*>(source_model);
+    if(reglist_model == nullptr) return QModelIndex();
 
-//    return idx;
-//}
+    QModelIndex source_parent = mapToSource(parent);
 
-//QModelIndex RegsViewModel::parent(const QModelIndex& child) const
-//{
-//    qDebug() << "RegsViewModel::parent" << child;
+    RegEntry* re = reglist_model->entryByModelIndex(source_parent);
+    if(re == nullptr) return createIndex(row, column, static_cast<quintptr>(-1));
 
-//    QAbstractItemModel* model = sourceModel();
-//    if(model == nullptr) return QModelIndex();
+    RegVar* rv = re->at(row);
+    if(rv == nullptr) return QModelIndex();
 
-//    QModelIndex p = model->parent(child);
+    return createIndex(row, column, static_cast<quintptr>(RegUtils::makeFullIndex(re->index(), rv->subIndex())));
+}
 
-//    qDebug() << "child" << child;
-//    qDebug() << "parent" << p;
+QModelIndex RegsViewModel::parent(const QModelIndex& child) const
+{
+    //qDebug() << "RegsViewModel::parent" << child;
 
-//    return p;
-//}
+    QAbstractItemModel* source_model = sourceModel();
+    if(source_model == nullptr) return QModelIndex();
+
+    RegListModel* reglist_model = qobject_cast<RegListModel*>(source_model);
+    if(reglist_model == nullptr) return QModelIndex();
+
+    reg_fullindex_t fi = static_cast<reg_fullindex_t>(child.internalId());
+    if(fi == static_cast<reg_fullindex_t>(-1)) return QModelIndex();
+
+    auto index_subindex = RegUtils::getIndexSubIndex(fi);
+
+    RegVar* rv = reglist_model->varByRegIndex(index_subindex.first, index_subindex.second);
+    if(rv == nullptr) return QModelIndex();
+
+    RegEntry* re = rv->parent();
+    if(re == nullptr) return QModelIndex();
+
+    QModelIndex parent_index = mapFromSource(reglist_model->entryModelIndex(re));
+
+    return parent_index;
+}
 
 int RegsViewModel::rowCount(const QModelIndex& parent) const
 {
@@ -140,8 +158,8 @@ QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
 
     if(!proxyIndex.isValid()) return QModelIndex();
 
-    QAbstractItemModel* model = sourceModel();
-    if(model == nullptr) return QModelIndex();
+    QAbstractItemModel* source_model = sourceModel();
+    if(source_model == nullptr) return QModelIndex();
 
     int col = proxyIndex.column();
     {
@@ -153,16 +171,16 @@ QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
         //qDebug() << "->" << col;
     }
 
-    QModelIndex parent = mapToSource(proxyIndex.parent());
+    QModelIndex source_parent = mapToSource(proxyIndex.parent());
 
-    int rows = model->rowCount(parent);
+    int rows = source_model->rowCount(source_parent);
     int row = proxyIndex.row();
     {
         int f_row = -1; // finded row.
         int s_row = 0; // accepted source row.
         int i_row = 0; // iterator.
         for(;i_row < rows; i_row ++){
-            if(filterAcceptsRow(i_row, parent)){
+            if(filterAcceptsRow(i_row, source_parent)){
                 if(s_row == row){
                     f_row = i_row;
                     break;
@@ -174,7 +192,7 @@ QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
 //        int s_row = 0;
 //        int i_row = 0;
 //        do{
-//            if(filterAcceptsRow(i_row, parent)){
+//            if(filterAcceptsRow(i_row, source_parent)){
 //                if(s_row == row){
 //                    break;
 //                }
@@ -186,7 +204,7 @@ QModelIndex RegsViewModel::mapToSource(const QModelIndex& proxyIndex) const
     }
     if(row == -1) return QModelIndex();
 
-    QModelIndex idx = model->index(row, col, parent);
+    QModelIndex idx = source_model->index(row, col, source_parent);
 
     //if(!idx.isValid()) qDebug() << "source model index invalid!";
     //else qDebug() << idx;
@@ -202,8 +220,8 @@ QModelIndex RegsViewModel::mapFromSource(const QModelIndex& sourceIndex) const
 
     if(!sourceIndex.isValid()) return QModelIndex();
 
-    QAbstractItemModel* model = sourceModel();
-    if(model == nullptr) return QModelIndex();
+    QAbstractItemModel* source_model = sourceModel();
+    if(source_model == nullptr) return QModelIndex();
 
     int col = sourceIndex.column();
     {
@@ -216,15 +234,15 @@ QModelIndex RegsViewModel::mapFromSource(const QModelIndex& sourceIndex) const
         //qDebug() << "->" << col;
     }
 
-    QModelIndex parent = sourceIndex.parent();
+    QModelIndex source_parent = sourceIndex.parent();
 
     int row = sourceIndex.row();
-    if(!filterAcceptsRow(row, parent)) return QModelIndex();
+    if(!filterAcceptsRow(row, source_parent)) return QModelIndex();
     {
         int s_row = -1;
         int i_row = 0;
         for(; i_row <= row; i_row ++){
-            if(filterAcceptsRow(i_row, parent)){
+            if(filterAcceptsRow(i_row, source_parent)){
                 s_row ++;
             }
         }
@@ -232,7 +250,8 @@ QModelIndex RegsViewModel::mapFromSource(const QModelIndex& sourceIndex) const
     }
     if(row == -1) return QModelIndex();
 
-    QModelIndex idx = model->index(row, col, parent);
+    QModelIndex parent = mapFromSource(source_parent);
+    QModelIndex idx = index(row, col, parent);
     //if(!idx.isValid()) qDebug() << "source model index invalid!";
     //else qDebug() << idx;
 
@@ -428,7 +447,7 @@ bool RegsViewModel::filterAcceptsRow(int source_row, const QModelIndex& source_p
     //qDebug() << "RegsViewModel::filterAcceptsRow" << source_row << source_parent;
 
     auto defRet = [&source_row, &source_parent, this]() -> bool {
-        return QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
+        return true; //QSortFilterProxyModel::filterAcceptsRow(source_row, source_parent);
     };
 
     QAbstractItemModel* model = sourceModel();
@@ -667,9 +686,9 @@ void RegsViewModel::setSourceModel(QAbstractItemModel* sourceModel)
 //    qDebug() << "RegsViewModel::setSourceModel" << this->sourceModel() << sourceModel;
 //    QAbstractItemModel* model = sourceModel();
 
-    //beginResetModel();
+    beginResetModel();
 
-    QSortFilterProxyModel::setSourceModel(sourceModel);
+    QAbstractProxyModel::setSourceModel(sourceModel);
 
-    //endResetModel();
+    endResetModel();
 }

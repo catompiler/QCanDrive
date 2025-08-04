@@ -12,7 +12,7 @@ class SDOValue;
 class SLCanOpenNode;
 class RegListModel;
 
-class RegsViewModel : public QSortFilterProxyModel
+class RegsViewModel : public QAbstractProxyModel
 {
     Q_OBJECT
 public:
@@ -37,8 +37,8 @@ public:
 
     void refreshRegs();
 
-    //QModelIndex index(int row, int column, const QModelIndex& parent) const override;
-    //QModelIndex parent(const QModelIndex& child) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent) const override;
+    QModelIndex parent(const QModelIndex& child) const override;
     int rowCount(const QModelIndex& parent) const override;
     int columnCount(const QModelIndex& parent) const override;
     QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
@@ -54,8 +54,8 @@ public:
 
 protected:
     // QSortFilterProxyModel interface
-    bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const override;
-    bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
+    virtual bool filterAcceptsColumn(int source_column, const QModelIndex& source_parent) const;
+    virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
 
 private slots:
     void m_modelReseted();
