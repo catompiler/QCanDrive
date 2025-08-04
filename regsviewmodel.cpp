@@ -461,83 +461,95 @@ void RegsViewModel::m_modelReseted()
 
 void RegsViewModel::m_valueUpdateFinished()
 {
-    qDebug() << "RegsViewModel::m_valueUpdateFinished" << Qt::hex << m_sdoval->index() << Qt::dec << m_sdoval->subIndex();
+    //qDebug() << "RegsViewModel::m_valueUpdateFinished" << Qt::hex << m_sdoval->index() << Qt::dec << m_sdoval->subIndex();
 
     if(m_sdoval->running()) return;
     if(m_queue->isEmpty()) return;
 
     QVariant val;
+    int32_t data = 0;
 
     UpdateCmd cmd = m_queue->takeFirst();
 
-    if(m_sdoval->error() == SDOComm::ERROR_NONE){
+    if(m_sdoval->index() != cmd.index || m_sdoval->subIndex() != cmd.subindex){
+        qDebug() << "RegsViewModel::m_valueUpdateFinished sdova and cmd index or subindex mismatch";
+        val = tr("mismatch");
+    }else{
+        if(m_sdoval->error() == SDOComm::ERROR_NONE){
 
-        COValue::Type type = cmd.type;
+            COValue::Type type = cmd.type;
 
-        if(!RegTypes::isMemory(type)){
+            if(!RegTypes::isMemory(type)){
 
-            int32_t data = 0;
-            size_t data_size = m_sdoval->dataSize();
-            if(data_size <= sizeof(data)){
-                m_sdoval->copyDataTo(&data, data_size);
-                //std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&data));
-            }
+                size_t data_size = m_sdoval->transferSize();
 
-            if(RegTypes::isInteger(type)){
-                if(RegTypes::isSigned(type)){
-                    val = COValue::valueFrom<int32_t>(reinterpret_cast<const void*>(&data), type);
-                }else{
-                    val = COValue::valueFrom<uint32_t>(reinterpret_cast<const void*>(&data), type);
+                if(data_size <= sizeof(data)){
+                    if(!m_sdoval->copyDataTo(&data, data_size)){
+                        qDebug() << "RegsViewModel::m_valueUpdateFinished error copying data from sdo value";
+                    }
+                    //std::copy(static_cast<uint8_t*>(m_sdoval->data()), static_cast<uint8_t*>(m_sdoval->data()) + m_sdoval->dataSize(), reinterpret_cast<uint8_t*>(&data));
                 }
-            }else if(RegTypes::isFractional(type)){
-                val = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&data), type);// / RegTypes::iqBase(type);
-            }else if(RegTypes::isBoolean(type)){
-                val = COValue::valueFrom<bool>(reinterpret_cast<const void*>(&data), type);
+
+                //qDebug() << Qt::hex << cmd.index << Qt::dec << cmd.subindex << static_cast<int>(cmd.type) << data << data_size;
+
+                if(RegTypes::isInteger(type)){
+                    if(RegTypes::isSigned(type)){
+                        val = COValue::valueFrom<int32_t>(reinterpret_cast<const void*>(&data), type);
+                    }else{
+                        val = COValue::valueFrom<uint32_t>(reinterpret_cast<const void*>(&data), type);
+                    }
+                }else if(RegTypes::isFractional(type)){
+                    val = COValue::valueFrom<qreal>(reinterpret_cast<const void*>(&data), type);// / RegTypes::iqBase(type);
+                }else if(RegTypes::isBoolean(type)){
+                    val = COValue::valueFrom<bool>(reinterpret_cast<const void*>(&data), type);
+                }else{
+                    val = tr("UNKNOWN");
+                }
             }else{
-                val = tr("UNKNOWN");
+                val = tr("DATA");
             }
         }else{
-            val = tr("DATA");
-        }
-    }else{
-        switch(m_sdoval->error()){
-        case SDOComm::ERROR_IO:
-            val = tr("io error");
-            break;
-        case SDOComm::ERROR_TIMEOUT:
-            val = tr("timeout");
-            break;
-        case SDOComm::ERROR_CANCEL:
-            val = tr("canceled");
-            break;
-        case SDOComm::ERROR_INVALID_SIZE:
-            val = tr("invalid size");
-            break;
-        case SDOComm::ERROR_INVALID_VALUE:
-            val = tr("invalid value");
-            break;
-        case SDOComm::ERROR_ACCESS:
-            val = tr("access error");
-            break;
-        case SDOComm::ERROR_NOT_FOUND:
-            val = tr("not found");
-            break;
-        case SDOComm::ERROR_NO_DATA:
-            val = tr("no data");
-            break;
-        case SDOComm::ERROR_OUT_OF_MEM:
-            val = tr("out of mem");
-            break;
-        case SDOComm::ERROR_GENERAL:
-            val = tr("general error");
-            break;
-        case SDOComm::ERROR_UNKNOWN:
-            val = tr("unknown error");
-            break;
-        default:
-            break;
+            switch(m_sdoval->error()){
+            case SDOComm::ERROR_IO:
+                val = tr("io error");
+                break;
+            case SDOComm::ERROR_TIMEOUT:
+                val = tr("timeout");
+                break;
+            case SDOComm::ERROR_CANCEL:
+                val = tr("canceled");
+                break;
+            case SDOComm::ERROR_INVALID_SIZE:
+                val = tr("invalid size");
+                break;
+            case SDOComm::ERROR_INVALID_VALUE:
+                val = tr("invalid value");
+                break;
+            case SDOComm::ERROR_ACCESS:
+                val = tr("access error");
+                break;
+            case SDOComm::ERROR_NOT_FOUND:
+                val = tr("not found");
+                break;
+            case SDOComm::ERROR_NO_DATA:
+                val = tr("no data");
+                break;
+            case SDOComm::ERROR_OUT_OF_MEM:
+                val = tr("out of mem");
+                break;
+            case SDOComm::ERROR_GENERAL:
+                val = tr("general error");
+                break;
+            case SDOComm::ERROR_UNKNOWN:
+                val = tr("unknown error");
+                break;
+            default:
+                break;
+            }
         }
     }
+
+    //qDebug() << val;
 
     applyUpdatedValue(m_sdoval->index(), m_sdoval->subIndex(), val);
 
@@ -578,7 +590,7 @@ void RegsViewModel::applyUpdatedValue(uint16_t regIndex, uint16_t regSubIndex, c
 
 int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isWrite, COValue::Type type, uint32_t value) const
 {
-    qDebug() << "RegsViewModel::updateValue" << Qt::hex << regIndex << Qt::dec << regSubIndex << isWrite << static_cast<int>(type) << value;
+    //qDebug() << "RegsViewModel::updateValue" << Qt::hex << regIndex << Qt::dec << regSubIndex << isWrite << static_cast<int>(type) << value;
 
     if(!RegTypes::isNumeric(type)) return 0;
 
@@ -614,7 +626,10 @@ int RegsViewModel::processQueue() const
     m_sdoval->setNodeId(m_nodeId); //m_slcon->nodeId()
     m_sdoval->setIndex(cmd.index);
     m_sdoval->setSubIndex(cmd.subindex);
-    m_sdoval->setDataSize(data_size);
+    if(m_sdoval->dataSize() < data_size){
+        m_sdoval->setDataSize(data_size);
+    }
+    m_sdoval->setTransferSize(data_size);
 
     bool io_res = false;
 

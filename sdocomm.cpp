@@ -28,7 +28,7 @@ SDOComm::~SDOComm()
 
 SDOComm::Type SDOComm::type() const
 {
-    return m_d->m_type;
+    return static_cast<SDOComm::Type>(m_d->m_type);
 }
 
 void SDOComm::setType(Type newType)
@@ -108,12 +108,12 @@ void SDOComm::setDataSize(size_t newSize)
 
 SDOComm::State SDOComm::state() const
 {
-    return m_d->m_state;
+    return static_cast<SDOComm::State>(m_d->m_state);
 }
 
 SDOComm::Error SDOComm::error() const
 {
-    return m_d->m_error;
+    return static_cast<SDOComm::Error>(m_d->m_error);
 }
 
 void SDOComm::setError(Error newError)

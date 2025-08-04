@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include "cotypes.h"
+#include "sdocomm_data.h"
 
-struct SDOComm_data;
+//struct SDOComm_data;
 
 
 class SDOComm : public QObject

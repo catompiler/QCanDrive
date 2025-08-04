@@ -129,6 +129,7 @@ private:
     SDOComm::Error sdoCommError(CO_SDO_abortCode_t code) const;
     void cancelAllSDOComms();
     void createOd();
+    //void dumpSdoComm(SDOComm* sdoc) const;
 };
 
 #endif // SLCANOPENNODE_H

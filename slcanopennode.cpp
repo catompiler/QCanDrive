@@ -427,7 +427,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
 {
     if(m_sdoComms.isEmpty()) return false;
 
-    auto sdoc = m_sdoComms.head();
+    auto& sdoc = m_sdoComms.head();
 
     size_t size_ret = 0;
     size_t size_to_ret = 0;
@@ -561,9 +561,6 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 sdoc->setError(finish_err);
                 return true;
             }else{
-                if(sdo_ret == CO_SDO_RT_blockUploadInProgress){
-                    break;
-                }
 #if defined(SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH) && SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH == 1
                 if(size_to_ret > 0){
                     if(size_to_ret != sdoc->transferSize()){
@@ -573,7 +570,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                     }
                 }
 #endif
-                if(size_ret == 0){
+                if(sdo_ret > CO_SDO_RT_ok_communicationEnd){
                     break;
                 }
             }
@@ -600,6 +597,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                     break;
                 }
             }
+            //dumpSdoComm(sdoc);
 
         __attribute__ ((fallthrough));
         case SDOComm::DONE:
@@ -866,3 +864,10 @@ void SLCanOpenNode::createOd()
 
     m_od.make();
 }
+
+//#include <QByteArray>
+//void SLCanOpenNode::dumpSdoComm(SDOComm* sdoc) const
+//{
+//    QByteArray ba(static_cast<const char*>(sdoc->data()), static_cast<int>(sdoc->dataSize()));
+//    qDebug() << sdoc->state() << sdoc->error() << sdoc->bufferedDataSize() << Qt::hex << sdoc->index() << Qt::dec << sdoc->subIndex() << sdoc->dataSize() << ba.toHex();
+//}

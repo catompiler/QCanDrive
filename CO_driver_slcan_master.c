@@ -294,6 +294,18 @@ static bool can_send_msg(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer)
     return true;
 }
 
+//#include <stdio.h>
+//static void dump_can_rx_msg(CO_CANrxMsg_t* rxMsg)
+//{
+//    printf("[%03x]", rxMsg->ident);
+//    printf("(%u)", rxMsg->DLC);
+//    for(unsigned int i = 0; i < rxMsg->DLC; i ++){
+//        printf("%02x", rxMsg->data[i]);
+//    }
+//    printf("\n");
+//    fflush(stdout);
+//}
+
 static bool can_recv_msg(CO_CANmodule_t* CANmodule, CO_CANrxMsg_t* rxMsg)
 {
     if(CANmodule == NULL || CANmodule->CANptr == NULL || rxMsg == NULL) return false;
@@ -313,6 +325,8 @@ static bool can_recv_msg(CO_CANmodule_t* CANmodule, CO_CANrxMsg_t* rxMsg)
             rxMsg->data[i] = can_msg.data[i];
         }
     }
+
+    //dump_can_rx_msg(rxMsg);
 
     return true;
 }
@@ -450,7 +464,7 @@ CO_CANinterrupt(CO_CANmodule_t* CANmodule) {
     CO_CANrxMsg_t rcvMsgData;
 
     /* receive interrupt */
-    if (can_recv_msg(CANmodule, &rcvMsgData)) {
+    while (can_recv_msg(CANmodule, &rcvMsgData)) {
         CO_CANrxMsg_t* rcvMsg;     /* pointer to received message in CAN module */
         uint16_t index;            /* index of received message */
         uint32_t rcvMsgIdent;      /* identifier of the received message */
@@ -484,6 +498,7 @@ CO_CANinterrupt(CO_CANmodule_t* CANmodule) {
 
         /* Call specific function, which will process the message */
         if (msgMatched && (buffer != NULL) && (buffer->pCANrx_callback != NULL)) {
+            //dump_can_rx_msg(rcvMsg);
             buffer->pCANrx_callback(buffer->object, (void*)rcvMsg);
         }
 
@@ -491,7 +506,7 @@ CO_CANinterrupt(CO_CANmodule_t* CANmodule) {
     }
 
     /* transmit interrupt */
-    else if (can_is_can_send_msg(CANmodule)) {
+    while (can_is_can_send_msg(CANmodule)) {
         /* Clear interrupt flag */
 
         /* First CAN message (bootup) was sent successfully */
@@ -526,7 +541,9 @@ CO_CANinterrupt(CO_CANmodule_t* CANmodule) {
                 CANmodule->CANtxCount = 0U;
             }
         }
-    } else {
-        /* some other interrupt reason */
+        // No messages to send.
+        if(CANmodule->CANtxCount == 0){
+            break;
+        }
     }
 }

@@ -5,15 +5,15 @@
 #include "cotypes.h"
 
 struct SDOComm_data {
-    SDOComm::Type m_type;
+    int/*SDOComm::Type*/ m_type;
     CO::NodeId m_nodeId;
     CO::Index m_index;
     CO::SubIndex m_subIndex;
     void* m_data;
     size_t m_dataSize;
     int m_timeout;
-    SDOComm::State m_state;
-    SDOComm::Error m_error;
+    int/*SDOComm::State*/ m_state;
+    int/*SDOComm::Error*/ m_error;
     bool m_cancel;
     size_t m_transferSize;
     size_t m_dataTransfered;
