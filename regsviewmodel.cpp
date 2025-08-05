@@ -88,7 +88,12 @@ void RegsViewModel::refreshRegs()
     m_update_set->clear();
 
     // https://stackoverflow.com/questions/24001613/qt-make-view-to-update-visible-data
-    emit dataChanged( QModelIndex(), QModelIndex() );
+    QModelIndex invalid_index = QModelIndex();
+    int rows = rowCount(invalid_index);
+
+    if(rows > 0){
+        emit dataChanged( index(0, COL_VALUE, invalid_index), index(rows-1, COL_VALUE, invalid_index) );
+    }
 }
 
 void RegsViewModel::stopRefreshingRegs()
