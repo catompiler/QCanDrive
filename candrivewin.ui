@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>758</width>
-    <height>533</height>
+    <width>788</width>
+    <height>566</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,7 +97,7 @@
       </widget>
       <widget class="QWidget" name="tabRegView">
        <attribute name="title">
-        <string>Значения регистров</string>
+        <string>Просмотр регистров</string>
        </attribute>
        <layout class="QVBoxLayout" name="lRegView">
         <property name="spacing">
@@ -129,7 +129,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>758</width>
+     <width>788</width>
      <height>21</height>
     </rect>
    </property>
@@ -156,7 +156,7 @@
    </widget>
    <widget class="QMenu" name="mnuRegList">
     <property name="title">
-     <string>Регистры</string>
+     <string>Редактор регистров</string>
     </property>
     <addaction name="actRegListOpen"/>
     <addaction name="actRegListOpenAppend"/>
@@ -177,9 +177,20 @@
     <addaction name="actRegListExpandTree"/>
     <addaction name="actRegListCollapseTree"/>
    </widget>
+   <widget class="QMenu" name="mnuRegsView">
+    <property name="title">
+     <string>Просмотр регистров</string>
+    </property>
+    <addaction name="actRegsViewRefresh"/>
+    <addaction name="actRegsViewAutoRefresh"/>
+    <addaction name="separator"/>
+    <addaction name="actRegsViewExpandTree"/>
+    <addaction name="actRegsViewCollapseTree"/>
+   </widget>
    <addaction name="mnuProgram"/>
    <addaction name="mnuCockpit"/>
    <addaction name="mnuRegList"/>
+   <addaction name="mnuRegsView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="tbMain">
@@ -253,6 +264,9 @@
    </attribute>
    <addaction name="actRegsViewRefresh"/>
    <addaction name="actRegsViewAutoRefresh"/>
+   <addaction name="separator"/>
+   <addaction name="actRegsViewExpandTree"/>
+   <addaction name="actRegsViewCollapseTree"/>
   </widget>
   <action name="actDebugExec">
    <property name="icon">
@@ -542,6 +556,24 @@
     <string>Обновлять автоматически</string>
    </property>
   </action>
+  <action name="actRegsViewExpandTree">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/icons8-expand-48.png</normaloff>:/images/icons/icons8-expand-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Раскрыть</string>
+   </property>
+  </action>
+  <action name="actRegsViewCollapseTree">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/icons8-collapse-48.png</normaloff>:/images/icons/icons8-collapse-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>С&amp;вернуть</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -562,9 +594,9 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="qt_canopennode_slcan.qrc"/>
-  <include location="reglisteditor.qrc"/>
   <include location="candrive.qrc"/>
+  <include location="reglisteditor.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
  </resources>
  <connections/>
 </ui>

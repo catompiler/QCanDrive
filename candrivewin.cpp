@@ -79,6 +79,8 @@ CanDriveWin::CanDriveWin(QWidget *parent)
 
     connect(ui->actRegsViewRefresh, &QAction::triggered, ui->tvRegView, &RegsViewWgt::refreshRegs);
     connect(ui->actRegsViewAutoRefresh, &QAction::toggled, ui->tvRegView, &RegsViewWgt::setRefreshingRegs);
+    connect(ui->actRegsViewExpandTree, &QAction::triggered, ui->tvRegView, &RegsViewWgt::expandTree);
+    connect(ui->actRegsViewCollapseTree, &QAction::triggered, ui->tvRegView, &RegsViewWgt::collapseTree);
 
     //connect(ui->act, &QAction::triggered, this, &CanDriveWin::m_ui_act_triggered);
 
