@@ -36,6 +36,7 @@ public:
     void setSLCanOpenNode(SLCanOpenNode* slcon);
 
     void refreshRegs();
+    void stopRefreshingRegs();
 
     QModelIndex buddy(const QModelIndex& index) const override;
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
@@ -93,9 +94,11 @@ private:
     } UpdateCmd;
 
     typedef QQueue<UpdateCmd> UpdateQueue;
+    typedef QSet<uint32_t> UpdateSet;
 
     ValuesCache* m_cache;
-    UpdateQueue* m_queue;
+    UpdateQueue* m_update_queue;
+    UpdateSet* m_update_set;
 };
 
 #endif // REGSVIEWMODEL_H

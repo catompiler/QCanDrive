@@ -5,7 +5,7 @@
 #include "regutils.h"
 #include "sdovalue.h"
 #include "slcanopennode.h"
-//#include <algorithm>
+#include <algorithm>
 #include <QAbstractItemModel>
 #include <QDebug>
 
@@ -50,14 +50,16 @@ RegsViewModel::RegsViewModel(QObject* parent)
     m_slcon = nullptr;
     m_sdoval = new SDOValue();
     m_cache = new ValuesCache();
-    m_queue = new UpdateQueue();
+    m_update_queue = new UpdateQueue();
+    m_update_set = new UpdateSet();
 
     connect(m_sdoval, &SDOValue::finished, this, &RegsViewModel::m_valueUpdateFinished);
 }
 
 RegsViewModel::~RegsViewModel()
 {
-    delete m_queue;
+    delete m_update_set;
+    delete m_update_queue;
     delete m_cache;
     delete m_sdoval;
 }
@@ -83,10 +85,21 @@ void RegsViewModel::refreshRegs()
     QAbstractItemModel* model = sourceModel();
     if(model == nullptr) return;
 
-    m_cache->clear();
+    m_update_set->clear();
 
     // https://stackoverflow.com/questions/24001613/qt-make-view-to-update-visible-data
     emit dataChanged( QModelIndex(), QModelIndex() );
+}
+
+void RegsViewModel::stopRefreshingRegs()
+{
+    if(m_update_queue->size() > 1){
+        auto it_first = m_update_queue->begin();
+        auto it_last = m_update_queue->end();
+
+        std::advance(it_first, 1);
+        m_update_queue->erase(it_first, it_last);
+    }
 }
 
 QModelIndex RegsViewModel::buddy(const QModelIndex& index) const
@@ -448,14 +461,13 @@ QVariant RegsViewModel::data(const QModelIndex& index, int role) const
                         auto it = m_cache->find(val_fi);
                         if(it != m_cache->end()){
                             res = it.value();
-                        }else if(m_slcon->isConnected()){
-                            int upd_res = updateValue(re->index(), rv->subIndex(), false, rv->dataType());
+                        }
+                        int upd_res = updateValue(re->index(), rv->subIndex(), false, rv->dataType());
+                        if(it == m_cache->end()){
                             if(upd_res == 1){
                                 res = tr("updating...");
                             }else if(upd_res == -1){
                                 res = tr("error");
-                            }else{
-                                res = tr("");
                             }
                         }
                     }break;
@@ -617,7 +629,8 @@ void RegsViewModel::m_modelReseted()
     beginResetModel();
 
     m_cache->clear();
-    m_queue->clear();
+    m_update_queue->clear();
+    m_update_set->clear();
 
     endResetModel();
 }
@@ -627,12 +640,12 @@ void RegsViewModel::m_valueUpdateFinished()
     //qDebug() << "RegsViewModel::m_valueUpdateFinished" << Qt::hex << m_sdoval->index() << Qt::dec << m_sdoval->subIndex();
 
     if(m_sdoval->running()) return;
-    if(m_queue->isEmpty()) return;
+    if(m_update_queue->isEmpty()) return;
 
     QVariant val;
     int32_t data = 0;
 
-    UpdateCmd cmd = m_queue->takeFirst();
+    UpdateCmd cmd = m_update_queue->takeFirst();
 
     if(m_sdoval->index() != cmd.index || m_sdoval->subIndex() != cmd.subindex){
         qDebug() << "RegsViewModel::m_valueUpdateFinished sdova and cmd index or subindex mismatch";
@@ -755,7 +768,12 @@ int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isW
 {
     //qDebug() << "RegsViewModel::updateValue" << Qt::hex << regIndex << Qt::dec << regSubIndex << isWrite << static_cast<int>(type) << value;
 
+    if(!m_slcon->isConnected()) return 0;
+
     if(!RegTypes::isNumeric(type)) return 0;
+
+    reg_fullindex_t fi = RegUtils::makeFullIndex(regIndex, regSubIndex);
+    if(!isWrite && m_update_set->contains(fi)) return 0;
 
     UpdateCmd cmd;
     cmd.index = regIndex;
@@ -764,7 +782,8 @@ int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isW
     cmd.type = type;
     cmd.data = value;
 
-    m_queue->enqueue(cmd);
+    m_update_set->insert(fi);
+    m_update_queue->enqueue(cmd);
 
     int res = processQueue();
 
@@ -780,9 +799,9 @@ int RegsViewModel::updateValue(uint16_t regIndex, uint16_t regSubIndex, bool isW
 int RegsViewModel::processQueue() const
 {
     if(m_sdoval->running()) return 0;
-    if(m_queue->isEmpty()) return 0;
+    if(m_update_queue->isEmpty()) return 0;
 
-    UpdateCmd& cmd = m_queue->first();
+    UpdateCmd& cmd = m_update_queue->first();
     size_t data_size = COValue::typeSize(cmd.type);
 
     m_sdoval->setNodeId(m_nodeId); //m_slcon->nodeId()
@@ -806,7 +825,8 @@ int RegsViewModel::processQueue() const
     }
 
     if(!io_res){
-        m_queue->pop_front();
+        m_update_queue->pop_front();
+        m_update_set->remove(RegUtils::makeFullIndex(cmd.index, cmd.subindex));
         return -1;
     }
 

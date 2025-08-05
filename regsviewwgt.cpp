@@ -133,6 +133,7 @@ void RegsViewWgt::setRefreshingRegs(bool newRefreshing)
         m_refreshTimer->start();
     }else{
         m_refreshTimer->stop();
+        m_regsViewModel->stopRefreshingRegs();
     }
 }
 
