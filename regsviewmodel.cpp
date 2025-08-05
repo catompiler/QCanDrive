@@ -21,6 +21,11 @@
 #define DATA_DEBUG 0
 #endif
 
+#define QUEUE_DEBUG 0
+#if defined(QUEUE_DEBUG) && QUEUE_DEBUG == 1
+#define QUEUE_SIZE_DEBUG 0
+#endif
+
 
 typedef struct _Col_Mapping {
     const char* name;
@@ -85,7 +90,20 @@ void RegsViewModel::refreshRegs()
     QAbstractItemModel* model = sourceModel();
     if(model == nullptr) return;
 
-    m_update_set->clear();
+#if defined(QUEUE_DEBUG) && QUEUE_DEBUG == 1
+#if defined(QUEUE_SIZE_DEBUG) && QUEUE_SIZE_DEBUG == 1
+    qDebug() << "Queue size:" << m_update_queue->size();
+#endif
+#endif
+
+    {
+        QSet<uint32_t> queued;
+        for(UpdateCmd& cmd: *m_update_queue){
+            queued.insert(RegUtils::makeFullIndex(cmd.index, cmd.subindex));
+        }
+
+        m_update_set->swap(queued);
+    }
 
     // https://stackoverflow.com/questions/24001613/qt-make-view-to-update-visible-data
     QModelIndex invalid_index = QModelIndex();
