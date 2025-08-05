@@ -124,7 +124,7 @@ void RegsViewWgt::collapseTree()
 
 void RegsViewWgt::refreshRegs()
 {
-    m_regsViewModel->refreshRegs();
+    if(state() != QAbstractItemView::EditingState) m_regsViewModel->refreshRegs();
 }
 
 void RegsViewWgt::setRefreshingRegs(bool newRefreshing)
