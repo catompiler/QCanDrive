@@ -137,6 +137,8 @@
     <property name="title">
      <string>&amp;Программа</string>
     </property>
+    <addaction name="actSettings"/>
+    <addaction name="separator"/>
     <addaction name="actQuit"/>
    </widget>
    <widget class="QMenu" name="mnuCockpit">
