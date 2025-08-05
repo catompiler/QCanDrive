@@ -96,6 +96,9 @@ CanDriveWin::CanDriveWin(QWidget *parent)
 
 CanDriveWin::~CanDriveWin()
 {
+    m_slcon->destroyCO();
+    m_slcon->closePort();
+
     Settings::get()->save();
 
     delete m_settingsDlg;
@@ -110,9 +113,6 @@ CanDriveWin::~CanDriveWin()
     delete ui;
 
     delete m_valsHolder;
-
-    m_slcon->destroyCO();
-    m_slcon->closePort();
     delete m_slcon;
 }
 
