@@ -120,6 +120,11 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabOsc">
+       <attribute name="title">
+        <string>Осциллограф</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>
