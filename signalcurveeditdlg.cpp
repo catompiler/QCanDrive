@@ -1,5 +1,6 @@
 #include "signalcurveeditdlg.h"
 #include "ui_signalcurveeditdlg.h"
+#include "regselectdlg.h"
 #include "covaluetypes.h"
 #include <QColorDialog>
 #include <QList>
@@ -20,11 +21,20 @@ SignalCurveEditDlg::SignalCurveEditDlg(QWidget *parent) :
     populateTypes();
     populatePenStyles();
     populateBrushStyles();
+
+    setRegSelectDialog(nullptr);
 }
 
 SignalCurveEditDlg::~SignalCurveEditDlg()
 {
     delete ui;
+}
+
+void SignalCurveEditDlg::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_regSelectDlg = newRegSelectDialog;
+
+    ui->tbRegSel->setEnabled(m_regSelectDlg != nullptr);
 }
 
 QString SignalCurveEditDlg::name() const
@@ -140,6 +150,21 @@ Qt::BrushStyle SignalCurveEditDlg::brushStyle() const
 void SignalCurveEditDlg::setBrushStyle(Qt::BrushStyle newBrushStyle)
 {
     ui->cbBrushStyle->setCurrentIndex(ui->cbBrushStyle->findData(static_cast<int>(newBrushStyle)));
+}
+
+void SignalCurveEditDlg::on_tbRegSel_clicked(bool checked)
+{
+    if(m_regSelectDlg == nullptr) return;
+
+    m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());
+
+    if(m_regSelectDlg->exec()){
+        if(m_regSelectDlg->hasSelectedReg()){
+            auto ri = m_regSelectDlg->selectedRegIndex();
+            ui->sbIndex->setValue(ri.first);
+            ui->sbSubIndex->setValue(ri.second);
+        }
+    }
 }
 
 void SignalCurveEditDlg::on_tbPenColorSel_clicked(bool checked)

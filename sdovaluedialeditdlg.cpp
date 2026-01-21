@@ -1,5 +1,6 @@
 #include "sdovaluedialeditdlg.h"
 #include "ui_sdovaluedialeditdlg.h"
+#include "regselectdlg.h"
 #include "covaluetypes.h"
 #include <QColorDialog>
 
@@ -18,11 +19,20 @@ SDOValueDialEditDlg::SDOValueDialEditDlg(QWidget *parent) :
     setNeedleColor(Qt::darkRed);
 
     populateTypes();
+
+    setRegSelectDialog(nullptr);
 }
 
 SDOValueDialEditDlg::~SDOValueDialEditDlg()
 {
     delete ui;
+}
+
+void SDOValueDialEditDlg::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_regSelectDlg = newRegSelectDialog;
+
+    ui->tbRegSel->setEnabled(m_regSelectDlg != nullptr);
 }
 
 QString SDOValueDialEditDlg::name() const
@@ -221,6 +231,21 @@ uint SDOValueDialEditDlg::precision() const
 void SDOValueDialEditDlg::setPrecision(uint newPrecision)
 {
     ui->sbPrecision->setValue(static_cast<int>(newPrecision));
+}
+
+void SDOValueDialEditDlg::on_tbRegSel_clicked(bool checked)
+{
+    if(m_regSelectDlg == nullptr) return;
+
+    m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());
+
+    if(m_regSelectDlg->exec()){
+        if(m_regSelectDlg->hasSelectedReg()){
+            auto ri = m_regSelectDlg->selectedRegIndex();
+            ui->sbIndex->setValue(ri.first);
+            ui->sbSubIndex->setValue(ri.second);
+        }
+    }
 }
 
 void SDOValueDialEditDlg::on_tbOutsideBackColorSel_clicked(bool checked)

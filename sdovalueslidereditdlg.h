@@ -7,9 +7,13 @@
 #include "covaluetypes.h"
 
 
+class RegSelectDlg;
+
+
 namespace Ui {
 class SDOValueSliderEditDlg;
 }
+
 
 class SDOValueSliderEditDlg : public QDialog
 {
@@ -18,6 +22,8 @@ class SDOValueSliderEditDlg : public QDialog
 public:
     explicit SDOValueSliderEditDlg(QWidget *parent = nullptr);
     ~SDOValueSliderEditDlg();
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
     QString name() const;
     void setName(const QString& newName);
@@ -83,6 +89,7 @@ public:
     void setOrientation(Qt::Orientation newAlign);
 
 private slots:
+    void on_tbRegSel_clicked(bool checked = false);
     void on_tbTroughColorSel_clicked(bool checked = false);
     void on_tbGrooveColorSel_clicked(bool checked = false);
     void on_tbHandleColorSel_clicked(bool checked = false);
@@ -91,6 +98,7 @@ private slots:
 
 private:
     Ui::SDOValueSliderEditDlg *ui;
+    RegSelectDlg* m_regSelectDlg;
 
     void peekColor(QWidget* colHolder);
     void populateTypes();

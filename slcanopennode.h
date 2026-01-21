@@ -9,6 +9,7 @@
 #include "CANopen.h"
 #include "coobjectdict.h"
 #include "sdocomm.h"
+#include "cotypes.h"
 
 
 class QTimer;
@@ -20,9 +21,9 @@ class SLCanOpenNode : public QObject
     Q_OBJECT
 public:
 
-    using NodeId = quint8;
-    using Index = quint16;
-    using SubIndex = quint8;
+    using NodeId = CO::NodeId;
+    using Index = CO::Index;
+    using SubIndex = CO::SubIndex;
 
     explicit SLCanOpenNode(QObject *parent = nullptr);
     ~SLCanOpenNode();

@@ -14,6 +14,10 @@ class RegVar;
 
 typedef uint32_t reg_fullindex_t;
 
+// Некорректный полный индекс.
+const reg_fullindex_t REG_FULLINDEX_INVALID = (reg_fullindex_t)-1;
+
+
 namespace RegUtils{
 
 // //! Получает систему счисления числа в строке.

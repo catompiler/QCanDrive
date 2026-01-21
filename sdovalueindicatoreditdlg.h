@@ -8,9 +8,13 @@
 #include "sdovalueindicator.h"
 
 
+class RegSelectDlg;
+
+
 namespace Ui {
 class SDOValueIndicatorEditDlg;
 }
+
 
 class SDOValueIndicatorEditDlg : public QDialog
 {
@@ -19,6 +23,8 @@ class SDOValueIndicatorEditDlg : public QDialog
 public:
     explicit SDOValueIndicatorEditDlg(QWidget *parent = nullptr);
     ~SDOValueIndicatorEditDlg();
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
     QString text() const;
     void setText(const QString& newName);
@@ -81,6 +87,7 @@ public:
     void setIndicatorValue(uint32_t newIndicatorValue);
 
 private slots:
+    void on_tbRegSel_clicked(bool checked = false);
     void on_tbBackColorSel_clicked(bool checked = false);
     void on_tbShadowColorSel_clicked(bool checked = false);
     void on_tbIndicatorColorSel_clicked(bool checked = false);
@@ -89,6 +96,7 @@ private slots:
 
 private:
     Ui::SDOValueIndicatorEditDlg *ui;
+    RegSelectDlg* m_regSelectDlg;
 
     void peekColor(QWidget* colHolder);
     void populateTypes();

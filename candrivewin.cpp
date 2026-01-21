@@ -41,6 +41,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
 
     ui->cockpitWgt->setValsHolder(m_valsHolder);
+    ui->cockpitWgt->setRegSelectDialog(ui->tvRegList->regSelectDialog());
 
     ui->tvRegView->setSLCanOpenNode(m_slcon);
     ui->tvRegView->setRegListModel(ui->tvRegList->regListModel());

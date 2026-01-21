@@ -1,5 +1,6 @@
 #include "sdovalueindicatoreditdlg.h"
 #include "ui_sdovalueindicatoreditdlg.h"
+#include "regselectdlg.h"
 #include "covaluetypes.h"
 #include <stdint.h>
 #include <QColorDialog>
@@ -21,11 +22,20 @@ SDOValueIndicatorEditDlg::SDOValueIndicatorEditDlg(QWidget *parent) :
 
     populateTypes();
     populateCompares();
+
+    setRegSelectDialog(nullptr);
 }
 
 SDOValueIndicatorEditDlg::~SDOValueIndicatorEditDlg()
 {
     delete ui;
+}
+
+void SDOValueIndicatorEditDlg::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_regSelectDlg = newRegSelectDialog;
+
+    ui->tbRegSel->setEnabled(m_regSelectDlg != nullptr);
 }
 
 QString SDOValueIndicatorEditDlg::text() const
@@ -263,6 +273,21 @@ uint32_t SDOValueIndicatorEditDlg::indicatorValue() const
 void SDOValueIndicatorEditDlg::setIndicatorValue(uint32_t newIndicatorValue)
 {
     ui->leIndicatorValue->setText(QStringLiteral("0x%1").arg(newIndicatorValue, 0, 16));
+}
+
+void SDOValueIndicatorEditDlg::on_tbRegSel_clicked(bool checked)
+{
+    if(m_regSelectDlg == nullptr) return;
+
+    m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());
+
+    if(m_regSelectDlg->exec()){
+        if(m_regSelectDlg->hasSelectedReg()){
+            auto ri = m_regSelectDlg->selectedRegIndex();
+            ui->sbIndex->setValue(ri.first);
+            ui->sbSubIndex->setValue(ri.second);
+        }
+    }
 }
 
 void SDOValueIndicatorEditDlg::on_tbBackColorSel_clicked(bool checked)

@@ -3,7 +3,10 @@
 
 #include <QTreeView>
 #include <QString>
+#include <QPair>
 #include "reglistmodel.h"
+#include "regselectdlg.h"
+#include "cotypes.h"
 
 class QItemSelection;
 class QModelIndex;
@@ -29,6 +32,10 @@ public:
 
     const RegListModel* regListModel() const;
     RegListModel* regListModel();
+
+    QPair<CO::Index, CO::SubIndex> selectReg();
+
+    RegSelectDlg* regSelectDialog();
 
     void openRegListFile(const QString& filename);
 

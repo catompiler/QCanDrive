@@ -1,5 +1,6 @@
 #include "sdovaluebareditdlg.h"
 #include "ui_sdovaluebareditdlg.h"
+#include "regselectdlg.h"
 #include "covaluetypes.h"
 #include <QColorDialog>
 
@@ -22,11 +23,20 @@ SDOValueBarEditDlg::SDOValueBarEditDlg(QWidget *parent) :
     populateScalePositions();
 
     setScalePosition(QwtThermo::LeadingScale);
+
+    setRegSelectDialog(nullptr);
 }
 
 SDOValueBarEditDlg::~SDOValueBarEditDlg()
 {
     delete ui;
+}
+
+void SDOValueBarEditDlg::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_regSelectDlg = newRegSelectDialog;
+
+    ui->tbRegSel->setEnabled(m_regSelectDlg != nullptr);
 }
 
 QString SDOValueBarEditDlg::name() const
@@ -285,6 +295,21 @@ qreal SDOValueBarEditDlg::alarmLevel() const
 void SDOValueBarEditDlg::setAlarmLevel(qreal newLevel)
 {
     ui->sbAlarmLevel->setValue(newLevel);
+}
+
+void SDOValueBarEditDlg::on_tbRegSel_clicked(bool checked)
+{
+    if(m_regSelectDlg == nullptr) return;
+
+    m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());
+
+    if(m_regSelectDlg->exec()){
+        if(m_regSelectDlg->hasSelectedReg()){
+            auto ri = m_regSelectDlg->selectedRegIndex();
+            ui->sbIndex->setValue(ri.first);
+            ui->sbSubIndex->setValue(ri.second);
+        }
+    }
 }
 
 void SDOValueBarEditDlg::on_tbBarBackColorSel_clicked(bool checked)

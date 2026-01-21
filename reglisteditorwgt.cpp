@@ -125,6 +125,21 @@ RegListModel* RegListEditorWgt::regListModel()
     return m_regsListModel;
 }
 
+QPair<CO::Index, CO::SubIndex> RegListEditorWgt::selectReg()
+{
+    if(m_regSelectDlg->exec()){
+        if(m_regSelectDlg->hasSelectedReg()){
+            return m_regSelectDlg->selectedRegIndex();
+        }
+    }
+    return qMakePair<CO::Index, CO::SubIndex>(REG_INDEX_INVALID, 0);
+}
+
+RegSelectDlg* RegListEditorWgt::regSelectDialog()
+{
+    return m_regSelectDlg;
+}
+
 void RegListEditorWgt::openRegList()
 {
     QStringList filenames = QFileDialog::getOpenFileNames(this, tr("Открыть файлы"), m_curDir,

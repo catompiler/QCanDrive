@@ -8,9 +8,13 @@
 #include "covaluetypes.h"
 
 
+class RegSelectDlg;
+
+
 namespace Ui {
 class SDOValueBarEditDlg;
 }
+
 
 class SDOValueBarEditDlg : public QDialog
 {
@@ -19,6 +23,8 @@ class SDOValueBarEditDlg : public QDialog
 public:
     explicit SDOValueBarEditDlg(QWidget *parent = nullptr);
     ~SDOValueBarEditDlg();
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
     QString name() const;
     void setName(const QString& newName);
@@ -90,6 +96,7 @@ public:
     void setAlarmLevel(qreal newLevel);
 
 private slots:
+    void on_tbRegSel_clicked(bool checked = false);
     void on_tbBarBackColorSel_clicked(bool checked = false);
     void on_tbBarColorSel_clicked(bool checked = false);
     void on_tbBarAlarmColorSel_clicked(bool checked = false);
@@ -100,6 +107,7 @@ private slots:
 
 private:
     Ui::SDOValueBarEditDlg *ui;
+    RegSelectDlg* m_regSelectDlg;
 
     void peekColor(QWidget* colHolder);
     void populateTypes();

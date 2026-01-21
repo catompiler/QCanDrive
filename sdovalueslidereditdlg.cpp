@@ -1,5 +1,6 @@
 #include "sdovalueslidereditdlg.h"
 #include "ui_sdovalueslidereditdlg.h"
+#include "regselectdlg.h"
 #include "covaluetypes.h"
 #include <QColorDialog>
 
@@ -19,11 +20,20 @@ SDOValueSliderEditDlg::SDOValueSliderEditDlg(QWidget *parent) :
 
     populateTypes();
     populateOrientations();
+
+    setRegSelectDialog(nullptr);
 }
 
 SDOValueSliderEditDlg::~SDOValueSliderEditDlg()
 {
     delete ui;
+}
+
+void SDOValueSliderEditDlg::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_regSelectDlg = newRegSelectDialog;
+
+    ui->tbRegSel->setEnabled(m_regSelectDlg != nullptr);
 }
 
 QString SDOValueSliderEditDlg::name() const
@@ -255,6 +265,21 @@ Qt::Orientation SDOValueSliderEditDlg::orientation() const
 void SDOValueSliderEditDlg::setOrientation(Qt::Orientation newOrientation)
 {
     ui->cbOrientation->setCurrentIndex(ui->cbOrientation->findData(static_cast<int>(newOrientation)));
+}
+
+void SDOValueSliderEditDlg::on_tbRegSel_clicked(bool checked)
+{
+    if(m_regSelectDlg == nullptr) return;
+
+    m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());
+
+    if(m_regSelectDlg->exec()){
+        if(m_regSelectDlg->hasSelectedReg()){
+            auto ri = m_regSelectDlg->selectedRegIndex();
+            ui->sbIndex->setValue(ri.first);
+            ui->sbSubIndex->setValue(ri.second);
+        }
+    }
 }
 
 void SDOValueSliderEditDlg::on_tbTroughColorSel_clicked(bool checked)

@@ -7,9 +7,13 @@
 #include "covaluetypes.h"
 
 
+class RegSelectDlg;
+
+
 namespace Ui {
 class SDOValueDialEditDlg;
 }
+
 
 class SDOValueDialEditDlg : public QDialog
 {
@@ -18,6 +22,8 @@ class SDOValueDialEditDlg : public QDialog
 public:
     explicit SDOValueDialEditDlg(QWidget *parent = nullptr);
     ~SDOValueDialEditDlg();
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
     QString name() const;
     void setName(const QString& newName);
@@ -74,6 +80,7 @@ public:
     void setPrecision(uint newPrecision);
 
 private slots:
+    void on_tbRegSel_clicked(bool checked = false);
     void on_tbOutsideBackColorSel_clicked(bool checked = false);
     void on_tbInsideBackColorSel_clicked(bool checked = false);
     void on_tbInsideScaleBackColorSel_clicked(bool checked = false);
@@ -82,6 +89,7 @@ private slots:
 
 private:
     Ui::SDOValueDialEditDlg *ui;
+    RegSelectDlg* m_regSelectDlg;
 
     void peekColor(QWidget* colHolder);
     void populateTypes();

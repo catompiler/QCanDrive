@@ -8,6 +8,8 @@
 #include "covaluetypes.h"
 
 
+class RegSelectDlg;
+
 
 namespace Ui {
 class SignalCurveEditDlg;
@@ -21,6 +23,8 @@ class SignalCurveEditDlg : public QDialog
 public:
     explicit SignalCurveEditDlg(QWidget *parent = nullptr);
     ~SignalCurveEditDlg();
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
     QString name() const;
     void setName(const QString& newName);
@@ -53,11 +57,13 @@ public:
     void setBrushStyle(Qt::BrushStyle newBrushStyle);
 
 private slots:
+    void on_tbRegSel_clicked(bool checked = false);
     void on_tbPenColorSel_clicked(bool checked = false);
     void on_tbBrushColorSel_clicked(bool checked = false);
 
 private:
     Ui::SignalCurveEditDlg *ui;
+    RegSelectDlg* m_regSelectDlg;
 
     void populateTypes();
     void populatePenStyles();

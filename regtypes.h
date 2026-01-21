@@ -1,7 +1,7 @@
 #ifndef REGTYPES_H
 #define REGTYPES_H
 
-#include <stdint.h>
+#include "cotypes.h"
 #include "first_arg_type.hpp"
 #include <QString>
 #include <QStringList>
@@ -9,10 +9,13 @@
 #include <QPair>
 
 //! Тип индекса.
-typedef uint16_t reg_index_t;
+typedef CO::Index reg_index_t;
 
 //! Тип подындекса.
-typedef uint8_t reg_subindex_t;
+typedef CO::SubIndex reg_subindex_t;
+
+// Некорректный индекс.
+const reg_index_t REG_INDEX_INVALID = (reg_index_t)-1;
 
 
 //! Тип объекта.

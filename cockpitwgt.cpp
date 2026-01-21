@@ -165,6 +165,16 @@ void CockpitWgt::openCockpitFile(const QString& fileName)
     appendCockpitWidgets(widgets);
 }
 
+void CockpitWgt::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_signalCurveEditDlg->setRegSelectDialog(newRegSelectDialog);
+    m_dialDlg->setRegSelectDialog(newRegSelectDialog);
+    m_sliderDlg->setRegSelectDialog(newRegSelectDialog);
+    m_barDlg->setRegSelectDialog(newRegSelectDialog);
+    m_buttonDlg->setRegSelectDialog(newRegSelectDialog);
+    m_indicatorDlg->setRegSelectDialog(newRegSelectDialog);
+}
+
 void CockpitWgt::clearCockpit()
 {
     clearCockpitWidgets();

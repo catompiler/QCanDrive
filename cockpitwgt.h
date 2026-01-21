@@ -24,6 +24,7 @@ class SDOValueSliderEditDlg;
 class SDOValueBarEditDlg;
 class SDOValueButtonEditDlg;
 class SDOValueIndicatorEditDlg;
+class RegSelectDlg;
 
 
 class CockpitWgt : public QWidget
@@ -38,6 +39,8 @@ public:
     void setValsHolder(CoValuesHolder* newValsHolder);
 
     void openCockpitFile(const QString& fileName);
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
 public slots:
     void saveCockpit();

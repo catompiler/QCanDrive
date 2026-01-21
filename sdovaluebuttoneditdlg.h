@@ -8,9 +8,13 @@
 #include "sdovaluebutton.h"
 
 
+class RegSelectDlg;
+
+
 namespace Ui {
 class SDOValueButtonEditDlg;
 }
+
 
 class SDOValueButtonEditDlg : public QDialog
 {
@@ -19,6 +23,8 @@ class SDOValueButtonEditDlg : public QDialog
 public:
     explicit SDOValueButtonEditDlg(QWidget *parent = nullptr);
     ~SDOValueButtonEditDlg();
+
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
     QString text() const;
     void setText(const QString& newName);
@@ -90,6 +96,7 @@ public:
     void setActivateValue(uint32_t newActivateValue);
 
 private slots:
+    void on_tbRegSel_clicked(bool checked = false);
     void on_tbButtonColorSel_clicked(bool checked = false);
     void on_tbBorderColorSel_clicked(bool checked = false);
     void on_tbIndicatorColorSel_clicked(bool checked = false);
@@ -99,6 +106,7 @@ private slots:
 
 private:
     Ui::SDOValueButtonEditDlg *ui;
+    RegSelectDlg* m_regSelectDlg;
 
     void peekColor(QWidget* colHolder);
     void populateTypes();
