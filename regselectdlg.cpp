@@ -28,6 +28,8 @@ RegSelectDlg::RegSelectDlg(QWidget *parent) :
     }
     connect(selMdl, &QItemSelectionModel::selectionChanged, this, &RegSelectDlg::regList_selectionChanged);
     ui->tvRegList->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    connect(ui->tvRegList, &QTreeView::doubleClicked, this, &RegSelectDlg::regList_doubleClicked);
 }
 
 RegSelectDlg::~RegSelectDlg()
@@ -58,19 +60,21 @@ bool RegSelectDlg::hasSelectedReg() const
 
 QPair<uint, uint> RegSelectDlg::selectedRegIndex() const
 {
+    const auto invalid = qMakePair(REG_INDEX_INVALID, REG_SUBINDEX_INVALID);
+
     auto model = qobject_cast<RegListModel*>(m_regSelMdl->sourceModel());
-    if(model == nullptr) return qMakePair(0U, 0U);
+    if(model == nullptr) return invalid;
 
     QModelIndexList sel_index_list = ui->tvRegList->selectionModel()->selectedIndexes();
-    if(sel_index_list.isEmpty()) return qMakePair(0U, 0U);
+    if(sel_index_list.isEmpty()) return invalid;
 
     QModelIndex index = m_regSelMdl->mapToSource(sel_index_list.first());
 
     RegVar* rv = model->varByModelIndex(index);
-    if(rv == nullptr) return qMakePair(0U, 0U);
+    if(rv == nullptr) return invalid;
 
     RegEntry* re = rv->parent();
-    if(re == nullptr) return qMakePair(0U, 0U);
+    if(re == nullptr) return invalid;
 
     return qMakePair(static_cast<uint>(re->index()), static_cast<uint>(rv->subIndex()));
 }
@@ -83,7 +87,7 @@ void RegSelectDlg::selectReg(uint index, uint subIndex)
     QModelIndex src_index = model->objectModelIndexByRegIndex(index, subIndex);
     QModelIndex sel_index = m_regSelMdl->mapFromSource(src_index);
 
-    ui->tvRegList->selectionModel()->setCurrentIndex(sel_index, QItemSelectionModel::ClearAndSelect);
+    ui->tvRegList->selectionModel()->setCurrentIndex(sel_index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 }
 
 void RegSelectDlg::regList_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
@@ -98,6 +102,15 @@ void RegSelectDlg::regList_selectionChanged(const QItemSelection &selected, cons
     if(pb){
         pb->setEnabled(!ui->tvRegList->selectionModel()->selectedIndexes().isEmpty());
     }
+}
+
+void RegSelectDlg::regList_doubleClicked(const QModelIndex& index)
+{
+    Q_UNUSED(index);
+
+    if(!hasSelectedReg()) return;
+
+    accept();
 }
 
 void RegSelectDlg::showEvent(QShowEvent* event)

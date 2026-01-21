@@ -17,6 +17,9 @@ typedef CO::SubIndex reg_subindex_t;
 // Некорректный индекс.
 const reg_index_t REG_INDEX_INVALID = (reg_index_t)-1;
 
+// Некорректный подындекс.
+const reg_subindex_t REG_SUBINDEX_INVALID = (reg_subindex_t)-1;
+
 
 //! Тип объекта.
 enum class ObjectType {

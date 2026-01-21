@@ -35,6 +35,7 @@ protected:
 
 private slots:
     void regList_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void regList_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::RegSelectDlg *ui;
