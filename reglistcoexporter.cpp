@@ -571,7 +571,7 @@ bool RegListCoExporter::writeOdVarConstDef(QTextStream& out_stream, const RegEnt
 
         QString attrs_str = RegTypes::getNames(attrs, RegTypes::coAttributeFullName).join(" | ");
 
-        out << QStringLiteral("    .dataOrig = %1,")
+        out << QStringLiteral("    .dataOrig = (void*)%1,")
                .arg(RegUtils::memAddress(data_str))
             << "\n";
 
@@ -626,7 +626,7 @@ bool RegListCoExporter::writeOdRecConstDef(QTextStream& out_stream, const RegEnt
 
         QString attrs_str = RegTypes::getNames(attrs, RegTypes::coAttributeFullName).join(" | ");
 
-        out << QStringLiteral("    .dataOrig = %1,")
+        out << QStringLiteral("    .dataOrig = (void*)%1,")
                .arg(RegUtils::memAddress(data_str))
             << "\n";
 
@@ -700,10 +700,10 @@ bool RegListCoExporter::writeOdArrConstDef(QTextStream& out_stream, const RegEnt
     QString attrs_str0 = RegTypes::getNames(attrs0, RegTypes::coAttributeFullName).join(" | ");
     QString attrs_str = RegTypes::getNames(attrs, RegTypes::coAttributeFullName).join(" | ");
 
-    out << QStringLiteral("    .dataOrig0 = %1,")
+    out << QStringLiteral("    .dataOrig0 = (void*)%1,")
            .arg(RegUtils::memAddress(data_str0))
         << "\n";
-    out << QStringLiteral("    .dataOrig = %1,")
+    out << QStringLiteral("    .dataOrig = (void*)%1,")
            .arg(RegUtils::memAddress(data_str))
         << "\n";
     out << QStringLiteral("    .attribute0 = %1,")
