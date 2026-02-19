@@ -208,6 +208,8 @@
    <addaction name="actQuit"/>
    <addaction name="separator"/>
    <addaction name="actSettings"/>
+   <addaction name="separator"/>
+   <addaction name="actDebugExec"/>
   </widget>
   <widget class="QToolBar" name="tbCockpit">
    <property name="windowTitle">
@@ -596,9 +598,9 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="candrive.qrc"/>
-  <include location="reglisteditor.qrc"/>
   <include location="qt_canopennode_slcan.qrc"/>
+  <include location="reglisteditor.qrc"/>
+  <include location="candrive.qrc"/>
  </resources>
  <connections/>
 </ui>

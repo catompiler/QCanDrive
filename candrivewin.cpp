@@ -10,6 +10,9 @@
 #include <QLabel>
 #include <QDebug>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
 
 
 CanDriveWin::CanDriveWin(QWidget *parent)
@@ -138,9 +141,116 @@ void CanDriveWin::m_ui_actQuit_triggered(bool checked)
     close();
 }
 
+#include "sdoscope.h"
+
 void CanDriveWin::m_ui_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked)
+
+    static SDOScope* scope = nullptr;
+
+    if(scope == nullptr){
+
+        scope = new SDOScope();
+
+        scope->setRegListModel(ui->tvRegList->regListModel());
+        scope->setSLCanOpenNode(m_slcon);
+        //scope->setNodeId(Settings::get()->co.nodeId);
+
+        // connect(scope, &SDOScope::finished, [&scope](){
+        //     qDebug() << "SDOScope finished";
+        // });
+
+        connect(scope, &SDOScope::errorOccured, [&scope](){
+            qDebug() << "SDOScope error" << (int)scope->error();
+            scope->deleteLater();
+        });
+
+        connect(scope, &SDOScope::initialized, [&scope](){
+            qDebug() << scope->version() << scope->maxChannelsCount() << scope->maxSamplesCount() << scope->maxSampleRate();
+
+            if(!scope->update()){
+                scope->deleteLater();
+            }
+        });
+
+        connect(scope, &SDOScope::updated, [&scope](){
+            qDebug() << "SDOScope updated";
+
+            for(uint i = 0; i < scope->channelsCount(); i++){
+                const SDOScope::Channel* ch = scope->channel(i);
+                if(ch == nullptr){
+                    qDebug() << "Channel" << i << "is NULL";
+                    continue;
+                }
+
+                qDebug() << "Channel:" << i
+                         << "enabled:" << ch->enabled()
+                         << "regIndex:" << ch->regIndex()
+                         << "regSubIndex:" << ch->regSubIndex()
+                         << "dataType:" << (uint)ch->dataType()
+                         << "baseValue:" << ch->baseValue()
+                         << "samplesCount:" << ch->samplesCount();
+            }
+
+            if(!scope->run()){
+                scope->deleteLater();
+            }
+        });
+
+        connect(scope, &SDOScope::done, [&scope](){
+            qDebug() << "SDOScope done";
+
+            if(!scope->read()){
+                scope->deleteLater();
+            }
+        });
+
+        connect(scope, &SDOScope::readed, [&scope, this](){
+            qDebug() << "SDOScope readed";
+
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Save scope data"), "", tr("CSV files (*.csv);;All files (*.*)"));
+
+            if(fileName.isEmpty()){
+                qDebug() << "No file selected, not saving data";
+                scope->deleteLater();
+                return;
+            }
+
+            QFile outFile(fileName);
+            if(!outFile.open(QIODevice::WriteOnly | QIODevice::Text)){
+                qDebug() << "Failed to open file for writing:" << outFile.errorString();
+                scope->deleteLater();
+                return;
+            }
+
+            QTextStream out(&outFile);
+
+            const SDOScope::Channel* ch = nullptr;
+
+            for(uint j = 0; j < scope->maxSamplesCount(); j++){
+                for(uint i = 0; i < scope->channelsCount(); i ++){
+                    ch = scope->channel(i);
+                    if(ch == nullptr) continue;
+                    if(!ch->enabled()) continue;
+
+                    if(i != 0) out << ",";
+                    out << ch->value(j);
+                }
+                out << Qt::endl;
+            }
+
+            QMessageBox::information(this, tr("Success"), tr("Scope data saved successfully!"));
+
+            scope->deleteLater();
+        });
+
+        if(!scope->init()){
+            qDebug() << "SDOScope init failed";
+            scope->deleteLater();
+        }
+    }
+
 }
 
 void CanDriveWin::m_ui_actConnect_triggered(bool checked)

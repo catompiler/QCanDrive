@@ -35,6 +35,12 @@ extern reg_fullindex_t makeFullIndex(reg_index_t index, reg_subindex_t subindex)
 //! Получает пару индекс + под-индекс из полного индекса.
 extern QPair<reg_index_t, reg_subindex_t> getIndexSubIndex(reg_fullindex_t full_index);
 
+//! Получает индекс из полного индекса.
+extern reg_index_t getIndex(reg_fullindex_t full_index);
+
+//! Получает под-индекс из полного индекса.
+extern reg_subindex_t getSubIndex(reg_fullindex_t full_index);
+
 
 //! Тип маппинга имён точек входа.
 using EntryNameMap = QMap<reg_index_t, QString>;

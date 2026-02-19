@@ -49,6 +49,7 @@ SOURCES += \
     regsviewmodel.cpp \
     regsviewwgt.cpp \
     sdocomm.cpp \
+    sdoscope.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
     sdovaluebareditdlg.cpp \
@@ -137,6 +138,7 @@ HEADERS += \
     regsviewwgt.h \
     sdocomm.h \
     sdocomm_data.h \
+    sdoscope.h \
     sdovalue.h \
     sdovaluebar.h \
     sdovaluebareditdlg.h \

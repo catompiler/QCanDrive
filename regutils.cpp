@@ -50,10 +50,24 @@ reg_fullindex_t RegUtils::makeFullIndex(reg_index_t index, reg_subindex_t subind
 
 QPair<reg_index_t, reg_subindex_t> RegUtils::getIndexSubIndex(reg_fullindex_t full_index)
 {
-    reg_index_t index = full_index >> 8;
-    reg_subindex_t subindex = full_index & 0xff;
+    reg_index_t index = getIndex(full_index);
+    reg_subindex_t subindex = getSubIndex(full_index);
 
     return qMakePair(index, subindex);
+}
+
+reg_index_t RegUtils::getIndex(reg_fullindex_t full_index)
+{
+    reg_index_t index = full_index >> 8;
+
+    return index;
+}
+
+reg_subindex_t RegUtils::getSubIndex(reg_fullindex_t full_index)
+{
+    reg_subindex_t subindex = full_index & 0xff;
+
+    return subindex;
 }
 
 QMap<reg_index_t, QString> RegUtils::genRegDataEntryNameMapping(const RegEntryList* regentrylist)
