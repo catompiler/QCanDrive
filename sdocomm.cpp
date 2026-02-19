@@ -91,6 +91,11 @@ void SDOComm::setState(State newState)
     m_d->m_state = newState;
 }
 
+bool SDOComm::hasError() const
+{
+    return m_d->m_error != SDOComm::ERROR_NONE;
+}
+
 int SDOComm::timeout() const
 {
     return m_d->m_timeout;
@@ -131,6 +136,17 @@ void SDOComm::setCancel(bool newCancel)
     m_d->m_cancel = newCancel;
 }
 
+bool SDOComm::running() const
+{
+    return m_d->m_state != SDOComm::IDLE &&
+           m_d->m_state != SDOComm::DONE;
+}
+
+bool SDOComm::isFinished() const
+{
+    return m_d->m_state == SDOComm::DONE;
+}
+
 size_t SDOComm::transferSize() const
 {
     return m_d->m_transferSize;
@@ -144,12 +160,6 @@ void SDOComm::setTransferSize(size_t newTransferSize)
 void SDOComm::cancel()
 {
     setCancel(true);
-}
-
-bool SDOComm::running() const
-{
-    return m_d->m_state != SDOComm::IDLE &&
-           m_d->m_state != SDOComm::DONE;
 }
 
 void SDOComm::finish()

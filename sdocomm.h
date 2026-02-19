@@ -40,7 +40,8 @@ public:
         ERROR_NO_DATA       = 8,
         ERROR_OUT_OF_MEM    = 9,
         ERROR_GENERAL       = 10,
-        ERROR_UNKNOWN       = 11
+        ERROR_DEV_INCOMPAT  = 11,
+        ERROR_UNKNOWN       = 12
     };
 
     explicit SDOComm(QObject *parent = nullptr);
@@ -74,11 +75,15 @@ public:
     State state() const;
     void setState(State newState);
 
+    bool hasError() const;
     Error error() const;
     void setError(Error newError);
 
     bool cancelled() const;
     void setCancel(bool newCancel);
+
+    bool running() const;
+    bool isFinished() const;
 
     size_t transferSize() const;
     void setTransferSize(size_t newTransferSize);
@@ -86,7 +91,6 @@ public:
     // methods.
 
     void cancel();
-    bool running() const;
 
     void finish();
     void finish(Error err);
