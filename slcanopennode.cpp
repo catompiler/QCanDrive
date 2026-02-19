@@ -550,6 +550,10 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                             &size_to_ret, &size_ret,
                             nullptr);
             sdoc->setDataBuffered(size_ret);
+
+            // qDebug() << Qt::hex << sdoc->index() << Qt::dec << sdoc->subIndex()
+            //          << "sdo_ret:" << sdo_ret << "size_to_ret:" << size_to_ret << "size_ret:" << size_ret;
+
             if(sdo_ret == 0){
                 if(sdoc->cancelled()){
                     sdoc->setState(SDOComm::DONE);
@@ -573,16 +577,23 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                     }
                 }
 #endif
-                if(sdo_ret > CO_SDO_RT_ok_communicationEnd){
+
+                // Если в данный момент нельзя читать данные из буфера - подождём.
+                if(sdo_ret == CO_SDO_RT_blockUploadInProgress){
                     break;
                 }
+
+                // Провалимся в чтение данных из буфера.
             }
 
         __attribute__ ((fallthrough));
         case SDOComm::DATA:
-            size_ret = CO_SDOclientUploadBufRead(sdo_cli,
-                            static_cast<uint8_t*>(sdoc->dataToTransfer()), sdoc->dataSizeToTransfer());
-            sdoc->dataTransfered(size_ret);
+
+            do{
+                size_ret = CO_SDOclientUploadBufRead(sdo_cli,
+                                static_cast<uint8_t*>(sdoc->dataToTransfer()), sdoc->dataSizeToTransfer());
+                sdoc->dataTransfered(size_ret);
+            }while(size_ret != 0);
 
             if(sdoc->dataTransferDone()){
                 sdoc->setState(SDOComm::DONE);
@@ -646,7 +657,7 @@ SDOComm::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
         return SDOComm::ERROR_INVALID_VALUE;
     case CO_SDO_AB_PRAM_INCOMPAT:
     case CO_SDO_AB_DEVICE_INCOMPAT:
-        return SDOComm::ERROR_GENERAL;
+        return SDOComm::ERROR_DEV_INCOMPAT;
     case CO_SDO_AB_HW:
         return SDOComm::ERROR_IO;
     case CO_SDO_AB_TYPE_MISMATCH:
