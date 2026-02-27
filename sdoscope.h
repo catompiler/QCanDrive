@@ -125,6 +125,7 @@ public:
         STATE_NONE = 0,
         STATE_INIT,
         STATE_UPDATE,
+        STATE_APPLY,
         STATE_RUN,
         STATE_READ
     };
@@ -145,6 +146,17 @@ public:
         UPDATE_TASKS,
         UPDATE_BASE,
         UPDATE_DONE
+    };
+
+    //! КА применения настроек.
+    enum ApplyState {
+        APPLY_NONE = 0,
+        APPLY_BEGIN,
+        APPLY_COMMON,
+        APPLY_TRIG,
+        APPLY_CHANNLES,
+        APPLY_WAIT,
+        APPLY_DONE
     };
 
     //! КА записи осциллограммы.
@@ -177,23 +189,55 @@ public:
         Channel(Channel&& ch);
         ~Channel();
 
+        /**
+         * @brief Получает разрешение осциллографирования канала.
+         * Настройка в осциллографе.
+         * @return Разрешение осциллографирования канала.
+         */
         bool enabled() const;
         void setEnabled(bool newEnabled);
 
+        /**
+         * @brief Получает индекс регистра для осциллографирования.
+         * Настройка в осциллографе.
+         * @return Индекс регистра для осциллографирования.
+         */
         CO::Index regIndex() const;
         void setRegIndex(CO::Index newIndex);
 
+        /**
+         * @brief Получает подындекс регистра для осциллографирования.
+         * Настройка в осциллографе.
+         * @return Подындекс регистра для осциллографирования.
+         */
         CO::SubIndex regSubIndex() const;
         void setRegSubIndex(CO::SubIndex newSubIndex);
 
+        /**
+         * @brief Число семплов канала.
+         * @return Число семплов канала.
+         */
         uint samplesCount() const;
 
+        /**
+         * @brief Получает значение i-го семпла канала.
+         * @param i Индекс семпла.
+         * @return Значение i-го семпла канала.
+         */
         sample_t sample(uint i) const;
         bool setSample(uint i, sample_t value);
 
+        /**
+         * @brief Получает тип данных регистра для осциллографирования.
+         * @return Тип данных регистра для осциллографирования.
+         */
         DataType dataType() const;
         void setDataType(DataType newDataType);
 
+        /**
+         * @brief Получает базовое значение для значения осциллографируемого регистра.
+         * @return Базовое значение для значения осциллографируемого регистра.
+         */
         qreal baseValue() const;
         void setBaseValue(qreal newBaseValue);
 
@@ -210,12 +254,15 @@ public:
         qreal value(uint i) const;
 
     protected:
+        //! Получает указатель на разрешение осциллографирования канала.
         uint32_t* enabledPtr();
         const uint32_t* enabledPtr() const;
 
+        //! Получает указатель на идентификатор регистра для осциллографирования канала.
         uint32_t* regIdPtr();
         const uint32_t* regIdPtr() const;
 
+        //! Получает указатель на массив семплов канала.
         void* samplesPtr();
         const void* samplesPtr() const;
 
@@ -273,20 +320,24 @@ public:
     uint mode() const;
 
     //! Получить канал.
+    Channel* channel(uint i);
+
+    //! Получить канал.
     const Channel* channel(uint i) const;
 
 public slots:
     bool init();
     bool deinit();
     bool update();
+    bool apply();
     bool run();
     bool read();
-    //void apply();
 
 signals:
     void errorOccured(); // Сигнал о возникновении ошибки.
     void initialized(); // Сигнал об окончании инициализации.
     void updated(); // Сигнал об окончании обновления.
+    void applied(); // Сигнал об окончании применения настроек.
     void done(); // Сигнал об окончании записи осциллограммы.
     void readed(); // Сигнал об окончании чтения данных осциллограммы.
     void finished(); // Сигнал об окончании любой операции.
@@ -346,6 +397,14 @@ private:
     DataType m_update_base_dataType;
     uint32_t m_update_base_value;
 
+    // Переменные состояния применения.
+    ApplyState m_apply_state;
+    TasksVector m_apply_common_tasks;
+    TasksVector m_apply_trig_tasks;
+    TasksVector m_apply_channels_tasks;
+    uint m_apply_cur_task;
+    bool m_apply_status_read;
+
     // Переменные состояния записи осциллограммы.
     RunState m_run_state;
     bool m_run_status_read;
@@ -371,6 +430,7 @@ private:
     // Частота дискретизации.
     uint32_t m_max_sample_rate;
 
+    // Общие параметры.
     // Число семплов.
     uint32_t m_samples;
     // Предделитель.
@@ -380,7 +440,7 @@ private:
     // Режим работы.
     uint32_t m_mode;
 
-    // Триггер.
+    // Параметры триггера.
     // Включение.
     uint32_t m_trig_enabled;
     // Номер канала.
@@ -397,6 +457,10 @@ private:
     // Обработка КА обновления.
     ProcessingState processUpdate();
     void populateUpdateTasks();
+
+    // Обработка КА применения настроек.
+    ProcessingState processApply();
+    void populateApplyTasks();
 
     // Обработка КА записи осциллограммы.
     ProcessingState processRun();

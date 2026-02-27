@@ -46,6 +46,13 @@ SDOScope::SDOScope(QObject *parent)
     // Только после инициализации (нужны каналы).
     //populateUpdateTasks();
 
+    m_apply_state = APPLY_NONE;
+    m_error = ERROR_NONE;
+    m_apply_cur_task = 0;
+    m_apply_status_read = false;
+    // Только после инициализации (нужны каналы).
+    //populateApplyTasks();
+
     m_run_state = RUN_NONE;
     m_run_status_read = false;
 
@@ -174,6 +181,21 @@ bool SDOScope::update()
     return processUpdate() != PROCESSING_ERROR;
 }
 
+bool SDOScope::apply()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_apply_state = APPLY_BEGIN;
+    m_state = STATE_APPLY;
+    m_error = ERROR_NONE;
+    m_apply_cur_task = 0;
+    m_apply_status_read = false;
+
+    return processApply() != PROCESSING_ERROR;
+}
+
 bool SDOScope::run()
 {
     if(!m_slcon) return false;
@@ -215,6 +237,9 @@ void SDOScope::sdoFinished()
         break;
     case STATE_UPDATE:
         processUpdate();
+        break;
+    case STATE_APPLY:
+        processApply();
         break;
     case STATE_RUN:
         processRun();
@@ -268,6 +293,13 @@ uint SDOScope::histSamplesCount() const
 uint SDOScope::mode() const
 {
     return m_mode;
+}
+
+SDOScope::Channel* SDOScope::channel(uint i)
+{
+    if(i >= m_max_channels) return nullptr;
+
+    return &m_channels[i];
 }
 
 const SDOScope::Channel* SDOScope::channel(uint i) const
@@ -383,11 +415,15 @@ SDOScope::ProcessingState SDOScope::processInit()
             // Изменим число семплов в каналах.
             for(uint i = 0; i < m_max_channels; i ++){
                 m_channels[i].resize(m_max_samples);
+                // remove after debug
+                //memset(m_channels[i].m_samples, 0xDEADBEEF, m_max_samples*sizeof(Channel::sample_t));
             }
 
             // Каналы теперь созданы -
             // обновим задания для обновления.
             populateUpdateTasks();
+            // и применения настроек.
+            populateApplyTasks();
 
             m_init_state = INIT_DONE;
         }
@@ -624,6 +660,214 @@ void SDOScope::populateUpdateTasks()
 //    m_update_tasks.append({CommTask::READ, , &m_, sizeof(m_)});
 }
 
+SDOScope::ProcessingState SDOScope::processApply()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    // Обработка состояния.
+    switch(m_apply_state){
+    default:
+    case APPLY_NONE:
+        m_state = STATE_NONE;
+        return PROCESSING_DONE;
+
+    case APPLY_BEGIN:{
+        m_apply_state = APPLY_COMMON;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_COMMON:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        if(m_apply_cur_task < static_cast<uint>(m_apply_common_tasks.count())){
+            CommTask* ct = &m_apply_common_tasks[m_apply_cur_task];
+            // Следующие данные.
+            if(!runCommTask(ct)){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            m_apply_cur_task ++;
+            break;
+        }
+
+        m_apply_state = APPLY_TRIG;
+        m_apply_cur_task = 0;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        if(m_apply_cur_task < static_cast<uint>(m_apply_trig_tasks.count())){
+            CommTask* ct = &m_apply_trig_tasks[m_apply_cur_task];
+            // Следующие данные.
+            if(!runCommTask(ct)){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            m_apply_cur_task ++;
+            break;
+        }
+
+        m_apply_state = APPLY_CHANNLES;
+        m_apply_cur_task = 0;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_CHANNLES:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        if(m_apply_cur_task < static_cast<uint>(m_apply_channels_tasks.count())){
+            CommTask* ct = &m_apply_channels_tasks[m_apply_cur_task];
+            // Следующие данные.
+            if(!runCommTask(ct)){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            m_apply_cur_task ++;
+            break;
+        }
+
+        // Сброс статуса.
+        m_status = STATUS_NONE;
+        // Записать.
+        SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
+        if(comm == nullptr){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        m_apply_state = APPLY_WAIT;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_WAIT:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        //qDebug() << m_control << m_status;
+
+        if(!m_apply_status_read || !(m_status & STATUS_READY)){
+            // Если статус не читался или осциллограф ещё не применил настройки - продолжим ждать.
+            // Прочитаем статус.
+            SDOComm* comm = m_slcon->read(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
+            if(comm == nullptr){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Установим флаг чтения статуса.
+            m_apply_status_read = true;
+            break;
+        }
+
+        m_apply_state = APPLY_DONE;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_DONE:{
+        proc_err = ERROR_NONE;
+        proc_state = PROCESSING_DONE;
+    }break;
+    }
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit applied();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+void SDOScope::populateApplyTasks()
+{
+    // Применение общих настроек.
+    m_apply_common_tasks.clear();
+    m_apply_common_tasks.reserve(4);
+    m_apply_common_tasks.append({CommTask::WRITE, SAMPLES_SUBINDEX, &m_samples, sizeof(m_samples)});
+    m_apply_common_tasks.append({CommTask::WRITE, PRESCALER_SUBINDEX, &m_prescaler, sizeof(m_prescaler)});
+    m_apply_common_tasks.append({CommTask::WRITE, HIST_SAMPLES_SUBINDEX, &m_hist_samples, sizeof(m_hist_samples)});
+    m_apply_common_tasks.append({CommTask::WRITE, MODE_SUBINDEX, &m_mode, sizeof(m_mode)});
+
+    // Применение настроек триггера.
+    m_apply_trig_tasks.clear();
+    m_apply_trig_tasks.reserve(4);
+    m_apply_trig_tasks.append({CommTask::WRITE, TRIG_ENABLED_SUBINDEX, &m_trig_enabled, sizeof(m_trig_enabled)});
+    m_apply_trig_tasks.append({CommTask::WRITE, TRIG_CH_N_SUBINDEX, &m_trig_ch_n, sizeof(m_trig_ch_n)});
+    m_apply_trig_tasks.append({CommTask::WRITE, TRIG_TYPE_SUBINDEX, &m_trig_type, sizeof(m_trig_type)});
+    m_apply_trig_tasks.append({CommTask::WRITE, TRIG_VALUE_SUBINDEX, &m_trig_value, sizeof(m_trig_value)});
+
+    // Применение настроек каналов.
+    m_apply_channels_tasks.clear();
+    m_apply_channels_tasks.reserve(m_max_channels * 2);
+    for(uint i = 0; i < m_max_channels; i ++){
+        m_apply_channels_tasks.append({CommTask::WRITE, static_cast<CO::SubIndex>(CH0_ENABLED_SUBINDEX + i * (CH1_ENABLED_SUBINDEX - CH0_ENABLED_SUBINDEX)), m_channels[i].enabledPtr(), sizeof(decltype(*m_channels[i].enabledPtr()))});
+        m_apply_channels_tasks.append({CommTask::WRITE, static_cast<CO::SubIndex>(CH0_REG_ID_SUBINDEX + i * (CH1_REG_ID_SUBINDEX - CH0_REG_ID_SUBINDEX)), m_channels[i].regIdPtr(), sizeof(decltype(*m_channels[i].regIdPtr()))});
+    }
+    //    m_apply_tasks.append({CommTask::READ, , &m_, sizeof(m_)});
+}
+
 SDOScope::ProcessingState SDOScope::processRun()
 {
     assert(m_slcon != nullptr);
@@ -640,10 +884,10 @@ SDOScope::ProcessingState SDOScope::processRun()
         return PROCESSING_DONE;
 
     case RUN_BEGIN:{
-        // Установить управление.
-        m_control = CONTROL_ENABLE | CONTROL_START;
+        // Сбросить состояние.
+        m_status = STATUS_NONE;
         // Записать.
-        SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, CONTROL_SUBINDEX, &m_control, sizeof(m_control), m_comm);
+        SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
         if(comm == nullptr){
             proc_err = ERROR_COMM;
             proc_state = PROCESSING_ERROR;
@@ -658,6 +902,16 @@ SDOScope::ProcessingState SDOScope::processRun()
             break;
         }
         if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        // Установить управление.
+        m_control = CONTROL_ENABLE | CONTROL_START;
+        // Записать.
+        SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, CONTROL_SUBINDEX, &m_control, sizeof(m_control), m_comm);
+        if(comm == nullptr){
             proc_err = ERROR_COMM;
             proc_state = PROCESSING_ERROR;
             break;
@@ -975,7 +1229,7 @@ void SDOScope::Channel::setBaseValue(qreal newBaseValue)
 
 qreal SDOScope::Channel::rawValue(uint i) const
 {
-    if(m_samples == nullptr) return 0;
+    if(m_samples == nullptr) return 0.0;
     if(i >= m_samples_count) return 0.0;
 
     return COValue::valueFrom<qreal>(&m_samples[i], m_dataType);
