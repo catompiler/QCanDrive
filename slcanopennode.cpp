@@ -369,7 +369,13 @@ void SLCanOpenNode::pollSlcanProcessCO()
         return;
     }
 
-    slcan_master_poll(&m_scm);
+    slcan_err_t slerr = slcan_master_poll(&m_scm);
+    if(slerr != E_SLCAN_NO_ERROR){
+        qDebug() << "slcan_master_poll error:" << slerr;
+    }
+
+    // fflush(stdout);
+
     CO_CANinterrupt(m_co->CANmodule);
 
     meas_clock::time_point cur_tp = meas_clock::now();
@@ -460,12 +466,10 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                             std::min(static_cast<uint>(sdoc->timeout() == 0 ? m_defaultTimeout : sdoc->timeout()),
                                      static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
-            if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
+            if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
                 sdoc->setState(SDOComm::DONE);
                 sdoc->setError(SDOComm::ERROR_IO);
                 return true;
-            }else if(sdo_ret > CO_SDO_RT_ok_communicationEnd){
-                break;
             }
             sdoc->setState(SDOComm::DATA);
             dt = 0;
@@ -498,6 +502,7 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 sdoc->setState(SDOComm::DONE);
                 sdoc->setError(finish_err);
             }else{
+                // Transfer in progress, waiting.
                 break;
             }
 
@@ -533,12 +538,10 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                             std::min(static_cast<uint>(sdoc->timeout() == 0 ? m_defaultTimeout : sdoc->timeout()),
                                      static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
-            if(sdo_ret < CO_SDO_RT_ok_communicationEnd){
+            if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
                 sdoc->setState(SDOComm::DONE);
                 sdoc->setError(SDOComm::ERROR_IO);
                 return true;
-            }else if(sdo_ret > CO_SDO_RT_ok_communicationEnd){
-                break;
             }
             sdoc->setState(SDOComm::RUN);
             dt = 0;
@@ -656,6 +659,7 @@ SDOComm::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
     case CO_SDO_AB_MAP_LEN:
         return SDOComm::ERROR_INVALID_VALUE;
     case CO_SDO_AB_PRAM_INCOMPAT:
+        return SDOComm::ERROR_PRAM_INCOMPAT;
     case CO_SDO_AB_DEVICE_INCOMPAT:
         return SDOComm::ERROR_DEV_INCOMPAT;
     case CO_SDO_AB_HW:
