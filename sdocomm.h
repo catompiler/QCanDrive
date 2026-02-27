@@ -40,8 +40,9 @@ public:
         ERROR_NO_DATA       = 8,
         ERROR_OUT_OF_MEM    = 9,
         ERROR_GENERAL       = 10,
-        ERROR_DEV_INCOMPAT  = 11,
-        ERROR_UNKNOWN       = 12
+        ERROR_PRAM_INCOMPAT = 11,
+        ERROR_DEV_INCOMPAT  = 12,
+        ERROR_UNKNOWN       = 13,
     };
 
     explicit SDOComm(QObject *parent = nullptr);
