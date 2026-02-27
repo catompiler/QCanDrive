@@ -739,6 +739,12 @@ void RegsViewModel::m_valueUpdateFinished()
             case SDOComm::ERROR_GENERAL:
                 val = tr("general error");
                 break;
+            case SDOComm::ERROR_PRAM_INCOMPAT:
+                val = tr("pram incompat error");
+                break;
+            case SDOComm::ERROR_DEV_INCOMPAT:
+                val = tr("dev incompat error");
+                break;
             case SDOComm::ERROR_UNKNOWN:
                 val = tr("unknown error");
                 break;
