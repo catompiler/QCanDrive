@@ -487,12 +487,11 @@ SDOScope::ProcessingState SDOScope::processUpdate()
         m_state = STATE_NONE;
         return PROCESSING_DONE;
 
-    case UPDATE_BEGIN:{
-        m_update_state = UPDATE_TASKS;
-    }
+    case UPDATE_BEGIN:
+        m_update_state = UPDATE_COMMON;
 
     __attribute__((fallthrough));
-    case UPDATE_TASKS:{
+    case UPDATE_COMMON:{
         // Ожидание завершения предыдущего этапа.
         if(!m_comm->isFinished()){
             break;
@@ -503,8 +502,8 @@ SDOScope::ProcessingState SDOScope::processUpdate()
             break;
         }
 
-        if(m_update_cur_task < static_cast<uint>(m_update_tasks.count())){
-            CommTask* ct = &m_update_tasks[m_update_cur_task];
+        if(m_update_cur_task < static_cast<uint>(m_update_common_tasks.count())){
+            CommTask* ct = &m_update_common_tasks[m_update_cur_task];
             // Следующие данные.
             if(!runCommTask(ct)){
                 proc_err = ERROR_COMM;
@@ -514,19 +513,77 @@ SDOScope::ProcessingState SDOScope::processUpdate()
 
             m_update_cur_task ++;
             break;
-        }else{
+        }
 
-            for (uint i = 0; i < m_max_channels; i ++) {
-                Channel* ch = &m_channels[i];
+        m_update_state = UPDATE_TRIG;
+        m_update_cur_task = 0;
+    }
 
-                RegVar* rv = findRegVar(ch->regIndex(), ch->regSubIndex());
-                if(rv == nullptr) continue;
+    __attribute__((fallthrough));
+    case UPDATE_TRIG:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
 
-                ch->setDataType(rv->dataType());
+        if(m_update_cur_task < static_cast<uint>(m_update_trig_tasks.count())){
+            CommTask* ct = &m_update_trig_tasks[m_update_cur_task];
+            // Следующие данные.
+            if(!runCommTask(ct)){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
             }
 
-            m_update_state = UPDATE_BASE;
+            m_update_cur_task ++;
+            break;
         }
+
+        m_update_state = UPDATE_CHANNELS;
+        m_update_cur_task = 0;
+    }
+
+    __attribute__((fallthrough));
+    case UPDATE_CHANNELS:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        if(m_update_cur_task < static_cast<uint>(m_update_channels_tasks.count())){
+            CommTask* ct = &m_update_channels_tasks[m_update_cur_task];
+            // Следующие данные.
+            if(!runCommTask(ct)){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            m_update_cur_task ++;
+            break;
+        }
+
+        // Теперь, когда все данные обновлены, обновим типы данных каналов.
+        for (uint i = 0; i < m_max_channels; i ++) {
+            Channel* ch = &m_channels[i];
+
+            RegVar* rv = findRegVar(ch->regIndex(), ch->regSubIndex());
+            if(rv == nullptr) continue;
+
+            ch->setDataType(rv->dataType());
+        }
+
+        m_update_state = UPDATE_BASE;
     }
 
     __attribute__((fallthrough));
@@ -641,21 +698,28 @@ SDOScope::ProcessingState SDOScope::processUpdate()
 
 void SDOScope::populateUpdateTasks()
 {
-    m_update_tasks.clear();
-    m_update_tasks.reserve(8 + m_max_channels * 2);
+    // Применение общих настроек.
+    m_update_common_tasks.clear();
+    m_update_common_tasks.reserve(4);
+    m_update_common_tasks.append({CommTask::READ, SAMPLES_SUBINDEX, &m_samples, sizeof(m_samples)});
+    m_update_common_tasks.append({CommTask::READ, PRESCALER_SUBINDEX, &m_prescaler, sizeof(m_prescaler)});
+    m_update_common_tasks.append({CommTask::READ, HIST_SAMPLES_SUBINDEX, &m_hist_samples, sizeof(m_hist_samples)});
+    m_update_common_tasks.append({CommTask::READ, MODE_SUBINDEX, &m_mode, sizeof(m_mode)});
 
-    m_update_tasks.append({CommTask::READ, SAMPLES_SUBINDEX, &m_samples, sizeof(m_samples)});
-    m_update_tasks.append({CommTask::READ, PRESCALER_SUBINDEX, &m_prescaler, sizeof(m_prescaler)});
-    m_update_tasks.append({CommTask::READ, HIST_SAMPLES_SUBINDEX, &m_hist_samples, sizeof(m_hist_samples)});
-    m_update_tasks.append({CommTask::READ, MODE_SUBINDEX, &m_mode, sizeof(m_mode)});
-    m_update_tasks.append({CommTask::READ, TRIG_ENABLED_SUBINDEX, &m_trig_enabled, sizeof(m_trig_enabled)});
-    m_update_tasks.append({CommTask::READ, TRIG_CH_N_SUBINDEX, &m_trig_ch_n, sizeof(m_trig_ch_n)});
-    m_update_tasks.append({CommTask::READ, TRIG_TYPE_SUBINDEX, &m_trig_type, sizeof(m_trig_type)});
-    m_update_tasks.append({CommTask::READ, TRIG_VALUE_SUBINDEX, &m_trig_value, sizeof(m_trig_value)});
+    // Применение настроек триггера.
+    m_update_trig_tasks.clear();
+    m_update_trig_tasks.reserve(4);
+    m_update_trig_tasks.append({CommTask::READ, TRIG_ENABLED_SUBINDEX, &m_trig_enabled, sizeof(m_trig_enabled)});
+    m_update_trig_tasks.append({CommTask::READ, TRIG_CH_N_SUBINDEX, &m_trig_ch_n, sizeof(m_trig_ch_n)});
+    m_update_trig_tasks.append({CommTask::READ, TRIG_TYPE_SUBINDEX, &m_trig_type, sizeof(m_trig_type)});
+    m_update_trig_tasks.append({CommTask::READ, TRIG_VALUE_SUBINDEX, &m_trig_value, sizeof(m_trig_value)});
 
+    // Применение настроек каналов.
+    m_update_channels_tasks.clear();
+    m_update_channels_tasks.reserve(m_max_channels * 2);
     for(uint i = 0; i < m_max_channels; i ++){
-        m_update_tasks.append({CommTask::READ, static_cast<CO::SubIndex>(CH0_ENABLED_SUBINDEX + i * (CH1_ENABLED_SUBINDEX - CH0_ENABLED_SUBINDEX)), m_channels[i].enabledPtr(), sizeof(decltype(*m_channels[i].enabledPtr()))});
-        m_update_tasks.append({CommTask::READ, static_cast<CO::SubIndex>(CH0_REG_ID_SUBINDEX + i * (CH1_REG_ID_SUBINDEX - CH0_REG_ID_SUBINDEX)), m_channels[i].regIdPtr(), sizeof(decltype(*m_channels[i].regIdPtr()))});
+        m_update_channels_tasks.append({CommTask::READ, static_cast<CO::SubIndex>(CH0_ENABLED_SUBINDEX + i * (CH1_ENABLED_SUBINDEX - CH0_ENABLED_SUBINDEX)), m_channels[i].enabledPtr(), sizeof(decltype(*m_channels[i].enabledPtr()))});
+        m_update_channels_tasks.append({CommTask::READ, static_cast<CO::SubIndex>(CH0_REG_ID_SUBINDEX + i * (CH1_REG_ID_SUBINDEX - CH0_REG_ID_SUBINDEX)), m_channels[i].regIdPtr(), sizeof(decltype(*m_channels[i].regIdPtr()))});
     }
 //    m_update_tasks.append({CommTask::READ, , &m_, sizeof(m_)});
 }

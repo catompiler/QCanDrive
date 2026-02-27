@@ -143,7 +143,9 @@ public:
     enum UpdateState {
         UPDATE_NONE = 0,
         UPDATE_BEGIN,
-        UPDATE_TASKS,
+        UPDATE_COMMON,
+        UPDATE_TRIG,
+        UPDATE_CHANNELS,
         UPDATE_BASE,
         UPDATE_DONE
     };
@@ -390,7 +392,9 @@ private:
 
     // Переменные состояния обновления.
     UpdateState m_update_state;
-    TasksVector m_update_tasks;
+    TasksVector m_update_common_tasks;
+    TasksVector m_update_trig_tasks;
+    TasksVector m_update_channels_tasks;
     uint m_update_cur_task;
     uint m_update_base_ch;
     bool m_update_base_read;
