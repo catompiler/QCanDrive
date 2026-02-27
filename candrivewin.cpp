@@ -147,9 +147,9 @@ void CanDriveWin::m_ui_actDebugExec_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    static SDOScope* scope = nullptr;
+    /*static*/ SDOScope* scope = nullptr;
 
-    if(scope == nullptr){
+    //if(scope == nullptr){
 
         scope = new SDOScope();
 
@@ -157,24 +157,25 @@ void CanDriveWin::m_ui_actDebugExec_triggered(bool checked)
         scope->setSLCanOpenNode(m_slcon);
         //scope->setNodeId(Settings::get()->co.nodeId);
 
-        // connect(scope, &SDOScope::finished, [&scope](){
+        // connect(scope, &SDOScope::finished, [scope](){
         //     qDebug() << "SDOScope finished";
         // });
 
-        connect(scope, &SDOScope::errorOccured, [&scope](){
+        connect(scope, &SDOScope::errorOccured, [scope](){
             qDebug() << "SDOScope error" << (int)scope->error();
             scope->deleteLater();
         });
 
-        connect(scope, &SDOScope::initialized, [&scope](){
+        connect(scope, &SDOScope::initialized, [scope](){
             qDebug() << scope->version() << scope->maxChannelsCount() << scope->maxSamplesCount() << scope->maxSampleRate();
 
             if(!scope->update()){
+                qDebug() << "SDOScope update failed";
                 scope->deleteLater();
             }
         });
 
-        connect(scope, &SDOScope::updated, [&scope](){
+        connect(scope, &SDOScope::updated, [scope](){
             qDebug() << "SDOScope updated";
 
             for(uint i = 0; i < scope->channelsCount(); i++){
@@ -193,20 +194,59 @@ void CanDriveWin::m_ui_actDebugExec_triggered(bool checked)
                          << "samplesCount:" << ch->samplesCount();
             }
 
-            if(!scope->run()){
+            SDOScope::Channel* ch;
+            // // Фаза A.
+            // ch = scope->channel(3);
+            // ch->setRegIndex(0x2070);
+            // ch->setRegSubIndex(0x0a);
+            // ch->setEnabled(true);
+            // // Фаза B.
+            // ch = scope->channel(4);
+            // ch->setRegIndex(0x2070);
+            // ch->setRegSubIndex(0x0b);
+            // ch->setEnabled(true);
+            // // Фаза C.
+            // ch = scope->channel(5);
+            // ch->setRegIndex(0x2070);
+            // ch->setRegSubIndex(0x0c);
+            // ch->setEnabled(true);
+
+            // Udc.
+            ch = scope->channel(3);
+            ch->setRegIndex(0x2700);
+            ch->setRegSubIndex(26);
+            ch->setEnabled(true);
+            // Idc.
+            ch = scope->channel(4);
+            ch->setRegIndex(0x2700);
+            ch->setRegSubIndex(27);
+            ch->setEnabled(true);
+
+            if(!scope->apply()){
+                qDebug() << "SDOScope apply failed";
                 scope->deleteLater();
             }
         });
 
-        connect(scope, &SDOScope::done, [&scope](){
-            qDebug() << "SDOScope done";
+        connect(scope, &SDOScope::applied, [scope](){
+            qDebug() << "SDOScope applied";
+
+            if(!scope->run()){
+                qDebug() << "SDOScope run failed";
+                scope->deleteLater();
+            }
+        });
+
+        connect(scope, &SDOScope::done, [scope](){
+            qDebug() << "SDOScope run done";
 
             if(!scope->read()){
+                qDebug() << "SDOScope read failed";
                 scope->deleteLater();
             }
         });
 
-        connect(scope, &SDOScope::readed, [&scope, this](){
+        connect(scope, &SDOScope::readed, [scope, this](){
             qDebug() << "SDOScope readed";
 
             QString fileName = QFileDialog::getSaveFileName(this, tr("Save scope data"), "", tr("CSV files (*.csv);;All files (*.*)"));
@@ -249,7 +289,7 @@ void CanDriveWin::m_ui_actDebugExec_triggered(bool checked)
             qDebug() << "SDOScope init failed";
             scope->deleteLater();
         }
-    }
+    //}
 
 }
 

@@ -733,12 +733,12 @@ SDOScope::ProcessingState SDOScope::processApply()
             break;
         }
 
-        m_apply_state = APPLY_CHANNLES;
+        m_apply_state = APPLY_CHANNELS;
         m_apply_cur_task = 0;
     }
 
     __attribute__((fallthrough));
-    case APPLY_CHANNLES:{
+    case APPLY_CHANNELS:{
         // Ожидание завершения предыдущего этапа.
         if(!m_comm->isFinished()){
             break;

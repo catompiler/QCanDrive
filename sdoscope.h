@@ -154,7 +154,7 @@ public:
         APPLY_BEGIN,
         APPLY_COMMON,
         APPLY_TRIG,
-        APPLY_CHANNLES,
+        APPLY_CHANNELS,
         APPLY_WAIT,
         APPLY_DONE
     };
