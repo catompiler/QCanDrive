@@ -1,6 +1,7 @@
 #include "regsviewwgt.h"
 #include "regselectdlg.h"
 #include "regsviewmodel.h"
+#include "regsviewdelegate.h"
 #include "regentry.h"
 #include "regobject.h"
 #include "regvar.h"
@@ -53,6 +54,9 @@ RegsViewWgt::RegsViewWgt(QWidget *parent)
     getTreeView()->setModel(m_regsViewModel);
     //getTreeView()->setItemDelegate(nullptr);
 
+    m_regsViewDelegate = new RegsViewDelegate();
+    getTreeView()->setItemDelegate(m_regsViewDelegate);
+
     m_refreshTimer = new QTimer();
     connect(m_refreshTimer, &QTimer::timeout, this, &RegsViewWgt::refreshRegs);
 
@@ -79,6 +83,7 @@ RegsViewWgt::~RegsViewWgt()
     storeSettings();
 
     delete m_refreshTimer;
+    delete m_regsViewDelegate;
     delete m_regsViewModel;
 }
 

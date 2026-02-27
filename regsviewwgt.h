@@ -11,6 +11,7 @@ class QItemSelection;
 class QModelIndex;
 class QTimer;
 class RegListModel;
+class RegsViewDelegate;
 class RegEntry;
 class Settings;
 
@@ -51,6 +52,8 @@ private:
     QTreeView* getTreeView() { return this; }
 
     RegsViewModel* m_regsViewModel;
+
+    RegsViewDelegate* m_regsViewDelegate;
 
     QTimer* m_refreshTimer;
 

@@ -46,6 +46,7 @@ SOURCES += \
     covaluetypes.cpp \
     canopenwin.cpp \
     reglisteditorwgt.cpp \
+    regsviewdelegate.cpp \
     regsviewmodel.cpp \
     regsviewwgt.cpp \
     sdocomm.cpp \
@@ -134,6 +135,7 @@ HEADERS += \
     covaluesholder.h \
     covaluetypes.h \
     reglisteditorwgt.h \
+    regsviewdelegate.h \
     regsviewmodel.h \
     regsviewwgt.h \
     sdocomm.h \
