@@ -80,11 +80,12 @@ QWidget* RegsViewDelegate::createEditor(QWidget* parent, const QStyleOptionViewI
             break;
         }
         case DataType::U32:{
-            QSpinBox* sb = new QSpinBox(parent);
-            sb->setMinimum(INT32_MIN);
-            sb->setMaximum(INT32_MAX);
-            sb->setSingleStep(1);
-            res_widget = sb;
+            QDoubleSpinBox* dsb = new QDoubleSpinBox(parent);
+            dsb->setMinimum(static_cast<double>(0));
+            dsb->setMaximum(static_cast<double>(UINT32_MAX));
+            dsb->setSingleStep(1);
+            dsb->setDecimals(0);
+            res_widget = dsb;
             break;
         }
         case DataType::U16:{
@@ -174,7 +175,6 @@ void RegsViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) 
         case DataType::I32:
         case DataType::I16:
         case DataType::I8:
-        case DataType::U32:
         case DataType::U16:
         case DataType::U8:{
             QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
@@ -182,6 +182,7 @@ void RegsViewDelegate::setEditorData(QWidget* editor, const QModelIndex& index) 
             sb->setValue(index.data(Qt::EditRole).toInt());
             break;
         }
+        case DataType::U32:
         case DataType::IQ24:
         case DataType::IQ15:
         case DataType::IQ7:{
@@ -239,7 +240,6 @@ void RegsViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
         case DataType::I32:
         case DataType::I16:
         case DataType::I8:
-        case DataType::U32:
         case DataType::U16:
         case DataType::U8:{
             QSpinBox* sb = qobject_cast<QSpinBox*>(editor);
@@ -247,6 +247,7 @@ void RegsViewDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, 
             regsViewModel->setData(index, sb->value(), Qt::EditRole);
             break;
         }
+        case DataType::U32:
         case DataType::IQ24:
         case DataType::IQ15:
         case DataType::IQ7:{
