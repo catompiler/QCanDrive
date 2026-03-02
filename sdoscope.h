@@ -126,6 +126,9 @@ public:
         STATE_NONE = 0,
         STATE_INIT,
         STATE_UPDATE,
+        STATE_UPDATE_COMMON,
+        STATE_UPDATE_TRIG,
+        STATE_UPDATE_CHANNELS,
         STATE_APPLY,
         STATE_RUN,
         STATE_READ
@@ -332,6 +335,9 @@ public slots:
     bool init();
     bool deinit();
     bool update();
+    bool updateCommon();
+    bool updateTrig();
+    bool updateChannels();
     bool apply();
     bool run();
     bool read();
@@ -340,6 +346,9 @@ signals:
     void errorOccured(); // Сигнал о возникновении ошибки.
     void initialized(); // Сигнал об окончании инициализации.
     void updated(); // Сигнал об окончании обновления.
+    void updatedCommon(); // Сигнал об окончании обновления общих параметров.
+    void updatedTrig(); // Сигнал об окончании обновления параметров триггера.
+    void updatedChannels(); // Сигнал об окончании обновления параметров каналов.
     void applied(); // Сигнал об окончании применения настроек.
     void done(); // Сигнал об окончании записи осциллограммы.
     void readed(); // Сигнал об окончании чтения данных осциллограммы.
@@ -461,6 +470,9 @@ private:
 
     // Обработка КА обновления.
     ProcessingState processUpdate();
+    ProcessingState processUpdateCommon();
+    ProcessingState processUpdateTrig();
+    ProcessingState processUpdateChannels();
     QPair<ProcessingState, Error> processUpdateImpl(bool updCommon, bool updTrig, bool updChannels);
     void populateUpdateTasks();
 

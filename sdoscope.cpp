@@ -181,6 +181,54 @@ bool SDOScope::update()
     return processUpdate() != PROCESSING_ERROR;
 }
 
+bool SDOScope::updateCommon()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_update_state = UPDATE_BEGIN;
+    m_state = STATE_UPDATE_COMMON;
+    m_error = ERROR_NONE;
+    m_update_cur_task = 0;
+    m_update_base_ch = 0;
+    m_update_base_read = false;
+
+    return processUpdateCommon() != PROCESSING_ERROR;
+}
+
+bool SDOScope::updateTrig()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_update_state = UPDATE_BEGIN;
+    m_state = STATE_UPDATE_TRIG;
+    m_error = ERROR_NONE;
+    m_update_cur_task = 0;
+    m_update_base_ch = 0;
+    m_update_base_read = false;
+
+    return processUpdateTrig() != PROCESSING_ERROR;
+}
+
+bool SDOScope::updateChannels()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_update_state = UPDATE_BEGIN;
+    m_state = STATE_UPDATE_CHANNELS;
+    m_error = ERROR_NONE;
+    m_update_cur_task = 0;
+    m_update_base_ch = 0;
+    m_update_base_read = false;
+
+    return processUpdateChannels() != PROCESSING_ERROR;
+}
+
 bool SDOScope::apply()
 {
     if(!m_slcon) return false;
@@ -237,6 +285,15 @@ void SDOScope::sdoFinished()
         break;
     case STATE_UPDATE:
         processUpdate();
+        break;
+    case STATE_UPDATE_COMMON:
+        processUpdateCommon();
+        break;
+    case STATE_UPDATE_TRIG:
+        processUpdateTrig();
+        break;
+    case STATE_UPDATE_CHANNELS:
+        processUpdateChannels();
         break;
     case STATE_APPLY:
         processApply();
@@ -492,6 +549,117 @@ SDOScope::ProcessingState SDOScope::processUpdate()
         m_error = proc_err;
 
         emit updated();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+SDOScope::ProcessingState SDOScope::processUpdateCommon()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processUpdateImpl(true, false, false);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit updatedCommon();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+SDOScope::ProcessingState SDOScope::processUpdateTrig()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processUpdateImpl(false, true, false);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit updatedTrig();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+SDOScope::ProcessingState SDOScope::processUpdateChannels()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processUpdateImpl(false, false, true);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit updatedChannels();
         handleFinished();
         break;
 
