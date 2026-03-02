@@ -244,6 +244,51 @@ bool SDOScope::apply()
     return processApply() != PROCESSING_ERROR;
 }
 
+bool SDOScope::applyCommon()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_apply_state = APPLY_BEGIN;
+    m_state = STATE_APPLY_COMMON;
+    m_error = ERROR_NONE;
+    m_apply_cur_task = 0;
+    m_apply_status_read = false;
+
+    return processApplyCommon() != PROCESSING_ERROR;
+}
+
+bool SDOScope::applyTrig()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_apply_state = APPLY_BEGIN;
+    m_state = STATE_APPLY_TRIG;
+    m_error = ERROR_NONE;
+    m_apply_cur_task = 0;
+    m_apply_status_read = false;
+
+    return processApplyTrig() != PROCESSING_ERROR;
+}
+
+bool SDOScope::applyChannels()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_NONE) return false;
+
+    m_apply_state = APPLY_BEGIN;
+    m_state = STATE_APPLY_CHANNELS;
+    m_error = ERROR_NONE;
+    m_apply_cur_task = 0;
+    m_apply_status_read = false;
+
+    return processApplyChannels() != PROCESSING_ERROR;
+}
+
 bool SDOScope::run()
 {
     if(!m_slcon) return false;
@@ -297,6 +342,15 @@ void SDOScope::sdoFinished()
         break;
     case STATE_APPLY:
         processApply();
+        break;
+    case STATE_APPLY_COMMON:
+        processApplyCommon();
+        break;
+    case STATE_APPLY_TRIG:
+        processApplyTrig();
+        break;
+    case STATE_APPLY_CHANNELS:
+        processApplyChannels();
         break;
     case STATE_RUN:
         processRun();
@@ -927,7 +981,7 @@ SDOScope::ProcessingState SDOScope::processApply()
     ProcessingState proc_state = PROCESSING_IN_PROGRES;
 
 
-    auto res_pair = processApplyImpl(false, false, true);
+    auto res_pair = processApplyImpl(true, true, true);
     proc_state = res_pair.first; proc_err = res_pair.second;
 
 
@@ -939,6 +993,117 @@ SDOScope::ProcessingState SDOScope::processApply()
         m_error = proc_err;
 
         emit applied();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+SDOScope::ProcessingState SDOScope::processApplyCommon()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processApplyImpl(true, false, false);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit appliedCommon();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+SDOScope::ProcessingState SDOScope::processApplyTrig()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processApplyImpl(false, true, false);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit appliedTrig();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+SDOScope::ProcessingState SDOScope::processApplyChannels()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processApplyImpl(false, false, true);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_state = STATE_NONE;
+        m_error = proc_err;
+
+        emit appliedChannels();
         handleFinished();
         break;
 

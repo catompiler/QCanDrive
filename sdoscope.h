@@ -130,6 +130,9 @@ public:
         STATE_UPDATE_TRIG,
         STATE_UPDATE_CHANNELS,
         STATE_APPLY,
+        STATE_APPLY_COMMON,
+        STATE_APPLY_TRIG,
+        STATE_APPLY_CHANNELS,
         STATE_RUN,
         STATE_READ
     };
@@ -339,6 +342,9 @@ public slots:
     bool updateTrig();
     bool updateChannels();
     bool apply();
+    bool applyCommon();
+    bool applyTrig();
+    bool applyChannels();
     bool run();
     bool read();
 
@@ -350,6 +356,9 @@ signals:
     void updatedTrig(); // Сигнал об окончании обновления параметров триггера.
     void updatedChannels(); // Сигнал об окончании обновления параметров каналов.
     void applied(); // Сигнал об окончании применения настроек.
+    void appliedCommon(); // Сигнал об окончании применения общих параметров.
+    void appliedTrig(); // Сигнал об окончании применения параметров триггера.
+    void appliedChannels(); // Сигнал об окончании применения параметров каналов.
     void done(); // Сигнал об окончании записи осциллограммы.
     void readed(); // Сигнал об окончании чтения данных осциллограммы.
     void finished(); // Сигнал об окончании любой операции.
@@ -478,6 +487,9 @@ private:
 
     // Обработка КА применения настроек.
     ProcessingState processApply();
+    ProcessingState processApplyCommon();
+    ProcessingState processApplyTrig();
+    ProcessingState processApplyChannels();
     QPair<ProcessingState, Error> processApplyImpl(bool applCommon, bool applTrig, bool applChannels);
     void populateApplyTasks();
 
