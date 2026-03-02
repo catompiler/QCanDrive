@@ -478,6 +478,7 @@ private:
 
     // Обработка КА применения настроек.
     ProcessingState processApply();
+    QPair<ProcessingState, Error> processApplyImpl(bool applCommon, bool applTrig, bool applChannels);
     void populateApplyTasks();
 
     // Обработка КА записи осциллограммы.

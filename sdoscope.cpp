@@ -697,7 +697,7 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
 
     __attribute__((fallthrough));
     case UPDATE_COMMON:{
-        // Если нужно обновлять общие настройки.
+        // Если нужно обновить общие настройки.
         if(updCommon){
             // Ожидание завершения предыдущего этапа.
             if(!m_comm->isFinished()){
@@ -729,7 +729,7 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
 
     __attribute__((fallthrough));
     case UPDATE_TRIG:{
-        // Если нужно обновлять настройки триггера.
+        // Если нужно обновить настройки триггера.
         if(updTrig){
             // Ожидание завершения предыдущего этапа.
             if(!m_comm->isFinished()){
@@ -761,7 +761,7 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
 
     __attribute__((fallthrough));
     case UPDATE_CHANNELS:{
-        // Если нужно обновлять настройки каналов.
+        // Если нужно обновить настройки каналов.
         if(updChannels){
             // Ожидание завершения предыдущего этапа.
             if(!m_comm->isFinished()){
@@ -927,151 +927,8 @@ SDOScope::ProcessingState SDOScope::processApply()
     ProcessingState proc_state = PROCESSING_IN_PROGRES;
 
 
-    // Обработка состояния.
-    switch(m_apply_state){
-    default:
-    case APPLY_NONE:
-        m_state = STATE_NONE;
-        return PROCESSING_DONE;
-
-    case APPLY_BEGIN:{
-        m_apply_state = APPLY_COMMON;
-    }
-
-    __attribute__((fallthrough));
-    case APPLY_COMMON:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        if(m_apply_cur_task < static_cast<uint>(m_apply_common_tasks.count())){
-            CommTask* ct = &m_apply_common_tasks[m_apply_cur_task];
-            // Следующие данные.
-            if(!runCommTask(ct)){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            m_apply_cur_task ++;
-            break;
-        }
-
-        m_apply_state = APPLY_TRIG;
-        m_apply_cur_task = 0;
-    }
-
-    __attribute__((fallthrough));
-    case APPLY_TRIG:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        if(m_apply_cur_task < static_cast<uint>(m_apply_trig_tasks.count())){
-            CommTask* ct = &m_apply_trig_tasks[m_apply_cur_task];
-            // Следующие данные.
-            if(!runCommTask(ct)){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            m_apply_cur_task ++;
-            break;
-        }
-
-        m_apply_state = APPLY_CHANNELS;
-        m_apply_cur_task = 0;
-    }
-
-    __attribute__((fallthrough));
-    case APPLY_CHANNELS:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        if(m_apply_cur_task < static_cast<uint>(m_apply_channels_tasks.count())){
-            CommTask* ct = &m_apply_channels_tasks[m_apply_cur_task];
-            // Следующие данные.
-            if(!runCommTask(ct)){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            m_apply_cur_task ++;
-            break;
-        }
-
-        // Сброс статуса.
-        m_status = STATUS_NONE;
-        // Записать.
-        SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
-        if(comm == nullptr){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        m_apply_state = APPLY_WAIT;
-    }
-
-    __attribute__((fallthrough));
-    case APPLY_WAIT:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        //qDebug() << m_control << m_status;
-
-        if(!m_apply_status_read || !(m_status & STATUS_READY)){
-            // Если статус не читался или осциллограф ещё не применил настройки - продолжим ждать.
-            // Прочитаем статус.
-            SDOComm* comm = m_slcon->read(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
-            if(comm == nullptr){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            // Установим флаг чтения статуса.
-            m_apply_status_read = true;
-            break;
-        }
-
-        m_apply_state = APPLY_DONE;
-    }
-
-    __attribute__((fallthrough));
-    case APPLY_DONE:{
-        proc_err = ERROR_NONE;
-        proc_state = PROCESSING_DONE;
-    }break;
-    }
+    auto res_pair = processApplyImpl(false, false, true);
+    proc_state = res_pair.first; proc_err = res_pair.second;
 
 
     // Обработка результата.
@@ -1097,6 +954,176 @@ SDOScope::ProcessingState SDOScope::processApply()
     }
 
     return proc_state;
+}
+
+QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(bool applCommon, bool applTrig, bool applChannels)
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    // Обработка состояния.
+    switch(m_apply_state){
+    default:
+    case APPLY_NONE:
+        m_state = STATE_NONE;
+        break;
+
+    case APPLY_BEGIN:{
+        m_apply_state = APPLY_COMMON;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_COMMON:{
+        // Если нужно применить общие настройки.
+        if(applCommon){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            if(m_apply_cur_task < static_cast<uint>(m_apply_common_tasks.count())){
+                CommTask* ct = &m_apply_common_tasks[m_apply_cur_task];
+                // Следующие данные.
+                if(!runCommTask(ct)){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                m_apply_cur_task ++;
+                break;
+            }
+            m_apply_cur_task = 0;
+        }
+
+        m_apply_state = APPLY_TRIG;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG:{
+        // Если нужно применить настройки триггера.
+        if(applTrig){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            if(m_apply_cur_task < static_cast<uint>(m_apply_trig_tasks.count())){
+                CommTask* ct = &m_apply_trig_tasks[m_apply_cur_task];
+                // Следующие данные.
+                if(!runCommTask(ct)){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                m_apply_cur_task ++;
+                break;
+            }
+            m_apply_cur_task = 0;
+        }
+
+        m_apply_state = APPLY_CHANNELS;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_CHANNELS:{
+        // Если нужно применить настройки каналов.
+        if(applChannels){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            if(m_apply_cur_task < static_cast<uint>(m_apply_channels_tasks.count())){
+                CommTask* ct = &m_apply_channels_tasks[m_apply_cur_task];
+                // Следующие данные.
+                if(!runCommTask(ct)){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                m_apply_cur_task ++;
+                break;
+            }
+
+            // Сброс статуса.
+            m_status = STATUS_NONE;
+            // Записать.
+            SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
+            if(comm == nullptr){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+        }
+
+        m_apply_state = APPLY_WAIT;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_WAIT:{
+        // Если нужно применить настройки каналов.
+        if(applChannels){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            //qDebug() << m_control << m_status;
+
+            if(!m_apply_status_read || !(m_status & STATUS_READY)){
+                // Если статус не читался или осциллограф ещё не применил настройки - продолжим ждать.
+                // Прочитаем статус.
+                SDOComm* comm = m_slcon->read(m_nodeId, m_entryIndex, STATUS_SUBINDEX, &m_status, sizeof(m_status), m_comm);
+                if(comm == nullptr){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                // Установим флаг чтения статуса.
+                m_apply_status_read = true;
+                break;
+            }
+        }
+
+        m_apply_state = APPLY_DONE;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_DONE:{
+        proc_err = ERROR_NONE;
+        proc_state = PROCESSING_DONE;
+    }break;
+    }
+
+
+    return qMakePair(proc_state, proc_err);
 }
 
 void SDOScope::populateApplyTasks()
