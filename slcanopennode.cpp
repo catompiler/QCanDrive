@@ -371,7 +371,9 @@ void SLCanOpenNode::pollSlcanProcessCO()
 
     slcan_err_t slerr = slcan_master_poll(&m_scm);
     if(slerr != E_SLCAN_NO_ERROR){
-        qDebug() << "slcan_master_poll error:" << slerr;
+        if(slerr != E_SLCAN_UNEXPECTED){
+            qDebug() << "slcan_master_poll error:" << slerr;
+        }
     }
 
     // fflush(stdout);
