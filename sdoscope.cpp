@@ -480,195 +480,8 @@ SDOScope::ProcessingState SDOScope::processUpdate()
     ProcessingState proc_state = PROCESSING_IN_PROGRES;
 
 
-    // Обработка состояния.
-    switch(m_update_state){
-    default:
-    case UPDATE_NONE:
-        m_state = STATE_NONE;
-        return PROCESSING_DONE;
-
-    case UPDATE_BEGIN:
-        m_update_state = UPDATE_COMMON;
-
-    __attribute__((fallthrough));
-    case UPDATE_COMMON:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        if(m_update_cur_task < static_cast<uint>(m_update_common_tasks.count())){
-            CommTask* ct = &m_update_common_tasks[m_update_cur_task];
-            // Следующие данные.
-            if(!runCommTask(ct)){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            m_update_cur_task ++;
-            break;
-        }
-
-        m_update_state = UPDATE_TRIG;
-        m_update_cur_task = 0;
-    }
-
-    __attribute__((fallthrough));
-    case UPDATE_TRIG:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        if(m_update_cur_task < static_cast<uint>(m_update_trig_tasks.count())){
-            CommTask* ct = &m_update_trig_tasks[m_update_cur_task];
-            // Следующие данные.
-            if(!runCommTask(ct)){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            m_update_cur_task ++;
-            break;
-        }
-
-        m_update_state = UPDATE_CHANNELS;
-        m_update_cur_task = 0;
-    }
-
-    __attribute__((fallthrough));
-    case UPDATE_CHANNELS:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        if(m_update_cur_task < static_cast<uint>(m_update_channels_tasks.count())){
-            CommTask* ct = &m_update_channels_tasks[m_update_cur_task];
-            // Следующие данные.
-            if(!runCommTask(ct)){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            m_update_cur_task ++;
-            break;
-        }
-
-        // Теперь, когда все данные обновлены, обновим типы данных каналов.
-        for (uint i = 0; i < m_max_channels; i ++) {
-            Channel* ch = &m_channels[i];
-
-            RegVar* rv = findRegVar(ch->regIndex(), ch->regSubIndex());
-            if(rv == nullptr) continue;
-
-            ch->setDataType(rv->dataType());
-        }
-
-        m_update_state = UPDATE_BASE;
-    }
-
-    __attribute__((fallthrough));
-    case UPDATE_BASE:{
-        // Ожидание завершения предыдущего этапа.
-        if(!m_comm->isFinished()){
-            break;
-        }
-        if(m_comm->hasError()){
-            proc_err = ERROR_COMM;
-            proc_state = PROCESSING_ERROR;
-            break;
-        }
-
-        // Если чтение данных уже было запущено.
-        if(m_update_base_read){
-            // Канал.
-            Channel* ch_readed = &m_channels[m_update_base_ch];
-            // Установим базовое значение канала.
-            ch_readed->setBaseValue(COValue::valueFrom<qreal>(&m_update_base_value, m_update_base_dataType, 1.0));
-
-            // Следующий канал.
-            m_update_base_ch ++;
-        }
-
-        // Канал.
-        Channel* ch = nullptr;
-        // Регистр значения канала.
-        RegVar* rv = nullptr;
-        // Регистр базового значения.
-        RegVar* rv_base = nullptr;
-
-        // По всем каналам.
-        while(m_update_base_ch < m_max_channels){
-            // Получим текущий канал.
-            ch = &m_channels[m_update_base_ch];
-
-            // Найдём регистр.
-            rv = findRegVar(ch->regIndex(), ch->regSubIndex());
-            // Если не найден - пропустим
-            if(rv == nullptr){
-                m_update_base_ch ++;
-                continue;
-            }
-
-            // Найдём регистр базового значения.
-            rv_base = findRegVar(rv->baseIndex(), rv->baseSubIndex());
-            // Если не найден, тоже пропустим - читать просто нечего.
-            if(rv_base == nullptr){
-                m_update_base_ch ++;
-                continue;
-            }
-
-            break;
-        }
-
-        // Если есть откуда обновлять.
-        // Если список не окончен и регистр найден - запустим чтение его базового значения.
-        if(ch != nullptr && rv != nullptr && rv_base != nullptr){
-
-            m_update_base_dataType = rv_base->dataType();
-
-            SDOComm* comm = m_slcon->read(m_nodeId, rv->baseIndex(), rv->baseSubIndex(), &m_update_base_value, sizeof(m_update_base_value), m_comm);
-            if(comm == nullptr){
-                proc_err = ERROR_COMM;
-                proc_state = PROCESSING_ERROR;
-                break;
-            }
-
-            // Установим флаг чтения.
-            m_update_base_read = true;
-
-            // Выходим и ожидаем завершения чтения.
-            break;
-        }
-
-        m_update_state = UPDATE_DONE;
-    }
-
-    __attribute__((fallthrough));
-    case UPDATE_DONE:{
-        proc_err = ERROR_NONE;
-        proc_state = PROCESSING_DONE;
-    }break;
-    }
+    auto res_pair = processUpdateImpl(true, true, true);
+    proc_state = res_pair.first; proc_err = res_pair.second;
 
 
     // Обработка результата.
@@ -694,6 +507,220 @@ SDOScope::ProcessingState SDOScope::processUpdate()
     }
 
     return proc_state;
+}
+
+QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bool updCommon, bool updTrig, bool updChannels)
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    // Обработка состояния.
+    switch(m_update_state){
+    default:
+    case UPDATE_NONE:
+        m_state = STATE_NONE;
+        break;
+
+    case UPDATE_BEGIN:
+        m_update_state = UPDATE_COMMON;
+
+    __attribute__((fallthrough));
+    case UPDATE_COMMON:{
+        // Если нужно обновлять общие настройки.
+        if(updCommon){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            if(m_update_cur_task < static_cast<uint>(m_update_common_tasks.count())){
+                CommTask* ct = &m_update_common_tasks[m_update_cur_task];
+                // Следующие данные.
+                if(!runCommTask(ct)){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                m_update_cur_task ++;
+                break;
+            }
+            m_update_cur_task = 0;
+        }
+
+        m_update_state = UPDATE_TRIG;
+    }
+
+    __attribute__((fallthrough));
+    case UPDATE_TRIG:{
+        // Если нужно обновлять настройки триггера.
+        if(updTrig){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            if(m_update_cur_task < static_cast<uint>(m_update_trig_tasks.count())){
+                CommTask* ct = &m_update_trig_tasks[m_update_cur_task];
+                // Следующие данные.
+                if(!runCommTask(ct)){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                m_update_cur_task ++;
+                break;
+            }
+            m_update_cur_task = 0;
+        }
+
+        m_update_state = UPDATE_CHANNELS;
+    }
+
+    __attribute__((fallthrough));
+    case UPDATE_CHANNELS:{
+        // Если нужно обновлять настройки каналов.
+        if(updChannels){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            if(m_update_cur_task < static_cast<uint>(m_update_channels_tasks.count())){
+                CommTask* ct = &m_update_channels_tasks[m_update_cur_task];
+                // Следующие данные.
+                if(!runCommTask(ct)){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                m_update_cur_task ++;
+                break;
+            }
+
+            // Теперь, когда все данные обновлены, обновим типы данных каналов.
+            for (uint i = 0; i < m_max_channels; i ++) {
+                Channel* ch = &m_channels[i];
+
+                RegVar* rv = findRegVar(ch->regIndex(), ch->regSubIndex());
+                if(rv == nullptr) continue;
+
+                ch->setDataType(rv->dataType());
+            }
+        }
+
+        m_update_state = UPDATE_BASE;
+    }
+
+    __attribute__((fallthrough));
+    case UPDATE_BASE:{
+        // Если нужно обновлять настройки каналов.
+        if(updChannels){
+            // Ожидание завершения предыдущего этапа.
+            if(!m_comm->isFinished()){
+                break;
+            }
+            if(m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Если чтение данных уже было запущено.
+            if(m_update_base_read){
+                // Канал.
+                Channel* ch_readed = &m_channels[m_update_base_ch];
+                // Установим базовое значение канала.
+                ch_readed->setBaseValue(COValue::valueFrom<qreal>(&m_update_base_value, m_update_base_dataType, 1.0));
+
+                // Следующий канал.
+                m_update_base_ch ++;
+            }
+
+            // Канал.
+            Channel* ch = nullptr;
+            // Регистр значения канала.
+            RegVar* rv = nullptr;
+            // Регистр базового значения.
+            RegVar* rv_base = nullptr;
+
+            // По всем каналам.
+            while(m_update_base_ch < m_max_channels){
+                // Получим текущий канал.
+                ch = &m_channels[m_update_base_ch];
+
+                // Найдём регистр.
+                rv = findRegVar(ch->regIndex(), ch->regSubIndex());
+                // Если не найден - пропустим
+                if(rv == nullptr){
+                    m_update_base_ch ++;
+                    continue;
+                }
+
+                // Найдём регистр базового значения.
+                rv_base = findRegVar(rv->baseIndex(), rv->baseSubIndex());
+                // Если не найден, тоже пропустим - читать просто нечего.
+                if(rv_base == nullptr){
+                    m_update_base_ch ++;
+                    continue;
+                }
+
+                break;
+            }
+
+            // Если есть откуда обновлять.
+            // Если список не окончен и регистр найден - запустим чтение его базового значения.
+            if(ch != nullptr && rv != nullptr && rv_base != nullptr){
+
+                m_update_base_dataType = rv_base->dataType();
+
+                SDOComm* comm = m_slcon->read(m_nodeId, rv->baseIndex(), rv->baseSubIndex(), &m_update_base_value, sizeof(m_update_base_value), m_comm);
+                if(comm == nullptr){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                // Установим флаг чтения.
+                m_update_base_read = true;
+
+                // Выходим и ожидаем завершения чтения.
+                break;
+            }
+        }
+
+        m_update_state = UPDATE_DONE;
+    }
+
+    __attribute__((fallthrough));
+    case UPDATE_DONE:{
+        proc_err = ERROR_NONE;
+        proc_state = PROCESSING_DONE;
+    }break;
+    }
+
+
+    return qMakePair(proc_state, proc_err);
 }
 
 void SDOScope::populateUpdateTasks()

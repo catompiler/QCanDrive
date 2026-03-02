@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QPair>
 #include "cotypes.h"
 #include "covaluetypes.h"
 
@@ -460,6 +461,7 @@ private:
 
     // Обработка КА обновления.
     ProcessingState processUpdate();
+    QPair<ProcessingState, Error> processUpdateImpl(bool updCommon, bool updTrig, bool updChannels);
     void populateUpdateTasks();
 
     // Обработка КА применения настроек.
