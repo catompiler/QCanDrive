@@ -360,6 +360,7 @@ CO_CANsend(CO_CANmodule_t* CANmodule, CO_CANtx_t* buffer) {
         CANmodule->bufferInhibitFlag = buffer->syncFlag;
         /* copy message and txRequest */
         // copied in can_send_msg(...).
+        buffer->bufferFull = false;
     }
     /* if no buffer is free, message will be sent by interrupt */
     else {
