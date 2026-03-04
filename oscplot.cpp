@@ -1,6 +1,7 @@
 #include "oscplot.h"
 
-OscPlot::OscPlot()
+OscPlot::OscPlot(QWidget* parent)
+    :SignalPlot(tr("Осциллограф"), parent)
 {
 
 }

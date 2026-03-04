@@ -49,6 +49,10 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     ui->tvRegView->setSLCanOpenNode(m_slcon);
     ui->tvRegView->setRegListModel(ui->tvRegList->regListModel());
 
+    ui->oscopeWgt->setSLCanOpenNode(m_slcon);
+    ui->oscopeWgt->setRegListModel(ui->tvRegList->regListModel());
+
+    // Коннекты действий.
     connect(ui->actDebugExec, &QAction::triggered, this, &CanDriveWin::m_ui_actDebugExec_triggered);
     connect(ui->actQuit, &QAction::triggered, this, &CanDriveWin::m_ui_actQuit_triggered);
     connect(ui->actSettings, &QAction::triggered, this, &CanDriveWin::m_ui_actSettings_triggered);
@@ -125,12 +129,18 @@ CanDriveWin::~CanDriveWin()
 void CanDriveWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
+
+    ui->oscopeWgt->connected();
+
     updateStatusBar();
 }
 
 void CanDriveWin::CANopen_disconnected()
 {
     qDebug() << "CANopen_disconnected()";
+
+    ui->oscopeWgt->disconnected();
+
     updateStatusBar();
 }
 

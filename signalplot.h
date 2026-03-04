@@ -40,6 +40,7 @@ public:
     // takes ownership of the newBuffer
     int addSignal(const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1, SequentialBuffer* newBuffer = nullptr);
     void removeSignal(int n);
+    void removeSignals();
     int signalsCount() const;
 
     QString signalName(int n) const;

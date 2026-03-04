@@ -86,7 +86,7 @@ public:
         TRIG_CH_N_SUBINDEX = 0x24, /* Номер канала. */
         TRIG_TYPE_SUBINDEX = 0x25, /* Тип триггера. */
         TRIG_VALUE_SUBINDEX = 0x26, /* Значение триггера. */
-        START_INDEX_SUBINDEX = 0x27, /* Начальный индекс записи (индекс сработки триггера). */
+        TRIG_INDEX_SUBINDEX = 0x27, /* Индекс сработки триггера. */
         CUR_INDEX_SUBINDEX = 0x28, /* Индекс вставки. */
         CUR_COUNT_SUBINDEX = 0x29, /* Текущее число семплов. */
     };
@@ -181,6 +181,7 @@ public:
     enum ReadState {
         READ_NONE = 0,
         READ_BEGIN,
+        READ_INDEX,
         READ_DATA,
         READ_DONE
     };
@@ -272,8 +273,8 @@ public:
         const uint32_t* regIdPtr() const;
 
         //! Получает указатель на массив семплов канала.
-        void* samplesPtr();
-        const void* samplesPtr() const;
+        sample_t* samplesPtr();
+        const sample_t* samplesPtr() const;
 
         // Вызывает класс осциллографа после чтения конфигурации.
         // Изменяет размер буфера с семплами.
@@ -472,6 +473,14 @@ private:
     uint32_t m_trig_type;
     // Значение.
     uint32_t m_trig_value;
+
+
+    // Данные для обработки прочитанных данных.
+    // Начальный индекс записи.
+    uint32_t m_start_index;
+    // Буфер для чтения кольцевых буферов данных каналов.
+    Channel::sample_t* m_ring_samples;
+
 
     // Обработка КА инициализации.
     ProcessingState processInit();

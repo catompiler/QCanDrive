@@ -74,10 +74,15 @@ SDOScope::SDOScope(QObject *parent)
     m_trig_ch_n = 0;
     m_trig_type = 0;
     m_trig_value = 0;
+
+    m_start_index = 0;
+    m_ring_samples = nullptr;
 }
 
 SDOScope::~SDOScope()
 {
+    if(m_ring_samples) delete[] m_ring_samples;
+
     disconnect(m_comm, &SDOComm::finished, this, &SDOScope::sdoFinished);
     if(!m_comm->running()){
         delete m_comm;
@@ -529,6 +534,10 @@ SDOScope::ProcessingState SDOScope::processInit()
                 // remove after debug
                 //memset(m_channels[i].m_samples, 0xDEADBEEF, m_max_samples*sizeof(Channel::sample_t));
             }
+
+            // Выделим буфер для чтения данных каналов.
+            if(m_ring_samples) delete[] m_ring_samples;
+            m_ring_samples = new Channel::sample_t[m_max_samples];
 
             // Каналы теперь созданы -
             // обновим задания для обновления.
@@ -1452,8 +1461,16 @@ SDOScope::ProcessingState SDOScope::processRead()
         m_state = STATE_NONE;
         return PROCESSING_DONE;
 
-    case READ_BEGIN:
+    case READ_BEGIN:{
+        // Прпочитать индекс начала данных.
+        SDOComm* comm = m_slcon->read(m_nodeId, m_entryIndex, CUR_INDEX_SUBINDEX, &m_start_index, sizeof(m_start_index), m_comm);
+        if(comm == nullptr){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
         m_read_state = READ_DATA;
+    }
 
     __attribute__((fallthrough));
     case READ_DATA:{
@@ -1468,8 +1485,32 @@ SDOScope::ProcessingState SDOScope::processRead()
         }
 
 
-        // Если чтение уже было запущено.
+        // Если чтение уже было запущено,
+        // а при достижении данного участка кода
+        // ещё и завершено.
+        // Не смотря на чтение из предыдущего этапа -
+        // в этом случае условие не выполнится.
         if(m_read_read){
+            // Скопируем данные в текущий канал с
+            // преобразованием кольцевого порядка
+            // следования данных в линейный.
+            Channel* ch = &m_channels[m_read_ch];
+            Channel::sample_t* ch_samples = ch->samplesPtr();
+
+            // Часть буфера с началом данных.
+            size_t start_part_index = m_start_index;
+            size_t start_part_count = m_samples - m_start_index;
+            // Часть буфера с концом данных.
+            size_t end_part_index = 0;
+            size_t end_part_count = m_start_index;
+            // Индексы в целевом буфере.
+            size_t dst_start_part_index = 0;
+            size_t dst_end_part_index   = start_part_count;
+
+            // Копирование частей данных, если это необходимо (размер не равен нулю).
+            if(start_part_count != 0) memcpy(&ch_samples[dst_start_part_index], &m_ring_samples[start_part_index], sizeof(Channel::sample_t) * start_part_count);
+            if(end_part_count   != 0) memcpy(&ch_samples[dst_end_part_index  ], &m_ring_samples[end_part_index  ], sizeof(Channel::sample_t) * end_part_count  );
+
             // Перейдём к следующему каналу.
             m_read_ch ++;
         }
@@ -1492,7 +1533,7 @@ SDOScope::ProcessingState SDOScope::processRead()
         // Если есть канал для чтения.
         if(ch != nullptr && m_read_ch < m_max_channels){
             // Прочитаем данные.
-            SDOComm* comm = m_slcon->read(m_nodeId, m_entryIndex, CH_DATA0_SAMPLES_SUBINDEX + m_read_ch, ch->samplesPtr(), sizeof(Channel::sample_t) * m_samples, m_comm);
+            SDOComm* comm = m_slcon->read(m_nodeId, m_entryIndex, CH_DATA0_SAMPLES_SUBINDEX + m_read_ch, m_ring_samples, sizeof(Channel::sample_t) * m_samples, m_comm);
             if(comm == nullptr){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
@@ -1711,12 +1752,12 @@ const uint32_t* SDOScope::Channel::regIdPtr() const
     return &m_reg_id;
 }
 
-void* SDOScope::Channel::samplesPtr()
+SDOScope::Channel::sample_t* SDOScope::Channel::samplesPtr()
 {
     return m_samples;
 }
 
-const void* SDOScope::Channel::samplesPtr() const
+const SDOScope::Channel::sample_t* SDOScope::Channel::samplesPtr() const
 {
     return m_samples;
 }

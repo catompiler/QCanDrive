@@ -157,6 +157,9 @@ void SignalPlot::setTextColor(const QColor& newColor)
 
 int SignalPlot::addSignal(const QString& newName, const QColor& newColor, const qreal& z, SequentialBuffer* newBuffer)
 {
+    // Если нет данных - нет и сигналов.
+    if(m_size == 0) return -1;
+
     int curvesCount = signalsCount();
 
     QwtPlotCurve* newCurve = new QwtPlotCurve(newName);
@@ -218,6 +221,12 @@ void SignalPlot::removeSignal(int n)
     if(curv == nullptr) return;
 
     curv->detach();
+}
+
+void SignalPlot::removeSignals()
+{
+    //while(signalsCount()) removeSignal(0);
+    removeSignal(-1);
 }
 
 int SignalPlot::signalsCount() const

@@ -52,6 +52,8 @@ SOURCES += \
     regsviewwgt.cpp \
     sdocomm.cpp \
     sdoscope.cpp \
+    sdoscopechseditdlg.cpp \
+    sdoscopewgt.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
     sdovaluebareditdlg.cpp \
@@ -143,6 +145,8 @@ HEADERS += \
     sdocomm.h \
     sdocomm_data.h \
     sdoscope.h \
+    sdoscopechseditdlg.h \
+    sdoscopewgt.h \
     sdovalue.h \
     sdovaluebar.h \
     sdovaluebareditdlg.h \
@@ -216,6 +220,8 @@ HEADERS += \
 FORMS += \
     candrivewin.ui \
     canopenwin.ui \
+    sdoscopechseditdlg.ui \
+    sdoscopewgt.ui \
     sdovaluebareditdlg.ui \
     sdovaluebuttoneditdlg.ui \
     sdovaluedialeditdlg.ui \
@@ -232,6 +238,7 @@ FORMS += \
 
 RESOURCES += \
     candrive.qrc \
+    oscope.qrc \
     qt_canopennode_slcan.qrc \
     reglisteditor.qrc
 

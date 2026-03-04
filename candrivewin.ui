@@ -36,7 +36,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabCockpit">
        <property name="autoFillBackground">
@@ -124,6 +124,26 @@
        <attribute name="title">
         <string>Осциллограф</string>
        </attribute>
+       <layout class="QVBoxLayout" name="lOscope">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="SDOScopeWgt" name="oscopeWgt" native="true"/>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -601,11 +621,17 @@
    <extends>QTreeView</extends>
    <header>regsviewwgt.h</header>
   </customwidget>
+  <customwidget>
+   <class>SDOScopeWgt</class>
+   <extends>QWidget</extends>
+   <header>sdoscopewgt.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources>
-  <include location="qt_canopennode_slcan.qrc"/>
   <include location="reglisteditor.qrc"/>
   <include location="candrive.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
  </resources>
  <connections/>
 </ui>
