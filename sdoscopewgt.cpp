@@ -2,6 +2,7 @@
 #include "ui_sdoscopewgt.h"
 #include <QPushButton>
 #include "oscplot.h"
+#include "oscplotdata.h"
 #include "sdoscope.h"
 #include "slcanopennode.h"
 #include "reglistmodel.h"
@@ -113,6 +114,33 @@ void SDOScopeWgt::sdoscopeInitialized()
 void SDOScopeWgt::sdoscopeUpdated()
 {
     qDebug() << "SDOScopeWgt::sdoscopeUpdated()";
+
+    // Заполним график каналами осциллографа.
+
+    auto plt = getPlot();
+
+    // Очистим каналы.
+    plt->removeSignals();
+
+    size_t samplesCount = m_scope->samplesCount();
+
+    for(uint i = 0; i < samplesCount; i ++){
+        // Данные сигнала.
+        OscPlotData* pltData = new OscPlotData(m_scope, i);
+        // Добавим сигнал.
+        int sig_n = plt->addSignal(pltData);
+        // При ошибке - отрицательный номер.
+        if(sig_n < 0){
+            QMessageBox::critical(this, tr("Предупреждение!"), tr("Ощибка добавления сигнала %1 в осциллограф!").arg(i));
+            break;
+        }
+
+        // Данные ещё не читались - не показывать канал.
+        plt->setSignalVisible(sig_n, false);
+
+        // Первоначальная настройка.
+        plt->setBrush(sig_n, QBrush(Qt::NoBrush));
+    }
 }
 
 void SDOScopeWgt::sdoscopeErrorOccured()
@@ -137,26 +165,17 @@ void SDOScopeWgt::sdoscopeReaded()
 
     size_t samplesCount = m_scope->samplesCount();
 
-    plt->removeSignals();
-    plt->setBufferSize(samplesCount);
-    plt->setPeriod(1.0 / m_scope->sampleRate());
+    for(uint i = 0; i < samplesCount; i ++){
+        // Данные канала.
+        OscPlotData* pltData = plt->plotData(i);
+        // Обновим.
+        if(pltData) pltData->update();
 
-    for(uint i = 0; i < m_scope->channelsCount(); i ++){
+        // Канал.
         SDOScope::Channel* ch = m_scope->channel(i);
-        if(!ch) continue;
-        if(!ch->enabled()) continue;
-
-        int sig_n = plt->addSignal();
-        if(sig_n < 0){
-            QMessageBox::warning(this, tr("Предупреждение!"), tr("Ощибка добавления сигнала в осциллограф!"));
-            continue;
-        }
-
-        plt->setBrush(sig_n, QBrush(Qt::NoBrush));
-
-        for(uint sample_i = 0; sample_i < samplesCount; sample_i ++ ){
-            plt->putSample(sig_n, ch->value(sample_i));
-        }
+        // Если указатель не NULL
+        // и канал включен - показать сигнал.
+        plt->setSignalVisible(i, (ch && ch->enabled()));
     }
 
     plt->replot();

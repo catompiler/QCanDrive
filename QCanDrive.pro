@@ -46,6 +46,7 @@ SOURCES += \
     covaluetypes.cpp \
     canopenwin.cpp \
     oscplot.cpp \
+    oscplotdata.cpp \
     reglisteditorwgt.cpp \
     regsviewdelegate.cpp \
     regsviewmodel.cpp \
@@ -138,6 +139,7 @@ HEADERS += \
     covaluesholder.h \
     covaluetypes.h \
     oscplot.h \
+    oscplotdata.h \
     reglisteditorwgt.h \
     regsviewdelegate.h \
     regsviewmodel.h \
