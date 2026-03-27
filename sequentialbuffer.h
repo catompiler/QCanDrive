@@ -43,6 +43,11 @@ public:
     // Число семплов, записанных в буфер.
     size_t avail() const;
 
+    bool boundsAutoUpdate() const;
+    void setBoundsAutoUpdate(bool newAutoUpdate);
+
+    void updateBounds();
+
     const QPointF& get(size_t i) const;
     QPointF get(size_t i);
     // отрицательно приращение x
@@ -61,11 +66,13 @@ private:
         qreal period;
         qreal startTime;
         AddressingMode addrMode;
+        bool boundsAutoUpdate;
         QRectF boundingRect;
     };
 
     Data* m_d;
 
+    void putNoUpd(const qreal& new_y, const qreal& new_dx);
     void putAndUpd(const qreal& new_y, const qreal& new_dx);
     int transIndex(int i, int ref_i) const;
     int decIndex(int i) const;
@@ -73,7 +80,7 @@ private:
     int incCount(int cnt) const;
     int decCount(int cnt) const;
     void updateVerticalBounds() const;
-    void recalBounds();
+    void recalcBounds();
 };
 
 #endif // SEQUENTIALBUFFER_H

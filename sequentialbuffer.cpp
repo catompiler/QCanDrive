@@ -10,6 +10,7 @@ SequentialBuffer::SequentialBuffer()
     m_d->period = 1.0;
     m_d->startTime = 0.0;
     m_d->addrMode = CIRCULAR;
+    m_d->boundsAutoUpdate = true;
     reset();
 }
 
@@ -22,6 +23,7 @@ SequentialBuffer::SequentialBuffer(const SequentialBuffer& sb)
     m_d->period = sb.m_d->period;
     m_d->startTime = sb.m_d->startTime;
     m_d->addrMode = sb.m_d->addrMode;
+    m_d->boundsAutoUpdate = sb.m_d->boundsAutoUpdate;
     m_d->boundingRect = sb.m_d->boundingRect;
 }
 
@@ -99,9 +101,28 @@ size_t SequentialBuffer::avail() const
     return static_cast<size_t>(m_d->count);
 }
 
+bool SequentialBuffer::boundsAutoUpdate() const
+{
+    return m_d->boundsAutoUpdate;
+}
+
+void SequentialBuffer::setBoundsAutoUpdate(bool newAutoUpdate)
+{
+    m_d->boundsAutoUpdate = newAutoUpdate;
+}
+
+void SequentialBuffer::updateBounds()
+{
+    recalcBounds();
+}
+
 void SequentialBuffer::put(const qreal& y, const qreal& dx)
 {
-    putAndUpd(y, dx);
+    if(m_d->boundsAutoUpdate){
+        putAndUpd(y, dx);
+    }else{
+        putNoUpd(y, dx);
+    }
 //    m_d->index = incIndex(m_d->index);
     //    m_d->count = incCount(m_d->count);
 }
@@ -125,6 +146,29 @@ QPointF SequentialBuffer::get(size_t i)
     if(i >= static_cast<size_t>(m_d->samples.size())) return QPointF();
 
     return m_d->samples[transIndex(static_cast<int>(i), m_d->index)];
+}
+
+void SequentialBuffer::putNoUpd(const qreal& new_y, const qreal& new_dx)
+{
+    int cur_index = m_d->index;
+    int cur_count = m_d->count;
+
+    QVector<QPointF>& m_samples = m_d->samples;
+
+    qreal last_x = 0;
+
+    if(cur_count != 0){
+        int last_index = decIndex(cur_index);
+        last_x = m_samples[last_index].x();
+    }
+
+    qreal y = new_y;
+    qreal x = last_x + (new_dx >= 0) ? new_dx : m_d->period;
+
+    m_samples[cur_index] = QPointF(x, y);
+
+    m_d->index = incIndex(cur_index);
+    m_d->count = incCount(cur_count);
 }
 
 void SequentialBuffer::putAndUpd(const qreal& new_y, const qreal& new_dx)
@@ -298,7 +342,7 @@ void SequentialBuffer::updateVerticalBounds() const
     bounds.setCoords(left, bottom, right, top);
 }
 
-void SequentialBuffer::recalBounds()
+void SequentialBuffer::recalcBounds()
 {
     const QVector<QPointF>& m_samples = m_d->samples;
 
