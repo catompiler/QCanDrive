@@ -1,5 +1,6 @@
 #include "sdoscopewgt.h"
 #include "ui_sdoscopewgt.h"
+#include "sdoscopechseditdlg.h"
 #include <QPushButton>
 #include "oscplot.h"
 #include "oscplotdata.h"
@@ -23,6 +24,8 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 {
     ui->setupUi(this);
 
+    m_chs_edit_dlg = new SDOScopeChsEditDlg();
+
     m_initialized = false;
 
     // Осциллограф.
@@ -40,6 +43,7 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 
 SDOScopeWgt::~SDOScopeWgt()
 {
+    delete m_chs_edit_dlg;
     delete m_scope;
     delete ui;
 }
@@ -179,6 +183,20 @@ void SDOScopeWgt::sdoscopeReaded()
     }
 
     plt->replot();
+
+    // after replot (replot() call updateAxes()).
+    plt->updateZoomBaseSize();
+}
+
+void SDOScopeWgt::on_tbChannels_clicked(bool checked)
+{
+    Q_UNUSED(checked)
+
+    qDebug() << "on_tbChannels_clicked";
+
+    if(m_chs_edit_dlg->exec()){
+        //
+    }
 }
 
 OscPlot* SDOScopeWgt::getPlot()

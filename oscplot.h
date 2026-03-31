@@ -11,6 +11,7 @@
 
 class QwtPlotCurve;
 class QwtPlotLegendItem;
+class QwtPlotZoomer;
 class OscPlotData;
 
 
@@ -69,6 +70,10 @@ public:
     QRectF boundingRect(int n) const;
     QRectF boundingRect() const;
 
+    //! Обновляет zoom base
+    //! Plot Zoomer'а.
+    void updateZoomBaseSize();
+
     static QList<Qt::GlobalColor> getDefaultColors();
 
     bool legendItemEnabled() const;
@@ -88,6 +93,8 @@ protected:
     const QwtPlotCurve* getCurve(int n) const;
 
     void updateLegendItem();
+
+    QwtPlotZoomer* m_zoomer;
 };
 
 #endif // OSCPLOT_H

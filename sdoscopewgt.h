@@ -8,6 +8,8 @@ class SDOScope;
 class RegListModel;
 class SLCanOpenNode;
 
+class SDOScopeChsEditDlg;
+
 namespace Ui {
 class SDOScopeWgt;
 }
@@ -39,8 +41,11 @@ private slots:
     void sdoscopeDone();
     void sdoscopeReaded();
 
+    void on_tbChannels_clicked(bool checked);
+
 private:
     Ui::SDOScopeWgt *ui;
+    SDOScopeChsEditDlg* m_chs_edit_dlg;
 
     SDOScope* m_scope;
 
