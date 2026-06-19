@@ -45,6 +45,11 @@ SOURCES += \
     covaluesholder.cpp \
     covaluetypes.cpp \
     canopenwin.cpp \
+    oscopedata.cpp \
+    oscopehorizontal.cpp \
+    oscopeplot.cpp \
+    oscopeplotseriesdata.cpp \
+    oscopevertical.cpp \
     oscplot.cpp \
     oscplotdata.cpp \
     reglisteditorwgt.cpp \
@@ -138,6 +143,12 @@ HEADERS += \
     cotypes.h \
     covaluesholder.h \
     covaluetypes.h \
+    oscopechprop.h \
+    oscopedata.h \
+    oscopehorizontal.h \
+    oscopeplot.h \
+    oscopeplotseriesdata.h \
+    oscopevertical.h \
     oscplot.h \
     oscplotdata.h \
     reglisteditorwgt.h \

@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item row="0" column="0" colspan="2">
-    <widget class="OscPlot" name="oscplt" native="true">
+    <widget class="OScopePlot" name="oscplt" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -677,9 +677,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>OscPlot</class>
+   <class>OScopePlot</class>
    <extends>QWidget</extends>
-   <header>oscplot.h</header>
+   <header>oscopeplot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

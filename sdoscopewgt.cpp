@@ -2,8 +2,9 @@
 #include "ui_sdoscopewgt.h"
 #include "sdoscopechseditdlg.h"
 #include <QPushButton>
-#include "oscplot.h"
-#include "oscplotdata.h"
+#include "oscopeplot.h"
+#include "oscopeplotseriesdata.h"
+#include "oscopedata.h"
 #include "sdoscope.h"
 #include "slcanopennode.h"
 #include "reglistmodel.h"
@@ -126,25 +127,7 @@ void SDOScopeWgt::sdoscopeUpdated()
     // Очистим каналы.
     plt->removeSignals();
 
-    size_t samplesCount = m_scope->samplesCount();
-
-    for(uint i = 0; i < samplesCount; i ++){
-        // Данные сигнала.
-        OscPlotData* pltData = new OscPlotData(m_scope, i);
-        // Добавим сигнал.
-        int sig_n = plt->addSignal(pltData);
-        // При ошибке - отрицательный номер.
-        if(sig_n < 0){
-            QMessageBox::critical(this, tr("Предупреждение!"), tr("Ощибка добавления сигнала %1 в осциллограф!").arg(i));
-            break;
-        }
-
-        // Данные ещё не читались - не показывать канал.
-        plt->setSignalVisible(sig_n, false);
-
-        // Первоначальная настройка.
-        plt->setBrush(sig_n, QBrush(Qt::NoBrush));
-    }
+    // ...
 }
 
 void SDOScopeWgt::sdoscopeErrorOccured()
@@ -165,27 +148,11 @@ void SDOScopeWgt::sdoscopeDone()
 
 void SDOScopeWgt::sdoscopeReaded()
 {
+    // Обновим график.
+
     auto plt = getPlot();
 
-    size_t samplesCount = m_scope->samplesCount();
-
-    for(uint i = 0; i < samplesCount; i ++){
-        // Данные канала.
-        OscPlotData* pltData = plt->plotData(i);
-        // Обновим.
-        if(pltData) pltData->update();
-
-        // Канал.
-        SDOScope::Channel* ch = m_scope->channel(i);
-        // Если указатель не NULL
-        // и канал включен - показать сигнал.
-        plt->setSignalVisible(i, (ch && ch->enabled()));
-    }
-
     plt->replot();
-
-    // after replot (replot() call updateAxes()).
-    plt->updateZoomBaseSize();
 }
 
 void SDOScopeWgt::on_tbChannels_clicked(bool checked)
@@ -199,12 +166,12 @@ void SDOScopeWgt::on_tbChannels_clicked(bool checked)
     }
 }
 
-OscPlot* SDOScopeWgt::getPlot()
+OScopePlot* SDOScopeWgt::getPlot()
 {
     return ui->oscplt;
 }
 
-const OscPlot* SDOScopeWgt::getPlot() const
+const OScopePlot* SDOScopeWgt::getPlot() const
 {
     return ui->oscplt;
 }

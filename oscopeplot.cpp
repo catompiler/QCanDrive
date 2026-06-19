@@ -1,5 +1,7 @@
-#include "oscplot.h"
-#include "oscplotdata.h"
+#include "oscopeplot.h"
+#include "oscopehorizontal.h"
+#include "oscopedata.h"
+#include "oscopeplotseriesdata.h"
 #include <QwtPlotCanvas>
 #include <QwtPlotCurve>
 #include <QwtPlotGrid>
@@ -42,10 +44,12 @@ static const Qt::GlobalColor m_colors[] = {
 
 const int ColorsCount = static_cast<int>(sizeof(m_colors) / sizeof(m_colors[0]));
 
-OscPlot::OscPlot(QWidget* parent, const QString& newName)
+OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     :QwtPlot(parent)
 {
     setTitle(newName);
+
+    m_hori = new OScopeHorizontal();
 
     m_defaultAlpha = 0.75;
     m_legendItem = nullptr;
@@ -171,49 +175,49 @@ OscPlot::OscPlot(QWidget* parent, const QString& newName)
     setAutoReplot(false);
 }
 
-OscPlot::~OscPlot()
+OScopePlot::~OScopePlot()
 {
-
+    delete m_hori;
 }
 
-QString OscPlot::name() const
+QString OScopePlot::name() const
 {
     return title().text();
 }
 
-void OscPlot::setName(const QString& newName)
+void OScopePlot::setName(const QString& newName)
 {
     setTitle(newName);
 }
 
-qreal OscPlot::defaultAlpha() const
+qreal OScopePlot::defaultAlpha() const
 {
     return m_defaultAlpha;
 }
 
-void OscPlot::setDefaultAlpha(qreal newDefaultAlpha)
+void OScopePlot::setDefaultAlpha(qreal newDefaultAlpha)
 {
     m_defaultAlpha = newDefaultAlpha;
 }
 
-QBrush OscPlot::background() const
+QBrush OScopePlot::background() const
 {
     return canvasBackground();
 }
 
-void OscPlot::setBackground(const QBrush& newBrush)
+void OScopePlot::setBackground(const QBrush& newBrush)
 {
     setCanvasBackground(newBrush);
 
     updateLegendItem();
 }
 
-QColor OscPlot::textColor() const
+QColor OScopePlot::textColor() const
 {
     return palette().color(QPalette::Text);
 }
 
-void OscPlot::setTextColor(const QColor& newColor)
+void OScopePlot::setTextColor(const QColor& newColor)
 {
     QPalette pal(palette());
     pal.setColor(QPalette::Text, newColor);
@@ -222,7 +226,88 @@ void OscPlot::setTextColor(const QColor& newColor)
     updateLegendItem();
 }
 
-int OscPlot::addSignal(OscPlotData* pltData, const QString& newName, const QColor& newColor, const qreal& z)
+qreal OScopePlot::hDiv() const
+{
+    return m_hori->hDiv();
+}
+
+void OScopePlot::setHDiv(qreal newHDiv)
+{
+    m_hori->setHDiv(newHDiv);
+    invalidateAllBounds();
+}
+
+qreal OScopePlot::hOffset() const
+{
+    return m_hori->hOffset();
+}
+
+void OScopePlot::setHOffset(qreal newHOffset)
+{
+    m_hori->setHOffset(newHOffset);
+    invalidateAllBounds();
+}
+
+qreal OScopePlot::vDiv(int n) const
+{
+    const OScopePlotSeriesData* ser_data = plotData(n);
+    if(!ser_data) return qreal();
+
+    return ser_data->vDiv();
+}
+
+void OScopePlot::setVDiv(int n, qreal newVDiv)
+{
+    OScopePlotSeriesData* ser_data = plotData(n);
+    if(!ser_data) return;
+
+    ser_data->setVDiv(newVDiv);
+    ser_data->invalidateBounds();
+}
+
+qreal OScopePlot::vOffset(int n) const
+{
+    const OScopePlotSeriesData* ser_data = plotData(n);
+    if(!ser_data) return qreal();
+
+    return ser_data->vOffset();
+}
+
+void OScopePlot::setVOffset(int n, qreal newVOffset)
+{
+    OScopePlotSeriesData* ser_data = plotData(n);
+    if(!ser_data) return;
+
+    ser_data->setVOffset(newVOffset);
+    ser_data->invalidateBounds();
+}
+
+bool OScopePlot::setData(OScopeData* newOscData)
+{
+    if(newOscData == nullptr) return false;
+
+    removeSignals();
+
+    size_t channels_count = newOscData->channelsCount();
+    //size_t samples_count = newOscData->samplesCount();
+
+    for(size_t ch_i = 0; ch_i < channels_count; ch_i ++){
+        // Данные канала.
+        OScopePlotSeriesData* series_data = new OScopePlotSeriesData(m_hori, newOscData, ch_i);
+        // Добавить сигнал.
+        int added_n = addSignal(series_data, QString::number(ch_i));
+        // Если не удалось.
+        if(added_n < 0){
+            // Удалим данные.
+            delete series_data;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int OScopePlot::addSignal(OScopePlotSeriesData* pltData, const QString& newName, const QColor& newColor, const qreal& z)
 {
     // Если нет данных - нет и сигнала.
     if(pltData == nullptr) return -1;
@@ -264,7 +349,7 @@ int OscPlot::addSignal(OscPlotData* pltData, const QString& newName, const QColo
     return curvesCount;
 }
 
-void OscPlot::removeSignal(int n)
+void OScopePlot::removeSignal(int n)
 {
     if(n == -1){
         detachItems(QwtPlotItem::Rtti_PlotCurve, true);
@@ -278,38 +363,38 @@ void OscPlot::removeSignal(int n)
     curv->detach();
 }
 
-void OscPlot::removeSignals()
+void OScopePlot::removeSignals()
 {
     //while(signalsCount()) removeSignal(0);
     removeSignal(-1);
 }
 
-int OscPlot::signalsCount() const
+int OScopePlot::signalsCount() const
 {
     return itemList(QwtPlotItem::Rtti_PlotCurve).count();
 }
 
-OscPlotData* OscPlot::plotData(int n)
+OScopePlotSeriesData* OScopePlot::plotData(int n)
 {
     QwtPlotCurve* curv = getCurve(n);
     if(curv == nullptr) return nullptr;
 
-    OscPlotData* pltData = static_cast<OscPlotData*>(curv->data());
+    OScopePlotSeriesData* pltData = static_cast<OScopePlotSeriesData*>(curv->data());
 
     return pltData;
 }
 
-const OscPlotData* OscPlot::plotData(int n) const
+const OScopePlotSeriesData* OScopePlot::plotData(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
     if(curv == nullptr) return nullptr;
 
-    const OscPlotData* pltData = static_cast<const OscPlotData*>(curv->data());
+    const OScopePlotSeriesData* pltData = static_cast<const OScopePlotSeriesData*>(curv->data());
 
     return pltData;
 }
 
-bool OscPlot::signalVisible(int n) const
+bool OScopePlot::signalVisible(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
     if(curv == nullptr) return false;
@@ -317,7 +402,7 @@ bool OscPlot::signalVisible(int n) const
     return curv->isVisible();
 }
 
-void OscPlot::setSignalVisible(int n, bool newVisible)
+void OScopePlot::setSignalVisible(int n, bool newVisible)
 {
     QwtPlotCurve* curv = getCurve(n);
     if(curv == nullptr) return;
@@ -325,7 +410,7 @@ void OscPlot::setSignalVisible(int n, bool newVisible)
     curv->setVisible(newVisible);
 }
 
-QString OscPlot::signalName(int n) const
+QString OScopePlot::signalName(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -334,7 +419,7 @@ QString OscPlot::signalName(int n) const
     return curv->title().text();
 }
 
-void OscPlot::setSignalName(int n, const QString& newName)
+void OScopePlot::setSignalName(int n, const QString& newName)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -343,7 +428,7 @@ void OscPlot::setSignalName(int n, const QString& newName)
     curv->setTitle(newName);
 }
 
-qreal OscPlot::z(int n) const
+qreal OScopePlot::z(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -352,7 +437,7 @@ qreal OscPlot::z(int n) const
     return curv->z();
 }
 
-void OscPlot::setZ(int n, const qreal& newZ)
+void OScopePlot::setZ(int n, const qreal& newZ)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -361,7 +446,7 @@ void OscPlot::setZ(int n, const qreal& newZ)
     curv->setZ(newZ);
 }
 
-QwtPlotCurve::CurveStyle OscPlot::curveStyle(int n) const
+QwtPlotCurve::CurveStyle OScopePlot::curveStyle(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -370,7 +455,7 @@ QwtPlotCurve::CurveStyle OscPlot::curveStyle(int n) const
     return curv->style();
 }
 
-void OscPlot::setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle)
+void OScopePlot::setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -379,7 +464,7 @@ void OscPlot::setCurveStyle(int n, QwtPlotCurve::CurveStyle newStyle)
     curv->setStyle(newStyle);
 }
 
-QPen OscPlot::pen(int n) const
+QPen OScopePlot::pen(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -388,7 +473,7 @@ QPen OscPlot::pen(int n) const
     return curv->pen();
 }
 
-void OscPlot::setPen(int n, const QPen& newPen)
+void OScopePlot::setPen(int n, const QPen& newPen)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -397,7 +482,7 @@ void OscPlot::setPen(int n, const QPen& newPen)
     curv->setPen(newPen);
 }
 
-QBrush OscPlot::brush(int n) const
+QBrush OScopePlot::brush(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -406,7 +491,7 @@ QBrush OscPlot::brush(int n) const
     return curv->brush();
 }
 
-void OscPlot::setBrush(int n, const QBrush& newBrush)
+void OScopePlot::setBrush(int n, const QBrush& newBrush)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -415,7 +500,7 @@ void OscPlot::setBrush(int n, const QBrush& newBrush)
     curv->setBrush(newBrush);
 }
 
-qreal OscPlot::baseLine(int n) const
+qreal OScopePlot::baseLine(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -424,7 +509,7 @@ qreal OscPlot::baseLine(int n) const
     return curv->baseline();
 }
 
-void OscPlot::setBaseLine(int n, qreal newBaseLine)
+void OScopePlot::setBaseLine(int n, qreal newBaseLine)
 {
     QwtPlotCurve* curv = getCurve(n);
 
@@ -433,14 +518,14 @@ void OscPlot::setBaseLine(int n, qreal newBaseLine)
     curv->setBaseline(newBaseLine);
 }
 
-void OscPlot::setBaseLine(qreal newBaseLine)
+void OScopePlot::setBaseLine(qreal newBaseLine)
 {
     for(int i = 0; i < signalsCount(); i ++){
         setBaseLine(i, newBaseLine);
     }
 }
 
-QRectF OscPlot::boundingRect(int n) const
+QRectF OScopePlot::boundingRect(int n) const
 {
     const QwtPlotCurve* curv = getCurve(n);
 
@@ -449,7 +534,7 @@ QRectF OscPlot::boundingRect(int n) const
     return curv->dataRect();
 }
 
-QRectF OscPlot::boundingRect() const
+QRectF OScopePlot::boundingRect() const
 {
     QRectF resRect;
 
@@ -457,7 +542,7 @@ QRectF OscPlot::boundingRect() const
 
     for(auto& item: items){
         auto curv = static_cast<QwtPlotCurve*>(item);
-        auto pltData = static_cast<OscPlotData*>(curv->data());
+        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
 
         QRectF rect = pltData->boundingRect();
 
@@ -467,7 +552,7 @@ QRectF OscPlot::boundingRect() const
     return resRect;
 }
 
-void OscPlot::updateZoomBaseSize()
+void OScopePlot::updateZoomBaseSize()
 {
     QRectF bounds = boundingRect();
 
@@ -476,19 +561,19 @@ void OscPlot::updateZoomBaseSize()
     m_zoomer->setZoomBase(bounds);
 }
 
-void OscPlot::clear()
+void OScopePlot::clear()
 {
     removeSignals();
 
     //replot();
 }
 
-bool OscPlot::legendItemEnabled() const
+bool OScopePlot::legendItemEnabled() const
 {
     return m_legendItem != nullptr;
 }
 
-void OscPlot::setLegendItemEnabled(bool newEnabled)
+void OScopePlot::setLegendItemEnabled(bool newEnabled)
 {
     if(newEnabled){
         if(m_legendItem == nullptr){
@@ -505,7 +590,7 @@ void OscPlot::setLegendItemEnabled(bool newEnabled)
     }
 }
 
-QList<Qt::GlobalColor> OscPlot::getDefaultColors()
+QList<Qt::GlobalColor> OScopePlot::getDefaultColors()
 {
     QList<Qt::GlobalColor> colors;
 
@@ -516,7 +601,7 @@ QList<Qt::GlobalColor> OscPlot::getDefaultColors()
     return colors;
 }
 
-int OscPlot::findCurve(const QwtPlotCurve* findCurv) const
+int OScopePlot::findCurve(const QwtPlotCurve* findCurv) const
 {
     auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
@@ -530,7 +615,7 @@ int OscPlot::findCurve(const QwtPlotCurve* findCurv) const
     return -1;
 }
 
-QwtPlotCurve* OscPlot::getCurve(int n)
+QwtPlotCurve* OScopePlot::getCurve(int n)
 {
     auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
@@ -539,7 +624,7 @@ QwtPlotCurve* OscPlot::getCurve(int n)
     return static_cast<QwtPlotCurve*>(items.at(n));
 }
 
-const QwtPlotCurve* OscPlot::getCurve(int n) const
+const QwtPlotCurve* OScopePlot::getCurve(int n) const
 {
     auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
@@ -548,7 +633,19 @@ const QwtPlotCurve* OscPlot::getCurve(int n) const
     return static_cast<QwtPlotCurve*>(items.at(n));
 }
 
-void OscPlot::updateLegendItem()
+void OScopePlot::invalidateAllBounds()
+{
+    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    for(auto& item: items){
+        auto curv = static_cast<QwtPlotCurve*>(item);
+        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
+
+        pltData->invalidateBounds();
+    }
+}
+
+void OScopePlot::updateLegendItem()
 {
     if(m_legendItem == nullptr) return;
 

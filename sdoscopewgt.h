@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class OscPlot;
+class OScopePlot;
 class SDOScope;
 class RegListModel;
 class SLCanOpenNode;
@@ -51,8 +51,8 @@ private:
 
     bool m_initialized;
 
-    OscPlot* getPlot();
-    const OscPlot* getPlot() const;
+    OScopePlot* getPlot();
+    const OScopePlot* getPlot() const;
 
     void refreshUi();
 };
