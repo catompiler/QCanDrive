@@ -22,8 +22,8 @@ class OScopePlot : public QwtPlot
     Q_OBJECT
 public:
 
-    static constexpr size_t HGRID = 6;
-    static constexpr size_t VGRID = 6;
+    static constexpr size_t HGRID = 7;
+    static constexpr size_t VGRID = 4;
 
     OScopePlot(QWidget* parent = nullptr, const QString& newName = QString());
     ~OScopePlot();
@@ -117,6 +117,7 @@ protected:
     void invalidateAllBounds();
 
     void updateLegendItem();
+    void setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick);
 
     QwtPlotZoomer* m_zoomer;
 };
