@@ -273,6 +273,8 @@ bool OScopePlot::setData(OScopeData* newOscData)
             delete series_data;
             return false;
         }
+        // Выключаем заливку.
+        setBrush(added_n, QBrush(Qt::NoBrush));
     }
 
     return true;

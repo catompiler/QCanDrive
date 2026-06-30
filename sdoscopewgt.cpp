@@ -16,6 +16,50 @@
 #include <QPen>
 #include <QColor>
 #include <QDebug>
+#include "oscopedata.h"
+#include <math.h>
+
+
+class OScopeTestData:
+    public OScopeData {
+public:
+    OScopeTestData();
+    ~OScopeTestData();
+
+    // OScopeData interface
+    qreal Ts() const override;
+    size_t samplesCount() const override;
+    uint channelsCount() const override;
+    qreal sample(uint ch_n, size_t i) override;
+};
+
+OScopeTestData::OScopeTestData()
+{
+}
+
+OScopeTestData::~OScopeTestData()
+{
+}
+
+qreal OScopeTestData::Ts() const
+{
+    return 0.02/60;
+}
+
+size_t OScopeTestData::samplesCount() const
+{
+    return 60;
+}
+
+uint OScopeTestData::channelsCount() const
+{
+    return 3;
+}
+
+qreal OScopeTestData::sample(uint ch_n, size_t i)
+{
+    return 310.0 * sin(static_cast<double>(i) * 2.0 * M_PI / samplesCount() + M_PI * 2.0 / 3.0 * static_cast<double>(ch_n));
+}
 
 
 
@@ -40,6 +84,18 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 
     // Коннекты виджета.
     connect(ui->pbSingle, &QPushButton::clicked, this, &SDOScopeWgt::single);
+
+    auto plt = getPlot();
+    plt->setData(new OScopeTestData());
+    plt->setHOffset(-0.01);
+    plt->setHDiv(0.004);
+    for(int i = 0; i < plt->signalsCount(); i ++){
+        plt->setVOffset(i, 0.0);
+        plt->setVDiv(i, 100.0);
+    }
+
+    plt->setVOffset(0, 100.0);
+    plt->setVDiv(0, 200.0);
 }
 
 SDOScopeWgt::~SDOScopeWgt()

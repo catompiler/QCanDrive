@@ -133,7 +133,7 @@ qreal OScopePlotSeriesData::getYValue(size_t i) const
 
     qreal val = m_oscData->sample(m_ch_n, i);
 
-    return val * m_vert->invVDiv() + m_vert->vOffset();
+    return (val + m_vert->vOffset()) * m_vert->invVDiv();
 }
 
 qreal OScopePlotSeriesData::getXValue(size_t i) const
@@ -143,6 +143,6 @@ qreal OScopePlotSeriesData::getXValue(size_t i) const
 
     qreal val = m_oscData->Ts() * i;
 
-    return val * m_hori->invHDiv() + m_hori->hOffset();
+    return (val + m_hori->hOffset()) * m_hori->invHDiv();
 }
 
