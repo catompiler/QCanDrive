@@ -273,8 +273,6 @@ bool OScopePlot::setData(OScopeData* newOscData)
             delete series_data;
             return false;
         }
-        // Выключаем заливку.
-        setBrush(added_n, QBrush(Qt::NoBrush));
     }
 
     return true;
@@ -310,7 +308,7 @@ int OScopePlot::addSignal(OScopePlotSeriesData* pltData, const QString& newName,
     curvePen.setWidthF(defaultLineWidthF);
     curvePen.setColor(curveColor);
     QBrush curveBrush;
-    curveBrush.setStyle(Qt::SolidPattern);
+    curveBrush.setStyle(Qt::NoBrush);
     curveBrush.setColor(curveColor);
 
     newCurve->setPen(curvePen);

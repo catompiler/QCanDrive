@@ -5,6 +5,7 @@
 
 class OScopePlot;
 class SDOScope;
+class SDOScopeData;
 class RegListModel;
 class SLCanOpenNode;
 
@@ -48,6 +49,7 @@ private:
     SDOScopeChsEditDlg* m_chs_edit_dlg;
 
     SDOScope* m_scope;
+    SDOScopeData* m_scope_data;
 
     bool m_initialized;
 

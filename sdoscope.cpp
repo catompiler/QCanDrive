@@ -8,6 +8,10 @@
 #include <assert.h>
 #include <QDebug>
 
+#if defined(SDOSCOPE_TEST_DATA) && SDOSCOPE_TEST_DATA == 1
+#include <math.h>
+#endif // SDOSCOPE_TEST_DATA
+
 
 
 
@@ -77,6 +81,10 @@ SDOScope::SDOScope(QObject *parent)
 
     m_start_index = 0;
     m_ring_samples = nullptr;
+
+#if defined(SDOSCOPE_TEST_DATA) && SDOSCOPE_TEST_DATA == 1
+    genTestData();
+#endif // SDOSCOPE_TEST_DATA
 }
 
 SDOScope::~SDOScope()
@@ -1615,6 +1623,48 @@ RegVar* SDOScope::findRegVar(CO::Index rvIndex, CO::SubIndex rvSubIndex)
 
     return m_regListModel->varByRegIndex(rvIndex, rvSubIndex);
 }
+
+#if defined(SDOSCOPE_TEST_DATA) && SDOSCOPE_TEST_DATA == 1
+void SDOScope::genTestData()
+{
+    m_version = 0x0101;
+    m_max_channels = 4;
+    m_max_samples = 64;
+    m_max_sample_rate = 3600;
+
+    m_samples = m_max_samples;
+    m_prescaler = 0;
+    m_hist_samples = 0;
+
+    m_channels = new Channel[m_max_channels];
+
+    for(size_t ch_n = 0; ch_n < m_max_channels; ch_n ++){
+        Channel* ch = &m_channels[ch_n];
+
+        ch->resize(m_max_samples);
+
+        // sine waves.
+        if(ch_n < 3){
+            ch->setDataType(DataType::IQ24);
+            ch->setBaseValue(310.0);
+            ch->setEnabled(true);
+            for(size_t n = 0; n < m_max_samples; n ++){
+                qreal val = 1.0 * sin(static_cast<double>(n) * 2.0 * M_PI / m_max_samples + M_PI * 2.0 / 3.0 * static_cast<double>(ch_n));
+                ch->setSample(n, val * RegTypes::iqBase(ch->dataType()));
+            }
+        }
+        // zeros & disable.
+        else{
+            ch->setDataType(DataType::IQ24);
+            ch->setBaseValue(1.0);
+            ch->setEnabled(false);
+            for(size_t n = 0; n < m_max_samples; n ++){
+                ch->setSample(n, 0);
+            }
+        }
+    }
+}
+#endif // SDOSCOPE_TEST_DATA
 
 
 SDOScope::Channel::Channel()

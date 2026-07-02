@@ -8,6 +8,11 @@
 #include "covaluetypes.h"
 
 
+#ifndef SDOSCOPE_TEST_DATA
+#define SDOSCOPE_TEST_DATA 1
+#endif // SDOSCOPE_TEST_DATA
+
+
 class SDOComm;
 class SLCanOpenNode;
 class RegListModel;
@@ -524,6 +529,11 @@ private:
      * Получает регистр по индексу и подындексу.
      */
     RegVar* findRegVar(CO::Index rvIndex, CO::SubIndex rvSubIndex);
+
+#if defined(SDOSCOPE_TEST_DATA) && SDOSCOPE_TEST_DATA == 1
+    // Генерирует тестовую осциллограмму.
+    void genTestData();
+#endif // SDOSCOPE_TEST_DATA
 };
 
 #endif // SDOSCOPE_H

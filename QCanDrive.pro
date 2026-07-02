@@ -59,6 +59,7 @@ SOURCES += \
     sdocomm.cpp \
     sdoscope.cpp \
     sdoscopechseditdlg.cpp \
+    sdoscopedata.cpp \
     sdoscopewgt.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
@@ -159,6 +160,7 @@ HEADERS += \
     sdocomm_data.h \
     sdoscope.h \
     sdoscopechseditdlg.h \
+    sdoscopedata.h \
     sdoscopewgt.h \
     sdovalue.h \
     sdovaluebar.h \
