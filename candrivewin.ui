@@ -32,16 +32,10 @@
     </property>
     <item>
      <widget class="QTabWidget" name="twMain">
-      <property name="autoFillBackground">
-       <bool>true</bool>
-      </property>
       <property name="currentIndex">
        <number>3</number>
       </property>
       <widget class="QWidget" name="tabCockpit">
-       <property name="autoFillBackground">
-        <bool>true</bool>
-       </property>
        <attribute name="title">
         <string>Приборы</string>
        </attribute>
@@ -62,11 +56,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="CockpitWgt" name="cockpitWgt" native="true">
-          <property name="autoFillBackground">
-           <bool>true</bool>
-          </property>
-         </widget>
+         <widget class="CockpitWgt" name="cockpitWgt" native="true"/>
         </item>
        </layout>
       </widget>

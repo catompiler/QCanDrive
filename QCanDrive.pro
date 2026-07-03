@@ -45,6 +45,7 @@ SOURCES += \
     covaluesholder.cpp \
     covaluetypes.cpp \
     canopenwin.cpp \
+    oscopechannelwgt.cpp \
     oscopedata.cpp \
     oscopehorizontal.cpp \
     oscopeplot.cpp \
@@ -144,6 +145,7 @@ HEADERS += \
     cotypes.h \
     covaluesholder.h \
     covaluetypes.h \
+    oscopechannelwgt.h \
     oscopechprop.h \
     oscopedata.h \
     oscopehorizontal.h \
@@ -235,6 +237,7 @@ HEADERS += \
 FORMS += \
     candrivewin.ui \
     canopenwin.ui \
+    oscopechannelwgt.ui \
     sdoscopechseditdlg.ui \
     sdoscopewgt.ui \
     sdovaluebareditdlg.ui \

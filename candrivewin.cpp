@@ -21,8 +21,15 @@ CanDriveWin::CanDriveWin(QWidget *parent)
 {
     ui->setupUi(this);
     ui->twMain->setStyleSheet(
-                "QTabWidget::pane { border: 1px solid #222222; }"
-                ); // none
+        // Панель QTabWidget
+        "QTabWidget::pane { border: 1px solid #222222; }"
+        // Прозрачный фон панелей QToolBox
+        // https://forum.qt.io/topic/62760/background-color-of-qtoolbox-pages-inside-a-qtabwidget-in-windows-7/12
+        "QToolBox,"
+        "QToolBox > QScrollArea,"
+        //"QToolBox > QScrollArea > #qt_scrollarea_viewport,"
+        "QToolBox > QScrollArea > #qt_scrollarea_viewport > QWidget { background: transparent; }"
+        );
     //
     ui->lRegList->insertWidget(0, ui->tbRegsEdit);
     ui->lRegView->insertWidget(0, ui->tbRegsView);
