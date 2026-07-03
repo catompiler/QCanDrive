@@ -1,6 +1,8 @@
 #include "candrivewin.h"
 #include <QApplication>
 #include <QTextCodec>
+#include <QStyleFactory>
+#include <QPalette>
 
 /*
 #include <QRegExp>
@@ -90,10 +92,59 @@ static void testRegExpReplace()
     }
 }*/
 
+// DeepSeek + https://stackoverflow.com/questions/48256772/dark-theme-for-qt-widgets
+void applyDarkTheme()
+{
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+
+    QPalette darkPalette;
+
+    // Базовые цвета фона и текста
+    darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::WindowText, Qt::white);
+
+    // Фон для полей ввода (QLineEdit, QTextEdit) и таблиц
+    darkPalette.setColor(QPalette::Base, QColor(35, 35, 35));
+    //darkPalette.setColor(QPalette::Base, QColor(25, 25, 25));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+
+    // Цвет подсказок (tooltips)
+    darkPalette.setColor(QPalette::ToolTipBase, QColor(25, 25, 25));
+    //darkPalette.setColor(QPalette::ToolTipBase, Qt::black);
+    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
+
+    // Цвет текста (для виджетов, где используется Base)
+    darkPalette.setColor(QPalette::Text, Qt::white);
+
+    // Кнопки и их текст
+    darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
+    darkPalette.setColor(QPalette::ButtonText, Qt::white);
+
+    // Цвет для яркого текста (например, в кнопках с ошибкой)
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+
+    // Выделенные элементы (акцент)
+    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPalette.setColor(QPalette::HighlightedText, QColor(35, 35, 35));
+    //darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+
+    // В фокусе.
+    darkPalette.setColor(QPalette::Active, QPalette::Button, QColor(53, 53, 53));
+    // В неактивном состоянии.
+    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, Qt::darkGray);
+    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, Qt::darkGray);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Text, Qt::darkGray);
+    darkPalette.setColor(QPalette::Disabled, QPalette::Light, QColor(53, 53, 53));
+
+    // Применяем палитру ко всему приложению
+    qApp->setPalette(darkPalette);
+}
+
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    applyDarkTheme();
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
