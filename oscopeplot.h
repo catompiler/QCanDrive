@@ -90,10 +90,6 @@ public:
     QRectF boundingRect(int n) const;
     QRectF boundingRect() const;
 
-    //! Обновляет zoom base
-    //! Plot Zoomer'а.
-    void updateZoomBaseSize();
-
     static QList<Qt::GlobalColor> getDefaultColors();
 
     bool legendItemEnabled() const;
@@ -118,8 +114,6 @@ protected:
 
     void updateLegendItem();
     void setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick);
-
-    QwtPlotZoomer* m_zoomer;
 };
 
 #endif // OSCOPEPLOT_H

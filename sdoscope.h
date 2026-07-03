@@ -123,7 +123,8 @@ public:
         ERROR_COMM = 1,
         ERROR_VERSION = 2,
         ERROR_CONSTRAINTS = 3,
-        ERROR_ = 4,
+        ERROR_INVALID = 4,
+        //ERROR_ = 5,
     };
 
     //! Перечисление активных КА.
@@ -307,8 +308,11 @@ public:
     //! Получить максимальное число семплов.
     uint maxSamplesCount() const;
 
-    //! Получить частоту дискретизации.
+    //! Получить максимальную частоту дискретизации.
     uint32_t maxSampleRate() const;
+
+    //! Получить минимальный период дискретизации.
+    qreal minTs() const;
 
     //! Получить ошибку.
     Error error() const;
@@ -327,6 +331,9 @@ public:
 
     //! Получить частоту дискретизации.
     uint sampleRate() const;
+
+    //! Получить период дискретизации.
+    qreal Ts() const;
 
     //! Получить семплы истории.
     uint histSamplesCount() const;
@@ -458,6 +465,8 @@ private:
     uint32_t m_max_samples;
     // Частота дискретизации.
     uint32_t m_max_sample_rate;
+    // Период дискретизации.
+    qreal m_min_Ts;
 
     // Общие параметры.
     // Число семплов.

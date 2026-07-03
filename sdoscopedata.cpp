@@ -26,11 +26,7 @@ qreal SDOScopeData::Ts() const
 {
     if(m_scope == nullptr) return 0.0;
 
-    uint Fs = m_scope->sampleRate();
-
-    if(Fs == 0) return 0.0;
-
-    return 1.0 / Fs;
+    return m_scope->Ts();
 }
 
 size_t SDOScopeData::samplesCount() const

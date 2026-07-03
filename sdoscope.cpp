@@ -379,6 +379,11 @@ uint32_t SDOScope::maxSampleRate() const
     return m_max_sample_rate;
 }
 
+qreal SDOScope::minTs() const
+{
+    return m_min_Ts;
+}
+
 SDOScope::Error SDOScope::error() const
 {
     return m_error;
@@ -407,6 +412,11 @@ uint SDOScope::samplesCount() const
 uint SDOScope::sampleRate() const
 {
     return m_max_sample_rate / (m_prescaler + 1);
+}
+
+qreal SDOScope::Ts() const
+{
+    return m_min_Ts * (m_prescaler + 1);
 }
 
 uint SDOScope::histSamplesCount() const
@@ -531,6 +541,15 @@ SDOScope::ProcessingState SDOScope::processInit()
                 proc_state = PROCESSING_ERROR;
                 break;
             }
+
+            if(m_max_sample_rate == 0){
+                proc_err = ERROR_INVALID;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Вычислим минимальный период семплирования.
+            m_min_Ts = 1.0 / m_max_sample_rate;
 
             // Изменим число каналов.
             if(m_channels) delete[] m_channels;
@@ -1631,6 +1650,7 @@ void SDOScope::genTestData()
     m_max_channels = 4;
     m_max_samples = 64;
     m_max_sample_rate = 3600;
+    m_min_Ts = 1.0 / m_max_sample_rate;
 
     m_samples = m_max_samples;
     m_prescaler = 0;

@@ -523,15 +523,6 @@ QRectF OScopePlot::boundingRect() const
     return resRect;
 }
 
-void OScopePlot::updateZoomBaseSize()
-{
-    QRectF bounds = boundingRect();
-
-    //qDebug() << bounds;
-
-    m_zoomer->setZoomBase(bounds);
-}
-
 void OScopePlot::clear()
 {
     removeSignals();
