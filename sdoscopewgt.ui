@@ -182,27 +182,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolBox" name="tbChannels">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QTabWidget" name="twChannels">
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="OScopeChannelWgt" name="pgCh0">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>206</width>
-          <height>129</height>
-         </rect>
-        </property>
-        <attribute name="label">
+       <widget class="OScopeChannelWgt" name="tabCh0">
+        <attribute name="title">
          <string>Канал 1</string>
+        </attribute>
+       </widget>
+       <widget class="OScopeChannelWgt" name="tabCh1">
+        <attribute name="title">
+         <string>Канал 2</string>
         </attribute>
        </widget>
       </widget>
