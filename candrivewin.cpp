@@ -20,6 +20,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     , ui(new Ui::CanDriveWin)
 {
     ui->setupUi(this);
+    /*
     ui->twMain->setStyleSheet(
         // Панель QTabWidget
         "QTabWidget::pane { border: 1px solid #222222; }"
@@ -30,6 +31,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
         //"QToolBox > QScrollArea > #qt_scrollarea_viewport,"
         "QToolBox > QScrollArea > #qt_scrollarea_viewport > QWidget { background: transparent; }"
         );
+    */
     //
     ui->lRegList->insertWidget(0, ui->tbRegsEdit);
     ui->lRegView->insertWidget(0, ui->tbRegsView);

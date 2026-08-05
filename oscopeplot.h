@@ -22,7 +22,7 @@ class OScopePlot : public QwtPlot
     Q_OBJECT
 public:
 
-    static constexpr size_t HGRID = 5;
+    static constexpr size_t HGRID = 4;
     static constexpr size_t VGRID = 4;
 
     OScopePlot(QWidget* parent = nullptr, const QString& newName = QString());

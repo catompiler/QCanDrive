@@ -57,6 +57,8 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 
     plt->setVOffset(0, 100.0);
     plt->setVDiv(0, 200.0);
+
+    refreshUi();
 }
 
 SDOScopeWgt::~SDOScopeWgt()
@@ -176,17 +178,6 @@ void SDOScopeWgt::sdoscopeReaded()
     plt->replot();
 }
 
-void SDOScopeWgt::on_tbChannels_clicked(bool checked)
-{
-    Q_UNUSED(checked)
-
-    qDebug() << "on_tbChannels_clicked";
-
-    if(m_chs_edit_dlg->exec()){
-        //
-    }
-}
-
 OScopePlot* SDOScopeWgt::getPlot()
 {
     return ui->oscplt;
@@ -199,4 +190,15 @@ const OScopePlot* SDOScopeWgt::getPlot() const
 
 void SDOScopeWgt::refreshUi()
 {
+    updateChannelsUi();
+}
+
+void SDOScopeWgt::updateChannelsUi()
+{
+    ui->twChannels->clear();
+
+    for(uint i = 0; i < m_scope->channelsCount(); i ++){
+        OScopeChannelWgt* ocw = new OScopeChannelWgt();
+        ui->twChannels->addTab(ocw, tr("Канал %1").arg(i + 1));
+    }
 }

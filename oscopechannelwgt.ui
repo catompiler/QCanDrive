@@ -22,32 +22,12 @@
     </widget>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="lblOffset">
-       <property name="text">
-        <string>Смещение</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="lblGain">
-       <property name="text">
-        <string>Усиление</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QDial" name="dlOffset"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QDial" name="dlScale"/>
+    <layout class="QVBoxLayout" name="layoutVert">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="OScopeAxisWgt" name="asVert" native="true"/>
      </item>
     </layout>
    </item>
@@ -119,6 +99,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>OScopeAxisWgt</class>
+   <extends>QWidget</extends>
+   <header>oscopeaxiswgt.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

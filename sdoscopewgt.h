@@ -42,8 +42,6 @@ private slots:
     void sdoscopeDone();
     void sdoscopeReaded();
 
-    void on_tbChannels_clicked(bool checked);
-
 private:
     Ui::SDOScopeWgt *ui;
     SDOScopeChsEditDlg* m_chs_edit_dlg;
@@ -57,6 +55,7 @@ private:
     const OScopePlot* getPlot() const;
 
     void refreshUi();
+    void updateChannelsUi();
 };
 
 #endif // SDOSCOPEWGT_H
