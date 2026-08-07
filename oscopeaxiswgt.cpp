@@ -3,6 +3,7 @@
 #include <QwtRoundScaleDraw>
 #include <math.h>
 #include <algorithm>
+#include <QDebug>
 
 
 OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
@@ -15,9 +16,10 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
     knob->setKnobStyle( QwtKnob::Styled );
     knob->setMarkerStyle( QwtKnob::Nub );
     knob->setWrapping( false );
-    knob->setNumTurns( OFFSET_TURNS );
-    knob->setScale( -OFFSET_STEPS, OFFSET_STEPS );
-    knob->setTotalSteps( OFFSET_STEPS * 2 );
+    knob->setTotalAngle(360.0);
+    knob->setNumTurns( 10 );
+    knob->setScale( -10, 10 );
+    knob->setTotalSteps( 20 );
     knob->setValue(0.0);
     //knob->setScaleStepSize( 0.0 );
     if(QwtRoundScaleDraw* scaleDraw = knob->scaleDraw(); scaleDraw != nullptr){
@@ -30,9 +32,10 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
     knob->setKnobStyle( QwtKnob::Styled );
     knob->setMarkerStyle( QwtKnob::Nub );
     knob->setWrapping( false );
-    knob->setNumTurns( SCALE_TURNS );
-    knob->setScale( -SCALE_STEPS, SCALE_STEPS );
-    knob->setTotalSteps( SCALE_STEPS * 2 );
+    knob->setTotalAngle(360.0);
+    knob->setNumTurns( 4 );
+    knob->setScale( -10, 10 );
+    knob->setTotalSteps( 20 );
     knob->setValue(0.0);
     //knob->setScaleStepSize( 0.0 );
     if(QwtRoundScaleDraw* scaleDraw = knob->scaleDraw(); scaleDraw != nullptr){
@@ -41,11 +44,13 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
         scaleDraw->enableComponent(QwtAbstractScaleDraw::Backbone, false);
     }
 
-    connect(ui->valOffset, &QwtKnob::valueChanged, this, &OScopeAxisWgt::offset_valueChanged);
-    connect(ui->valScale, &QwtKnob::valueChanged, this, &OScopeAxisWgt::scale_valueChanged);
+    updateOffsetRange();
 
     updateOffsetDispVal();
     updateScaleDispVal();
+
+    connect(ui->valOffset, &QwtKnob::valueChanged, this, &OScopeAxisWgt::offset_valueChanged);
+    connect(ui->valScale, &QwtKnob::valueChanged, this, &OScopeAxisWgt::scale_valueChanged);
 }
 
 OScopeAxisWgt::~OScopeAxisWgt()
@@ -78,29 +83,52 @@ QString OScopeAxisWgt::unit() const
     return m_unit;
 }
 
-void OScopeAxisWgt::setUnit(const QString& newUnit)
+QStringList OScopeAxisWgt::unitUpPrefixes() const
+{
+    return m_unitUpPrefixes;
+}
+
+QStringList OScopeAxisWgt::unitDownPrefixes() const
+{
+    return m_unitDownPrefixes;
+}
+
+void OScopeAxisWgt::setUnit(const QString& newUnit, const QStringList& upPrefixes, const QStringList& downPrefixes)
 {
     m_unit = newUnit;
+    m_unitUpPrefixes = upPrefixes;
+    m_unitDownPrefixes = downPrefixes;
+
+    updateScaleDispVal();
+    updateOffsetDispVal();
 }
 
 qreal OScopeAxisWgt::scaleMin() const
 {
-    return m_scaleMin;
+    return valueFromScaleIndex(ui->valScale->lowerBound());
 }
 
 void OScopeAxisWgt::setScaleMin(qreal newScaleMin)
 {
-    m_scaleMin = newScaleMin;
+    int minIndex = scaleIndexFromValue(newScaleMin);
+    int maxIndex = static_cast<int>(ui->valScale->upperBound());
+
+    ui->valScale->setLowerBound(minIndex);
+    ui->valScale->setTotalSteps(abs(minIndex) + abs(maxIndex));
 }
 
 qreal OScopeAxisWgt::scaleMax() const
 {
-    return m_scaleMax;
+    return valueFromScaleIndex(ui->valScale->upperBound());
 }
 
 void OScopeAxisWgt::setScaleMax(qreal newScaleMax)
 {
-    m_scaleMax = newScaleMax;
+    int minIndex = static_cast<int>(ui->valScale->lowerBound());
+    int maxIndex = scaleIndexFromValue(newScaleMax);
+
+    ui->valScale->setUpperBound(maxIndex);
+    ui->valScale->setTotalSteps(abs(minIndex) + abs(maxIndex));
 }
 
 qreal OScopeAxisWgt::scale() const
@@ -113,45 +141,34 @@ qreal OScopeAxisWgt::scale() const
 
 void OScopeAxisWgt::setScale(qreal newScale)
 {
-    m_scale = newScale;
+    ui->valScale->setValue(scaleIndexFromValue(newScale));
 }
 
-qreal OScopeAxisWgt::offsetMin() const
+int OScopeAxisWgt::scaleTurns() const
 {
-    return m_offsetMin;
+    return ui->valScale->numTurns();
 }
 
-void OScopeAxisWgt::setOffsetMin(qreal newOffsetMin)
+void OScopeAxisWgt::setScaleTurns(int newScaleTurns)
 {
-    m_offsetMin = newOffsetMin;
-}
-
-qreal OScopeAxisWgt::offsetMax() const
-{
-    return m_offsetMax;
-}
-
-void OScopeAxisWgt::setOffsetMax(qreal newOffsetMax)
-{
-    m_offsetMax = newOffsetMax;
+    ui->valScale->setNumTurns(newScaleTurns);
 }
 
 qreal OScopeAxisWgt::offset() const
 {
-    int value_index = ui->valOffset->value();
-    qreal value = valueFromOffsetIndex(value_index);
-
-    return value;
+    return valueFromOffsetIndex(ui->valOffset->value());
 }
 
 void OScopeAxisWgt::setOffset(qreal newOffset)
 {
-    m_offset = newOffset;
+    ui->valOffset->setValue(offsetIndexFromValue(newOffset));
 }
 
 void OScopeAxisWgt::scale_valueChanged(double value)
 {
     Q_UNUSED(value);
+
+    //updateOffsetRange();
 
     updateScaleDispVal();
     updateOffsetDispVal();
@@ -219,16 +236,57 @@ int OScopeAxisWgt::offsetIndexFromValue(qreal offsetVal) const
     return round(offsetVal / (scale() * OFFSET_K));
 }
 
+QPair<QString, int> OScopeAxisWgt::getUnitPrefix(int expVal) const
+{
+    if(expVal == 0) return qMakePair(QString(), 0);
+
+    const QStringList& prefixes = (expVal >= 0) ? m_unitUpPrefixes : m_unitDownPrefixes;
+
+    if(prefixes.empty()) return qMakePair(QString(), 0);
+
+    int index = (expVal > 0) ? expVal - 1 : -(expVal + 1);
+
+    if(index >= prefixes.size()) index = prefixes.size() - 1;
+
+    return qMakePair(prefixes.at(index), (expVal >= 0) ? index + 1 : -index - 1);
+}
+
+QString OScopeAxisWgt::getDispVal(qreal dispVal) const
+{
+    int expVal = 0;
+
+    if(dispVal > 0.0){
+        expVal = static_cast<int>(floor(log10( dispVal) / 3.0)); //log1000
+    }else if(dispVal < 0.0){
+        expVal = static_cast<int>(floor(log10(-dispVal) / 3.0)); //log1000
+    }
+
+    auto prefixPair = getUnitPrefix(expVal);
+
+    //qDebug() << expVal << prefixPair;
+
+    QString prefix = prefixPair.first;
+    qreal value = dispVal / pow(1000, prefixPair.second);
+
+    return QString("%1 %2%3")
+        .arg(QString::number(value))
+        .arg(prefix)
+        .arg(m_unit);
+}
+
 void OScopeAxisWgt::updateScaleDispVal()
 {
-    qreal value = scale();
-
-    ui->lblScaleVal->setText(QString::number(value));
+    ui->lblScaleVal->setText(getDispVal(scale()));
 }
 
 void OScopeAxisWgt::updateOffsetDispVal()
 {
-    qreal value = offset();
+    ui->lblOffsetVal->setText(getDispVal(offset()));
+}
 
-    ui->lblOffsetVal->setText(QString::number(value));
+void OScopeAxisWgt::updateOffsetRange()
+{
+    ui->valOffset->setScale(-OFFSET_TURNS * OFFSET_TICKS_PER_TURN, OFFSET_TURNS * OFFSET_TICKS_PER_TURN);
+    ui->valOffset->setTotalSteps(OFFSET_TURNS * OFFSET_TICKS_PER_TURN + OFFSET_TURNS * OFFSET_TICKS_PER_TURN);
+    ui->valOffset->setNumTurns(OFFSET_TURNS + OFFSET_TURNS);
 }

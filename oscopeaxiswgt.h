@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPair>
+#include <QStringList>
 
 namespace Ui {
 class OScopeAxisWgt;
@@ -16,12 +17,9 @@ public:
 
     static constexpr int SCALE_VALUES[] = {1, 2, 5};
     static constexpr int SCALE_LEN = sizeof(SCALE_VALUES)/sizeof(SCALE_VALUES[0]);
-    static constexpr qreal OFFSET_K = 1.0 / 25.0;
-
-    static constexpr int SCALE_STEPS = 20;
-    static constexpr int SCALE_TURNS = 4;
-    static constexpr int OFFSET_STEPS = 100;
-    static constexpr int OFFSET_TURNS = 10;
+    static constexpr int OFFSET_TICKS_PER_TURN = 25;
+    static constexpr qreal OFFSET_K = 1.0 / OFFSET_TICKS_PER_TURN;
+    static constexpr int OFFSET_TURNS = 100;
 
     explicit OScopeAxisWgt(QWidget *parent = nullptr);
     ~OScopeAxisWgt();
@@ -33,7 +31,9 @@ public:
     void setOffsetTitle(const QString& newOffsetTitle);
 
     QString unit() const;
-    void setUnit(const QString& newUnit);
+    QStringList unitUpPrefixes() const;
+    QStringList unitDownPrefixes() const;
+    void setUnit(const QString& newUnit, const QStringList& upPrefixes, const QStringList& downPrefixes);
 
     qreal scaleMin() const;
     void setScaleMin(qreal newScaleMin);
@@ -44,11 +44,8 @@ public:
     qreal scale() const;
     void setScale(qreal newScale);
 
-    qreal offsetMin() const;
-    void setOffsetMin(qreal newOffsetMin);
-
-    qreal offsetMax() const;
-    void setOffsetMax(qreal newOffsetMax);
+    int scaleTurns() const;
+    void setScaleTurns(int newScaleTurns);
 
     qreal offset() const;
     void setOffset(qreal newOffset);
@@ -68,16 +65,8 @@ private:
     QString m_offsetTitle;
 
     QString m_unit;
-
-    qreal m_scaleMin;
-    qreal m_scaleMax;
-    qreal m_scale;
-    int m_scaleExp;
-
-    qreal m_offsetMin;
-    qreal m_offsetMax;
-    qreal m_offset;
-    int m_offsetExp;
+    QStringList m_unitUpPrefixes;
+    QStringList m_unitDownPrefixes;
 
     QPair<qreal, int> valueScaleBase(qreal val, qreal scaleBase) const;
 
@@ -87,8 +76,13 @@ private:
     int scaleIndexFromValue(qreal scaleVal) const;
     int offsetIndexFromValue(qreal offsetVal) const;
 
+    QPair<QString, int> getUnitPrefix(int expVal) const;
+    QString getDispVal(qreal dispVal) const;
+
     void updateScaleDispVal();
     void updateOffsetDispVal();
+
+    void updateOffsetRange();
 };
 
 #endif // OSCOPEAXISWGT_H

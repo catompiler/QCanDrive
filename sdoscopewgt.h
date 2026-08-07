@@ -42,6 +42,9 @@ private slots:
     void sdoscopeDone();
     void sdoscopeReaded();
 
+    void horiScaleChanged(double value);
+    void horiOffsetChanged(double value);
+
 private:
     Ui::SDOScopeWgt *ui;
     SDOScopeChsEditDlg* m_chs_edit_dlg;

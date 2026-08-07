@@ -7,8 +7,8 @@
 class OScopeVertical
 {
 public:
-    static constexpr qreal MIN_VDIV = 1e-3;
-    static constexpr qreal MAX_VDIV = 1e3;
+    static constexpr qreal MIN_VDIV = 1e-6;
+    static constexpr qreal MAX_VDIV = 1e6;
     static constexpr qreal DEF_VDIV = 1e0;
 
     OScopeVertical();

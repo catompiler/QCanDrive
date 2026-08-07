@@ -27,6 +27,17 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 {
     ui->setupUi(this);
 
+    ui->asHori->setScaleMin(1e-5);
+    ui->asHori->setScaleMax(1e+1);
+    ui->asHori->setScaleTurns(2);
+    ui->asHori->setUnit(
+        tr("с"),
+        QStringList(),
+        QStringList() << tr("м") << tr("мк")
+    );
+    connect(ui->asHori, &OScopeAxisWgt::scaleChanged, this, &SDOScopeWgt::horiScaleChanged);
+    connect(ui->asHori, &OScopeAxisWgt::offsetChanged, this, &SDOScopeWgt::horiOffsetChanged);
+
     m_chs_edit_dlg = new SDOScopeChsEditDlg();
 
     m_initialized = false;
@@ -48,15 +59,6 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 
     auto plt = getPlot();
     plt->setData(m_scope_data);
-    plt->setHOffset(-0.01);
-    plt->setHDiv(0.004);
-    for(int i = 0; i < plt->signalsCount(); i ++){
-        plt->setVOffset(i, 0.0);
-        plt->setVDiv(i, 100.0);
-    }
-
-    plt->setVOffset(0, 100.0);
-    plt->setVDiv(0, 200.0);
 
     refreshUi();
 }
@@ -178,6 +180,20 @@ void SDOScopeWgt::sdoscopeReaded()
     plt->replot();
 }
 
+void SDOScopeWgt::horiScaleChanged(double value)
+{
+    auto plt = getPlot();
+    plt->setHDiv(value);
+    plt->replot();
+}
+
+void SDOScopeWgt::horiOffsetChanged(double value)
+{
+    auto plt = getPlot();
+    plt->setHOffset(value);
+    plt->replot();
+}
+
 OScopePlot* SDOScopeWgt::getPlot()
 {
     return ui->oscplt;
@@ -191,14 +207,24 @@ const OScopePlot* SDOScopeWgt::getPlot() const
 void SDOScopeWgt::refreshUi()
 {
     updateChannelsUi();
+
+    auto plt = getPlot();
+    plt->setHOffset(ui->asHori->offset());
+    plt->setHDiv(ui->asHori->scale());
+
+    plt->replot();
 }
 
 void SDOScopeWgt::updateChannelsUi()
 {
+    auto plt = getPlot();
+
     ui->twChannels->clear();
 
     for(uint i = 0; i < m_scope->channelsCount(); i ++){
         OScopeChannelWgt* ocw = new OScopeChannelWgt();
+        ocw->setPlot(plt);
+        ocw->setChannel(i);
         ui->twChannels->addTab(ocw, tr("Канал %1").arg(i + 1));
     }
 }

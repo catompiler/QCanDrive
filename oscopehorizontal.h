@@ -8,8 +8,8 @@ class OScopeHorizontal
 {
 public:
     static constexpr qreal MIN_HDIV = 1e-6;
-    static constexpr qreal MAX_HDIV = 1e0;
-    static constexpr qreal DEF_HDIV = 1e-3;
+    static constexpr qreal MAX_HDIV = 1e6;
+    static constexpr qreal DEF_HDIV = 1e0;
 
     OScopeHorizontal();
     ~OScopeHorizontal();
