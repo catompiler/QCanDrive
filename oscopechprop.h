@@ -7,9 +7,12 @@
 
 
 struct OScopeChProp {
+    bool enabled;
+    bool visible;
     QString name;
     CO::Index index;
     CO::SubIndex subIndex;
+    qreal baseValue;
     QColor penColor;
     Qt::PenStyle penStyle;
     qreal penWidth;

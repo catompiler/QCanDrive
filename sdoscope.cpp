@@ -69,10 +69,9 @@ SDOScope::SDOScope(QObject *parent)
     m_max_samples = 0;
     m_max_sample_rate = 0;
 
-    m_samples = 0;
     m_prescaler = 0;
+    m_samples = 0;
     m_hist_samples = 0;
-    m_mode = 0;
 
     m_trig_enabled = 0;
     m_trig_ch_n = 0;
@@ -404,9 +403,24 @@ uint SDOScope::channelsCount() const
     return m_max_channels;
 }
 
+uint SDOScope::prescaler() const
+{
+    return m_prescaler;
+}
+
+void SDOScope::setPrescaler(uint newPrescaler)
+{
+    m_prescaler = newPrescaler;
+}
+
 uint SDOScope::samplesCount() const
 {
     return m_samples;
+}
+
+void SDOScope::setSamplesCount(uint newSamplesCount)
+{
+    m_samples = qMin(m_max_samples, newSamplesCount);
 }
 
 uint SDOScope::sampleRate() const
@@ -424,9 +438,49 @@ uint SDOScope::histSamplesCount() const
     return m_hist_samples;
 }
 
-uint SDOScope::mode() const
+void SDOScope::setHistSamplesCount(uint newHistSamplesCount)
 {
-    return m_mode;
+    m_hist_samples = qMin(m_samples, newHistSamplesCount);
+}
+
+bool SDOScope::triggerEnabled() const
+{
+    return m_trig_enabled;
+}
+
+void SDOScope::setTriggerEnabled(bool newEnabled)
+{
+    m_trig_enabled = newEnabled;
+}
+
+uint SDOScope::triggerChannel() const
+{
+    return m_trig_ch_n;
+}
+
+void SDOScope::setTriggerChannel(uint newChannel)
+{
+    m_trig_ch_n = qMin(m_max_channels, newChannel);
+}
+
+SDOScope::TriggerType SDOScope::triggerType() const
+{
+    return static_cast<TriggerType>(m_trig_type);
+}
+
+void SDOScope::setTriggerType(TriggerType newType)
+{
+    m_trig_type = static_cast<TriggerType>(newType);
+}
+
+int32_t SDOScope::triggerValue() const
+{
+    return m_trig_value;
+}
+
+void SDOScope::setTriggerValue(int32_t newValue)
+{
+    m_trig_value = newValue;
 }
 
 SDOScope::Channel* SDOScope::channel(uint i)
@@ -989,7 +1043,6 @@ void SDOScope::populateUpdateTasks()
     m_update_common_tasks.append({CommTask::READ, SAMPLES_SUBINDEX, &m_samples, sizeof(m_samples)});
     m_update_common_tasks.append({CommTask::READ, PRESCALER_SUBINDEX, &m_prescaler, sizeof(m_prescaler)});
     m_update_common_tasks.append({CommTask::READ, HIST_SAMPLES_SUBINDEX, &m_hist_samples, sizeof(m_hist_samples)});
-    m_update_common_tasks.append({CommTask::READ, MODE_SUBINDEX, &m_mode, sizeof(m_mode)});
 
     // Применение настроек триггера.
     m_update_trig_tasks.clear();
@@ -1335,7 +1388,6 @@ void SDOScope::populateApplyTasks()
     m_apply_common_tasks.append({CommTask::WRITE, SAMPLES_SUBINDEX, &m_samples, sizeof(m_samples)});
     m_apply_common_tasks.append({CommTask::WRITE, PRESCALER_SUBINDEX, &m_prescaler, sizeof(m_prescaler)});
     m_apply_common_tasks.append({CommTask::WRITE, HIST_SAMPLES_SUBINDEX, &m_hist_samples, sizeof(m_hist_samples)});
-    m_apply_common_tasks.append({CommTask::WRITE, MODE_SUBINDEX, &m_mode, sizeof(m_mode)});
 
     // Применение настроек триггера.
     m_apply_trig_tasks.clear();

@@ -60,8 +60,11 @@ SOURCES += \
     regsviewwgt.cpp \
     sdocomm.cpp \
     sdoscope.cpp \
+    sdoscopechanneldelegate.cpp \
+    sdoscopechannelsmodel.cpp \
     sdoscopechseditdlg.cpp \
     sdoscopedata.cpp \
+    sdoscopeparamsdlg.cpp \
     sdoscopewgt.cpp \
     sdovalue.cpp \
     sdovaluebar.cpp \
@@ -163,8 +166,11 @@ HEADERS += \
     sdocomm.h \
     sdocomm_data.h \
     sdoscope.h \
+    sdoscopechanneldelegate.h \
+    sdoscopechannelsmodel.h \
     sdoscopechseditdlg.h \
     sdoscopedata.h \
+    sdoscopeparamsdlg.h \
     sdoscopewgt.h \
     sdovalue.h \
     sdovaluebar.h \
@@ -242,6 +248,7 @@ FORMS += \
     oscopeaxiswgt.ui \
     oscopechannelwgt.ui \
     sdoscopechseditdlg.ui \
+    sdoscopeparamsdlg.ui \
     sdoscopewgt.ui \
     sdovaluebareditdlg.ui \
     sdovaluebuttoneditdlg.ui \

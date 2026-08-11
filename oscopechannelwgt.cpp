@@ -1,7 +1,9 @@
 #include "oscopechannelwgt.h"
 #include "ui_oscopechannelwgt.h"
 #include "oscopeplot.h"
-
+#include <QColorDialog>
+#include <QPen>
+#include <QDebug>
 
 
 OScopeChannelWgt::OScopeChannelWgt(QWidget *parent)
@@ -21,8 +23,16 @@ OScopeChannelWgt::OScopeChannelWgt(QWidget *parent)
         QStringList() << tr("к") << tr("М"),
         QStringList() << tr("м") << tr("мк")
         );
+
+    populatePenStyles();
+
     connect(ui->asVert, &OScopeAxisWgt::scaleChanged, this, &OScopeChannelWgt::vertScaleChanged);
     connect(ui->asVert, &OScopeAxisWgt::offsetChanged, this, &OScopeChannelWgt::vertOffsetChanged);
+
+    connect(ui->cbVisible, &QCheckBox::stateChanged, this, &OScopeChannelWgt::visiblityCheckStateChanged);
+    connect(ui->tbPenColorSel, &QToolButton::clicked, this, &OScopeChannelWgt::penColorSel_clicked);
+    connect(ui->cbPenStyle, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OScopeChannelWgt::penStyle_currentIndexChanged);
+    connect(ui->sbLineWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &OScopeChannelWgt::lineWidth_valueChanged);
 }
 
 OScopeChannelWgt::~OScopeChannelWgt()
@@ -50,6 +60,83 @@ void OScopeChannelWgt::setChannel(int newChannel)
     m_channel = newChannel;
 }
 
+bool OScopeChannelWgt::signalVisible() const
+{
+    return ui->cbVisible->isChecked();
+}
+
+void OScopeChannelWgt::setSignalVisible(bool newVisible)
+{
+    ui->cbVisible->blockSignals(true);
+    ui->cbVisible->setChecked(newVisible);
+    ui->cbVisible->blockSignals(false);
+}
+
+QColor OScopeChannelWgt::penColor() const
+{
+    const QPalette& pal = ui->frPenColor->palette();
+    return pal.window().color();
+}
+
+void OScopeChannelWgt::setPenColor(const QColor& newPenColor)
+{
+    QPalette pal = ui->frPenColor->palette();
+    pal.setColor(QPalette::Window, newPenColor);
+    ui->frPenColor->setPalette(pal);
+}
+
+Qt::PenStyle OScopeChannelWgt::penStyle() const
+{
+    bool ok = false;
+    auto res =  static_cast<Qt::PenStyle>(ui->cbPenStyle->currentData().toInt(&ok));
+    if(ok) return res;
+    return Qt::NoPen;
+}
+
+void OScopeChannelWgt::setPenStyle(Qt::PenStyle newPenStyle)
+{
+    ui->cbPenStyle->blockSignals(true);
+    ui->cbPenStyle->setCurrentIndex(ui->cbPenStyle->findData(static_cast<int>(newPenStyle)));
+    ui->cbPenStyle->blockSignals(false);
+}
+
+qreal OScopeChannelWgt::penWidth() const
+{
+    return ui->sbLineWidth->value();
+}
+
+void OScopeChannelWgt::setPenWidth(qreal newPenWidth)
+{
+    ui->sbLineWidth->blockSignals(true);
+    ui->sbLineWidth->setValue(newPenWidth);
+    ui->sbLineWidth->blockSignals(false);
+}
+
+void OScopeChannelWgt::updateValues()
+{
+    if(m_plot == nullptr || m_channel == -1) return;
+
+    ui->cbVisible->setChecked(m_plot->signalVisible(m_channel));
+
+    QPen pen = m_plot->pen(m_channel);
+    setPenColor(pen.color());
+    setPenStyle(pen.style());
+    setPenWidth(pen.widthF());
+}
+
+void OScopeChannelWgt::applyValues() const
+{
+    if(m_plot == nullptr || m_channel == -1) return;
+
+    m_plot->setSignalVisible(m_channel, ui->cbVisible->isChecked() && isEnabled());
+
+    QPen pen = m_plot->pen(m_channel);
+    pen.setColor(penColor());
+    pen.setStyle(penStyle());
+    pen.setWidthF(penWidth());
+    m_plot->setPen(m_channel, pen);
+}
+
 void OScopeChannelWgt::vertScaleChanged(qreal value)
 {
     if(m_plot == nullptr || m_channel == -1) return;
@@ -66,4 +153,78 @@ void OScopeChannelWgt::vertOffsetChanged(qreal value)
     m_plot->setVOffset(m_channel, value);
 
     m_plot->replot();
+}
+
+void OScopeChannelWgt::visiblityCheckStateChanged(int checkState)
+{
+    if(m_plot == nullptr || m_channel == -1) return;
+
+    m_plot->setSignalVisible(m_channel, (checkState == Qt::Checked) && isEnabled());
+
+    m_plot->replot();
+}
+
+void OScopeChannelWgt::penColorSel_clicked(bool checked)
+{
+    Q_UNUSED(checked);
+
+    QPalette pal = ui->frPenColor->palette();
+    QColor curCol = pal.window().color();
+
+    QColor col = QColorDialog::getColor(curCol, this, tr("Выбор цвета линии"), QColorDialog::ShowAlphaChannel);
+    if(col.isValid()){
+        pal.setColor(QPalette::Window, col);
+        ui->frPenColor->setPalette(pal);
+
+        if(m_plot != nullptr && m_channel != -1){
+            QPen pen = m_plot->pen(m_channel);
+            pen.setColor(col);
+            m_plot->setPen(m_channel, pen);
+
+            m_plot->replot();
+        }
+    }
+}
+
+void OScopeChannelWgt::penStyle_currentIndexChanged(int index)
+{
+    Q_UNUSED(index);
+
+    if(m_plot != nullptr && m_channel != -1){
+        QPen pen = m_plot->pen(m_channel);
+        pen.setStyle(penStyle());
+        m_plot->setPen(m_channel, pen);
+
+        m_plot->replot();
+    }
+}
+
+void OScopeChannelWgt::lineWidth_valueChanged(double value)
+{
+    if(m_plot != nullptr && m_channel != -1){
+        QPen pen = m_plot->pen(m_channel);
+        pen.setWidthF(value);
+        m_plot->setPen(m_channel, pen);
+
+        m_plot->replot();
+    }
+}
+
+void OScopeChannelWgt::populatePenStyles()
+{
+    QList<QPair<QString, Qt::PenStyle>> styles;
+
+    styles << qMakePair(tr("Нет"), Qt::NoPen)
+           << qMakePair(tr("————"), Qt::SolidLine)
+           << qMakePair(tr("- - - - - -"), Qt::DashLine)
+           << qMakePair(tr("· · · · · ·"), Qt::DotLine)
+           << qMakePair(tr("- · - · - ·"), Qt::DashDotLine)
+           << qMakePair(tr("- · · - · ·"), Qt::DashDotDotLine);
+    //<< qMakePair(tr(""), Qt::CustomDashLine);
+
+    ui->cbPenStyle->clear();
+
+    for(auto& style: styles){
+        ui->cbPenStyle->addItem(style.first, static_cast<int>(style.second));
+    }
 }

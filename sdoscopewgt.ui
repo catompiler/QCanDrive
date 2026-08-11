@@ -13,8 +13,8 @@
   <property name="windowTitle">
    <string>Осциллограф</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
     <widget class="OScopePlot" name="oscplt" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -79,8 +79,8 @@
      </property>
     </widget>
    </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_6">
+   <item row="0" column="1">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QGroupBox" name="gbHori">
        <property name="sizePolicy">
@@ -122,6 +122,12 @@
      </item>
      <item>
       <widget class="QTabWidget" name="twChannels">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -152,7 +158,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="0" column="2">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QGroupBox" name="gbRun">
@@ -206,6 +212,13 @@
          <widget class="QPushButton" name="pbParams">
           <property name="text">
            <string>Параметры</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pbChannels">
+          <property name="text">
+           <string>Каналы</string>
           </property>
          </widget>
         </item>
@@ -307,6 +320,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>OScopeAxisWgt</class>
+   <extends>QWidget</extends>
+   <header>oscopeaxiswgt.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>OScopePlot</class>
    <extends>QWidget</extends>
    <header>oscopeplot.h</header>
@@ -316,12 +335,6 @@
    <class>OScopeChannelWgt</class>
    <extends>QWidget</extends>
    <header>oscopechannelwgt.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>OScopeAxisWgt</class>
-   <extends>QWidget</extends>
-   <header>oscopeaxiswgt.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

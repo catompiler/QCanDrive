@@ -17,6 +17,14 @@ QString RegUtils::indexSubIndexToString(uint index, uint subindex)
             .arg(subindex, 2, 16, QChar('0'));
 }
 
+QString RegUtils::fullIndexToString(reg_fullindex_t fullindex)
+{
+    return indexSubIndexToString(
+            getIndex(fullindex),
+            getSubIndex(fullindex)
+        );
+}
+
 QPair<uint, uint> RegUtils::indexSubIndexFromString(const QString& index_str, bool* ok)
 {
     int base = 10;

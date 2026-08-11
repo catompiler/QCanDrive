@@ -51,6 +51,12 @@ public:
         MAX_SAMPLES = 16384, /* Максимальное число семплов. */
     };
 
+    //! Типы триггера.
+    enum TriggerType {
+        TRIGGER_RISING = 0, //!< Передний фронт.
+        TRIGGER_FALLING = 1, //!< Задний фронт.
+    };
+
     //! Подындексы по-умолчанию.
     enum SubIndices {
         CONTROL_SUBINDEX = 0x01, /* Слово управления. */
@@ -59,8 +65,8 @@ public:
         MAX_CHANNELS_SUBINDEX = 0x04, /* Максимальное число каналов. */
         MAX_SAMPLES_SUBINDEX = 0x05, /* Максимальное число семплов. */
         MAX_SAMPLE_RATE_SUBINDEX = 0x06, /* Частота дискретизации. */
-        SAMPLES_SUBINDEX = 0x07, /* Число семплов (длина буфера). */
-        PRESCALER_SUBINDEX = 0x08, /* Предделитель. */
+        PRESCALER_SUBINDEX = 0x07, /* Предделитель. */
+        SAMPLES_SUBINDEX = 0x08, /* Число семплов (длина буфера). */
         HIST_SAMPLES_SUBINDEX = 0x09, /* Семплы истории (0..SAMPLES-1) */
         CH0_ENABLED_SUBINDEX = 0x0a, /* Флаг разрешения осциллографирования. */
         CH0_REG_ID_SUBINDEX = 0x0b, /* Идентификатор регистра для осциллографирования. */
@@ -86,14 +92,13 @@ public:
         CH_DATA5_SAMPLES_SUBINDEX = 0x1f, /*  */
         CH_DATA6_SAMPLES_SUBINDEX = 0x20, /*  */
         CH_DATA7_SAMPLES_SUBINDEX = 0x21, /*  */
-        MODE_SUBINDEX = 0x22, /* Режим работы осциллографа. */
-        TRIG_ENABLED_SUBINDEX = 0x23, /* Включение триггера. */
-        TRIG_CH_N_SUBINDEX = 0x24, /* Номер канала. */
-        TRIG_TYPE_SUBINDEX = 0x25, /* Тип триггера. */
-        TRIG_VALUE_SUBINDEX = 0x26, /* Значение триггера. */
-        TRIG_INDEX_SUBINDEX = 0x27, /* Индекс сработки триггера. */
-        CUR_INDEX_SUBINDEX = 0x28, /* Индекс вставки. */
-        CUR_COUNT_SUBINDEX = 0x29, /* Текущее число семплов. */
+        TRIG_ENABLED_SUBINDEX = 0x22, /* Включение триггера. */
+        TRIG_CH_N_SUBINDEX = 0x23, /* Номер канала. */
+        TRIG_TYPE_SUBINDEX = 0x24, /* Тип триггера. */
+        TRIG_VALUE_SUBINDEX = 0x25, /* Значение триггера. */
+        TRIG_INDEX_SUBINDEX = 0x26, /* Индекс сработки триггера. */
+        CUR_INDEX_SUBINDEX = 0x27, /* Индекс вставки. */
+        CUR_COUNT_SUBINDEX = 0x28, /* Текущее число семплов. */
     };
 
     //! Перечисление управления.
@@ -326,8 +331,15 @@ public:
     //! Получить число каналов.
     uint channelsCount() const;
 
+    //! Получает предделитель.
+    uint prescaler() const;
+    //! Устанавливает предделитель.
+    void setPrescaler(uint newPrescaler);
+
     //! Получить число семплов.
     uint samplesCount() const;
+    //! Устанавливает число семплов.
+    void setSamplesCount(uint newSamplesCount);
 
     //! Получить частоту дискретизации.
     uint sampleRate() const;
@@ -337,15 +349,35 @@ public:
 
     //! Получить семплы истории.
     uint histSamplesCount() const;
-
-    //! Получить режим работы.
-    uint mode() const;
+    //! Устанавливает число семплов истории.
+    void setHistSamplesCount(uint newHistSamplesCount);
 
     //! Получить канал.
     Channel* channel(uint i);
 
     //! Получить канал.
     const Channel* channel(uint i) const;
+
+    // Триггер.
+    //! Получает разрешение триггера.
+    bool triggerEnabled() const;
+    //! Устанавливает разрешение триггера.
+    void setTriggerEnabled(bool newEnabled);
+
+    //! Получает номер канала триггера.
+    uint triggerChannel() const;
+    //! Устанавливает номер канала триггера.
+    void setTriggerChannel(uint newChannel);
+
+    //! Получает тип триггера.
+    TriggerType triggerType() const;
+    //! Устанавливает тип триггера.
+    void setTriggerType(TriggerType newType);
+
+    //! Получает значение триггера.
+    int32_t triggerValue() const;
+    //! Устанавливает значение триггера.
+    void setTriggerValue(int32_t newValue);
 
 public slots:
     bool init();
@@ -469,14 +501,12 @@ private:
     qreal m_min_Ts;
 
     // Общие параметры.
-    // Число семплов.
-    uint32_t m_samples;
     // Предделитель.
     uint32_t m_prescaler;
+    // Число семплов.
+    uint32_t m_samples;
     // Семплы истории.
     uint32_t m_hist_samples;
-    // Режим работы.
-    uint32_t m_mode;
 
     // Параметры триггера.
     // Включение.

@@ -52,8 +52,10 @@ public:
     qreal vOffset(int n) const;
     void setVOffset(int n, qreal newVOffset);
 
-    //! Очищает график и добавляет сигналы каналов осциллографы.
+    //! Очищает график и добавляет сигналы каналов осциллографа.
     bool setData(OScopeData* newOscData);
+    //! Обновляет каналы из ранее установленных данных каналов осциллографа.
+    bool updateData();
 
     // takes ownership of the plotData
     int addSignal(OScopePlotSeriesData* pltData, const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1);
@@ -97,6 +99,7 @@ public:
 
 public slots:
     void clear(); // Вызывает removeSignals();
+    void invalidateAllBounds(); // Помечает предрассчитанные границы графиков как невалидные.
 
 protected:
     OScopeHorizontal* m_hori;
@@ -104,13 +107,13 @@ protected:
     qreal m_defaultAlpha;
     qreal m_period;
 
+    OScopeData* m_oscData;
 
     QwtPlotLegendItem* m_legendItem;
 
     int findCurve(const QwtPlotCurve* findCurv) const;
     QwtPlotCurve* getCurve(int n);
     const QwtPlotCurve* getCurve(int n) const;
-    void invalidateAllBounds();
 
     void updateLegendItem();
     void setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick);

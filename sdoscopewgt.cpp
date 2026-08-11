@@ -1,6 +1,7 @@
 #include "sdoscopewgt.h"
 #include "ui_sdoscopewgt.h"
 #include "sdoscopechseditdlg.h"
+#include "sdoscopeparamsdlg.h"
 #include <QPushButton>
 #include "oscopeplot.h"
 #include "oscopeplotseriesdata.h"
@@ -8,6 +9,8 @@
 #include "sdoscope.h"
 #include "slcanopennode.h"
 #include "reglistmodel.h"
+#include "regutils.h"
+#include "regtypes.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
@@ -26,6 +29,8 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     , ui(new Ui::SDOScopeWgt)
 {
     ui->setupUi(this);
+    connect(ui->pbParams, &QPushButton::clicked, this, &SDOScopeWgt::btnScopeParams_clicked);
+    connect(ui->pbChannels, &QPushButton::clicked, this, &SDOScopeWgt::btnScopeChannels_clicked);
 
     ui->asHori->setScaleMin(1e-5);
     ui->asHori->setScaleMax(1e+1);
@@ -39,6 +44,7 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     connect(ui->asHori, &OScopeAxisWgt::offsetChanged, this, &SDOScopeWgt::horiOffsetChanged);
 
     m_chs_edit_dlg = new SDOScopeChsEditDlg();
+    m_params_dlg = new SDOScopeParamsDlg();
 
     m_initialized = false;
 
@@ -60,6 +66,10 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     auto plt = getPlot();
     plt->setData(m_scope_data);
 
+    // Создадим интерфейс каналов.
+    updateChannelsUi();
+
+    // Обновим интерфейс.
     refreshUi();
 }
 
@@ -68,6 +78,7 @@ SDOScopeWgt::~SDOScopeWgt()
     auto plt = getPlot();
     plt->clear();
 
+    delete m_params_dlg;
     delete m_chs_edit_dlg;
     delete m_scope_data;
     delete m_scope;
@@ -149,10 +160,14 @@ void SDOScopeWgt::sdoscopeUpdated()
 
     auto plt = getPlot();
 
-    // Очистим каналы.
-    plt->removeSignals();
+    // Обновим каналы.
+    plt->updateData();
 
-    // ...
+    // Обновим интерфейс каналов.
+    updateChannelsUi();
+
+    // Обновим.
+    refreshUi();
 }
 
 void SDOScopeWgt::sdoscopeErrorOccured()
@@ -177,6 +192,7 @@ void SDOScopeWgt::sdoscopeReaded()
 
     auto plt = getPlot();
 
+    plt->invalidateAllBounds();
     plt->replot();
 }
 
@@ -194,6 +210,68 @@ void SDOScopeWgt::horiOffsetChanged(double value)
     plt->replot();
 }
 
+void SDOScopeWgt::btnScopeParams_clicked(bool checked)
+{
+    Q_UNUSED(checked);
+
+    m_params_dlg->setPrescaler(m_scope->prescaler());
+    m_params_dlg->setMaxSamplesCount(m_scope->maxSamplesCount());
+    m_params_dlg->setSamplesCount(m_scope->samplesCount());
+    m_params_dlg->setHistSamplesCount(m_scope->histSamplesCount());
+
+    if(m_params_dlg->exec()){
+        m_scope->setPrescaler(m_params_dlg->prescaler());
+        m_scope->setSamplesCount(m_params_dlg->samplesCount());
+        m_scope->setHistSamplesCount(m_params_dlg->histSamplesCount());
+    }
+}
+
+void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
+{
+    Q_UNUSED(checked);
+
+    auto plt = getPlot();
+
+    {
+        SDOScopeChsEditDlg::ChannelsData chs_data;
+        chs_data.resize(m_scope->maxChannelsCount());
+
+        for(int i = 0; i < chs_data.size(); i ++){
+            SDOScope::Channel* ch = m_scope->channel(i);
+            if(ch == nullptr) continue;
+
+            SDOScopeChsEditDlg::ChannelData& ch_data = chs_data[i];
+            QString ch_name = plt->signalName(i);
+            ch_data.name = ch_name.isEmpty() ? tr("Канал %1").arg(i) : ch_name;
+            ch_data.enabled = ch->enabled();
+            ch_data.regFullIndex = RegUtils::makeFullIndex(ch->regIndex(), ch->regSubIndex());
+            ch_data.dataType = ch->dataType();
+            ch_data.baseValue = ch->baseValue();
+        }
+
+        m_chs_edit_dlg->setChannelsData(chs_data);
+    }
+
+
+    if(m_chs_edit_dlg->exec()){
+        const SDOScopeChsEditDlg::ChannelsData& chs_data = m_chs_edit_dlg->channelsData();
+
+        for(int i = 0; i < chs_data.size(); i ++){
+            SDOScope::Channel* ch = m_scope->channel(i);
+            if(ch == nullptr) continue;
+
+            const SDOScopeChsEditDlg::ChannelData& ch_data = chs_data[i];
+
+            plt->setSignalName(i, ch_data.name);
+            ch->setEnabled(ch_data.enabled);
+            ch->setRegIndex(RegUtils::getIndex(ch_data.regFullIndex));
+            ch->setRegSubIndex(RegUtils::getSubIndex(ch_data.regFullIndex));
+            ch->setDataType(ch_data.dataType);
+            ch->setBaseValue(ch_data.baseValue);
+        }
+    }
+}
+
 OScopePlot* SDOScopeWgt::getPlot()
 {
     return ui->oscplt;
@@ -204,9 +282,34 @@ const OScopePlot* SDOScopeWgt::getPlot() const
     return ui->oscplt;
 }
 
+void SDOScopeWgt::updateChannelsUi()
+{
+    ui->twChannels->setUpdatesEnabled(false);
+
+    // Clear tabs.
+    while(ui->twChannels->count() != 0){
+        QWidget* tabWidget = ui->twChannels->widget(0);
+        ui->twChannels->removeTab(0);
+        if(tabWidget) delete tabWidget;
+    }
+
+    auto plt = getPlot();
+
+    // Add new tabs.
+    for(uint i = 0; i < m_scope->channelsCount(); i ++){
+        OScopeChannelWgt* ocw = new OScopeChannelWgt(ui->twChannels);
+        ocw->setPlot(plt);
+        ocw->setChannel(i);
+        ocw->updateValues();
+        ui->twChannels->addTab(ocw, tr("Канал %1").arg(i + 1));
+    }
+
+    ui->twChannels->setUpdatesEnabled(true);
+}
+
 void SDOScopeWgt::refreshUi()
 {
-    updateChannelsUi();
+    refreshChannelsUi();
 
     auto plt = getPlot();
     plt->setHOffset(ui->asHori->offset());
@@ -215,16 +318,21 @@ void SDOScopeWgt::refreshUi()
     plt->replot();
 }
 
-void SDOScopeWgt::updateChannelsUi()
+void SDOScopeWgt::refreshChannelsUi()
 {
-    auto plt = getPlot();
+    ui->twChannels->setUpdatesEnabled(false);
 
-    ui->twChannels->clear();
+    for(int i = 0; i < ui->twChannels->count(); i ++){
+        auto ch = m_scope->channel(i);
 
-    for(uint i = 0; i < m_scope->channelsCount(); i ++){
-        OScopeChannelWgt* ocw = new OScopeChannelWgt();
-        ocw->setPlot(plt);
-        ocw->setChannel(i);
-        ui->twChannels->addTab(ocw, tr("Канал %1").arg(i + 1));
+        bool ch_enabled = ch && ch->enabled();
+        ui->twChannels->setTabEnabled(i, ch_enabled);
+
+        OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
+        if(ocw){
+            ocw->applyValues();
+        }
     }
+
+    ui->twChannels->setUpdatesEnabled(true);
 }

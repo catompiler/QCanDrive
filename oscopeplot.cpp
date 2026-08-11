@@ -52,6 +52,8 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
 
     m_hori = new OScopeHorizontal();
 
+    m_oscData = nullptr;
+
     m_defaultAlpha = 0.75;
     m_legendItem = nullptr;
 
@@ -255,18 +257,27 @@ void OScopePlot::setVOffset(int n, qreal newVOffset)
 
 bool OScopePlot::setData(OScopeData* newOscData)
 {
-    if(newOscData == nullptr) return false;
+    m_oscData = newOscData;
 
+    return updateData();
+}
+
+bool OScopePlot::updateData()
+{
     removeSignals();
 
-    size_t channels_count = newOscData->channelsCount();
+    OScopeData* osc_data = m_oscData;
+
+    if(osc_data == nullptr) return true;
+
+    size_t channels_count = osc_data->channelsCount();
     //size_t samples_count = newOscData->samplesCount();
 
     for(size_t ch_i = 0; ch_i < channels_count; ch_i ++){
         // Данные канала.
-        OScopePlotSeriesData* series_data = new OScopePlotSeriesData(m_hori, newOscData, ch_i);
+        OScopePlotSeriesData* series_data = new OScopePlotSeriesData(m_hori, osc_data, ch_i);
         // Добавить сигнал.
-        int added_n = addSignal(series_data, QString::number(ch_i));
+        int added_n = addSignal(series_data);
         // Если не удалось.
         if(added_n < 0){
             // Удалим данные.
@@ -513,6 +524,9 @@ QRectF OScopePlot::boundingRect() const
 
     for(auto& item: items){
         auto curv = static_cast<QwtPlotCurve*>(item);
+
+        if(!curv->isVisible()) continue;
+
         auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
 
         QRectF rect = pltData->boundingRect();
@@ -528,6 +542,18 @@ void OScopePlot::clear()
     removeSignals();
 
     //replot();
+}
+
+void OScopePlot::invalidateAllBounds()
+{
+    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    for(auto& item: items){
+        auto curv = static_cast<QwtPlotCurve*>(item);
+        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
+
+        pltData->invalidateBounds();
+    }
 }
 
 bool OScopePlot::legendItemEnabled() const
@@ -593,18 +619,6 @@ const QwtPlotCurve* OScopePlot::getCurve(int n) const
     if(n >= items.count()) return nullptr;
 
     return static_cast<QwtPlotCurve*>(items.at(n));
-}
-
-void OScopePlot::invalidateAllBounds()
-{
-    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
-
-    for(auto& item: items){
-        auto curv = static_cast<QwtPlotCurve*>(item);
-        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
-
-        pltData->invalidateBounds();
-    }
 }
 
 void OScopePlot::updateLegendItem()

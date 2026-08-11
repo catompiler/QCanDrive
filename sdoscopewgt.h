@@ -10,6 +10,7 @@ class RegListModel;
 class SLCanOpenNode;
 
 class SDOScopeChsEditDlg;
+class SDOScopeParamsDlg;
 
 namespace Ui {
 class SDOScopeWgt;
@@ -45,9 +46,13 @@ private slots:
     void horiScaleChanged(double value);
     void horiOffsetChanged(double value);
 
+    void btnScopeParams_clicked(bool checked);
+    void btnScopeChannels_clicked(bool checked);
+
 private:
     Ui::SDOScopeWgt *ui;
     SDOScopeChsEditDlg* m_chs_edit_dlg;
+    SDOScopeParamsDlg* m_params_dlg;
 
     SDOScope* m_scope;
     SDOScopeData* m_scope_data;
@@ -57,8 +62,9 @@ private:
     OScopePlot* getPlot();
     const OScopePlot* getPlot() const;
 
-    void refreshUi();
     void updateChannelsUi();
+    void refreshUi();
+    void refreshChannelsUi();
 };
 
 #endif // SDOSCOPEWGT_H

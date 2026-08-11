@@ -26,6 +26,9 @@ namespace RegUtils{
 //! Получает строковое представление индекса и под-индекса.
 extern QString indexSubIndexToString(uint index, uint subindex);
 
+//! Получает строковое представление индекса и под-индекса по полному индексу.
+extern QString fullIndexToString(reg_fullindex_t fullindex);
+
 //! Получает индекс и под-индекс из строки.
 extern QPair<uint, uint> indexSubIndexFromString(const QString& index_str, bool* ok = nullptr);
 
