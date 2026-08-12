@@ -15,6 +15,12 @@ static const char* col_names[] = {
 
 static const int col_count = (sizeof(col_names) / sizeof(col_names[0]));
 
+static const int HEADER_WIDTH_SIZE_HINT = 100;
+static const int HEADER_HEIGHT_SIZE_HINT = 20;
+
+static const int ITEM_WIDTH_SIZE_HINT = 100;
+static const int ITEM_HEIGHT_SIZE_HINT = 20;
+
 
 SDOScopeChannelsModel::SDOScopeChannelsModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -61,6 +67,8 @@ QVariant SDOScopeChannelsModel::headerData(int section, Qt::Orientation orientat
     case Qt::DisplayRole:
     case Qt::ToolTipRole:
         break;
+    case Qt::SizeHintRole:
+        return QSize(HEADER_WIDTH_SIZE_HINT, HEADER_HEIGHT_SIZE_HINT);
     }
 
     return QVariant(col_names[section]);
@@ -139,11 +147,13 @@ QVariant SDOScopeChannelsModel::data(const QModelIndex &index, int role) const
         case COL_REG:
             return ch_data.regFullIndex;
         case COL_DATA_TYPE:
-            return static_cast<int>(ch_data.dataType);
+            return static_cast<uint>(ch_data.dataType);
         case COL_BASE_VALUE:
             return ch_data.baseValue;
         }
         break;
+    case Qt::SizeHintRole:
+        return QSize(ITEM_WIDTH_SIZE_HINT, ITEM_HEIGHT_SIZE_HINT);
     }
 
     return QVariant();
@@ -151,12 +161,36 @@ QVariant SDOScopeChannelsModel::data(const QModelIndex &index, int role) const
 
 bool SDOScopeChannelsModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (data(index, role) != value) {
-        // FIXME: Implement me!
-        emit dataChanged(index, index, {role});
-        return true;
+    if(role != Qt::EditRole) return false;
+    if(!index.isValid()) return false;
+    if(index.row() >= m_data->size()) return false;
+    if(data(index, role) == value) return false;
+
+    ChannelData& ch_data = (*m_data)[index.row()];
+
+    switch(index.column()){
+    default:
+        return false;
+    case COL_ENABLED:
+        ch_data.enabled = value.toBool();
+        break;
+    case COL_NAME:
+        ch_data.name = value.toString();
+        break;
+    case COL_REG:
+        ch_data.regFullIndex = value.toUInt();
+        break;
+    case COL_DATA_TYPE:
+        ch_data.dataType = static_cast<DataType>(value.toUInt());
+        break;
+    case COL_BASE_VALUE:
+        ch_data.baseValue = value.toReal();
+        break;
     }
-    return false;
+
+    emit dataChanged(index, index, {role});
+
+    return true;
 }
 
 Qt::ItemFlags SDOScopeChannelsModel::flags(const QModelIndex &index) const

@@ -977,7 +977,7 @@ bool RegListModel::setData(const QModelIndex &index, const QVariant &value, int 
         }
     }
 
-    emit dataChanged(index, index); // QVector<int>{Qt::EditRole, Qt::DisplayRole}
+    emit dataChanged(index, index, {role}); // QVector<int>{Qt::EditRole, Qt::DisplayRole}
 
     return true;
 }

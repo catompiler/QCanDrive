@@ -245,8 +245,8 @@ void RegDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
             break;
         case ObjectType::VAR:{
             unsigned int base = data.toUInt();
-            unsigned int base_index = base >> 8;
-            unsigned int base_subindex = base & 0xff;
+            unsigned int base_index = RegUtils::getIndex(base);
+            unsigned int base_subindex = RegUtils::getSubIndex(base);
             le->setText(RegUtils::indexSubIndexToString(base_index, base_subindex));
             break;
         }
@@ -347,7 +347,7 @@ void RegDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const
         auto index_pair = RegUtils::indexSubIndexFromString(le->text(), &ok);
 
         if(ok){
-            unsigned int base = (index_pair.first << 8) | index_pair.second;
+            unsigned int base = RegUtils::makeFullIndex(index_pair.first, index_pair.second);
             regListModel->setData(index, base, Qt::EditRole);
         }
     }break;

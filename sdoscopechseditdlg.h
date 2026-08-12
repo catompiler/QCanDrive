@@ -4,6 +4,9 @@
 #include <QDialog>
 #include "sdoscopechannelsmodel.h"
 
+class SDOScopeChannelDelegate;
+class RegSelectDlg;
+
 
 namespace Ui {
 class SDOScopeChsEditDlg;
@@ -23,9 +26,13 @@ public:
     void setChannelsData(ChannelsData newChannelsData);
     const ChannelsData& channelsData() const;
 
+    RegSelectDlg* regSelectDialog() const;
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
+
 private:
     Ui::SDOScopeChsEditDlg *ui;
     SDOScopeChannelsModel* m_channelsModel;
+    SDOScopeChannelDelegate* m_channelDelegate;
 };
 
 #endif // SDOSCOPECHSEDITDLG_H

@@ -14,15 +14,15 @@ class SDOScopeChannelsModel : public QAbstractItemModel
 
 public:
     explicit SDOScopeChannelsModel(QObject *parent = nullptr);
+    ~SDOScopeChannelsModel();
 
-    enum Column {
+    enum ColId {
         COL_ENABLED = 0,
         COL_NAME = 1,
         COL_REG = 2,
         COL_DATA_TYPE = 3,
         COL_BASE_VALUE = 4
     };
-    ~SDOScopeChannelsModel();
 
     struct ChannelData {
         bool enabled;
