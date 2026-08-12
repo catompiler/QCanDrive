@@ -67,10 +67,13 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     plt->setData(m_scope_data);
 
     // Создадим интерфейс каналов.
-    updateChannelsUi();
+    populateChannelsUi();
 
     // Обновим интерфейс.
     refreshUi();
+
+    // Синхронизируем график с интерфейсом.
+    applyUiToPlot();
 }
 
 SDOScopeWgt::~SDOScopeWgt()
@@ -163,11 +166,14 @@ void SDOScopeWgt::sdoscopeUpdated()
     // Обновим каналы.
     plt->updateData();
 
-    // Обновим интерфейс каналов.
-    updateChannelsUi();
+    // Заполним интерфейс каналов.
+    populateChannelsUi();
 
-    // Обновим.
+    // Обновим интерфейс.
     refreshUi();
+
+    // Синхронизируем график с интерфейсом.
+    applyUiToPlot();
 }
 
 void SDOScopeWgt::sdoscopeErrorOccured()
@@ -282,7 +288,7 @@ const OScopePlot* SDOScopeWgt::getPlot() const
     return ui->oscplt;
 }
 
-void SDOScopeWgt::updateChannelsUi()
+void SDOScopeWgt::populateChannelsUi()
 {
     ui->twChannels->setUpdatesEnabled(false);
 
@@ -300,7 +306,7 @@ void SDOScopeWgt::updateChannelsUi()
         OScopeChannelWgt* ocw = new OScopeChannelWgt(ui->twChannels);
         ocw->setPlot(plt);
         ocw->setChannel(i);
-        ocw->updateValues();
+        //ocw->updateValues();
         ui->twChannels->addTab(ocw, tr("Канал %1").arg(i + 1));
     }
 
@@ -312,10 +318,8 @@ void SDOScopeWgt::refreshUi()
     refreshChannelsUi();
 
     auto plt = getPlot();
-    plt->setHOffset(ui->asHori->offset());
-    plt->setHDiv(ui->asHori->scale());
-
-    plt->replot();
+    ui->asHori->setScale(plt->hDiv());
+    ui->asHori->setOffset(plt->hOffset());
 }
 
 void SDOScopeWgt::refreshChannelsUi()
@@ -326,13 +330,31 @@ void SDOScopeWgt::refreshChannelsUi()
         auto ch = m_scope->channel(i);
 
         bool ch_enabled = ch && ch->enabled();
+        ui->twChannels->setTabVisible(i, ch != nullptr);
         ui->twChannels->setTabEnabled(i, ch_enabled);
 
+        OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
+        if(ocw){
+            ocw->updateValues();
+        }
+    }
+
+    ui->twChannels->setUpdatesEnabled(true);
+}
+
+void SDOScopeWgt::applyUiToPlot()
+{
+    auto plt = getPlot();
+
+    plt->setHOffset(ui->asHori->offset());
+    plt->setHDiv(ui->asHori->scale());
+
+    for(int i = 0; i < ui->twChannels->count(); i ++){
         OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
         if(ocw){
             ocw->applyValues();
         }
     }
 
-    ui->twChannels->setUpdatesEnabled(true);
+    plt->replot();
 }

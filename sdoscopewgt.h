@@ -62,9 +62,10 @@ private:
     OScopePlot* getPlot();
     const OScopePlot* getPlot() const;
 
-    void updateChannelsUi();
+    void populateChannelsUi();
     void refreshUi();
     void refreshChannelsUi();
+    void applyUiToPlot();
 };
 
 #endif // SDOSCOPEWGT_H

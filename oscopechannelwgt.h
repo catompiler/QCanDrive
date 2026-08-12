@@ -24,6 +24,12 @@ public:
     int channel() const;
     void setChannel(int newChannel);
 
+    qreal vDiv() const;
+    void setVDiv(qreal newVDiv);
+
+    qreal vOffset() const;
+    void setVOffset(qreal newVOffset);
+
     bool signalVisible() const;
     void setSignalVisible(bool newVisible);
 

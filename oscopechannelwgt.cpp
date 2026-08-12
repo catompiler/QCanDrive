@@ -60,6 +60,30 @@ void OScopeChannelWgt::setChannel(int newChannel)
     m_channel = newChannel;
 }
 
+qreal OScopeChannelWgt::vDiv() const
+{
+    return ui->asVert->scale();
+}
+
+void OScopeChannelWgt::setVDiv(qreal newVDiv)
+{
+    ui->asVert->blockSignals(true);
+    ui->asVert->setScale(newVDiv);
+    ui->asVert->blockSignals(false);
+}
+
+qreal OScopeChannelWgt::vOffset() const
+{
+    return ui->asVert->offset();
+}
+
+void OScopeChannelWgt::setVOffset(qreal newVOffset)
+{
+    ui->asVert->blockSignals(true);
+    ui->asVert->setOffset(newVOffset);
+    ui->asVert->blockSignals(false);
+}
+
 bool OScopeChannelWgt::signalVisible() const
 {
     return ui->cbVisible->isChecked();
@@ -122,6 +146,9 @@ void OScopeChannelWgt::updateValues()
     setPenColor(pen.color());
     setPenStyle(pen.style());
     setPenWidth(pen.widthF());
+
+    ui->asVert->setScale(m_plot->vDiv(m_channel));
+    ui->asVert->setOffset(m_plot->vOffset(m_channel));
 }
 
 void OScopeChannelWgt::applyValues() const
@@ -135,6 +162,9 @@ void OScopeChannelWgt::applyValues() const
     pen.setStyle(penStyle());
     pen.setWidthF(penWidth());
     m_plot->setPen(m_channel, pen);
+
+    m_plot->setVDiv(m_channel, ui->asVert->scale());
+    m_plot->setVOffset(m_channel, ui->asVert->offset());
 }
 
 void OScopeChannelWgt::vertScaleChanged(qreal value)
