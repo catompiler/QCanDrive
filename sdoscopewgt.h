@@ -7,6 +7,7 @@ class OScopePlot;
 class SDOScope;
 class SDOScopeData;
 class RegListModel;
+class RegSelectDlg;
 class SLCanOpenNode;
 
 class SDOScopeChsEditDlg;
@@ -31,10 +32,16 @@ public:
     SLCanOpenNode* getSLCanOpenNode();
     void setSLCanOpenNode(SLCanOpenNode* slcon);
 
+    RegSelectDlg* regSelectDialog() const;
+    void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
+
 public slots:
     void connected();
     void disconnected();
     void single();
+    void run();
+    void abort();
+    void autoScale();
 
 private slots:
     void sdoscopeInitialized();
@@ -42,12 +49,25 @@ private slots:
     void sdoscopeErrorOccured();
     void sdoscopeDone();
     void sdoscopeReaded();
+    void sdoscopeApplied();
+    void sdoscopeAppliedChannels();
+    void sdoscopeAppliedCommon();
+    void sdoscopeAppliedTrig();
 
     void horiScaleChanged(double value);
     void horiOffsetChanged(double value);
 
+    void triggerEnabledChanged(bool newEnabled);
+    void triggerTypeChanged(int newType /* SDOScope::TriggerType */);
+    void triggerDataValueChanged(int newValue);
+    void triggerChannelChanged(uint newChannel);
+
     void btnScopeParams_clicked(bool checked);
     void btnScopeChannels_clicked(bool checked);
+    void btnRun_clicked(bool checked);
+    void btnSingle_clicked(bool checked);
+    void btnAbort_clicked(bool checked);
+    void btnAutoScale_clicked(bool checked);
 
 private:
     Ui::SDOScopeWgt *ui;
@@ -63,9 +83,12 @@ private:
     const OScopePlot* getPlot() const;
 
     void populateChannelsUi();
+    void populateTriggerChannels();
     void refreshUi();
     void refreshChannelsUi();
+    void refreshTriggerUi();
     void applyUiToPlot();
+    void applyChannelsUiToPlot();
 };
 
 #endif // SDOSCOPEWGT_H

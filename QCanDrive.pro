@@ -51,6 +51,7 @@ SOURCES += \
     oscopehorizontal.cpp \
     oscopeplot.cpp \
     oscopeplotseriesdata.cpp \
+    oscopetriggerwgt.cpp \
     oscopevertical.cpp \
     oscplot.cpp \
     oscplotdata.cpp \
@@ -156,6 +157,7 @@ HEADERS += \
     oscopehorizontal.h \
     oscopeplot.h \
     oscopeplotseriesdata.h \
+    oscopetriggerwgt.h \
     oscopevertical.h \
     oscplot.h \
     oscplotdata.h \
@@ -247,6 +249,7 @@ FORMS += \
     canopenwin.ui \
     oscopeaxiswgt.ui \
     oscopechannelwgt.ui \
+    oscopetriggerwgt.ui \
     sdoscopechseditdlg.ui \
     sdoscopeparamsdlg.ui \
     sdoscopewgt.ui \

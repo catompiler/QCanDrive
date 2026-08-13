@@ -159,7 +159,10 @@ bool SDOScope::init()
 {
     if(!m_slcon) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_init_state = INIT_BEGIN;
     m_state = STATE_INIT;
     m_error = ERROR_NONE;
@@ -182,7 +185,10 @@ bool SDOScope::update()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE;
     m_error = ERROR_NONE;
@@ -198,7 +204,10 @@ bool SDOScope::updateCommon()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_COMMON;
     m_error = ERROR_NONE;
@@ -214,7 +223,10 @@ bool SDOScope::updateTrig()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_TRIG;
     m_error = ERROR_NONE;
@@ -230,7 +242,10 @@ bool SDOScope::updateChannels()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_CHANNELS;
     m_error = ERROR_NONE;
@@ -246,7 +261,10 @@ bool SDOScope::apply()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY;
     m_error = ERROR_NONE;
@@ -261,7 +279,10 @@ bool SDOScope::applyCommon()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_COMMON;
     m_error = ERROR_NONE;
@@ -276,7 +297,10 @@ bool SDOScope::applyTrig()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_TRIG;
     m_error = ERROR_NONE;
@@ -291,7 +315,10 @@ bool SDOScope::applyChannels()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_CHANNELS;
     m_error = ERROR_NONE;
@@ -306,7 +333,10 @@ bool SDOScope::run()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_run_state = RUN_BEGIN;
     m_state = STATE_RUN;
     m_error = ERROR_NONE;
@@ -320,7 +350,10 @@ bool SDOScope::read()
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
     if(m_state != STATE_NONE) return false;
+    if(m_comm->running()) return false;
 
+    m_comm->setState(SDOComm::IDLE);
+    m_comm->setError(SDOComm::ERROR_NONE);
     m_read_state = READ_BEGIN;
     m_state = STATE_READ;
     m_error = ERROR_NONE;
@@ -328,6 +361,22 @@ bool SDOScope::read()
     m_read_read = false;
 
     return processRead() != PROCESSING_ERROR;
+}
+
+bool SDOScope::abort()
+{
+    if(!m_slcon) return true;
+
+    if(m_slcon->cancel(m_comm)){
+        m_error = ERROR_CANCELED;
+        m_state = STATE_NONE;
+
+        //handleError();
+        handleFinished();
+        return true;
+    }
+
+    return false;
 }
 
 void SDOScope::sdoFinished()
@@ -846,10 +895,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
         // Если нужно обновить общие настройки.
         if(updCommon){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -878,10 +927,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
         // Если нужно обновить настройки триггера.
         if(updTrig){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -910,10 +959,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
         // Если нужно обновить настройки каналов.
         if(updChannels){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -951,10 +1000,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
         // Если нужно обновлять настройки каналов.
         if(updChannels){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -1236,10 +1285,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(boo
         // Если нужно применить общие настройки.
         if(applCommon){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -1268,10 +1317,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(boo
         // Если нужно применить настройки триггера.
         if(applTrig){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -1300,10 +1349,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(boo
         // Если нужно применить настройки каналов.
         if(applChannels){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;
@@ -1341,10 +1390,10 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(boo
         // Если нужно применить настройки каналов.
         if(applChannels){
             // Ожидание завершения предыдущего этапа.
-            if(!m_comm->isFinished()){
+            if(m_comm->running()){
                 break;
             }
-            if(m_comm->hasError()){
+            if(m_comm->isFinished() && m_comm->hasError()){
                 proc_err = ERROR_COMM;
                 proc_state = PROCESSING_ERROR;
                 break;

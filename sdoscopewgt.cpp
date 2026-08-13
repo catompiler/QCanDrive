@@ -56,9 +56,22 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     connect(m_scope, &SDOScope::errorOccured, this, &SDOScopeWgt::sdoscopeErrorOccured);
     connect(m_scope, &SDOScope::done, this, &SDOScopeWgt::sdoscopeDone);
     connect(m_scope, &SDOScope::readed, this, &SDOScopeWgt::sdoscopeReaded);
+    connect(m_scope, &SDOScope::applied, this, &SDOScopeWgt::sdoscopeApplied);
+    connect(m_scope, &SDOScope::appliedChannels, this, &SDOScopeWgt::sdoscopeAppliedChannels);
+    connect(m_scope, &SDOScope::appliedCommon, this, &SDOScopeWgt::sdoscopeAppliedCommon);
+    connect(m_scope, &SDOScope::appliedTrig, this, &SDOScopeWgt::sdoscopeAppliedTrig);
+
+    // Триггер.
+    connect(ui->twTrig, &OScopeTriggerWgt::triggerEnabledChanged, this, &SDOScopeWgt::triggerEnabledChanged);
+    connect(ui->twTrig, &OScopeTriggerWgt::triggerTypeChanged, this, &SDOScopeWgt::triggerTypeChanged);
+    connect(ui->twTrig, &OScopeTriggerWgt::triggerChannelChanged, this, &SDOScopeWgt::triggerChannelChanged);
+    connect(ui->twTrig, &OScopeTriggerWgt::triggerDataValueChanged, this, &SDOScopeWgt::triggerDataValueChanged);
 
     // Коннекты виджета.
-    connect(ui->pbSingle, &QPushButton::clicked, this, &SDOScopeWgt::single);
+    connect(ui->pbRun, &QPushButton::clicked, this, &SDOScopeWgt::btnRun_clicked);
+    connect(ui->pbSingle, &QPushButton::clicked, this, &SDOScopeWgt::btnSingle_clicked);
+    connect(ui->pbAbort, &QPushButton::clicked, this, &SDOScopeWgt::btnAbort_clicked);
+    connect(ui->pbAutoScale, &QPushButton::clicked, this, &SDOScopeWgt::btnAutoScale_clicked);
 
     // Данные осциллографа.
     m_scope_data = new SDOScopeData(m_scope);
@@ -69,11 +82,17 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     // Создадим интерфейс каналов.
     populateChannelsUi();
 
+    // Заполним список каналов триггера.
+    populateTriggerChannels();
+
     // Обновим интерфейс.
     refreshUi();
 
     // Синхронизируем график с интерфейсом.
     applyUiToPlot();
+
+    // Обновим график.
+    plt->replot();
 }
 
 SDOScopeWgt::~SDOScopeWgt()
@@ -113,6 +132,16 @@ void SDOScopeWgt::setSLCanOpenNode(SLCanOpenNode* slcon)
     m_scope->setSLCanOpenNode(slcon);
 }
 
+RegSelectDlg* SDOScopeWgt::regSelectDialog() const
+{
+    return m_chs_edit_dlg->regSelectDialog();
+}
+
+void SDOScopeWgt::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
+{
+    m_chs_edit_dlg->setRegSelectDialog(newRegSelectDialog);
+}
+
 void SDOScopeWgt::connected()
 {
     qDebug() << "SDOScopeWgt::connected()";
@@ -142,6 +171,21 @@ void SDOScopeWgt::single()
     }
 }
 
+void SDOScopeWgt::run()
+{
+
+}
+
+void SDOScopeWgt::abort()
+{
+    m_scope->abort();
+}
+
+void SDOScopeWgt::autoScale()
+{
+
+}
+
 void SDOScopeWgt::sdoscopeInitialized()
 {
     qDebug() << "SDOScopeWgt::sdoscopeInitialized()";
@@ -169,11 +213,17 @@ void SDOScopeWgt::sdoscopeUpdated()
     // Заполним интерфейс каналов.
     populateChannelsUi();
 
+    // Заполним список каналов триггера.
+    populateTriggerChannels();
+
     // Обновим интерфейс.
     refreshUi();
 
     // Синхронизируем график с интерфейсом.
     applyUiToPlot();
+
+    // Обновим график.
+    plt->replot();
 }
 
 void SDOScopeWgt::sdoscopeErrorOccured()
@@ -198,14 +248,52 @@ void SDOScopeWgt::sdoscopeReaded()
 
     auto plt = getPlot();
 
+    // Сбросим кешированные границы.
     plt->invalidateAllBounds();
+
+    // Обновим график.
     plt->replot();
+}
+
+void SDOScopeWgt::sdoscopeApplied()
+{
+    qDebug() << "SDOScopeWgt::sdoscopeApplied()";
+
+    refreshUi();
+    applyUiToPlot();
+
+    // Обновим график.
+    getPlot()->replot();
+}
+
+void SDOScopeWgt::sdoscopeAppliedChannels()
+{
+    qDebug() << "SDOScopeWgt::sdoscopeAppliedChannels()";
+
+    refreshChannelsUi();
+    applyChannelsUiToPlot();
+
+    // Обновим график.
+    getPlot()->replot();
+}
+
+void SDOScopeWgt::sdoscopeAppliedCommon()
+{
+    qDebug() << "SDOScopeWgt::sdoscopeAppliedCommon()";
+}
+
+void SDOScopeWgt::sdoscopeAppliedTrig()
+{
+    qDebug() << "SDOScopeWgt::sdoscopeAppliedTrig()";
+
+    //refreshTriggerUi();
 }
 
 void SDOScopeWgt::horiScaleChanged(double value)
 {
     auto plt = getPlot();
     plt->setHDiv(value);
+    // Обновим график.
     plt->replot();
 }
 
@@ -213,7 +301,44 @@ void SDOScopeWgt::horiOffsetChanged(double value)
 {
     auto plt = getPlot();
     plt->setHOffset(value);
+    // Обновим график.
     plt->replot();
+}
+
+void SDOScopeWgt::triggerEnabledChanged(bool newEnabled)
+{
+    m_scope->setTriggerEnabled(newEnabled);
+
+    if(!m_scope->applyTrig()){
+        qDebug() << "SDOScope applyTrig failed";
+    }
+}
+
+void SDOScopeWgt::triggerTypeChanged(int newType)
+{
+    m_scope->setTriggerType(static_cast<SDOScope::TriggerType>(newType));
+
+    if(!m_scope->applyTrig()){
+        qDebug() << "SDOScope applyTrig failed";
+    }
+}
+
+void SDOScopeWgt::triggerDataValueChanged(int newValue)
+{
+    m_scope->setTriggerValue(newValue);
+
+    if(!m_scope->applyTrig()){
+        qDebug() << "SDOScope applyTrig failed";
+    }
+}
+
+void SDOScopeWgt::triggerChannelChanged(uint newChannel)
+{
+    m_scope->setTriggerChannel(newChannel);
+
+    if(!m_scope->applyTrig()){
+        qDebug() << "SDOScope applyTrig failed";
+    }
 }
 
 void SDOScopeWgt::btnScopeParams_clicked(bool checked)
@@ -229,6 +354,12 @@ void SDOScopeWgt::btnScopeParams_clicked(bool checked)
         m_scope->setPrescaler(m_params_dlg->prescaler());
         m_scope->setSamplesCount(m_params_dlg->samplesCount());
         m_scope->setHistSamplesCount(m_params_dlg->histSamplesCount());
+
+        if(!m_scope->applyCommon()){
+            qDebug() << "SDOScope applyCommon failed";
+
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения параметров осциллографа!"));
+        }
     }
 }
 
@@ -275,7 +406,33 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
             ch->setDataType(ch_data.dataType);
             ch->setBaseValue(ch_data.baseValue);
         }
+
+        if(!m_scope->applyChannels()){
+            qDebug() << "SDOScope applyChannels failed";
+
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка настройки каналов осциллографа!"));
+        }
     }
+}
+
+void SDOScopeWgt::btnRun_clicked(bool checked)
+{
+
+}
+
+void SDOScopeWgt::btnSingle_clicked(bool checked)
+{
+    single();
+}
+
+void SDOScopeWgt::btnAbort_clicked(bool checked)
+{
+    abort();
+}
+
+void SDOScopeWgt::btnAutoScale_clicked(bool checked)
+{
+
 }
 
 OScopePlot* SDOScopeWgt::getPlot()
@@ -313,9 +470,21 @@ void SDOScopeWgt::populateChannelsUi()
     ui->twChannels->setUpdatesEnabled(true);
 }
 
+void SDOScopeWgt::populateTriggerChannels()
+{
+    ui->twTrig->clearTriggerChannels();
+
+    for(uint i = 0; i < m_scope->channelsCount(); i ++){
+        if(m_scope->channel(i)->enabled()){
+            ui->twTrig->addTriggerChannel(tr("Канал %1").arg(i + 1), i);
+        }
+    }
+}
+
 void SDOScopeWgt::refreshUi()
 {
     refreshChannelsUi();
+    refreshTriggerUi();
 
     auto plt = getPlot();
     ui->asHori->setScale(plt->hDiv());
@@ -342,6 +511,14 @@ void SDOScopeWgt::refreshChannelsUi()
     ui->twChannels->setUpdatesEnabled(true);
 }
 
+void SDOScopeWgt::refreshTriggerUi()
+{
+    ui->twTrig->setTriggerEnabled(m_scope->triggerEnabled());
+    ui->twTrig->setTriggerType(m_scope->triggerType());
+    ui->twTrig->setTriggerChannel(m_scope->triggerChannel());
+    ui->twTrig->setTriggerDataValue(m_scope->triggerValue());
+}
+
 void SDOScopeWgt::applyUiToPlot()
 {
     auto plt = getPlot();
@@ -349,12 +526,15 @@ void SDOScopeWgt::applyUiToPlot()
     plt->setHOffset(ui->asHori->offset());
     plt->setHDiv(ui->asHori->scale());
 
+    applyChannelsUiToPlot();
+}
+
+void SDOScopeWgt::applyChannelsUiToPlot()
+{
     for(int i = 0; i < ui->twChannels->count(); i ++){
         OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
         if(ocw){
             ocw->applyValues();
         }
     }
-
-    plt->replot();
 }

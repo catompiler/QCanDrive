@@ -202,6 +202,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pbAbort">
+          <property name="text">
+           <string>Прервать</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="pbAutoScale">
           <property name="text">
            <string>Авто</string>
@@ -249,51 +256,23 @@
         <string>Триггер</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
         <item>
-         <widget class="QCheckBox" name="cbTrigEnables">
-          <property name="text">
-           <string>Включен</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="lblTrigChannel">
-          <property name="text">
-           <string>Канал</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="cbTrigChannel"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="lblTrigType">
-          <property name="text">
-           <string>Фронт</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="cbTrigType"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="lblTrigValue">
-          <property name="text">
-           <string>Значение</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="dsbTrigValue"/>
+         <widget class="OScopeTriggerWgt" name="twTrig" native="true"/>
         </item>
        </layout>
       </widget>
@@ -335,6 +314,12 @@
    <class>OScopeChannelWgt</class>
    <extends>QWidget</extends>
    <header>oscopechannelwgt.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>OScopeTriggerWgt</class>
+   <extends>QWidget</extends>
+   <header>oscopetriggerwgt.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

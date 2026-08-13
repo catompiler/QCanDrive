@@ -803,6 +803,10 @@ bool SLCanOpenNode::cancel(SDOComm* sdoc)
 
     m_sdoComms.erase(it);
 
+    sdoc->setState(SDOComm::DONE);
+    sdoc->setError(SDOComm::ERROR_CANCEL);
+    sdoc->finish();
+
     return true;
 }
 

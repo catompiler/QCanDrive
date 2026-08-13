@@ -90,7 +90,7 @@ public:
     bool write(SDOComm* sdocom);
 
     // return true if sdoc removed(not in) from queue and can be deleted or reused.
-    // when return true - not finish sdo comm.
+    // when return false - not finish sdo comm.
     bool cancel(SDOComm* sdoc);
 
 signals:

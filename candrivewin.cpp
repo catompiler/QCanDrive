@@ -60,6 +60,7 @@ CanDriveWin::CanDriveWin(QWidget *parent)
 
     ui->oscopeWgt->setSLCanOpenNode(m_slcon);
     ui->oscopeWgt->setRegListModel(ui->tvRegList->regListModel());
+    ui->oscopeWgt->setRegSelectDialog(ui->tvRegList->regSelectDialog());
 
     // Коннекты действий.
     connect(ui->actDebugExec, &QAction::triggered, this, &CanDriveWin::m_ui_actDebugExec_triggered);

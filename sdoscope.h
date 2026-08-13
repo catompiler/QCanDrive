@@ -129,7 +129,8 @@ public:
         ERROR_VERSION = 2,
         ERROR_CONSTRAINTS = 3,
         ERROR_INVALID = 4,
-        //ERROR_ = 5,
+        ERROR_CANCELED = 5,
+        //ERROR_ = 6,
     };
 
     //! Перечисление активных КА.
@@ -395,6 +396,7 @@ public slots:
     bool applyChannels();
     bool run();
     bool read();
+    bool abort();
 
 signals:
     void errorOccured(); // Сигнал о возникновении ошибки.
