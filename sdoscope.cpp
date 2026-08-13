@@ -379,6 +379,15 @@ bool SDOScope::abort()
     return false;
 }
 
+void SDOScope::clear()
+{
+    for(uint i = 0; i < m_max_channels; i ++){
+        Channel* ch = &m_channels[i];
+
+        if(ch->enabled()) ch->clear();
+    }
+}
+
 void SDOScope::sdoFinished()
 {
     switch(m_state){
@@ -1905,6 +1914,13 @@ qreal SDOScope::Channel::value(uint i) const
     return rawValue(i) * m_base_value;
 }
 
+void SDOScope::Channel::clear()
+{
+    if(m_samples == nullptr) return;
+
+    memset(m_samples, 0x0, m_samples_count * sizeof(sample_t));
+}
+
 uint32_t* SDOScope::Channel::enabledPtr()
 {
     return &m_enabled;
@@ -1943,11 +1959,4 @@ void SDOScope::Channel::resize(uint newSize)
 
     m_samples = new sample_t[newSize];
     m_samples_count = newSize;
-}
-
-void SDOScope::Channel::clear()
-{
-    if(m_samples == nullptr) return;
-
-    memset(m_samples, 0x0, m_samples_count * sizeof(sample_t));
 }

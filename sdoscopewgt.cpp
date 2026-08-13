@@ -207,7 +207,7 @@ void SDOScopeWgt::sdoscopeUpdated()
 
     auto plt = getPlot();
 
-    // Обновим каналы.
+    // Обновим графики каналов.
     plt->updateData();
 
     // Заполним интерфейс каналов.
@@ -259,6 +259,14 @@ void SDOScopeWgt::sdoscopeApplied()
 {
     qDebug() << "SDOScopeWgt::sdoscopeApplied()";
 
+    // Очистим каналы.
+    m_scope->clear();
+
+    auto plt = getPlot();
+
+    // Обновим графики каналов.
+    plt->updateData();
+
     populateChannelsUi();
     populateTriggerChannels();
 
@@ -266,21 +274,30 @@ void SDOScopeWgt::sdoscopeApplied()
     applyUiToPlot();
 
     // Обновим график.
-    getPlot()->replot();
+    plt->replot();
 }
 
 void SDOScopeWgt::sdoscopeAppliedChannels()
 {
     qDebug() << "SDOScopeWgt::sdoscopeAppliedChannels()";
 
+    // Очистим каналы.
+    m_scope->clear();
+
+    auto plt = getPlot();
+
+    // Обновим графики каналов.
+    plt->updateData();
+
     populateChannelsUi();
     populateTriggerChannels();
 
     refreshChannelsUi();
+    refreshTriggerUi();
     applyChannelsUiToPlot();
 
     // Обновим график.
-    getPlot()->replot();
+    plt->replot();
 }
 
 void SDOScopeWgt::sdoscopeAppliedCommon()
@@ -455,6 +472,9 @@ void SDOScopeWgt::populateChannelsUi()
 {
     ui->twChannels->setUpdatesEnabled(false);
 
+    OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->currentWidget());
+    int curTabChannel = (ocw != nullptr) ? ocw->channel() : -1;
+
     // Clear tabs.
     while(ui->twChannels->count() != 0){
         QWidget* tabWidget = ui->twChannels->widget(0);
@@ -473,11 +493,22 @@ void SDOScopeWgt::populateChannelsUi()
         ui->twChannels->addTab(ocw, tr("Канал %1").arg(i + 1));
     }
 
+    // Restore active channel tab.
+    for(int i = 0; i < ui->twChannels->count(); i ++){
+        OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
+        if(ocw && (ocw->channel() == curTabChannel)){
+            ui->twChannels->setCurrentIndex(i);
+            break;
+        }
+    }
+
     ui->twChannels->setUpdatesEnabled(true);
 }
 
 void SDOScopeWgt::populateTriggerChannels()
 {
+    ui->twTrig->blockSignals(true);
+
     ui->twTrig->clearTriggerChannels();
 
     for(uint i = 0; i < m_scope->channelsCount(); i ++){
@@ -485,6 +516,8 @@ void SDOScopeWgt::populateTriggerChannels()
             ui->twTrig->addTriggerChannel(tr("Канал %1").arg(i + 1), i);
         }
     }
+
+    ui->twTrig->blockSignals(false);
 }
 
 void SDOScopeWgt::refreshUi()
@@ -519,10 +552,14 @@ void SDOScopeWgt::refreshChannelsUi()
 
 void SDOScopeWgt::refreshTriggerUi()
 {
+    ui->twTrig->blockSignals(true);
+
     ui->twTrig->setTriggerEnabled(m_scope->triggerEnabled());
     ui->twTrig->setTriggerType(m_scope->triggerType());
     ui->twTrig->setTriggerChannel(m_scope->triggerChannel());
     ui->twTrig->setTriggerDataValue(m_scope->triggerValue());
+
+    ui->twTrig->blockSignals(false);
 }
 
 void SDOScopeWgt::applyUiToPlot()

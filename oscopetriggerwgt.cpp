@@ -186,7 +186,7 @@ void OScopeTriggerWgt::trigValue_valueChanged(qreal newValue)
 {
     Q_UNUSED(newValue);
 
-    m_valueChangedTmr->start();
+    if(!signalsBlocked()) m_valueChangedTmr->start();
 }
 
 void OScopeTriggerWgt::valueChangedTmr_timeout()
