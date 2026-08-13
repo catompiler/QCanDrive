@@ -259,6 +259,9 @@ void SDOScopeWgt::sdoscopeApplied()
 {
     qDebug() << "SDOScopeWgt::sdoscopeApplied()";
 
+    populateChannelsUi();
+    populateTriggerChannels();
+
     refreshUi();
     applyUiToPlot();
 
@@ -269,6 +272,9 @@ void SDOScopeWgt::sdoscopeApplied()
 void SDOScopeWgt::sdoscopeAppliedChannels()
 {
     qDebug() << "SDOScopeWgt::sdoscopeAppliedChannels()";
+
+    populateChannelsUi();
+    populateTriggerChannels();
 
     refreshChannelsUi();
     applyChannelsUiToPlot();

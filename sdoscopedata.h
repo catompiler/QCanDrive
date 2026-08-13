@@ -17,6 +17,7 @@ public:
 
     qreal Ts() const override;
     size_t samplesCount() const override;
+    size_t historySize() const override;
     uint channelsCount() const override;
     qreal sample(uint ch_n, size_t i) override;
 

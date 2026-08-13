@@ -36,6 +36,13 @@ size_t SDOScopeData::samplesCount() const
     return m_scope->samplesCount();
 }
 
+size_t SDOScopeData::historySize() const
+{
+    if(m_scope == nullptr) return 0;
+
+    return m_scope->histSamplesCount();
+}
+
 uint SDOScopeData::channelsCount() const
 {
     if(m_scope == nullptr) return 0;

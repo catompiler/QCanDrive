@@ -16,6 +16,10 @@ public:
     //! Число точек.
     virtual size_t samplesCount() const = 0;
 
+    //! Количество семплов истории (до времени t = 0).
+    //! (Номер семпла в момент срабатывания триггера (t = 0)).
+    virtual size_t historySize() const = 0;
+
     //! Число каналов.
     virtual uint channelsCount() const = 0;
 

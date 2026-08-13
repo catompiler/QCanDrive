@@ -141,7 +141,7 @@ qreal OScopePlotSeriesData::getXValue(size_t i) const
     assert(m_oscData != nullptr);
     assert(m_hori != nullptr);
 
-    qreal val = m_oscData->Ts() * i;
+    qreal val = m_oscData->Ts() * (static_cast<long>(i) - static_cast<long>(m_oscData->historySize()));
 
     return (val + m_hori->hOffset()) * m_hori->invHDiv();
 }
