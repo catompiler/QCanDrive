@@ -21,6 +21,12 @@ public:
     static constexpr qreal OFFSET_K = 1.0 / OFFSET_TICKS_PER_TURN;
     static constexpr int OFFSET_TURNS = 100;
 
+    enum AdjustType {
+        ADJUST_TO_LOWEST = -1,
+        ADJUST_TO_NEAREST = 0,
+        ADJUST_TO_HIGHEST = 1
+    };
+
     explicit OScopeAxisWgt(QWidget *parent = nullptr);
     ~OScopeAxisWgt();
 
@@ -50,6 +56,9 @@ public:
     qreal offset() const;
     void setOffset(qreal newOffset);
 
+    AdjustType scaleAdjustType() const;
+    void setScaleAdjustType(AdjustType newType);
+
 signals:
     void scaleChanged(qreal value);
     void offsetChanged(qreal value);
@@ -67,6 +76,8 @@ private:
     QString m_unit;
     QStringList m_unitUpPrefixes;
     QStringList m_unitDownPrefixes;
+
+    AdjustType m_scaleAdjustType;
 
     QPair<qreal, int> valueScaleBase(qreal val, qreal scaleBase) const;
 

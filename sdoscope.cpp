@@ -27,6 +27,9 @@ SDOScope::SDOScope(QObject *parent)
     m_comm = new SDOComm();
     connect(m_comm, &SDOComm::finished, this, &SDOScope::sdoFinished);
 
+    m_comm_apply_trig = new SDOComm();
+    connect(m_comm_apply_trig, &SDOComm::finished, this, &SDOScope::sdoFinishedApplyTrig);
+
     m_nodeId = 1;
     m_entryIndex = 0x2800;
     m_versionSubIndex = VERSION_SUBINDEX;
@@ -95,6 +98,13 @@ SDOScope::~SDOScope()
         delete m_comm;
     }else{
         m_comm->deleteLater();
+    }
+
+    disconnect(m_comm_apply_trig, &SDOComm::finished, this, &SDOScope::sdoFinishedApplyTrig);
+    if(!m_comm_apply_trig->running()){
+        delete m_comm_apply_trig;
+    }else{
+        m_comm_apply_trig->deleteLater();
     }
 
     if(m_channels) delete[] m_channels;
@@ -292,22 +302,36 @@ bool SDOScope::applyCommon()
     return processApplyCommon() != PROCESSING_ERROR;
 }
 
+// bool SDOScope::applyTrig()
+// {
+//     if(!m_slcon) return false;
+//     if(!isInitialized()) return false;
+//     if(m_state != STATE_NONE) return false;
+//     if(m_comm->running()) return false;
+
+//     m_comm->setState(SDOComm::IDLE);
+//     m_comm->setError(SDOComm::ERROR_NONE);
+//     m_apply_state = APPLY_BEGIN;
+//     m_state = STATE_APPLY_TRIG;
+//     m_error = ERROR_NONE;
+//     m_apply_cur_task = 0;
+//     m_apply_status_read = false;
+
+//     return processApplyTrig() != PROCESSING_ERROR;
+// }
+
 bool SDOScope::applyTrig()
 {
     if(!m_slcon) return false;
     if(!isInitialized()) return false;
-    if(m_state != STATE_NONE) return false;
-    if(m_comm->running()) return false;
+    if(m_comm_apply_trig->running()) return false;
 
-    m_comm->setState(SDOComm::IDLE);
-    m_comm->setError(SDOComm::ERROR_NONE);
-    m_apply_state = APPLY_BEGIN;
-    m_state = STATE_APPLY_TRIG;
+    m_comm_apply_trig->setState(SDOComm::IDLE);
+    m_comm_apply_trig->setError(SDOComm::ERROR_NONE);
+    m_apply_trig_state = APPLY_TRIG_BEGIN;
     m_error = ERROR_NONE;
-    m_apply_cur_task = 0;
-    m_apply_status_read = false;
 
-    return processApplyTrig() != PROCESSING_ERROR;
+    return processApplyTrigIndep() != PROCESSING_ERROR;
 }
 
 bool SDOScope::applyChannels()
@@ -372,7 +396,7 @@ bool SDOScope::abort()
         m_state = STATE_NONE;
 
         //handleError();
-        handleFinished();
+        //handleFinished();
         return true;
     }
 
@@ -429,6 +453,11 @@ void SDOScope::sdoFinished()
         processRead();
         break;
     }
+}
+
+void SDOScope::sdoFinishedApplyTrig()
+{
+    processApplyTrigIndep();
 }
 
 uint32_t SDOScope::maxSampleRate() const
@@ -539,6 +568,46 @@ int32_t SDOScope::triggerValue() const
 void SDOScope::setTriggerValue(int32_t newValue)
 {
     m_trig_value = newValue;
+}
+
+bool SDOScope::isBusy() const
+{
+    return m_state != STATE_NONE;
+}
+
+bool SDOScope::isApplyTrigBusy() const
+{
+    return isApplyingTrig();
+}
+
+bool SDOScope::isInitializing() const
+{
+    return m_init_state != INIT_NONE && m_init_state != INIT_DONE;
+}
+
+bool SDOScope::isUpdating() const
+{
+    return m_update_state != UPDATE_NONE && m_update_state != UPDATE_DONE;
+}
+
+bool SDOScope::isApplying() const
+{
+    return m_apply_state != APPLY_NONE && m_apply_state != APPLY_DONE;
+}
+
+bool SDOScope::isApplyingTrig() const
+{
+    return m_apply_trig_state != APPLY_TRIG_NONE && m_apply_trig_state != APPLY_TRIG_DONE;
+}
+
+bool SDOScope::isRunning() const
+{
+    return m_run_state != RUN_NONE && m_run_state != RUN_DONE;
+}
+
+bool SDOScope::isReading() const
+{
+    return m_read_state != READ_NONE && m_read_state != READ_DONE;
 }
 
 SDOScope::Channel* SDOScope::channel(uint i)
@@ -704,6 +773,7 @@ SDOScope::ProcessingState SDOScope::processInit()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_init_state = INIT_DONE;
 
         emit initialized();
         handleFinished();
@@ -712,6 +782,7 @@ SDOScope::ProcessingState SDOScope::processInit()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_init_state = INIT_DONE;
 
         handleError();
         break;
@@ -751,6 +822,7 @@ SDOScope::ProcessingState SDOScope::processUpdate()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         emit updated();
         handleFinished();
@@ -759,6 +831,7 @@ SDOScope::ProcessingState SDOScope::processUpdate()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         handleError();
         break;
@@ -788,6 +861,7 @@ SDOScope::ProcessingState SDOScope::processUpdateCommon()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         emit updatedCommon();
         handleFinished();
@@ -796,6 +870,7 @@ SDOScope::ProcessingState SDOScope::processUpdateCommon()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         handleError();
         break;
@@ -825,6 +900,7 @@ SDOScope::ProcessingState SDOScope::processUpdateTrig()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         emit updatedTrig();
         handleFinished();
@@ -833,6 +909,7 @@ SDOScope::ProcessingState SDOScope::processUpdateTrig()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         handleError();
         break;
@@ -862,6 +939,7 @@ SDOScope::ProcessingState SDOScope::processUpdateChannels()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         emit updatedChannels();
         handleFinished();
@@ -870,6 +948,7 @@ SDOScope::ProcessingState SDOScope::processUpdateChannels()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_update_state = UPDATE_DONE;
 
         handleError();
         break;
@@ -1140,6 +1219,7 @@ SDOScope::ProcessingState SDOScope::processApply()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         emit applied();
         handleFinished();
@@ -1148,6 +1228,7 @@ SDOScope::ProcessingState SDOScope::processApply()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         handleError();
         break;
@@ -1177,6 +1258,7 @@ SDOScope::ProcessingState SDOScope::processApplyCommon()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         emit appliedCommon();
         handleFinished();
@@ -1185,6 +1267,7 @@ SDOScope::ProcessingState SDOScope::processApplyCommon()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         handleError();
         break;
@@ -1214,6 +1297,7 @@ SDOScope::ProcessingState SDOScope::processApplyTrig()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         emit appliedTrig();
         handleFinished();
@@ -1222,6 +1306,7 @@ SDOScope::ProcessingState SDOScope::processApplyTrig()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         handleError();
         break;
@@ -1251,6 +1336,7 @@ SDOScope::ProcessingState SDOScope::processApplyChannels()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         emit appliedChannels();
         handleFinished();
@@ -1259,6 +1345,7 @@ SDOScope::ProcessingState SDOScope::processApplyChannels()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_apply_state = APPLY_DONE;
 
         handleError();
         break;
@@ -1467,6 +1554,191 @@ void SDOScope::populateApplyTasks()
     //    m_apply_tasks.append({CommTask::READ, , &m_, sizeof(m_)});
 }
 
+SDOScope::ProcessingState SDOScope::processApplyTrigIndep()
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    auto res_pair = processApplyTrigIndepImpl(true, true, true, true);
+    proc_state = res_pair.first; proc_err = res_pair.second;
+
+
+    // Обработка результата.
+    switch(proc_state){
+    default:
+    case PROCESSING_DONE:
+        m_error = proc_err;
+        m_apply_trig_state = APPLY_TRIG_DONE;
+
+        emit appliedTrig();
+        handleFinished();
+        break;
+
+    case PROCESSING_ERROR:
+        m_error = proc_err;
+        m_apply_trig_state = APPLY_TRIG_DONE;
+
+        handleError();
+        break;
+
+    case PROCESSING_IN_PROGRES:
+        break;
+    }
+
+    return proc_state;
+}
+
+QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyTrigIndepImpl(bool applEnabled, bool applChannel, bool applType, bool applValue)
+{
+    assert(m_slcon != nullptr);
+
+    Error proc_err = ERROR_NONE;
+    ProcessingState proc_state = PROCESSING_IN_PROGRES;
+
+
+    // Обработка состояния.
+    switch(m_apply_trig_state){
+    default:
+    case APPLY_TRIG_NONE:
+        break;
+
+    case APPLY_TRIG_BEGIN:{
+        m_apply_trig_state = APPLY_TRIG_ENABLED;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG_ENABLED:{
+        // Если нужно применить разрешение.
+        if(applEnabled){
+            // Ожидание завершения предыдущего этапа.
+            if(m_comm_apply_trig->running()){
+                break;
+            }
+            if(m_comm_apply_trig->isFinished() && m_comm_apply_trig->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Записать разрешение работы триггера.
+            SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, TRIG_ENABLED_SUBINDEX, &m_trig_enabled, sizeof(m_trig_enabled), m_comm_apply_trig);
+            if(comm == nullptr){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+        }
+
+        m_apply_trig_state = APPLY_TRIG_CHANNEL;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG_CHANNEL:{
+        // Если нужно применить канал.
+        if(applChannel){
+            // Ожидание завершения предыдущего этапа.
+            if(m_comm_apply_trig->running()){
+                break;
+            }
+            if(m_comm_apply_trig->isFinished() && m_comm_apply_trig->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Записать номер канала триггера.
+            SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, TRIG_CH_N_SUBINDEX, &m_trig_ch_n, sizeof(m_trig_ch_n), m_comm_apply_trig);
+            if(comm == nullptr){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+        }
+
+        m_apply_trig_state = APPLY_TRIG_TYPE;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG_TYPE:{
+        // Если нужно применить тип.
+        if(applType){
+            // Ожидание завершения предыдущего этапа.
+            if(m_comm_apply_trig->running()){
+                break;
+            }
+            if(m_comm_apply_trig->isFinished() && m_comm_apply_trig->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Записать тип триггера.
+            SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, TRIG_TYPE_SUBINDEX, &m_trig_type, sizeof(m_trig_type), m_comm_apply_trig);
+            if(comm == nullptr){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+        }
+
+        m_apply_trig_state = APPLY_TRIG_VALUE;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG_VALUE:{
+        // Если нужно применить значение.
+        if(applValue){
+            // Ожидание завершения предыдущего этапа.
+            if(m_comm_apply_trig->running()){
+                break;
+            }
+            if(m_comm_apply_trig->isFinished() && m_comm_apply_trig->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Записать значение триггера.
+            SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, TRIG_VALUE_SUBINDEX, &m_trig_value, sizeof(m_trig_value), m_comm_apply_trig);
+            if(comm == nullptr){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+        }
+
+        m_apply_trig_state = APPLY_TRIG_WAIT;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG_WAIT:{
+        // Ожидание завершения предыдущего этапа.
+        if(m_comm_apply_trig->running()){
+            break;
+        }
+        if(m_comm_apply_trig->isFinished() && m_comm_apply_trig->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        m_apply_trig_state = APPLY_TRIG_DONE;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_TRIG_DONE:{
+        proc_err = ERROR_NONE;
+        proc_state = PROCESSING_DONE;
+    }break;
+    }
+
+
+    return qMakePair(proc_state, proc_err);
+}
+
 SDOScope::ProcessingState SDOScope::processRun()
 {
     assert(m_slcon != nullptr);
@@ -1565,6 +1837,7 @@ SDOScope::ProcessingState SDOScope::processRun()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_run_state = RUN_DONE;
 
         emit done();
         handleFinished();
@@ -1573,6 +1846,7 @@ SDOScope::ProcessingState SDOScope::processRun()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_run_state = RUN_DONE;
 
         handleError();
         break;
@@ -1701,6 +1975,7 @@ SDOScope::ProcessingState SDOScope::processRead()
     case PROCESSING_DONE:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_read_state = READ_DONE;
 
         emit readed();
         handleFinished();
@@ -1709,6 +1984,7 @@ SDOScope::ProcessingState SDOScope::processRead()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_read_state = READ_DONE;
 
         handleError();
         break;

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "sdoscope.h"
 #include <stdint.h>
+#include "regtypes.h"
 
 
 class QTimer;
@@ -29,6 +30,9 @@ public:
 
     SDOScope::TriggerType triggerType() const;
     void setTriggerType(SDOScope::TriggerType newType);
+
+    DataType triggerDataType() const;
+    void setTriggerDataType(DataType newDataType);
 
     qreal triggerValue() const;
     void setTriggerValue(qreal newValue);

@@ -180,6 +180,18 @@ public:
         APPLY_DONE
     };
 
+    //! КА применения триггера.
+    enum ApplyTrigState {
+        APPLY_TRIG_NONE = 0,
+        APPLY_TRIG_BEGIN,
+        APPLY_TRIG_ENABLED,
+        APPLY_TRIG_CHANNEL,
+        APPLY_TRIG_TYPE,
+        APPLY_TRIG_VALUE,
+        APPLY_TRIG_WAIT,
+        APPLY_TRIG_DONE
+    };
+
     //! КА записи осциллограммы.
     enum RunState {
         RUN_NONE = 0,
@@ -383,6 +395,31 @@ public:
     //! Устанавливает значение триггера.
     void setTriggerValue(int32_t newValue);
 
+    //! Получает флаг занятости.
+    bool isBusy() const;
+
+    //! Получает флаг занятости применения триггера независимо от текущей операции.
+    bool isApplyTrigBusy() const;
+
+    //! Получение флага, указывающего, идёт ли инициализация (считывание базовых параметров).
+    bool isInitializing() const;
+
+    //! Получение флага, указывающего, идёт ли обновление (считывание всех параметров работы).
+    bool isUpdating() const;
+
+    //! Получение флага, указывающего, идёт ли применение (запись) всех параметров работы.
+    bool isApplying() const;
+
+    //! Получение флага, указывающего, идёт ли применение параметров триггера независимо от текущей операции.
+    bool isApplyingTrig() const;
+
+    //! Получение флага, указывающего, идёт ли запуск и ожидание окончания записи осциллограммы.
+    bool isRunning() const;
+
+    //! Получение флага, указывающего, идёт ли чтение текущей осциллограммы.
+    bool isReading() const;
+
+
 public slots:
     bool init(); //!< Инициализация (считывания базовых параметров).
     bool deinit(); //!< Деинициализация.
@@ -392,7 +429,7 @@ public slots:
     bool updateChannels(); //!< Обновление (считывание) параметров каналов.
     bool apply(); //!< Применение (запись) всех параметров работы.
     bool applyCommon(); //!< Применение (запись) общих параметров работы.
-    bool applyTrig(); //!< Применение (запись) параметров триггера.
+    bool applyTrig(); //!< Применение (запись) параметров триггера не зависимо от текущей операции.
     bool applyChannels(); //!< Применение (запись) параметров каналов.
     bool run(); //!< Запуск и ожидание окончания запись осциллограммы.
     bool read(); //!< Чтение текущей осциллограммы.
@@ -408,7 +445,7 @@ signals:
     void updatedChannels(); //!< Сигнал об окончании обновления параметров каналов.
     void applied(); //!< Сигнал об окончании применения настроек.
     void appliedCommon(); //!< Сигнал об окончании применения общих параметров.
-    void appliedTrig(); //!< Сигнал об окончании применения параметров триггера.
+    void appliedTrig(); //!< Сигнал об окончании применения параметров триггера не зависимо от текущей операции.
     void appliedChannels(); //!< Сигнал об окончании применения параметров каналов.
     void done(); //!< Сигнал об окончании записи осциллограммы.
     void readed(); //!< Сигнал об окончании чтения данных осциллограммы.
@@ -416,6 +453,7 @@ signals:
 
 private slots:
     void sdoFinished();
+    void sdoFinishedApplyTrig();
 
 private:
     RegListModel* m_regListModel;
@@ -448,6 +486,7 @@ private:
     CO::SubIndex m_versionSubIndex;
 
     SDOComm* m_comm;
+    SDOComm* m_comm_apply_trig;
 
     Channel* m_channels;
 
@@ -478,6 +517,10 @@ private:
     TasksVector m_apply_channels_tasks;
     uint m_apply_cur_task;
     bool m_apply_status_read;
+
+    // Применение триггера, не зависимо от остальных операций.
+    ApplyTrigState m_apply_trig_state;
+
 
     // Переменные состояния записи осциллограммы.
     RunState m_run_state;
@@ -551,6 +594,10 @@ private:
     ProcessingState processApplyChannels();
     QPair<ProcessingState, Error> processApplyImpl(bool applCommon, bool applTrig, bool applChannels);
     void populateApplyTasks();
+
+    // Обработка КА применения триггера не зависимо от остального.
+    ProcessingState processApplyTrigIndep();
+    QPair<ProcessingState, Error> processApplyTrigIndepImpl(bool applEnabled, bool applChannel, bool applType, bool applValue);
 
     // Обработка КА записи осциллограммы.
     ProcessingState processRun();

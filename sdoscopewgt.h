@@ -44,6 +44,7 @@ public slots:
     void autoScale();
 
 private slots:
+    void sdoscopeFinished();
     void sdoscopeInitialized();
     void sdoscopeUpdated();
     void sdoscopeErrorOccured();
@@ -84,10 +85,12 @@ private:
 
     void populateChannelsUi();
     void populateTriggerChannels();
+    void updateUiEnabled();
     void refreshUi();
     void refreshChannelsUi();
     void refreshTriggerUi();
     void applyUiToPlot();
+    void applyHoriUiToPlot();
     void applyChannelsUiToPlot();
 };
 

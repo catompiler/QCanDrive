@@ -15,6 +15,7 @@ OScopeChannelWgt::OScopeChannelWgt(QWidget *parent)
 
     ui->setupUi(this);
 
+    ui->asVert->setScaleAdjustType(OScopeAxisWgt::ADJUST_TO_HIGHEST);
     ui->asVert->setScaleMin(1e-5);
     ui->asVert->setScaleMax(1e+4);
     ui->asVert->setScaleTurns(2);

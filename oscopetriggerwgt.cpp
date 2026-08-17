@@ -59,6 +59,20 @@ void OScopeTriggerWgt::setTriggerType(SDOScope::TriggerType newType)
     if(type_index != -1) ui->cbTrigType->setCurrentIndex(type_index);
 }
 
+DataType OScopeTriggerWgt::triggerDataType() const
+{
+    bool ok = false;
+    auto res =  static_cast<DataType>(ui->cbDataType->currentData().toUInt(&ok));
+    if(ok) return res;
+    return DataType::I32;
+}
+
+void OScopeTriggerWgt::setTriggerDataType(DataType newDataType)
+{
+    int type_index = ui->cbDataType->findData(static_cast<uint>(newDataType));
+    if(type_index != -1) ui->cbDataType->setCurrentIndex(type_index);
+}
+
 qreal OScopeTriggerWgt::triggerValue() const
 {
     return ui->dsbTrigValue->value();

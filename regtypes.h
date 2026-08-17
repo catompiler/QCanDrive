@@ -226,8 +226,63 @@ extern bool isSigned(DataType type);
 extern bool isUnsigned(DataType type);
 extern bool isFractional(DataType type);
 extern bool isMemory(DataType type);
+
 // Базовое значение фиксированной запятой.
 extern int32_t iqBase(DataType type);
+
+// Получает значение по сырому значению и типу.
+template <typename T>
+T valueFromRaw(int32_t rawValue, DataType type)
+{
+    switch(type){
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+        return static_cast<T>(rawValue);
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+        return static_cast<T>(static_cast<uint32_t>(rawValue));
+    case DataType::IQ24:
+        return static_cast<T>(rawValue) / (1L << 24);
+    case DataType::IQ15:
+        return static_cast<T>(rawValue) / (1L << 15);
+    case DataType::IQ7:
+        return static_cast<T>(rawValue) / (1L << 7);
+    case DataType::STR:
+    case DataType::MEM:
+    default:
+        break;
+    }
+    return T();
+}
+
+// Получает сырое значение по значению и типу.
+template <typename T>
+int32_t valueToRaw(T value, DataType type)
+{
+    switch(type){
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+        return static_cast<int32_t>(value);
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+        return static_cast<int32_t>(static_cast<uint32_t>(value));
+    case DataType::IQ24:
+        return static_cast<int32_t>(value * (1L << 24));
+    case DataType::IQ15:
+        return static_cast<int32_t>(value * (1L << 15));
+    case DataType::IQ7:
+        return static_cast<int32_t>(value * (1L << 7));
+    case DataType::STR:
+    case DataType::MEM:
+    default:
+        break;
+    }
+    return 0;
+}
 
 
 template <typename T, typename GetNameType>

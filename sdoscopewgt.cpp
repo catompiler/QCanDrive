@@ -51,6 +51,7 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     // Осциллограф.
     m_scope = new SDOScope();
     // Коннекты осциллографа.
+    connect(m_scope, &SDOScope::finished, this, &SDOScopeWgt::sdoscopeFinished);
     connect(m_scope, &SDOScope::initialized, this, &SDOScopeWgt::sdoscopeInitialized);
     connect(m_scope, &SDOScope::updated, this, &SDOScopeWgt::sdoscopeUpdated);
     connect(m_scope, &SDOScope::errorOccured, this, &SDOScopeWgt::sdoscopeErrorOccured);
@@ -90,6 +91,9 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 
     // Синхронизируем график с интерфейсом.
     applyUiToPlot();
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 
     // Обновим график.
     plt->replot();
@@ -183,7 +187,66 @@ void SDOScopeWgt::abort()
 
 void SDOScopeWgt::autoScale()
 {
+    auto plt = getPlot();
 
+    int signals_count = plt->signalsCount();
+
+    if(signals_count == 0) return;
+
+    uint samples_count = m_scope->samplesCount();
+
+    if(samples_count == 0) return;
+
+    for(int i = 0; i < ui->twChannels->count(); i ++){
+        OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
+        if(!ocw) continue;
+        if(!ocw->signalVisible()) continue;
+
+        uint ch_n = ocw->channel();
+
+        const SDOScope::Channel* ch = m_scope->channel(ch_n);
+        if(!ch) continue;
+        if(!ch->enabled()) continue;
+
+        qreal min_val = ch->value(0);
+        qreal max_val = min_val;
+        for(uint i = 1; i < samples_count; i ++){
+            qreal val = ch->value(i);
+            min_val = qMin(min_val, val);
+            max_val = qMax(max_val, val);
+        }
+
+        qreal vdiv = (max_val - min_val) / (OScopePlot::VGRID * 2);
+        qreal voffset = (min_val + max_val) / 2;
+
+        ocw->blockSignals(true);
+        ocw->setVDiv(vdiv);
+        ocw->setVOffset(voffset);
+        ocw->blockSignals(false);
+    }
+
+    // Масштаб - вся осциллограмма.
+    qreal hdiv = m_scope->Ts() * (m_scope->samplesCount()) / (OScopePlot::HGRID * 2);
+    // Смещение - вся осциллограмма.
+    qreal hoffset = - m_scope->Ts() * (static_cast<int>(m_scope->samplesCount() / 2) - static_cast<int>(m_scope->histSamplesCount()));
+
+    ui->asHori->blockSignals(true);
+    ui->asHori->setScale(hdiv);
+    ui->asHori->setOffset(hoffset);
+    ui->asHori->blockSignals(false);
+
+    applyHoriUiToPlot();
+    applyChannelsUiToPlot();
+
+    plt->replot();
+}
+
+void SDOScopeWgt::sdoscopeFinished()
+{
+    qDebug() << "SDOScopeWgt::sdoscopeFinished()";
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::sdoscopeInitialized()
@@ -335,6 +398,9 @@ void SDOScopeWgt::triggerEnabledChanged(bool newEnabled)
     if(!m_scope->applyTrig()){
         qDebug() << "SDOScope applyTrig failed";
     }
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::triggerTypeChanged(int newType)
@@ -344,6 +410,9 @@ void SDOScopeWgt::triggerTypeChanged(int newType)
     if(!m_scope->applyTrig()){
         qDebug() << "SDOScope applyTrig failed";
     }
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::triggerDataValueChanged(int newValue)
@@ -353,6 +422,9 @@ void SDOScopeWgt::triggerDataValueChanged(int newValue)
     if(!m_scope->applyTrig()){
         qDebug() << "SDOScope applyTrig failed";
     }
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::triggerChannelChanged(uint newChannel)
@@ -362,6 +434,9 @@ void SDOScopeWgt::triggerChannelChanged(uint newChannel)
     if(!m_scope->applyTrig()){
         qDebug() << "SDOScope applyTrig failed";
     }
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::btnScopeParams_clicked(bool checked)
@@ -383,6 +458,9 @@ void SDOScopeWgt::btnScopeParams_clicked(bool checked)
 
             QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения параметров осциллографа!"));
         }
+
+        // Обновление доступности элементов UI.
+        updateUiEnabled();
     }
 }
 
@@ -435,27 +513,47 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
 
             QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка настройки каналов осциллографа!"));
         }
+
+        // Обновление доступности элементов UI.
+        updateUiEnabled();
     }
 }
 
 void SDOScopeWgt::btnRun_clicked(bool checked)
 {
+    Q_UNUSED(checked);
 
+    run();
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::btnSingle_clicked(bool checked)
 {
+    Q_UNUSED(checked);
+
     single();
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::btnAbort_clicked(bool checked)
 {
+    Q_UNUSED(checked);
+
     abort();
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::btnAutoScale_clicked(bool checked)
 {
+    Q_UNUSED(checked);
 
+    autoScale();
 }
 
 OScopePlot* SDOScopeWgt::getPlot()
@@ -520,6 +618,21 @@ void SDOScopeWgt::populateTriggerChannels()
     ui->twTrig->blockSignals(false);
 }
 
+void SDOScopeWgt::updateUiEnabled()
+{
+    bool init = m_initialized;
+    bool busy = m_scope->isBusy();
+    bool trig = m_scope->isApplyingTrig();
+    bool init_and_nbusy = init & !busy;
+    bool init_and_ntrig = init & !trig;
+
+    ui->pbRun->setEnabled(init_and_nbusy);
+    ui->pbSingle->setEnabled(init_and_nbusy);
+    ui->pbParams->setEnabled(init_and_nbusy);
+    ui->pbChannels->setEnabled(init_and_nbusy);
+    ui->twTrig->setEnabled(init_and_ntrig);
+}
+
 void SDOScopeWgt::refreshUi()
 {
     refreshChannelsUi();
@@ -557,6 +670,11 @@ void SDOScopeWgt::refreshTriggerUi()
     ui->twTrig->setTriggerEnabled(m_scope->triggerEnabled());
     ui->twTrig->setTriggerType(m_scope->triggerType());
     ui->twTrig->setTriggerChannel(m_scope->triggerChannel());
+
+    uint trig_ch = ui->twTrig->triggerChannel();
+    auto ch = m_scope->channel(trig_ch);
+    if(ch) ui->twTrig->setTriggerDataType(ch->dataType());
+
     ui->twTrig->setTriggerDataValue(m_scope->triggerValue());
 
     ui->twTrig->blockSignals(false);
@@ -564,12 +682,17 @@ void SDOScopeWgt::refreshTriggerUi()
 
 void SDOScopeWgt::applyUiToPlot()
 {
+    applyHoriUiToPlot();
+
+    applyChannelsUiToPlot();
+}
+
+void SDOScopeWgt::applyHoriUiToPlot()
+{
     auto plt = getPlot();
 
     plt->setHOffset(ui->asHori->offset());
     plt->setHDiv(ui->asHori->scale());
-
-    applyChannelsUiToPlot();
 }
 
 void SDOScopeWgt::applyChannelsUiToPlot()

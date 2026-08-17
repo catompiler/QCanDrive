@@ -12,6 +12,8 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
 {
     ui->setupUi(this);
 
+    m_scaleAdjustType = ADJUST_TO_NEAREST;
+
     QwtKnob* knob = ui->valOffset;
     knob->setKnobStyle( QwtKnob::Styled );
     knob->setMarkerStyle( QwtKnob::Nub );
@@ -164,6 +166,16 @@ void OScopeAxisWgt::setOffset(qreal newOffset)
     ui->valOffset->setValue(offsetIndexFromValue(newOffset));
 }
 
+OScopeAxisWgt::AdjustType OScopeAxisWgt::scaleAdjustType() const
+{
+    return m_scaleAdjustType;
+}
+
+void OScopeAxisWgt::setScaleAdjustType(AdjustType newType)
+{
+    m_scaleAdjustType = newType;
+}
+
 void OScopeAxisWgt::scale_valueChanged(double value)
 {
     Q_UNUSED(value);
@@ -216,19 +228,61 @@ int OScopeAxisWgt::scaleIndexFromValue(qreal scaleVal) const
     qreal valE = floor(log10(scaleVal)); // Экспонента.
     qreal valM = scaleVal / pow(10.0, valE); // Мантисса.
 
-    int min_index = 0;
-    qreal min_err = fabs(valM - SCALE_VALUES[min_index]);
+    int res_index = 0;
 
-    for(int i = 1; i < SCALE_LEN; i ++){
-        qreal err = fabs(valM - SCALE_VALUES[i]);
-        // <= для выбора следующего масштаба для среднего значения.
-        if(err <= min_err){
-            min_err = err;
-            min_index = i;
+    // Если нужно ближайшее меньшее.
+    if(m_scaleAdjustType == ADJUST_TO_LOWEST){
+
+        int last_index = 0;
+        for(int i = 0; i < SCALE_LEN; i ++){
+            qreal err = valM - SCALE_VALUES[i];
+            if(err <= 0){
+                break;
+            }
+            last_index = i;
+        }
+
+        res_index = last_index;
+    }
+    // Если нужно ближайшее большее.
+    else if(m_scaleAdjustType == ADJUST_TO_HIGHEST){
+
+        int next_index = SCALE_LEN;
+        for(int i = 0; i < SCALE_LEN; i ++){
+            qreal err = valM - SCALE_VALUES[i];
+            if(err <= 0){
+                next_index = i;
+                break;
+            }
+        }
+
+        if(next_index < SCALE_LEN){
+            res_index = next_index;
+        }else{
+            valE += 1.0;
+            res_index = 0;
         }
     }
+    // Ближайшее.
+    else{
 
-    return static_cast<int>(valE) * SCALE_LEN + min_index;
+        int min_index = 0;
+        qreal min_err = fabs(valM - SCALE_VALUES[min_index]);
+
+        for(int i = 1; i < SCALE_LEN; i ++){
+            qreal err = valM - SCALE_VALUES[i];
+            qreal abs_err = fabs(err);
+            // <= для выбора следующего масштаба для среднего значения.
+            if(abs_err <= min_err){
+                min_err = abs_err;
+                min_index = i;
+            }
+        }
+
+        res_index = min_index;
+    }
+
+    return static_cast<int>(valE) * SCALE_LEN + res_index;
 }
 
 int OScopeAxisWgt::offsetIndexFromValue(qreal offsetVal) const
