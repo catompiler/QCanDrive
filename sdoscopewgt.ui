@@ -211,7 +211,7 @@
         <item>
          <widget class="QPushButton" name="pbAutoScale">
           <property name="text">
-           <string>Вместить</string>
+           <string>Вписать</string>
           </property>
          </widget>
         </item>

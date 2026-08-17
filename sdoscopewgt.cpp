@@ -166,6 +166,8 @@ void SDOScopeWgt::disconnected()
 
 void SDOScopeWgt::single()
 {
+    qDebug() << "SDOScopeWgt::single()";
+
     if(!m_initialized) return;
 
     if(!m_scope->run()){
@@ -177,7 +179,15 @@ void SDOScopeWgt::single()
 
 void SDOScopeWgt::run()
 {
+    qDebug() << "SDOScopeWgt::run()";
 
+    if(!m_initialized) return;
+
+    if(!m_scope->run()){
+        qDebug() << "SDOScope run failed";
+
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка запуска осциллографа!"));
+    }
 }
 
 void SDOScopeWgt::abort()
@@ -316,6 +326,11 @@ void SDOScopeWgt::sdoscopeReaded()
 
     // Обновим график.
     plt->replot();
+
+    // Если кнопка RUN активна - запустим снова.
+    if(ui->pbRun->isChecked()){
+        run();
+    }
 }
 
 void SDOScopeWgt::sdoscopeApplied()
@@ -521,7 +536,7 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
 
 void SDOScopeWgt::btnRun_clicked(bool checked)
 {
-    Q_UNUSED(checked);
+    if(!checked) return;
 
     run();
 
@@ -623,14 +638,15 @@ void SDOScopeWgt::updateUiEnabled()
     bool init = m_initialized;
     bool busy = m_scope->isBusy();
     bool trig = m_scope->isApplyingTrig();
-    bool init_and_nbusy = init & !busy;
-    bool init_and_ntrig = init & !trig;
+    bool run  = m_scope->isRunning();
+    bool read = m_scope->isReading();
+    bool run_read = run || read;
 
-    ui->pbRun->setEnabled(init_and_nbusy);
-    ui->pbSingle->setEnabled(init_and_nbusy);
-    ui->pbParams->setEnabled(init_and_nbusy);
-    ui->pbChannels->setEnabled(init_and_nbusy);
-    ui->twTrig->setEnabled(init_and_ntrig);
+    ui->pbRun->setEnabled(init && (!run_read || ui->pbRun->isChecked()));
+    ui->pbSingle->setEnabled(init && !run_read);
+    ui->pbParams->setEnabled(init && !busy);
+    ui->pbChannels->setEnabled(init && !busy);
+    ui->twTrig->setEnabled(init && !trig);
 }
 
 void SDOScopeWgt::refreshUi()
