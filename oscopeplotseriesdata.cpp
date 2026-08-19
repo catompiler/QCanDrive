@@ -52,6 +52,11 @@ void OScopePlotSeriesData::setVDiv(qreal newVDiv)
     //invalidateBounds();
 }
 
+qreal OScopePlotSeriesData::invVDiv() const
+{
+    return m_vert->invVDiv();
+}
+
 qreal OScopePlotSeriesData::vOffset() const
 {
     return m_vert->vOffset();

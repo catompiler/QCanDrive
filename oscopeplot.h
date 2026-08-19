@@ -11,10 +11,12 @@
 
 class QwtPlotCurve;
 class QwtPlotLegendItem;
-class QwtPlotZoomer;
+class QwtPlotMarker;
+class QwtSymbol;
 class OScopeHorizontal;
 class OScopeData;
 class OScopePlotSeriesData;
+class OScopeChsZerosScaleDraw;
 
 
 class OScopePlot : public QwtPlot
@@ -109,6 +111,11 @@ protected:
 
     OScopeData* m_oscData;
 
+    OScopeChsZerosScaleDraw* m_chsZerosScaleDraw;
+
+    QwtPlotMarker* m_zeroTimeMarker;
+    QwtSymbol* m_zeroTimeSymbol;
+
     QwtPlotLegendItem* m_legendItem;
 
     int findCurve(const QwtPlotCurve* findCurv) const;
@@ -117,6 +124,7 @@ protected:
 
     void updateLegendItem();
     void setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick);
+    void invalidateZerosScale();
 };
 
 #endif // OSCOPEPLOT_H

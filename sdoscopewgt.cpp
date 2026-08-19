@@ -95,8 +95,12 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     // Обновление доступности элементов UI.
     updateUiEnabled();
 
+    // Автоматический масштаб.
+    autoScale();
+
     // Обновим график.
-    plt->replot();
+    // уже в autoScale();
+    //plt->replot();
 }
 
 SDOScopeWgt::~SDOScopeWgt()
@@ -295,8 +299,12 @@ void SDOScopeWgt::sdoscopeUpdated()
     // Синхронизируем график с интерфейсом.
     applyUiToPlot();
 
+    // Автоматический масштаб.
+    autoScale();
+
     // Обновим график.
-    plt->replot();
+    // уже в autoScale();
+    //plt->replot();
 }
 
 void SDOScopeWgt::sdoscopeErrorOccured()

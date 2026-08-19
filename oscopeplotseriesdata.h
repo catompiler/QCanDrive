@@ -40,6 +40,7 @@ public:
     // Вертикальная развёртка, вольт / деление.
     qreal vDiv() const;
     void setVDiv(qreal newVDiv);
+    qreal invVDiv() const;
 
     // Вертикальная развёртка, смещение.
     qreal vOffset() const;

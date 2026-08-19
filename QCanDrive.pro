@@ -47,6 +47,7 @@ SOURCES += \
     canopenwin.cpp \
     oscopeaxiswgt.cpp \
     oscopechannelwgt.cpp \
+    oscopechszerosscaledraw.cpp \
     oscopedata.cpp \
     oscopehorizontal.cpp \
     oscopeplot.cpp \
@@ -153,6 +154,7 @@ HEADERS += \
     oscopeaxiswgt.h \
     oscopechannelwgt.h \
     oscopechprop.h \
+    oscopechszerosscaledraw.h \
     oscopedata.h \
     oscopehorizontal.h \
     oscopeplot.h \

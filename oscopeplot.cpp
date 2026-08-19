@@ -2,6 +2,7 @@
 #include "oscopehorizontal.h"
 #include "oscopedata.h"
 #include "oscopeplotseriesdata.h"
+#include "oscopechszerosscaledraw.h"
 #include <QwtPlotCanvas>
 #include <QwtPlotCurve>
 #include <QwtPlotGrid>
@@ -14,9 +15,8 @@
 #include <QwtScaleDiv>
 #include <QwtPlotLegendItem>
 #include <QFontMetrics>
-#include <QwtPlotPanner>
-#include <QwtPlotZoomer>
-#include <QwtPlotMagnifier>
+#include <QwtPlotMarker>
+#include <QwtSymbol>
 #include <QDebug>
 
 
@@ -93,20 +93,37 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     // Пример https://forum.qt.io/topic/54848/qwtplot-zooming-logarithmic-scale
     // Оси.
     // Движок масштабирования.
-    QwtLinearScaleEngine* scaleEng_x = new QwtLinearScaleEngine();
-    QwtLinearScaleEngine* scaleEng_y = new QwtLinearScaleEngine();
-    scaleEng_x->setAttribute(QwtScaleEngine::Floating);
-    scaleEng_y->setAttribute(QwtScaleEngine::Floating);
-    scaleEng_x->setMargins(0.0, 0.0);
-    scaleEng_y->setMargins(0.0, 0.0);
-    setAxisScaleEngine(QwtPlot::xBottom, scaleEng_x);
-    setAxisScaleEngine(QwtPlot::yLeft, scaleEng_y);
+    QwtLinearScaleEngine* scaleEng_xb = new QwtLinearScaleEngine();
+    QwtLinearScaleEngine* scaleEng_yl = new QwtLinearScaleEngine();
+    scaleEng_xb->setAttribute(QwtScaleEngine::Floating);
+    scaleEng_yl->setAttribute(QwtScaleEngine::Floating);
+    scaleEng_xb->setMargins(0.0, 0.0);
+    scaleEng_yl->setMargins(0.0, 0.0);
+    setAxisScaleEngine(QwtPlot::xBottom, scaleEng_xb);
+    setAxisScaleEngine(QwtPlot::yLeft, scaleEng_yl);
     // Названия осей.
     // setAxisTitle(QwtPlot::xBottom, tr("Время"));
     // setAxisTitle(QwtPlot::yLeft, tr("Значение"));
     // Масштаб и деления.
     setupAxisTicks(QwtAxis::XBottom, -static_cast<int>(HGRID), HGRID);
     setupAxisTicks(QwtAxis::YLeft, -static_cast<int>(VGRID), VGRID);
+
+    // Debug {
+    QwtLinearScaleEngine* scaleEng_xt = new QwtLinearScaleEngine();
+    QwtLinearScaleEngine* scaleEng_yr = new QwtLinearScaleEngine();
+    scaleEng_xt->setAttribute(QwtScaleEngine::Floating);
+    scaleEng_yr->setAttribute(QwtScaleEngine::Floating);
+    scaleEng_xt->setMargins(0.0, 0.0);
+    scaleEng_yr->setMargins(0.0, 0.0);
+    setAxisScaleEngine(QwtPlot::xTop, scaleEng_xt);
+    setAxisScaleEngine(QwtPlot::yRight, scaleEng_yr);
+    // Названия осей.
+    // setAxisTitle(QwtPlot::xBottom, tr("Время"));
+    // setAxisTitle(QwtPlot::yLeft, tr("Значение"));
+    // Масштаб и деления.
+    setupAxisTicks(QwtAxis::XTop, -static_cast<int>(HGRID), HGRID);
+    setupAxisTicks(QwtAxis::YRight, -static_cast<int>(VGRID), VGRID);
+    // } // Debug
 
     // Сетка.
     QwtPlotGrid *grid = new QwtPlotGrid();
@@ -133,17 +150,43 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
         int acw = QFontMetrics( scaleWidget_xb->font() ).averageCharWidth();
         scaleWidget_xb->setMinBorderDist( acw * 2, acw * 2 );
     }
-    // scaleWidget_xb->setBorderDist(0, 0);
-    // scaleWidget_xb->setColorBarWidth(0);
-    // scaleWidget_xb->setColorBarEnabled(false);
-    // scaleWidget_xb->setMargin(0);
-    // scaleWidget_xb->setSpacing(0);
 
     QwtScaleWidget* scaleWidget_yl = axisWidget( QwtAxis::YLeft );
     if(scaleWidget_yl){
         int ach = QFontMetrics( scaleWidget_xb->font() ).height();
         scaleWidget_yl->setMinBorderDist( ach, ach );
     }
+
+    m_chsZerosScaleDraw = new OScopeChsZerosScaleDraw();
+    m_chsZerosScaleDraw->setPlot(this);
+    setAxisScaleDraw(QwtAxis::YLeft, m_chsZerosScaleDraw);
+    setAxisVisible(QwtAxis::YLeft, true);
+
+    // Debug {
+    setAxisScaleDraw(QwtAxis::YRight, new OScopeChsZerosScaleDraw(this));
+    setAxisVisible(QwtAxis::YRight, true);
+    setAxisScaleDraw(QwtAxis::XTop, new OScopeChsZerosScaleDraw(this));
+    setAxisVisible(QwtAxis::XTop, true);
+    setAxisScaleDraw(QwtAxis::XBottom, new OScopeChsZerosScaleDraw(this));
+    setAxisVisible(QwtAxis::XBottom, true);
+    // } // Debug
+
+    m_zeroTimeSymbol = new QwtSymbol();
+    m_zeroTimeSymbol->setStyle(QwtSymbol::DTriangle);
+    m_zeroTimeSymbol->setSize(QSize(10, 10));
+    m_zeroTimeSymbol->setPinPoint(QPointF(0.0, 10.0));
+    m_zeroTimeSymbol->setPinPointEnabled(true);
+
+    m_zeroTimeMarker = new QwtPlotMarker();
+    m_zeroTimeMarker->setSymbol(m_zeroTimeSymbol);
+    m_zeroTimeMarker->setLabelAlignment(Qt::AlignTop);
+    m_zeroTimeMarker->setLabelOrientation(Qt::Horizontal);
+    m_zeroTimeMarker->setTitle(tr("T0"));
+    m_zeroTimeMarker->setLineStyle(QwtPlotMarker::NoLine);
+    m_zeroTimeMarker->setLinePen(Qt::white, 1.0, Qt::SolidLine);
+    //m_zeroTimeMarker->setXValue(0.0);
+    m_zeroTimeMarker->setValue(0.0, VGRID/*- m_zeroTimeSymbol->size().height() / 2*/);
+    m_zeroTimeMarker->attach(this);
 
     setAutoReplot(false);
 }
@@ -248,8 +291,15 @@ qreal OScopePlot::vOffset(int n) const
 
 void OScopePlot::setVOffset(int n, qreal newVOffset)
 {
-    OScopePlotSeriesData* ser_data = plotData(n);
+    QwtPlotCurve* curv = getCurve(n);
+    if(!curv) return;
+
+    OScopePlotSeriesData* ser_data = static_cast<OScopePlotSeriesData*>(curv->data());
     if(!ser_data) return;
+
+    curv->setBaseline(newVOffset * ser_data->invVDiv());
+
+    invalidateZerosScale();
 
     ser_data->setVOffset(newVOffset);
     ser_data->invalidateBounds();
@@ -353,7 +403,9 @@ void OScopePlot::removeSignals()
 
 int OScopePlot::signalsCount() const
 {
-    return itemList(QwtPlotItem::Rtti_PlotCurve).count();
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    return items.count();
 }
 
 OScopePlotSeriesData* OScopePlot::plotData(int n)
@@ -520,9 +572,9 @@ QRectF OScopePlot::boundingRect() const
 {
     QRectF resRect;
 
-    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
-    for(auto& item: items){
+    for(const auto& item: items){
         auto curv = static_cast<QwtPlotCurve*>(item);
 
         if(!curv->isVisible()) continue;
@@ -546,9 +598,9 @@ void OScopePlot::clear()
 
 void OScopePlot::invalidateAllBounds()
 {
-    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
-    for(auto& item: items){
+    for(const auto& item: items){
         auto curv = static_cast<QwtPlotCurve*>(item);
         auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
 
@@ -591,10 +643,10 @@ QList<Qt::GlobalColor> OScopePlot::getDefaultColors()
 
 int OScopePlot::findCurve(const QwtPlotCurve* findCurv) const
 {
-    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
     int n = 0;
-    for(auto& item: items){
+    for(const auto& item: items){
         const auto& curv = static_cast<const QwtPlotCurve*>(item);
         if(curv == findCurv) return n;
         n ++;
@@ -605,7 +657,7 @@ int OScopePlot::findCurve(const QwtPlotCurve* findCurv) const
 
 QwtPlotCurve* OScopePlot::getCurve(int n)
 {
-    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
     if(n >= items.count()) return nullptr;
 
@@ -614,7 +666,7 @@ QwtPlotCurve* OScopePlot::getCurve(int n)
 
 const QwtPlotCurve* OScopePlot::getCurve(int n) const
 {
-    auto items = itemList(QwtPlotItem::Rtti_PlotCurve);
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
 
     if(n >= items.count()) return nullptr;
 
@@ -649,21 +701,7 @@ void OScopePlot::setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick)
 {
     constexpr int step = 1;
 
-    // setAxisScale(QwtAxis::XBottom, -static_cast<int>(HGRID), HGRID, HGRID);
-    // setAxisScale(QwtAxis::YLeft, -static_cast<int>(VGRID), VGRID, VGRID);
-    // setAxisAutoScale(QwtAxis::XBottom, false);
-    // setAxisAutoScale(QwtAxis::YLeft, false);
-    // setAxisMaxMajor(QwtAxis::XBottom, 1);
-    // setAxisMaxMajor(QwtAxis::YLeft, 1);
-    // setAxisMaxMinor(QwtAxis::XBottom, HGRID);
-    // setAxisMaxMinor(QwtAxis::YLeft, VGRID);
-    // //setAxisScale(QwtPlot::yLeft, 1e-6, 1e3);
-    // // TODO: Вручную.
-    // // QwtScaleDiv xScaleDiv(-10.0, 15.0);
-    // // xScaleDiv.setTicks(QwtScaleDiv::MinorTick, {0.0, 1.0, 2.0});
-    // // setAxisScaleDiv(QwtAxis::XBottom, xScaleDiv);
-
-    QwtScaleDiv xScaleDiv(min_tick, max_tick);
+    QwtScaleDiv scale_div(min_tick, max_tick);
 
     QList<double> minor_ticks, major_ticks {static_cast<double>(min_tick), 0.0, static_cast<double>(max_tick)};
 
@@ -672,15 +710,31 @@ void OScopePlot::setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick)
         minor_ticks.append(static_cast<double>(i));
     }
 
-    xScaleDiv.setTicks(QwtScaleDiv::MinorTick, minor_ticks);
-    xScaleDiv.setTicks(QwtScaleDiv::MajorTick, major_ticks);
+    scale_div.setTicks(QwtScaleDiv::MinorTick, minor_ticks);
+    scale_div.setTicks(QwtScaleDiv::MajorTick, major_ticks);
 
-    setAxisScaleDiv(axis_id, xScaleDiv);
+    setAxisScaleDiv(axis_id, scale_div);
 
-    QwtScaleDraw* scaleDraw = axisScaleDraw(axis_id);
-    if(scaleDraw){
-        scaleDraw->enableComponent(QwtScaleDraw::Labels, false);
-        scaleDraw->enableComponent(QwtScaleDraw::Ticks, false);
-        scaleDraw->enableComponent(QwtScaleDraw::Backbone, false);
+    QwtScaleDraw* scale_draw = axisScaleDraw(axis_id);
+    if(scale_draw){
+        scale_draw->enableComponent(QwtScaleDraw::Labels, false);
+        scale_draw->enableComponent(QwtScaleDraw::Ticks, false);
+        scale_draw->enableComponent(QwtScaleDraw::Backbone, false);
     }
+}
+
+void OScopePlot::invalidateZerosScale()
+{
+    // Debug {
+    axisWidget(QwtAxis::XTop)->update();
+    axisWidget(QwtAxis::XBottom)->update();
+    axisWidget(QwtAxis::YLeft)->update();
+    axisWidget(QwtAxis::YRight)->update();
+    // } // Debug
+
+    QwtScaleWidget* zeroScaleWgt = axisWidget(QwtAxis::YLeft);
+
+    if(!zeroScaleWgt) return;
+
+    zeroScaleWgt->update();
 }
