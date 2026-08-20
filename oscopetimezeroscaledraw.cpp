@@ -27,9 +27,9 @@ OScopeTimeZeroScaleDraw::OScopeTimeZeroScaleDraw(OScopePlot* newPlot)
 {
     m_plot = newPlot;
 
-    enableComponent(QwtAbstractScaleDraw::Backbone, true);
-    enableComponent(QwtAbstractScaleDraw::Labels, true);
-    enableComponent(QwtAbstractScaleDraw::Ticks, true);
+    enableComponent(QwtAbstractScaleDraw::Backbone, false);
+    enableComponent(QwtAbstractScaleDraw::Labels, false);
+    enableComponent(QwtAbstractScaleDraw::Ticks, false);
 }
 
 OScopeTimeZeroScaleDraw::~OScopeTimeZeroScaleDraw()

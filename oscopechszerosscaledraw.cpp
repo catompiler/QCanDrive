@@ -1,4 +1,5 @@
 #include "oscopechszerosscaledraw.h"
+#include "trianglemarkersymbol.h"
 #include <QPainter>
 #include <QPalette>
 #include <QFont>
@@ -248,50 +249,28 @@ void OScopeChsZerosScaleDraw::drawZero(QPainter* painter, const QColor& markerCo
 
 void OScopeChsZerosScaleDraw::drawMarker(QPainter* painter, const QColor& markerCol, const QPoint& zeroPoint, QwtScaleDraw::Alignment align) const
 {
-    //const QwtScaleMap& map = scaleMap();
-    //const QwtScaleDiv& div = scaleDiv();
-
-
-    // (-w, -h/2)
-    // |>
-    // |  |> (0, 0)
-    // |>
-    // (-w, +h/2)
-
-
-    static const QPoint trianglePoints[] = {
-        {-MARKER_WIDTH, -MARKER_HALF_HEIGHT},
-        {0, 0},
-        {-MARKER_WIDTH, +MARKER_HALF_HEIGHT}
-    };
-
-    static const QPolygon trianglePoly = {qMove(QVector<QPoint>(trianglePoints, trianglePoints + sizeof(trianglePoints) / sizeof(trianglePoints[0])))};
-
-    painter->save();
-
-    painter->translate(zeroPoint);
+    TriangleMarkerSymbol::Direction dir;
 
     switch(align){
     default:
     case QwtScaleDraw::LeftScale:
-        painter->rotate(0.0);
+        dir = TriangleMarkerSymbol::Right;
         break;
     case QwtScaleDraw::BottomScale:
-        painter->rotate(270.0);
+        dir = TriangleMarkerSymbol::Up;
         break;
     case QwtScaleDraw::TopScale:
-        painter->rotate(90.0);
+        dir = TriangleMarkerSymbol::Down;
         break;
     case QwtScaleDraw::RightScale:
-        painter->rotate(180.0);
+        dir = TriangleMarkerSymbol::Left;
         break;
     }
 
     painter->setBrush(QBrush(markerCol));
     painter->setPen(QPen(markerCol));
-    painter->drawPolygon(trianglePoly);
 
-    painter->restore();
+    TriangleMarkerSymbol::drawTriangleMarker(painter, zeroPoint, MARKER_HALF_HEIGHT * 2, MARKER_WIDTH, dir);
 }
 
 void OScopeChsZerosScaleDraw::drawLabel(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, QwtScaleDraw::Alignment align) const

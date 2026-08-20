@@ -32,6 +32,10 @@ public:
     static constexpr int ZERO_TIME_MARK_HEIGHT = 5;
     static constexpr int ZERO_TIME_MARK_MARGIN = 2;
 
+    static constexpr int TRIGGER_MARK_WIDTH = 10;
+    static constexpr int TRIGGER_MARK_HEIGHT = 5;
+    static constexpr int TRIGGER_MARK_MARGIN = 2;
+
     OScopePlot(QWidget* parent = nullptr, const QString& newName = QString());
     ~OScopePlot();
 
@@ -124,6 +128,9 @@ protected:
     QwtPlotMarker* m_zeroTimeMarker;
     TriangleMarkerSymbol* m_zeroTimeSymbol;
 
+    QwtPlotMarker* m_trigMarker;
+    TriangleMarkerSymbol* m_trigSymbol;
+
     QwtPlotLegendItem* m_legendItem;
 
     int findCurve(const QwtPlotCurve* findCurv) const;
@@ -135,6 +142,7 @@ protected:
     void updateZerosScale();
     void updateZeroTimeMark();
     void updateTimeScale();
+    void updateTriggerMark();
 };
 
 #endif // OSCOPEPLOT_H
