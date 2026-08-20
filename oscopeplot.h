@@ -12,11 +12,12 @@
 class QwtPlotCurve;
 class QwtPlotLegendItem;
 class QwtPlotMarker;
-class QwtSymbol;
+class TriangleMarkerSymbol;
 class OScopeHorizontal;
 class OScopeData;
 class OScopePlotSeriesData;
 class OScopeChsZerosScaleDraw;
+class OScopeTimeZeroScaleDraw;
 
 
 class OScopePlot : public QwtPlot
@@ -24,8 +25,12 @@ class OScopePlot : public QwtPlot
     Q_OBJECT
 public:
 
-    static constexpr size_t HGRID = 4;
-    static constexpr size_t VGRID = 4;
+    static constexpr int HGRID = 4;
+    static constexpr int VGRID = 4;
+
+    static constexpr int ZERO_TIME_MARK_WIDTH = 10;
+    static constexpr int ZERO_TIME_MARK_HEIGHT = 5;
+    static constexpr int ZERO_TIME_MARK_MARGIN = 2;
 
     OScopePlot(QWidget* parent = nullptr, const QString& newName = QString());
     ~OScopePlot();
@@ -43,12 +48,14 @@ public:
     void setTextColor(const QColor& newColor);
 
     qreal hDiv() const;
+    qreal invHDiv() const;
     void setHDiv(qreal newHDiv);
 
     qreal hOffset() const;
     void setHOffset(qreal newHOffset);
 
     qreal vDiv(int n) const;
+    qreal invVDiv(int n) const;
     void setVDiv(int n, qreal newVDiv);
 
     qreal vOffset(int n) const;
@@ -112,9 +119,10 @@ protected:
     OScopeData* m_oscData;
 
     OScopeChsZerosScaleDraw* m_chsZerosScaleDraw;
+    OScopeTimeZeroScaleDraw* m_timeZeroScaleDraw;
 
     QwtPlotMarker* m_zeroTimeMarker;
-    QwtSymbol* m_zeroTimeSymbol;
+    TriangleMarkerSymbol* m_zeroTimeSymbol;
 
     QwtPlotLegendItem* m_legendItem;
 
@@ -124,7 +132,9 @@ protected:
 
     void updateLegendItem();
     void setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick);
-    void invalidateZerosScale();
+    void updateZerosScale();
+    void updateZeroTimeMark();
+    void updateTimeScale();
 };
 
 #endif // OSCOPEPLOT_H

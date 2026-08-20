@@ -3,6 +3,8 @@
 #include "oscopedata.h"
 #include "oscopeplotseriesdata.h"
 #include "oscopechszerosscaledraw.h"
+#include "oscopetimezeroscaledraw.h"
+#include "trianglemarkersymbol.h"
 #include <QwtPlotCanvas>
 #include <QwtPlotCurve>
 #include <QwtPlotGrid>
@@ -105,8 +107,8 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     // setAxisTitle(QwtPlot::xBottom, tr("Время"));
     // setAxisTitle(QwtPlot::yLeft, tr("Значение"));
     // Масштаб и деления.
-    setupAxisTicks(QwtAxis::XBottom, -static_cast<int>(HGRID), HGRID);
-    setupAxisTicks(QwtAxis::YLeft, -static_cast<int>(VGRID), VGRID);
+    setupAxisTicks(QwtAxis::XBottom, -HGRID, HGRID);
+    setupAxisTicks(QwtAxis::YLeft, -VGRID, VGRID);
 
     // Debug {
     QwtLinearScaleEngine* scaleEng_xt = new QwtLinearScaleEngine();
@@ -121,8 +123,8 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     // setAxisTitle(QwtPlot::xBottom, tr("Время"));
     // setAxisTitle(QwtPlot::yLeft, tr("Значение"));
     // Масштаб и деления.
-    setupAxisTicks(QwtAxis::XTop, -static_cast<int>(HGRID), HGRID);
-    setupAxisTicks(QwtAxis::YRight, -static_cast<int>(VGRID), VGRID);
+    setupAxisTicks(QwtAxis::XTop, -HGRID, HGRID);
+    setupAxisTicks(QwtAxis::YRight, -VGRID, VGRID);
     // } // Debug
 
     // Сетка.
@@ -163,29 +165,30 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     setAxisVisible(QwtAxis::YLeft, true);
 
     // Debug {
-    setAxisScaleDraw(QwtAxis::YRight, new OScopeChsZerosScaleDraw(this));
+    setAxisScaleDraw(QwtAxis::YLeft, new OScopeTimeZeroScaleDraw(this));
+    setAxisVisible(QwtAxis::YLeft, true);
+    setAxisScaleDraw(QwtAxis::YRight, new OScopeTimeZeroScaleDraw(this));
     setAxisVisible(QwtAxis::YRight, true);
-    setAxisScaleDraw(QwtAxis::XTop, new OScopeChsZerosScaleDraw(this));
+    setAxisScaleDraw(QwtAxis::XTop, new OScopeTimeZeroScaleDraw(this));
     setAxisVisible(QwtAxis::XTop, true);
-    setAxisScaleDraw(QwtAxis::XBottom, new OScopeChsZerosScaleDraw(this));
+    setAxisScaleDraw(QwtAxis::XBottom, new OScopeTimeZeroScaleDraw(this));
     setAxisVisible(QwtAxis::XBottom, true);
     // } // Debug
 
-    m_zeroTimeSymbol = new QwtSymbol();
-    m_zeroTimeSymbol->setStyle(QwtSymbol::DTriangle);
-    m_zeroTimeSymbol->setSize(QSize(10, 10));
-    m_zeroTimeSymbol->setPinPoint(QPointF(0.0, 10.0));
-    m_zeroTimeSymbol->setPinPointEnabled(true);
+    m_zeroTimeSymbol = new TriangleMarkerSymbol();
+    m_zeroTimeSymbol->setDir(TriangleMarkerSymbol::Down);
+    m_zeroTimeSymbol->setSize(ZERO_TIME_MARK_WIDTH, ZERO_TIME_MARK_HEIGHT);
+    m_zeroTimeSymbol->setPinPoint(QPointF(0.0, ZERO_TIME_MARK_HEIGHT + ZERO_TIME_MARK_MARGIN));
+    m_zeroTimeSymbol->setColor(Qt::white);
 
     m_zeroTimeMarker = new QwtPlotMarker();
     m_zeroTimeMarker->setSymbol(m_zeroTimeSymbol);
     m_zeroTimeMarker->setLabelAlignment(Qt::AlignTop);
     m_zeroTimeMarker->setLabelOrientation(Qt::Horizontal);
     m_zeroTimeMarker->setTitle(tr("T0"));
-    m_zeroTimeMarker->setLineStyle(QwtPlotMarker::NoLine);
+    m_zeroTimeMarker->setLineStyle(QwtPlotMarker::NoLine); //NoLine
     m_zeroTimeMarker->setLinePen(Qt::white, 1.0, Qt::SolidLine);
-    //m_zeroTimeMarker->setXValue(0.0);
-    m_zeroTimeMarker->setValue(0.0, VGRID/*- m_zeroTimeSymbol->size().height() / 2*/);
+    m_zeroTimeMarker->setValue(0.0, VGRID);
     m_zeroTimeMarker->attach(this);
 
     setAutoReplot(false);
@@ -247,10 +250,17 @@ qreal OScopePlot::hDiv() const
     return m_hori->hDiv();
 }
 
+qreal OScopePlot::invHDiv() const
+{
+    return m_hori->invHDiv();
+}
+
 void OScopePlot::setHDiv(qreal newHDiv)
 {
     m_hori->setHDiv(newHDiv);
     invalidateAllBounds();
+    updateZeroTimeMark();
+    updateTimeScale();
 }
 
 qreal OScopePlot::hOffset() const
@@ -262,6 +272,8 @@ void OScopePlot::setHOffset(qreal newHOffset)
 {
     m_hori->setHOffset(newHOffset);
     invalidateAllBounds();
+    updateZeroTimeMark();
+    updateTimeScale();
 }
 
 qreal OScopePlot::vDiv(int n) const
@@ -270,6 +282,14 @@ qreal OScopePlot::vDiv(int n) const
     if(!ser_data) return qreal();
 
     return ser_data->vDiv();
+}
+
+qreal OScopePlot::invVDiv(int n) const
+{
+    const OScopePlotSeriesData* ser_data = plotData(n);
+    if(!ser_data) return qreal();
+
+    return ser_data->invVDiv();
 }
 
 void OScopePlot::setVDiv(int n, qreal newVDiv)
@@ -299,7 +319,7 @@ void OScopePlot::setVOffset(int n, qreal newVOffset)
 
     curv->setBaseline(newVOffset * ser_data->invVDiv());
 
-    invalidateZerosScale();
+    updateZerosScale();
 
     ser_data->setVOffset(newVOffset);
     ser_data->invalidateBounds();
@@ -723,7 +743,7 @@ void OScopePlot::setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick)
     }
 }
 
-void OScopePlot::invalidateZerosScale()
+void OScopePlot::updateZerosScale()
 {
     // Debug {
     axisWidget(QwtAxis::XTop)->update();
@@ -733,8 +753,52 @@ void OScopePlot::invalidateZerosScale()
     // } // Debug
 
     QwtScaleWidget* zeroScaleWgt = axisWidget(QwtAxis::YLeft);
+    if(zeroScaleWgt) zeroScaleWgt->update();
+}
 
-    if(!zeroScaleWgt) return;
+void OScopePlot::updateZeroTimeMark()
+{
+    int canvas_width;
 
-    zeroScaleWgt->update();
+    if(QwtPlotLayout* pltLay = plotLayout(); pltLay != nullptr){
+        QRectF canvas_rect = pltLay->canvasRect();
+        canvas_width = qRound(canvas_rect.width());
+    }else{
+        canvas_width = qRound(
+            transform(QwtAxis::XTop, HGRID) - transform(QwtAxis::XTop, -HGRID)
+            );
+    }
+
+    qreal grid_offset = hOffset() * invHDiv();
+    int canvas_offset = qRound(transform(QwtAxis::XTop, grid_offset));
+
+    if(canvas_offset <= (ZERO_TIME_MARK_WIDTH/2)){
+        grid_offset = -HGRID;
+        m_zeroTimeSymbol->setPinPoint(QPointF(ZERO_TIME_MARK_MARGIN, (ZERO_TIME_MARK_WIDTH/2) + ZERO_TIME_MARK_MARGIN));
+        m_zeroTimeSymbol->setDir(TriangleMarkerSymbol::Left);
+    }
+    else if(canvas_offset >= (canvas_width - ZERO_TIME_MARK_WIDTH/2)){
+        grid_offset = HGRID;
+        m_zeroTimeSymbol->setPinPoint(QPointF(-ZERO_TIME_MARK_MARGIN, (ZERO_TIME_MARK_WIDTH/2) + ZERO_TIME_MARK_MARGIN));
+        m_zeroTimeSymbol->setDir(TriangleMarkerSymbol::Right);
+    }
+    else{
+        m_zeroTimeSymbol->setPinPoint(QPointF(0.0, ZERO_TIME_MARK_HEIGHT + ZERO_TIME_MARK_MARGIN));
+        m_zeroTimeSymbol->setDir(TriangleMarkerSymbol::Down);
+    }
+
+    m_zeroTimeMarker->setXValue(grid_offset);
+}
+
+void OScopePlot::updateTimeScale()
+{
+    // Debug {
+    axisWidget(QwtAxis::XTop)->update();
+    axisWidget(QwtAxis::XBottom)->update();
+    axisWidget(QwtAxis::YLeft)->update();
+    axisWidget(QwtAxis::YRight)->update();
+    // } // Debug
+
+    QwtScaleWidget* timeScaleWgt = axisWidget(QwtAxis::XTop);
+    if(!timeScaleWgt) timeScaleWgt->update();
 }

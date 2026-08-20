@@ -52,6 +52,7 @@ SOURCES += \
     oscopehorizontal.cpp \
     oscopeplot.cpp \
     oscopeplotseriesdata.cpp \
+    oscopetimezeroscaledraw.cpp \
     oscopetriggerwgt.cpp \
     oscopevertical.cpp \
     oscplot.cpp \
@@ -124,7 +125,8 @@ SOURCES += \
     regutils.cpp \
     regvar.cpp \
     regvarmodel.cpp \
-    sellineedit.cpp
+    sellineedit.cpp \
+    trianglemarkersymbol.cpp
 
 HEADERS += \
     CANopenNode/301/CO_Emergency.h \
@@ -159,6 +161,7 @@ HEADERS += \
     oscopehorizontal.h \
     oscopeplot.h \
     oscopeplotseriesdata.h \
+    oscopetimezeroscaledraw.h \
     oscopetriggerwgt.h \
     oscopevertical.h \
     oscplot.h \
@@ -244,7 +247,8 @@ HEADERS += \
     regutils.h \
     regvar.h \
     regvarmodel.h \
-    sellineedit.h
+    sellineedit.h \
+    trianglemarkersymbol.h
 
 FORMS += \
     candrivewin.ui \
