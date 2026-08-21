@@ -2,7 +2,6 @@
 #include "ui_oscopetriggerwgt.h"
 #include "regtypes.h"
 #include <QPair>
-#include <QTimer>
 
 
 
@@ -11,11 +10,6 @@ OScopeTriggerWgt::OScopeTriggerWgt(QWidget *parent)
     , ui(new Ui::OScopeTriggerWgt)
 {
     ui->setupUi(this);
-
-    m_valueChangedTmr = new QTimer();
-    m_valueChangedTmr->setInterval(VALUE_CHANGED_DELAY_MS);
-    m_valueChangedTmr->setSingleShot(true);
-    connect(m_valueChangedTmr, &QTimer::timeout, this, &OScopeTriggerWgt::valueChangedTmr_timeout);
 
     populateTriggerTypes();
     populateDataTypes();
@@ -31,7 +25,6 @@ OScopeTriggerWgt::OScopeTriggerWgt(QWidget *parent)
 
 OScopeTriggerWgt::~OScopeTriggerWgt()
 {
-    delete m_valueChangedTmr;
     delete ui;
 }
 
@@ -71,11 +64,30 @@ void OScopeTriggerWgt::setTriggerDataType(DataType newDataType)
 {
     int type_index = ui->cbDataType->findData(static_cast<uint>(newDataType));
     if(type_index != -1) ui->cbDataType->setCurrentIndex(type_index);
+
+    updateValueUi();
+}
+
+qreal OScopeTriggerWgt::triggerBaseValue() const
+{
+    return ui->dsbBaseValue->value();
+}
+
+void OScopeTriggerWgt::setTriggerBaseValue(qreal newValue)
+{
+    ui->dsbBaseValue->setValue(newValue);
+
+    updateValueUi();
 }
 
 qreal OScopeTriggerWgt::triggerValue() const
 {
     return ui->dsbTrigValue->value();
+}
+
+void OScopeTriggerWgt::setTriggerValue(qreal newValue)
+{
+    ui->dsbTrigValue->setValue(newValue);
 }
 
 int32_t OScopeTriggerWgt::triggerDataValue() const
@@ -84,6 +96,13 @@ int32_t OScopeTriggerWgt::triggerDataValue() const
     DataType dataType = static_cast<DataType>(ui->cbDataType->currentData().toUInt(&ok));
     if(!ok) return 0;
 
+    qreal val = ui->dsbTrigValue->value();
+    qreal baseVal = ui->dsbBaseValue->value();
+
+    qreal valPU = val / baseVal;
+
+    qreal res_val = 0.0;
+
     switch(dataType){
     default:
         break;
@@ -93,16 +112,20 @@ int32_t OScopeTriggerWgt::triggerDataValue() const
     case DataType::U32:
     case DataType::U16:
     case DataType::U8:
-        return ui->dsbTrigValue->value();
+        res_val = valPU;
+        break;
     case DataType::IQ24:
-        return ui->dsbTrigValue->value() * (1L << 24);
+        res_val = valPU * (1L << 24);
+        break;
     case DataType::IQ15:
-        return ui->dsbTrigValue->value() * (1L << 15);
+        res_val = valPU * (1L << 15);
+        break;
     case DataType::IQ7:
-        return ui->dsbTrigValue->value() * (1L << 7);
+        res_val =  valPU * (1L << 7);
+        break;
     }
 
-    return 0;
+    return res_val;
 }
 
 void OScopeTriggerWgt::setTriggerDataValue(int32_t newValue)
@@ -111,6 +134,10 @@ void OScopeTriggerWgt::setTriggerDataValue(int32_t newValue)
     DataType dataType = static_cast<DataType>(ui->cbDataType->currentData().toUInt(&ok));
     if(!ok) return;
 
+    qreal baseVal = ui->dsbBaseValue->value();
+
+    qreal valPU = 0.0;
+
     switch(dataType){
     default:
         break;
@@ -120,19 +147,22 @@ void OScopeTriggerWgt::setTriggerDataValue(int32_t newValue)
     case DataType::U32:
     case DataType::U16:
     case DataType::U8:
-        return ui->dsbTrigValue->setValue(newValue);
+        valPU = newValue;
+        break;
     case DataType::IQ24:
-        return ui->dsbTrigValue->setValue(static_cast<qreal>(newValue) / (1L << 24));
+        valPU = static_cast<qreal>(newValue) / (1L << 24);
+        break;
     case DataType::IQ15:
-        return ui->dsbTrigValue->setValue(static_cast<qreal>(newValue) / (1L << 15));
+        valPU = static_cast<qreal>(newValue) / (1L << 15);
+        break;
     case DataType::IQ7:
-        return ui->dsbTrigValue->setValue(static_cast<qreal>(newValue) / (1L << 7));
+        valPU = static_cast<qreal>(newValue) / (1L << 7);
+        break;
     }
-}
 
-void OScopeTriggerWgt::setTriggerValue(qreal newValue)
-{
-    ui->dsbTrigValue->setValue(newValue);
+    qreal val = valPU * baseVal;
+
+    ui->dsbTrigValue->setValue(val);
 }
 
 uint OScopeTriggerWgt::triggerChannel() const
@@ -200,11 +230,6 @@ void OScopeTriggerWgt::trigValue_valueChanged(qreal newValue)
 {
     Q_UNUSED(newValue);
 
-    if(!signalsBlocked()) m_valueChangedTmr->start();
-}
-
-void OScopeTriggerWgt::valueChangedTmr_timeout()
-{
     emit triggerValueChanged(triggerValue());
     emit triggerDataValueChanged(triggerDataValue());
 }
@@ -242,62 +267,64 @@ void OScopeTriggerWgt::updateValueUi()
     DataType dataType = static_cast<DataType>(ui->cbDataType->currentData().toUInt(&ok));
     if(!ok) return;
 
+    qreal baseVal = ui->dsbBaseValue->value();
+
     //int32_t dataValue = triggerDataValue();
 
     switch(dataType){
     default:
         return;
     case DataType::I32:
-        ui->dsbTrigValue->setMinimum(INT32_MIN);
-        ui->dsbTrigValue->setMaximum(INT32_MAX);
+        ui->dsbTrigValue->setMinimum(baseVal * INT32_MIN);
+        ui->dsbTrigValue->setMaximum(baseVal * INT32_MAX);
         ui->dsbTrigValue->setSingleStep(1);
         ui->dsbTrigValue->setDecimals(0);
         break;
     case DataType::I16:
-        ui->dsbTrigValue->setMinimum(INT16_MIN);
-        ui->dsbTrigValue->setMaximum(INT16_MAX);
+        ui->dsbTrigValue->setMinimum(baseVal * INT16_MIN);
+        ui->dsbTrigValue->setMaximum(baseVal * INT16_MAX);
         ui->dsbTrigValue->setSingleStep(1);
         ui->dsbTrigValue->setDecimals(0);
         break;
     case DataType::I8:
-        ui->dsbTrigValue->setMinimum(INT8_MIN);
-        ui->dsbTrigValue->setMaximum(INT8_MAX);
+        ui->dsbTrigValue->setMinimum(baseVal * INT8_MIN);
+        ui->dsbTrigValue->setMaximum(baseVal * INT8_MAX);
         ui->dsbTrigValue->setSingleStep(1);
         ui->dsbTrigValue->setDecimals(0);
         break;
     case DataType::U32:
         ui->dsbTrigValue->setMinimum(0);
-        ui->dsbTrigValue->setMaximum(UINT32_MAX);
+        ui->dsbTrigValue->setMaximum(baseVal * UINT32_MAX);
         ui->dsbTrigValue->setSingleStep(1);
         ui->dsbTrigValue->setDecimals(0);
         break;
     case DataType::U16:
         ui->dsbTrigValue->setMinimum(0);
-        ui->dsbTrigValue->setMaximum(UINT16_MAX);
+        ui->dsbTrigValue->setMaximum(baseVal * UINT16_MAX);
         ui->dsbTrigValue->setSingleStep(1);
         ui->dsbTrigValue->setDecimals(0);
         break;
     case DataType::U8:
         ui->dsbTrigValue->setMinimum(0);
-        ui->dsbTrigValue->setMaximum(UINT8_MAX);
+        ui->dsbTrigValue->setMaximum(baseVal * UINT8_MAX);
         ui->dsbTrigValue->setSingleStep(1);
         ui->dsbTrigValue->setDecimals(0);
         break;
     case DataType::IQ24:
-        ui->dsbTrigValue->setMinimum(static_cast<qreal>(INT32_MIN) / (1L << 24));
-        ui->dsbTrigValue->setMaximum(static_cast<qreal>(INT32_MAX) / (1L << 24));
+        ui->dsbTrigValue->setMinimum(baseVal * static_cast<qreal>(INT32_MIN) / (1L << 24));
+        ui->dsbTrigValue->setMaximum(baseVal * static_cast<qreal>(INT32_MAX) / (1L << 24));
         ui->dsbTrigValue->setSingleStep(0.1);
         ui->dsbTrigValue->setDecimals(7);
         break;
     case DataType::IQ15:
-        ui->dsbTrigValue->setMinimum(static_cast<qreal>(INT32_MIN) / (1L << 15));
-        ui->dsbTrigValue->setMaximum(static_cast<qreal>(INT32_MAX) / (1L << 15));
+        ui->dsbTrigValue->setMinimum(baseVal * static_cast<qreal>(INT32_MIN) / (1L << 15));
+        ui->dsbTrigValue->setMaximum(baseVal * static_cast<qreal>(INT32_MAX) / (1L << 15));
         ui->dsbTrigValue->setSingleStep(0.1);
         ui->dsbTrigValue->setDecimals(4);
         break;
     case DataType::IQ7:
-        ui->dsbTrigValue->setMinimum(static_cast<qreal>(INT32_MIN) / (1L << 7));
-        ui->dsbTrigValue->setMaximum(static_cast<qreal>(INT32_MAX) / (1L << 7));
+        ui->dsbTrigValue->setMinimum(baseVal * static_cast<qreal>(INT32_MIN) / (1L << 7));
+        ui->dsbTrigValue->setMaximum(baseVal * static_cast<qreal>(INT32_MAX) / (1L << 7));
         ui->dsbTrigValue->setSingleStep(0.1);
         ui->dsbTrigValue->setDecimals(2);
         break;

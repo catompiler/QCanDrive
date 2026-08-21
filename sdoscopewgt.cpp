@@ -21,6 +21,7 @@
 #include <QDebug>
 #include "sdoscopedata.h"
 #include <math.h>
+#include <QTimer>
 
 
 
@@ -62,10 +63,17 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     connect(m_scope, &SDOScope::appliedCommon, this, &SDOScopeWgt::sdoscopeAppliedCommon);
     connect(m_scope, &SDOScope::appliedTrig, this, &SDOScopeWgt::sdoscopeAppliedTrig);
 
+    // Таймер отложенного применения значения триггера.
+    m_triggerValueChangedTmr = new QTimer();
+    m_triggerValueChangedTmr->setInterval(TRIGGER_VALUE_APPLY_DELAY_MS);
+    m_triggerValueChangedTmr->setSingleShot(true);
+    connect(m_triggerValueChangedTmr, &QTimer::timeout, this, &SDOScopeWgt::triggerValueChangedTmr_timeout);
+
     // Триггер.
     connect(ui->twTrig, &OScopeTriggerWgt::triggerEnabledChanged, this, &SDOScopeWgt::triggerEnabledChanged);
     connect(ui->twTrig, &OScopeTriggerWgt::triggerTypeChanged, this, &SDOScopeWgt::triggerTypeChanged);
     connect(ui->twTrig, &OScopeTriggerWgt::triggerChannelChanged, this, &SDOScopeWgt::triggerChannelChanged);
+    connect(ui->twTrig, &OScopeTriggerWgt::triggerValueChanged, this, &SDOScopeWgt::triggerValueChanged);
     connect(ui->twTrig, &OScopeTriggerWgt::triggerDataValueChanged, this, &SDOScopeWgt::triggerDataValueChanged);
 
     // Коннекты виджета.
@@ -108,6 +116,7 @@ SDOScopeWgt::~SDOScopeWgt()
     auto plt = getPlot();
     plt->clear();
 
+    delete m_triggerValueChangedTmr;
     delete m_params_dlg;
     delete m_chs_edit_dlg;
     delete m_scope_data;
@@ -381,6 +390,7 @@ void SDOScopeWgt::sdoscopeAppliedChannels()
     refreshChannelsUi();
     refreshTriggerUi();
     applyChannelsUiToPlot();
+    applyTriggerUiToPlot();
 
     // Обновим график.
     plt->replot();
@@ -395,7 +405,7 @@ void SDOScopeWgt::sdoscopeAppliedTrig()
 {
     qDebug() << "SDOScopeWgt::sdoscopeAppliedTrig()";
 
-    applyTriggerUiToPlot();
+    //applyTriggerUiToPlot();
 }
 
 void SDOScopeWgt::horiScaleChanged(double value)
@@ -424,6 +434,10 @@ void SDOScopeWgt::triggerEnabledChanged(bool newEnabled)
 
     // Обновление доступности элементов UI.
     updateUiEnabled();
+
+    auto plt = getPlot();
+    plt->setTriggerMarkEnabled(newEnabled);
+    plt->replot();
 }
 
 void SDOScopeWgt::triggerTypeChanged(int newType)
@@ -438,9 +452,25 @@ void SDOScopeWgt::triggerTypeChanged(int newType)
     updateUiEnabled();
 }
 
+void SDOScopeWgt::triggerValueChanged(qreal newValue)
+{
+    auto plt = getPlot();
+    plt->setTriggerMarkValue(newValue);
+    plt->replot();
+}
+
 void SDOScopeWgt::triggerDataValueChanged(int newValue)
 {
     m_scope->setTriggerValue(newValue);
+
+    m_triggerValueChangedTmr->start();
+}
+
+void SDOScopeWgt::triggerChannelChanged(uint newChannel)
+{
+    m_scope->setTriggerChannel(newChannel);
+
+    updateTriggerUiByChannel();
 
     if(!m_scope->applyTrig()){
         qDebug() << "SDOScope applyTrig failed";
@@ -448,12 +478,14 @@ void SDOScopeWgt::triggerDataValueChanged(int newValue)
 
     // Обновление доступности элементов UI.
     updateUiEnabled();
+
+    auto plt = getPlot();
+    plt->setTriggerMarkChannel(newChannel);
+    plt->replot();
 }
 
-void SDOScopeWgt::triggerChannelChanged(uint newChannel)
+void SDOScopeWgt::triggerValueChangedTmr_timeout()
 {
-    m_scope->setTriggerChannel(newChannel);
-
     if(!m_scope->applyTrig()){
         qDebug() << "SDOScope applyTrig failed";
     }
@@ -695,13 +727,19 @@ void SDOScopeWgt::refreshTriggerUi()
     ui->twTrig->setTriggerType(m_scope->triggerType());
     ui->twTrig->setTriggerChannel(m_scope->triggerChannel());
 
-    uint trig_ch = ui->twTrig->triggerChannel();
-    auto ch = m_scope->channel(trig_ch);
-    if(ch) ui->twTrig->setTriggerDataType(ch->dataType());
+    updateTriggerUiByChannel();
 
     ui->twTrig->setTriggerDataValue(m_scope->triggerValue());
 
     ui->twTrig->blockSignals(false);
+}
+
+void SDOScopeWgt::updateTriggerUiByChannel()
+{
+    if(auto ch = m_scope->channel(ui->twTrig->triggerChannel()); ch != nullptr){
+        ui->twTrig->setTriggerDataType(ch->dataType());
+        ui->twTrig->setTriggerBaseValue(ch->baseValue());
+    }
 }
 
 void SDOScopeWgt::applyUiToPlot()

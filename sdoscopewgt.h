@@ -12,6 +12,7 @@ class SLCanOpenNode;
 
 class SDOScopeChsEditDlg;
 class SDOScopeParamsDlg;
+class QTimer;
 
 namespace Ui {
 class SDOScopeWgt;
@@ -22,6 +23,9 @@ class SDOScopeWgt : public QWidget
     Q_OBJECT
 
 public:
+
+    static constexpr int TRIGGER_VALUE_APPLY_DELAY_MS = 500;
+
     explicit SDOScopeWgt(QWidget *parent = nullptr);
     ~SDOScopeWgt();
 
@@ -60,8 +64,10 @@ private slots:
 
     void triggerEnabledChanged(bool newEnabled);
     void triggerTypeChanged(int newType /* SDOScope::TriggerType */);
+    void triggerValueChanged(qreal newValue);
     void triggerDataValueChanged(int newValue);
     void triggerChannelChanged(uint newChannel);
+    void triggerValueChangedTmr_timeout();
 
     void btnScopeParams_clicked(bool checked);
     void btnScopeChannels_clicked(bool checked);
@@ -74,6 +80,8 @@ private:
     Ui::SDOScopeWgt *ui;
     SDOScopeChsEditDlg* m_chs_edit_dlg;
     SDOScopeParamsDlg* m_params_dlg;
+
+    QTimer* m_triggerValueChangedTmr;
 
     SDOScope* m_scope;
     SDOScopeData* m_scope_data;
@@ -89,6 +97,7 @@ private:
     void refreshUi();
     void refreshChannelsUi();
     void refreshTriggerUi();
+    void updateTriggerUiByChannel();
     void applyUiToPlot();
     void applyHoriUiToPlot();
     void applyChannelsUiToPlot();

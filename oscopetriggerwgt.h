@@ -7,9 +7,6 @@
 #include "regtypes.h"
 
 
-class QTimer;
-
-
 namespace Ui {
 class OScopeTriggerWgt;
 }
@@ -19,9 +16,6 @@ class OScopeTriggerWgt : public QWidget
     Q_OBJECT
 
 public:
-
-    static constexpr int VALUE_CHANGED_DELAY_MS = 500;
-
     explicit OScopeTriggerWgt(QWidget *parent = nullptr);
     ~OScopeTriggerWgt();
 
@@ -33,6 +27,9 @@ public:
 
     DataType triggerDataType() const;
     void setTriggerDataType(DataType newDataType);
+
+    qreal triggerBaseValue() const;
+    void setTriggerBaseValue(qreal newValue);
 
     qreal triggerValue() const;
     void setTriggerValue(qreal newValue);
@@ -58,11 +55,9 @@ private slots:
     void trigChannel_currentIndexChanged(int newIndex);
     void dataType_currentIndexChanged(int newIndex);
     void trigValue_valueChanged(qreal newValue);
-    void valueChangedTmr_timeout();
 
 private:
     Ui::OScopeTriggerWgt *ui;
-    QTimer* m_valueChangedTmr;
 
     void populateTriggerTypes();
     void populateDataTypes();

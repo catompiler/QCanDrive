@@ -230,6 +230,26 @@ extern bool isMemory(DataType type);
 // Базовое значение фиксированной запятой.
 extern int32_t iqBase(DataType type);
 
+// Минимальное целочисленное значение заданного типа.
+int32_t iqIntMinimum(DataType type);
+
+// Максимальное целочисленное значение заданного типа.
+int32_t iqIntMaximum(DataType type);
+
+// Минимальное значение заданного типа.
+// intN - принимается как IQN.0
+qreal iqMinimum(DataType type);
+
+// Максимальное значение заданного типа.
+// intN - принимается как IQN.0
+qreal iqMaximum(DataType type);
+
+// Получает точность.
+qreal iqPrecision(DataType type);
+
+// Получает число знаков после запятой.
+int iqDecimals(DataType type);
+
 // Получает значение по сырому значению и типу.
 template <typename T>
 T valueFromRaw(int32_t rawValue, DataType type)

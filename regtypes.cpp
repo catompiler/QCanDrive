@@ -732,4 +732,120 @@ int32_t iqBase(DataType type)
     return 1;
 }
 
+int32_t iqIntMinimum(DataType type)
+{
+    switch(type){
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+    case DataType::I32:
+        return INT32_MIN;
+    case DataType::I16:
+        return INT16_MIN;
+    case DataType::I8:
+        return INT8_MIN;
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+        return 0;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
+    }
+    return 0;
+}
+
+int32_t iqIntMaximum(DataType type)
+{
+    switch(type){
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+    case DataType::I32:
+        return INT32_MAX;
+    case DataType::I16:
+        return INT16_MAX;
+    case DataType::I8:
+        return INT8_MAX;
+    case DataType::U32:
+        return UINT32_MAX;
+    case DataType::U16:
+        return UINT16_MAX;
+    case DataType::U8:
+        return UINT8_MAX;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
+    }
+    return 0;
+}
+
+qreal iqMinimum(DataType type)
+{
+    int32_t baseVal = iqBase(type);
+    int32_t minVal = iqIntMinimum(type);
+
+    // Для не числовых типов данных.
+    if(baseVal == 0 || minVal == 0) return 0.0;
+
+    return static_cast<qreal>(minVal) / baseVal;
+}
+
+qreal iqMaxim1um(DataType type)
+{
+    int32_t baseVal = iqBase(type);
+    int32_t maxVal = iqIntMaximum(type);
+
+    // Для не числовых типов данных.
+    if(baseVal == 0 || maxVal == 0) return 0.0;
+
+    return static_cast<qreal>(maxVal) / baseVal;
+}
+
+qreal iqPrecision(DataType type)
+{
+    switch(type){
+    case DataType::IQ24:
+        return 1e-7;
+    case DataType::IQ15:
+        return 1e-4;
+    case DataType::IQ7:
+        return 1e-2;
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+        return 1e0;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
+    }
+    return 0;
+}
+
+int iqDecimals(DataType type)
+{
+    switch(type){
+    case DataType::IQ24:
+        return 7;
+    case DataType::IQ15:
+        return 4;
+    case DataType::IQ7:
+        return 2;
+    case DataType::I32:
+    case DataType::I16:
+    case DataType::I8:
+    case DataType::U32:
+    case DataType::U16:
+    case DataType::U8:
+        return 0;
+    case DataType::STR:
+    case DataType::MEM:
+        break;
+    }
+    return 0;
+}
+
 }
