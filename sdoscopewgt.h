@@ -65,7 +65,6 @@ private slots:
     void triggerEnabledChanged(bool newEnabled);
     void triggerTypeChanged(int newType /* SDOScope::TriggerType */);
     void triggerValueChanged(qreal newValue);
-    void triggerDataValueChanged(int newValue);
     void triggerChannelChanged(uint newChannel);
     void triggerValueChangedTmr_timeout();
 

@@ -250,9 +250,10 @@ qreal iqPrecision(DataType type);
 // Получает число знаков после запятой.
 int iqDecimals(DataType type);
 
+
 // Получает значение по сырому значению и типу.
 template <typename T>
-T valueFromRaw(int32_t rawValue, DataType type)
+T iqValueFromRaw(int32_t rawValue, DataType type)
 {
     switch(type){
     case DataType::I32:
@@ -279,7 +280,7 @@ T valueFromRaw(int32_t rawValue, DataType type)
 
 // Получает сырое значение по значению и типу.
 template <typename T>
-int32_t valueToRaw(T value, DataType type)
+int32_t iqValueToRaw(T value, DataType type)
 {
     switch(type){
     case DataType::I32:

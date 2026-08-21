@@ -25,43 +25,42 @@ public:
     SDOScope::TriggerType triggerType() const;
     void setTriggerType(SDOScope::TriggerType newType);
 
-    DataType triggerDataType() const;
-    void setTriggerDataType(DataType newDataType);
-
-    qreal triggerBaseValue() const;
-    void setTriggerBaseValue(qreal newValue);
-
     qreal triggerValue() const;
     void setTriggerValue(qreal newValue);
-
-    int32_t triggerDataValue() const;
-    void setTriggerDataValue(int32_t newValue);
 
     uint triggerChannel() const;
     void setTriggerChannel(uint newChannel);
     void clearTriggerChannels();
     void addTriggerChannel(QString newChannelName, uint newChannel);
 
+    qreal triggerValueMinimum() const;
+    void setTriggerValueMinimum(qreal newMin);
+
+    qreal triggerValueMaximum() const;
+    void setTriggerValueMaximum(qreal newMax);
+
+    int triggerValueDecimals() const;
+    void setTriggerValueDecimals(int newDecimals);
+
+    qreal triggerValueSingleStep() const;
+    void setTriggerValueSingleStep(qreal newSingleStep);
+
 signals:
     void triggerEnabledChanged(bool newEnabled);
     void triggerTypeChanged(int newType /* SDOScope::TriggerType */);
     void triggerValueChanged(qreal newValue);
-    void triggerDataValueChanged(int newValue);
     void triggerChannelChanged(uint newChannel);
 
 private slots:
     void trigEnabled_stateChanged(int newState);
     void trigType_currentIndexChanged(int newIndex);
     void trigChannel_currentIndexChanged(int newIndex);
-    void dataType_currentIndexChanged(int newIndex);
     void trigValue_valueChanged(qreal newValue);
 
 private:
     Ui::OScopeTriggerWgt *ui;
 
     void populateTriggerTypes();
-    void populateDataTypes();
-    void updateValueUi();
 };
 
 #endif // OSCOPETRIGGERWGT_H

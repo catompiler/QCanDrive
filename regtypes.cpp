@@ -791,7 +791,7 @@ qreal iqMinimum(DataType type)
     return static_cast<qreal>(minVal) / baseVal;
 }
 
-qreal iqMaxim1um(DataType type)
+qreal iqMaximum(DataType type)
 {
     int32_t baseVal = iqBase(type);
     int32_t maxVal = iqIntMaximum(type);

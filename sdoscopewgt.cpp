@@ -74,7 +74,6 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     connect(ui->twTrig, &OScopeTriggerWgt::triggerTypeChanged, this, &SDOScopeWgt::triggerTypeChanged);
     connect(ui->twTrig, &OScopeTriggerWgt::triggerChannelChanged, this, &SDOScopeWgt::triggerChannelChanged);
     connect(ui->twTrig, &OScopeTriggerWgt::triggerValueChanged, this, &SDOScopeWgt::triggerValueChanged);
-    connect(ui->twTrig, &OScopeTriggerWgt::triggerDataValueChanged, this, &SDOScopeWgt::triggerDataValueChanged);
 
     // Коннекты виджета.
     connect(ui->pbRun, &QPushButton::clicked, this, &SDOScopeWgt::btnRun_clicked);
@@ -454,16 +453,27 @@ void SDOScopeWgt::triggerTypeChanged(int newType)
 
 void SDOScopeWgt::triggerValueChanged(qreal newValue)
 {
+    if(auto ch = m_scope->channel(ui->twTrig->triggerChannel()); ch != nullptr){
+
+        DataType chDataType = ch->dataType();
+        qreal chBaseValue = ch->baseValue();
+        // Если установлено 0 - относительные единицы.
+        if(chBaseValue == 0.0) chBaseValue = 1.0;
+
+        qreal valPU = newValue / chBaseValue;
+        valPU = qBound(RegTypes::iqMinimum(chDataType),
+                       valPU,
+                       RegTypes::iqMaximum(chDataType));
+        //qDebug() << valPU << RegTypes::iqValueToRaw(valPU, chDataType);
+
+        m_scope->setTriggerValue(RegTypes::iqValueToRaw(valPU, chDataType));
+
+        m_triggerValueChangedTmr->start();
+    }
+
     auto plt = getPlot();
     plt->setTriggerMarkValue(newValue);
     plt->replot();
-}
-
-void SDOScopeWgt::triggerDataValueChanged(int newValue)
-{
-    m_scope->setTriggerValue(newValue);
-
-    m_triggerValueChangedTmr->start();
 }
 
 void SDOScopeWgt::triggerChannelChanged(uint newChannel)
@@ -729,16 +739,23 @@ void SDOScopeWgt::refreshTriggerUi()
 
     updateTriggerUiByChannel();
 
-    ui->twTrig->setTriggerDataValue(m_scope->triggerValue());
-
     ui->twTrig->blockSignals(false);
 }
 
 void SDOScopeWgt::updateTriggerUiByChannel()
 {
     if(auto ch = m_scope->channel(ui->twTrig->triggerChannel()); ch != nullptr){
-        ui->twTrig->setTriggerDataType(ch->dataType());
-        ui->twTrig->setTriggerBaseValue(ch->baseValue());
+
+        DataType chDataType = ch->dataType();
+        qreal chBaseValue = ch->baseValue();
+        // Если установлено 0 - относительные единицы.
+        if(chBaseValue == 0.0) chBaseValue = 1.0;
+
+        ui->twTrig->setTriggerValueMinimum(chBaseValue * RegTypes::iqMinimum(chDataType));
+        ui->twTrig->setTriggerValueMaximum(chBaseValue * RegTypes::iqMaximum(chDataType));
+        ui->twTrig->setTriggerValueDecimals(RegTypes::iqDecimals(chDataType));
+        ui->twTrig->setTriggerValueSingleStep(RegTypes::iqPrecision(chDataType));
+        ui->twTrig->setTriggerValue(chBaseValue * RegTypes::iqValueFromRaw<qreal>(m_scope->triggerValue(), chDataType));
     }
 }
 
