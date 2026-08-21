@@ -395,7 +395,7 @@ void SDOScopeWgt::sdoscopeAppliedTrig()
 {
     qDebug() << "SDOScopeWgt::sdoscopeAppliedTrig()";
 
-    //refreshTriggerUi();
+    applyTriggerUiToPlot();
 }
 
 void SDOScopeWgt::horiScaleChanged(double value)
@@ -709,6 +709,8 @@ void SDOScopeWgt::applyUiToPlot()
     applyHoriUiToPlot();
 
     applyChannelsUiToPlot();
+
+    applyTriggerUiToPlot();
 }
 
 void SDOScopeWgt::applyHoriUiToPlot()
@@ -727,4 +729,15 @@ void SDOScopeWgt::applyChannelsUiToPlot()
             ocw->applyValues();
         }
     }
+}
+
+void SDOScopeWgt::applyTriggerUiToPlot()
+{
+    auto plt = getPlot();
+
+    plt->setTriggerMarkEnabled(ui->twTrig->triggerEnabled());
+    plt->setTriggerMarkChannel(ui->twTrig->triggerChannel());
+    plt->setTriggerMarkValue(ui->twTrig->triggerValue());
+
+    plt->replot();
 }

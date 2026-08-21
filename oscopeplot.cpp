@@ -185,6 +185,8 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     m_zeroTimeMarker->setVisible(true);
 
     // Отметка триггера.
+    m_trigChannel = -1;
+    m_trigValue = 0.0;
     // Символ.
     m_trigSymbol = new TriangleMarkerSymbol();
     m_trigSymbol->setDir(TriangleMarkerSymbol::Left);
@@ -269,7 +271,7 @@ void OScopePlot::setHDiv(qreal newHDiv)
     m_hori->setHDiv(newHDiv);
     invalidateAllBounds();
     updateZeroTimeMark();
-    updateTimeScale();
+    updateZeroTimeScale();
 }
 
 qreal OScopePlot::hOffset() const
@@ -282,7 +284,7 @@ void OScopePlot::setHOffset(qreal newHOffset)
     m_hori->setHOffset(newHOffset);
     invalidateAllBounds();
     updateZeroTimeMark();
-    updateTimeScale();
+    updateZeroTimeScale();
 }
 
 qreal OScopePlot::vDiv(int n) const
@@ -308,6 +310,8 @@ void OScopePlot::setVDiv(int n, qreal newVDiv)
 
     ser_data->setVDiv(newVDiv);
     ser_data->invalidateBounds();
+
+    if(n == m_trigChannel) updateTriggerMark();
 }
 
 qreal OScopePlot::vOffset(int n) const
@@ -332,6 +336,8 @@ void OScopePlot::setVOffset(int n, qreal newVOffset)
 
     ser_data->setVOffset(newVOffset);
     ser_data->invalidateBounds();
+
+    if(n == m_trigChannel) updateTriggerMark();
 }
 
 bool OScopePlot::setData(OScopeData* newOscData)
@@ -364,6 +370,11 @@ bool OScopePlot::updateData()
             return false;
         }
     }
+
+    updateZerosScale();
+    updateZeroTimeMark();
+    updateZeroTimeScale();
+    updateTriggerMark();
 
     return true;
 }
@@ -543,6 +554,10 @@ void OScopePlot::setPen(int n, const QPen& newPen)
     if(curv == nullptr) return;
 
     curv->setPen(newPen);
+
+    updateZerosScale();
+
+    if(n == m_trigChannel) m_trigSymbol->setColor(newPen.color());
 }
 
 QBrush OScopePlot::brush(int n) const
@@ -659,6 +674,40 @@ void OScopePlot::setLegendItemEnabled(bool newEnabled)
     }
 }
 
+bool OScopePlot::triggerMarkEnabled() const
+{
+    return m_trigMarker->isVisible();
+}
+
+void OScopePlot::setTriggerMarkEnabled(bool newEnabled)
+{
+    m_trigMarker->setVisible(newEnabled);
+}
+
+int OScopePlot::triggerMarkChannel() const
+{
+    return m_trigChannel;
+}
+
+void OScopePlot::setTriggerMarkChannel(int newChN)
+{
+    m_trigChannel = newChN;
+
+    updateTriggerMark();
+}
+
+qreal OScopePlot::triggerMarkValue() const
+{
+    return m_trigValue;
+}
+
+void OScopePlot::setTriggerMarkValue(qreal newValue)
+{
+    m_trigValue = newValue;
+
+    updateTriggerMark();
+}
+
 QList<Qt::GlobalColor> OScopePlot::getDefaultColors()
 {
     QList<Qt::GlobalColor> colors;
@@ -754,8 +803,8 @@ void OScopePlot::setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick)
 
 void OScopePlot::updateZerosScale()
 {
-    QwtScaleWidget* zeroScaleWgt = axisWidget(QwtAxis::YLeft);
-    if(zeroScaleWgt) zeroScaleWgt->update();
+    QwtScaleWidget* zerosScaleWgt = axisWidget(QwtAxis::YLeft);
+    if(zerosScaleWgt) zerosScaleWgt->update();
 }
 
 void OScopePlot::updateZeroTimeMark()
@@ -794,14 +843,28 @@ void OScopePlot::updateZeroTimeMark()
     m_zeroTimeMarker->setXValue(qMax(qMin(grid_offset, static_cast<qreal>(HGRID)), static_cast<qreal>(-HGRID)));
 }
 
-void OScopePlot::updateTimeScale()
+void OScopePlot::updateZeroTimeScale()
 {
-    QwtScaleWidget* timeScaleWgt = axisWidget(QwtAxis::XTop);
-    if(timeScaleWgt) timeScaleWgt->update();
+    QwtScaleWidget* zeroTimeScaleWgt = axisWidget(QwtAxis::XTop);
+    if(zeroTimeScaleWgt) zeroTimeScaleWgt->update();
 }
 
 void OScopePlot::updateTriggerMark()
 {
+    // Обновление позиции.
+
+    qreal value_scale_k = 1.0;
+    qreal value_offset = 0.0;
+
+    if(m_trigChannel >= 0 && m_trigChannel < signalsCount()){
+        value_scale_k = invVDiv(m_trigChannel);
+        value_offset = vOffset(m_trigChannel);
+    }
+
+    m_trigMarker->setYValue((m_trigValue + value_offset) * value_scale_k);
+
+    // Обновлени символа / маркера.
+
     int canvas_height;
 
     if(QwtPlotLayout* pltLay = plotLayout(); pltLay != nullptr){
@@ -813,7 +876,7 @@ void OScopePlot::updateTriggerMark()
             );
     }
 
-    qreal grid_offset = hOffset() * invHDiv();
+    qreal grid_offset = m_trigMarker->value().y();
     int canvas_offset = qRound(transform(QwtAxis::YRight, grid_offset));
 
     if(canvas_offset <= (TRIGGER_MARK_WIDTH/2)){
@@ -834,4 +897,15 @@ void OScopePlot::updateTriggerMark()
     }
 
     m_trigMarker->setYValue(qMax(qMin(grid_offset, static_cast<qreal>(VGRID)), static_cast<qreal>(-VGRID)));
+
+    // Обновление оформления.
+
+    QColor channelCol = Qt::white;
+
+    if(m_trigChannel >= 0 && m_trigChannel < signalsCount()){
+        channelCol = pen(m_trigChannel).color();
+    }
+
+    m_trigSymbol->setColor(channelCol);
+    m_trigMarker->setLinePen(QPen(channelCol));
 }

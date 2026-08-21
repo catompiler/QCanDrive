@@ -92,6 +92,7 @@ private:
     void applyUiToPlot();
     void applyHoriUiToPlot();
     void applyChannelsUiToPlot();
+    void applyTriggerUiToPlot();
 };
 
 #endif // SDOSCOPEWGT_H

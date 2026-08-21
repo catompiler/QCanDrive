@@ -110,6 +110,16 @@ public:
     bool legendItemEnabled() const;
     void setLegendItemEnabled(bool newEnabled);
 
+    // Триггер.
+    bool triggerMarkEnabled() const;
+    void setTriggerMarkEnabled(bool newEnabled);
+
+    int triggerMarkChannel() const;
+    void setTriggerMarkChannel(int newChN);
+
+    qreal triggerMarkValue() const;
+    void setTriggerMarkValue(qreal newValue);
+
 public slots:
     void clear(); // Вызывает removeSignals();
     void invalidateAllBounds(); // Помечает предрассчитанные границы графиков как невалидные.
@@ -130,6 +140,8 @@ protected:
 
     QwtPlotMarker* m_trigMarker;
     TriangleMarkerSymbol* m_trigSymbol;
+    int m_trigChannel;
+    qreal m_trigValue;
 
     QwtPlotLegendItem* m_legendItem;
 
@@ -141,7 +153,7 @@ protected:
     void setupAxisTicks(QwtAxisId axis_id, int min_tick, int max_tick);
     void updateZerosScale();
     void updateZeroTimeMark();
-    void updateTimeScale();
+    void updateZeroTimeScale();
     void updateTriggerMark();
 };
 
