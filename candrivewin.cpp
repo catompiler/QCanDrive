@@ -127,6 +127,8 @@ CanDriveWin::~CanDriveWin()
     statusBar()->removeWidget(m_sblblConStatus);
     delete m_sblblConStatus;
 
+    ui->cockpitWgt->clearCockpit();
+    delete ui->cockpitWgt;
     delete ui->tvRegView;
     delete ui->tvRegList;
 
