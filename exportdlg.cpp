@@ -352,10 +352,10 @@ QString ExportDlg::replaceVars(const QString& text) const
     QString str = text;
 
     if(m_varRE.isValid()){
-        int pos = 0;
-        int len = 0;
-        while((pos = m_varRE.indexIn(str, 0)) != -1){
-            len = m_varRE.matchedLength();
+        QRegularExpressionMatch match;
+        while((match = m_varRE.match(str, 0)).hasMatch()){
+            int pos = match.capturedStart(0);
+            int len = match.capturedLength(0);
             QString var_name = str.mid(pos+2, len-3).trimmed();
             str.replace(pos, len, vars.value(var_name, var_name));
         }

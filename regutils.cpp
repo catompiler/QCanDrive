@@ -3,7 +3,7 @@
 #include "regvar.h"
 #include <algorithm>
 #include <functional>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QVariant>
 #include <QString>
 #include <QDebug>
@@ -323,10 +323,10 @@ QString RegUtils::makeName(const QString& text, SyntaxType syntaxType)
 
     //qDebug() << text;
 
-    words = text.split(QRegExp("\\s+"));
+    words = text.split(QRegularExpression("\\s+"));
     //qDebug() << words;
 
-    QRegExp re_non_word("\\W");
+    QRegularExpression re_non_word("\\W");
     std::for_each(words.begin(), words.end(), [&re_non_word](QString& word){
         word.replace(re_non_word, QChar('_'));
     });

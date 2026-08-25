@@ -132,7 +132,7 @@ QPair<CO::Index, CO::SubIndex> RegListEditorWgt::selectReg()
             return m_regSelectDlg->selectedRegIndex();
         }
     }
-    return qMakePair<CO::Index, CO::SubIndex>(REG_INDEX_INVALID, 0);
+    return qMakePair(REG_INDEX_INVALID, 0);
 }
 
 RegSelectDlg* RegListEditorWgt::regSelectDialog()

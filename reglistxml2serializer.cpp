@@ -50,7 +50,7 @@ RegListXml2Serializer::~RegListXml2Serializer()
 }
 
 
-int RegListXml2Serializer::intValue(const QStringRef& str, int defVal) const
+int RegListXml2Serializer::intValue(const QStringView& str, int defVal) const
 {
     bool ok = false;
     decltype(defVal) val = str.toInt(&ok, 0);
@@ -66,7 +66,7 @@ int RegListXml2Serializer::intValue(const QString& str, int defVal) const
     return defVal;
 }
 
-unsigned int RegListXml2Serializer::uintValue(const QStringRef& str, unsigned int defVal) const
+unsigned int RegListXml2Serializer::uintValue(const QStringView& str, unsigned int defVal) const
 {
     bool ok = false;
     decltype(defVal) val = str.toUInt(&ok, 0);
@@ -82,7 +82,7 @@ unsigned int RegListXml2Serializer::uintValue(const QString& str, unsigned int d
     return defVal;
 }
 
-double RegListXml2Serializer::realValue(const QStringRef& str, double defVal) const
+double RegListXml2Serializer::realValue(const QStringView& str, double defVal) const
 {
     bool ok = false;
     decltype(defVal) val = str.toDouble(&ok);

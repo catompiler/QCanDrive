@@ -1,6 +1,5 @@
 #include "candrivewin.h"
 #include <QApplication>
-#include <QTextCodec>
 #include <QStyleFactory>
 #include <QPalette>
 
@@ -97,7 +96,7 @@ void applyDarkTheme()
 {
     qApp->setStyle(QStyleFactory::create("Fusion"));
 
-    QPalette darkPalette;
+    QPalette darkPalette(qApp->palette());
 
     // Базовые цвета фона и текста
     darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
@@ -145,8 +144,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     applyDarkTheme();
-
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
     CanDriveWin w;
 

@@ -61,7 +61,7 @@ QWidget* SDOScopeChannelDelegate::createEditor(QWidget* parent, const QStyleOpti
         auto dataTypes = RegTypes::dataTypes();
         dataTypes.removeAll(DataType::MEM);
         dataTypes.removeAll(DataType::STR);
-        for(auto& t: qAsConst(dataTypes)){
+        for(auto& t: std::as_const(dataTypes)){
             cb->addItem(RegTypes::dataTypeStr(t));
         }
         res_widget = cb;

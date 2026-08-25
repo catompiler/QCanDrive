@@ -23,11 +23,11 @@ public:
 
 protected:
 
-    int intValue(const QStringRef& str, int defVal = 0) const;
+    int intValue(const QStringView& str, int defVal = 0) const;
     int intValue(const QString& str, int defVal = 0) const;
-    unsigned int uintValue(const QStringRef& str, unsigned int defVal = 0) const;
+    unsigned int uintValue(const QStringView& str, unsigned int defVal = 0) const;
     unsigned int uintValue(const QString& str, unsigned int defVal = 0) const;
-    double realValue(const QStringRef& str, double defVal = 0) const;
+    double realValue(const QStringView& str, double defVal = 0) const;
     double realValue(const QString& str, double defVal = 0) const;
 
 private:

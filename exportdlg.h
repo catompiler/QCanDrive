@@ -3,9 +3,9 @@
 
 #include <QDialog>
 #include <QString>
+#include <QRegularExpression>
 
 class QLineEdit;
-class QRegExp;
 
 namespace Ui {
 class ExportDlg;
@@ -106,7 +106,7 @@ private slots:
 private:
     Ui::ExportDlg *ui;
 
-    QRegExp m_varRE;
+    QRegularExpression m_varRE;
 
     void selectFileNameTo(QLineEdit* le, const QString& caption, const QString& filter);
     QString replaceVars(const QString& text) const;

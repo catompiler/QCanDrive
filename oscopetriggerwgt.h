@@ -52,7 +52,7 @@ signals:
     void triggerChannelChanged(uint newChannel);
 
 private slots:
-    void trigEnabled_stateChanged(int newState);
+    void trigEnabled_stateChanged(Qt::CheckState newState);
     void trigType_currentIndexChanged(int newIndex);
     void trigChannel_currentIndexChanged(int newIndex);
     void trigValue_valueChanged(qreal newValue);

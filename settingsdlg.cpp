@@ -66,7 +66,7 @@ QSerialPort::BaudRate SettingsDlg::portBaud() const
     bool ok = false;
     auto res =  static_cast<QSerialPort::BaudRate>(ui->cbBaud->currentData().toUInt(&ok));
     if(ok) return res;
-    return QSerialPort::UnknownBaud;
+    return QSerialPort::Baud115200;
 }
 
 void SettingsDlg::setPortBaud(QSerialPort::BaudRate newPortBaud)
@@ -79,7 +79,7 @@ QSerialPort::Parity SettingsDlg::portParity() const
     bool ok = false;
     auto res =  static_cast<QSerialPort::Parity>(ui->cbParity->currentData().toUInt(&ok));
     if(ok) return res;
-    return QSerialPort::UnknownParity;
+    return QSerialPort::NoParity;
 }
 
 void SettingsDlg::setPortParity(const QSerialPort::Parity& newPortParity)
@@ -92,7 +92,7 @@ QSerialPort::StopBits SettingsDlg::portStopBits() const
     bool ok = false;
     auto res =  static_cast<QSerialPort::StopBits>(ui->cbStopBits->currentData().toUInt(&ok));
     if(ok) return res;
-    return QSerialPort::UnknownStopBits;
+    return QSerialPort::OneStop;
 }
 
 void SettingsDlg::setPortStopBits(const QSerialPort::StopBits& newPortStopBits)

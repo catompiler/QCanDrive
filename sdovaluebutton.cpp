@@ -478,7 +478,7 @@ void SDOValueButton::mouseMoveEvent(QMouseEvent* event)
     QAbstractButton::mouseMoveEvent(event);
 }
 
-void SDOValueButton::enterEvent(QEvent* event)
+void SDOValueButton::enterEvent(QEnterEvent* event)
 {
     m_mouseFlag = true;
 

@@ -83,7 +83,7 @@ CockpitSerializer::CockpitWidgets CockpitSerializer::deserialize(QIODevice* dev,
     return widgets;
 }
 
-int CockpitSerializer::intValue(const QStringRef& str, int defVal) const
+int CockpitSerializer::intValue(const QStringView& str, int defVal) const
 {
     bool ok = false;
     decltype(defVal) val = str.toInt(&ok, 0);
@@ -99,7 +99,7 @@ int CockpitSerializer::intValue(const QString& str, int defVal) const
     return defVal;
 }
 
-unsigned int CockpitSerializer::uintValue(const QStringRef& str, unsigned int defVal) const
+unsigned int CockpitSerializer::uintValue(const QStringView& str, unsigned int defVal) const
 {
     bool ok = false;
     decltype(defVal) val = str.toUInt(&ok, 0);
@@ -115,7 +115,7 @@ unsigned int CockpitSerializer::uintValue(const QString& str, unsigned int defVa
     return defVal;
 }
 
-double CockpitSerializer::realValue(const QStringRef& str, double defVal) const
+double CockpitSerializer::realValue(const QStringView& str, double defVal) const
 {
     bool ok = false;
     decltype(defVal) val = str.toDouble(&ok);

@@ -58,7 +58,7 @@ void SelLineEdit::createUi()
     m_lMain = new QHBoxLayout();
     m_lMain->setContentsMargins(0, 0, 0, 0);
     m_lMain->setSpacing(0);
-    m_lMain->setMargin(0);
+    //m_lMain->setMargin(0);
 
     m_lMain->addWidget(m_lineEdit);
     m_lMain->addWidget(m_selButton);

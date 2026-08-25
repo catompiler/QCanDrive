@@ -74,7 +74,7 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
         if(isEntry){
             QComboBox* cb = new QComboBox(parent);
             auto objTypes = RegTypes::objectTypes();
-            for(auto& t: qAsConst(objTypes)){
+            for(auto& t: std::as_const(objTypes)){
                 cb->addItem(RegTypes::typeStr(t));
             }
             res_widget = cb;
@@ -85,7 +85,7 @@ QWidget* RegDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& 
                 dataTypes.removeAll(DataType::MEM);
                 dataTypes.removeAll(DataType::STR);
             }
-            for(auto& t: qAsConst(dataTypes)){
+            for(auto& t: std::as_const(dataTypes)){
                 cb->addItem(RegTypes::dataTypeStr(t));
             }
             res_widget = cb;
