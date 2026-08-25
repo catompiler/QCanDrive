@@ -94,18 +94,18 @@
     </widget>
    </item>
    <item row="1" column="0" rowspan="2">
-    <widget class="QwtKnob" name="valOffset" native="true"/>
+    <widget class="OScopeKnob" name="valOffset" native="true"/>
    </item>
    <item row="1" column="1" rowspan="2">
-    <widget class="QwtKnob" name="valScale" native="true"/>
+    <widget class="OScopeKnob" name="valScale" native="true"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QwtKnob</class>
+   <class>OScopeKnob</class>
    <extends>QWidget</extends>
-   <header location="global">QwtKnob</header>
+   <header>oscopeknob.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -53,6 +53,9 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
 
     connect(ui->valOffset, &QwtKnob::valueChanged, this, &OScopeAxisWgt::offset_valueChanged);
     connect(ui->valScale, &QwtKnob::valueChanged, this, &OScopeAxisWgt::scale_valueChanged);
+
+    connect(ui->valOffset, &OScopeKnob::sliderDoubleClicked, this, &OScopeAxisWgt::offset_doubleClicked);
+    connect(ui->valScale, &OScopeKnob::sliderDoubleClicked, this, &OScopeAxisWgt::scale_doubleClicked);
 }
 
 OScopeAxisWgt::~OScopeAxisWgt()
@@ -178,7 +181,7 @@ void OScopeAxisWgt::setScaleAdjustType(AdjustType newType)
 
 void OScopeAxisWgt::scale_valueChanged(double value)
 {
-    Q_UNUSED(value);
+    Q_UNUSED(value)
 
     //updateOffsetRange();
 
@@ -191,11 +194,29 @@ void OScopeAxisWgt::scale_valueChanged(double value)
 
 void OScopeAxisWgt::offset_valueChanged(double value)
 {
-    Q_UNUSED(value);
+    Q_UNUSED(value)
 
     updateOffsetDispVal();
 
     emit offsetChanged(offset());
+}
+
+void OScopeAxisWgt::scale_doubleClicked(int buttons, int modifiers)
+{
+    Q_UNUSED(modifiers)
+
+    if(buttons == Qt::LeftButton){
+        ui->valScale->setValue(0.0);
+    }
+}
+
+void OScopeAxisWgt::offset_doubleClicked(int buttons, int modifiers)
+{
+    Q_UNUSED(modifiers)
+
+    if(buttons == Qt::LeftButton){
+        ui->valOffset->setValue(0.0);
+    }
 }
 
 QPair<qreal, int> OScopeAxisWgt::valueScaleBase(qreal val, qreal scaleBase) const

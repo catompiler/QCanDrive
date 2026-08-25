@@ -50,6 +50,7 @@ SOURCES += \
     oscopechszerosscaledraw.cpp \
     oscopedata.cpp \
     oscopehorizontal.cpp \
+    oscopeknob.cpp \
     oscopeplot.cpp \
     oscopeplotseriesdata.cpp \
     oscopetimezeroscaledraw.cpp \
@@ -159,6 +160,7 @@ HEADERS += \
     oscopechszerosscaledraw.h \
     oscopedata.h \
     oscopehorizontal.h \
+    oscopeknob.h \
     oscopeplot.h \
     oscopeplotseriesdata.h \
     oscopetimezeroscaledraw.h \

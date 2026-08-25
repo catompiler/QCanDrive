@@ -619,9 +619,9 @@
   </customwidget>
  </customwidgets>
  <resources>
+  <include location="qt_canopennode_slcan.qrc"/>
   <include location="reglisteditor.qrc"/>
   <include location="candrive.qrc"/>
-  <include location="qt_canopennode_slcan.qrc"/>
  </resources>
  <connections/>
 </ui>

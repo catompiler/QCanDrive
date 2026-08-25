@@ -66,6 +66,8 @@ signals:
 private slots:
     void scale_valueChanged(double value);
     void offset_valueChanged(double value);
+    void scale_doubleClicked(int buttons, int modifiers);
+    void offset_doubleClicked(int buttons, int modifiers);
 
 private:
     Ui::OScopeAxisWgt *ui;
