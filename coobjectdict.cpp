@@ -179,7 +179,7 @@ COObjectDict::Entry COObjectDict::entryByIndex(CO::Index entryIndex)
 
     if(it == m_od_entries.end()) return Entry();
 
-    return Entry(it);
+    return Entry(&(*it));
 }
 
 COObjectDict::Entry COObjectDict::add_H1000_DevType()
