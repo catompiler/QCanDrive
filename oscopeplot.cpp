@@ -677,16 +677,24 @@ void OScopePlot::invalidateAllBounds()
 
 void OScopePlot::floatingCursorMoved(const QPointF& pos)
 {
-    if(m_oscData == nullptr) return;
+    if(m_oscData == nullptr){
+        QToolTip::hideText();
+        return;
+    }
 
     qreal Tpos = m_hori->invTransform(pos.x());
     int Tidx = qRound(Tpos / m_oscData->Ts());
 
-    if(Tidx < 0 || static_cast<size_t>(Tidx) >= m_oscData->samplesCount()) return;
+    if(Tidx < 0 || static_cast<size_t>(Tidx) >= m_oscData->samplesCount()){
+        QToolTip::hideText();
+        return;
+    }
+
+    // TODO: Елиницы измерения времени.
 
     // Отобразим именно дискретное время согласно индесу,
     // а не согласно координатам сетки осциллографа.
-    QString valuesText = tr("T: %1").arg(m_oscData->Ts() * Tidx);
+    QString valuesText = tr("T: %1").arg(m_oscData->Ts() * (Tidx - static_cast<int>(m_oscData->historySize())));
 
     //qDebug() << pos << Tpos << Tidx;
 
