@@ -51,6 +51,13 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
 
     // Осциллограф.
     m_scope = new SDOScope();
+
+    // Данные осциллографа.
+    m_scope_data = new SDOScopeData(m_scope);
+
+    auto plt = getPlot();
+    plt->setData(m_scope_data);
+
     // Коннекты осциллографа.
     connect(m_scope, &SDOScope::finished, this, &SDOScopeWgt::sdoscopeFinished);
     connect(m_scope, &SDOScope::initialized, this, &SDOScopeWgt::sdoscopeInitialized);
@@ -80,12 +87,7 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     connect(ui->pbSingle, &QPushButton::clicked, this, &SDOScopeWgt::btnSingle_clicked);
     connect(ui->pbAbort, &QPushButton::clicked, this, &SDOScopeWgt::btnAbort_clicked);
     connect(ui->pbAutoScale, &QPushButton::clicked, this, &SDOScopeWgt::btnAutoScale_clicked);
-
-    // Данные осциллографа.
-    m_scope_data = new SDOScopeData(m_scope);
-
-    auto plt = getPlot();
-    plt->setData(m_scope_data);
+    connect(ui->cwCursors, &OScopeCursorsWgt::floatingEnabledChanged, this, &SDOScopeWgt::cursorsFloatingEnabledChanged);
 
     // Создадим интерфейс каналов.
     populateChannelsUi();
@@ -504,6 +506,11 @@ void SDOScopeWgt::triggerValueChangedTmr_timeout()
     updateUiEnabled();
 }
 
+void SDOScopeWgt::cursorsFloatingEnabledChanged(bool newEnabled)
+{
+    getPlot()->setCursorsFloatingEnabled(newEnabled);
+}
+
 void SDOScopeWgt::btnScopeParams_clicked(bool checked)
 {
     Q_UNUSED(checked);
@@ -691,18 +698,23 @@ void SDOScopeWgt::updateUiEnabled()
     bool run  = m_scope->isRunning();
     bool read = m_scope->isReading();
     bool run_read = run || read;
+    bool has_signals = getPlot()->hasVisibleSignals();
 
     ui->pbRun->setEnabled(init && (!run_read || ui->pbRun->isChecked()));
     ui->pbSingle->setEnabled(init && !run_read);
     ui->pbParams->setEnabled(init && !busy);
     ui->pbChannels->setEnabled(init && !busy);
     ui->twTrig->setEnabled(init && !trig);
+    ui->pbAutoScale->setEnabled(has_signals);
+    ui->pbAbort->setEnabled(busy);
+    ui->gbCursors->setEnabled(has_signals);
 }
 
 void SDOScopeWgt::refreshUi()
 {
     refreshChannelsUi();
     refreshTriggerUi();
+    refreshCursorsUi();
 
     auto plt = getPlot();
     ui->asHori->setScale(plt->hDiv());
@@ -742,6 +754,13 @@ void SDOScopeWgt::refreshTriggerUi()
     ui->twTrig->blockSignals(false);
 }
 
+void SDOScopeWgt::refreshCursorsUi()
+{
+    auto plt = getPlot();
+
+    ui->cwCursors->setFloatingEnabled(plt->cursorsFloatingEnabled());
+}
+
 void SDOScopeWgt::updateTriggerUiByChannel()
 {
     if(auto ch = m_scope->channel(ui->twTrig->triggerChannel()); ch != nullptr){
@@ -766,6 +785,8 @@ void SDOScopeWgt::applyUiToPlot()
     applyChannelsUiToPlot();
 
     applyTriggerUiToPlot();
+
+    applyCursorsUiToPlot();
 }
 
 void SDOScopeWgt::applyHoriUiToPlot()
@@ -795,4 +816,11 @@ void SDOScopeWgt::applyTriggerUiToPlot()
     plt->setTriggerMarkValue(ui->twTrig->triggerValue());
 
     plt->replot();
+}
+
+void SDOScopeWgt::applyCursorsUiToPlot()
+{
+    auto plt = getPlot();
+
+    plt->setCursorsFloatingEnabled(ui->cwCursors->floatingEnabled());
 }

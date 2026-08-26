@@ -18,7 +18,12 @@
 #include <QwtPlotLegendItem>
 #include <QFontMetrics>
 #include <QwtPlotMarker>
+#include <QwtPlotPicker>
+#include <QwtPickerMachine>
 #include <QwtSymbol>
+#include <QPointF>
+#include <QToolTip>
+#include <QCursor>
 #include <QDebug>
 
 
@@ -184,6 +189,7 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     m_zeroTimeMarker->attach(this);
     m_zeroTimeMarker->setVisible(true);
 
+    // Триггер.
     // Отметка триггера.
     m_trigChannel = -1;
     m_trigValue = 0.0;
@@ -201,6 +207,15 @@ OScopePlot::OScopePlot(QWidget* parent, const QString& newName)
     m_trigMarker->setValue(HGRID, 0.0);
     m_trigMarker->attach(this);
     m_trigMarker->setVisible(false);
+
+    // Курсоры.
+    m_floatingPicker = new QwtPlotPicker(canvas());
+    m_floatingPicker->setAxes(QwtAxis::XBottom, QwtAxis::YLeft);
+    m_floatingPicker->setRubberBand(QwtPlotPicker::NoRubberBand);
+    m_floatingPicker->setStateMachine(new QwtPickerTrackerMachine());
+    m_floatingPicker->setTrackerMode(QwtPicker::AlwaysOff);
+    m_floatingPicker->setEnabled(false); // Выключим по-умолчанию.
+    connect(m_floatingPicker, &QwtPlotPicker::moved, this, &OScopePlot::floatingCursorMoved);
 
     setAutoReplot(false);
 }
@@ -448,6 +463,14 @@ int OScopePlot::signalsCount() const
     return items.count();
 }
 
+bool OScopePlot::hasVisibleSignals() const
+{
+    for(int i = 0; i < signalsCount(); i ++){
+        if(signalVisible(i)) return true;
+    }
+    return false;
+}
+
 OScopePlotSeriesData* OScopePlot::plotData(int n)
 {
     QwtPlotCurve* curv = getCurve(n);
@@ -652,6 +675,47 @@ void OScopePlot::invalidateAllBounds()
     }
 }
 
+void OScopePlot::floatingCursorMoved(const QPointF& pos)
+{
+    if(m_oscData == nullptr) return;
+
+    qreal Tpos = m_hori->invTransform(pos.x());
+    int Tidx = qRound(Tpos / m_oscData->Ts());
+
+    if(Tidx < 0 || static_cast<size_t>(Tidx) >= m_oscData->samplesCount()) return;
+
+    // Отобразим именно дискретное время согласно индесу,
+    // а не согласно координатам сетки осциллографа.
+    QString valuesText = tr("T: %1").arg(m_oscData->Ts() * Tidx);
+
+    //qDebug() << pos << Tpos << Tidx;
+
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    int signal_number = 0;
+    for(const auto& item: items){
+        signal_number ++;
+
+        auto curv = static_cast<QwtPlotCurve*>(item);
+
+        if(!curv->isVisible()) continue;
+
+        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
+
+        //qDebug() << pltData->value(Tidx);
+
+        // Добавим в подсказку номер/имя сигнала и его значение.
+        valuesText += QStringLiteral("\n%1 (\"%2\"): %3").arg(signal_number)
+                                                       .arg(curv->title().text())
+                                                       .arg(pltData->value(Tidx));
+    }
+
+    //qDebug() << valuesText;
+
+    // Отобразим подсказку.
+    QToolTip::showText(QCursor::pos(), valuesText, canvas());
+}
+
 bool OScopePlot::legendItemEnabled() const
 {
     return m_legendItem != nullptr;
@@ -706,6 +770,16 @@ void OScopePlot::setTriggerMarkValue(qreal newValue)
     m_trigValue = newValue;
 
     updateTriggerMark();
+}
+
+bool OScopePlot::cursorsFloatingEnabled() const
+{
+    return m_floatingPicker->isEnabled();
+}
+
+void OScopePlot::setCursorsFloatingEnabled(bool newEnabled)
+{
+    m_floatingPicker->setEnabled(newEnabled);
 }
 
 QList<Qt::GlobalColor> OScopePlot::getDefaultColors()

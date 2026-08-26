@@ -51,7 +51,7 @@ private slots:
     void vertScaleChanged(qreal value);
     void vertOffsetChanged(qreal value);
 
-    void visiblityCheckStateChanged(int checkState);
+    void visiblityCheckStateChanged(Qt::CheckState checkState);
     void penColorSel_clicked(bool checked);
     void penStyle_currentIndexChanged(int index);
     void lineWidth_valueChanged(double value);

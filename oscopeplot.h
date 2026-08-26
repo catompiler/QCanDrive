@@ -9,9 +9,11 @@
 #include <QRectF>
 
 
+class QPointF;
 class QwtPlotCurve;
 class QwtPlotLegendItem;
 class QwtPlotMarker;
+class QwtPlotPicker;
 class TriangleMarkerSymbol;
 class OScopeHorizontal;
 class OScopeData;
@@ -75,6 +77,7 @@ public:
     void removeSignal(int n);
     void removeSignals();
     int signalsCount() const;
+    bool hasVisibleSignals() const;
 
     // Данные канала.
     OScopePlotSeriesData* plotData(int n);
@@ -120,9 +123,16 @@ public:
     qreal triggerMarkValue() const;
     void setTriggerMarkValue(qreal newValue);
 
+    // Курсоры.
+    bool cursorsFloatingEnabled() const;
+    void setCursorsFloatingEnabled(bool newEnabled);
+
 public slots:
     void clear(); // Вызывает removeSignals();
     void invalidateAllBounds(); // Помечает предрассчитанные границы графиков как невалидные.
+
+private slots:
+    void floatingCursorMoved(const QPointF& pos);
 
 protected:
     OScopeHorizontal* m_hori;
@@ -138,10 +148,14 @@ protected:
     QwtPlotMarker* m_zeroTimeMarker;
     TriangleMarkerSymbol* m_zeroTimeSymbol;
 
+    // Триггер.
     QwtPlotMarker* m_trigMarker;
     TriangleMarkerSymbol* m_trigSymbol;
     int m_trigChannel;
     qreal m_trigValue;
+
+    // Курсоры.
+    QwtPlotPicker* m_floatingPicker;
 
     QwtPlotLegendItem* m_legendItem;
 

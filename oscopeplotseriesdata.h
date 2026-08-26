@@ -24,11 +24,18 @@ public:
     void setHorizontal(OScopeHorizontal* newHori);
 
     /**
+     * @brief Получает данные осциллографа.
+     * @return Данные осциллографа.
+     */
+    OScopeData* oscopeData();
+    const OScopeData* oscopeData() const;
+
+    /**
      * @brief Устанавливает данные осциллографа.
      * @param newOScopeData Данные осциллографа.
      * После всех установок необходимо вызвать update.
      */
-    void setScope(OScopeData* newOScopeData);
+    void setOScopeData(OScopeData* newOScopeData);
 
     /**
      * @brief Устанавливает номер канала.
@@ -45,6 +52,22 @@ public:
     // Вертикальная развёртка, смещение.
     qreal vOffset() const;
     void setVOffset(qreal newVOffset);
+
+    /**
+     * @brief Получает время точки графика
+     * без преобразований (согласно данным).
+     * @param idx Индекс семпла.
+     * @return Значение время точки по индексу.
+     */
+    qreal time(size_t idx) const;
+
+    /**
+     * @brief Получает значение графика
+     * без преобразований (согласно данным).
+     * @param idx Индекс семпла.
+     * @return Значение графика по индексу.
+     */
+    qreal value(size_t idx) const;
 
     /**
      * @brief Сбрасывает кэшированный ограничивающий прямоугольник.
@@ -69,8 +92,11 @@ private:
     OScopeVertical* m_vert;
     OScopeData* m_oscData;
     uint m_ch_n;
+    //! Обновляет границы.
     void updateBounds() const;
+    //! Получает значение семпла по-вертикали.
     qreal getYValue(size_t i) const;
+    //! Получает значение семпла по-горизонтали.
     qreal getXValue(size_t i) const;
 };
 

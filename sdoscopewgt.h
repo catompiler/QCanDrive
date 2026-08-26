@@ -68,6 +68,8 @@ private slots:
     void triggerChannelChanged(uint newChannel);
     void triggerValueChangedTmr_timeout();
 
+    void cursorsFloatingEnabledChanged(bool newEnabled);
+
     void btnScopeParams_clicked(bool checked);
     void btnScopeChannels_clicked(bool checked);
     void btnRun_clicked(bool checked);
@@ -96,11 +98,13 @@ private:
     void refreshUi();
     void refreshChannelsUi();
     void refreshTriggerUi();
+    void refreshCursorsUi();
     void updateTriggerUiByChannel();
     void applyUiToPlot();
     void applyHoriUiToPlot();
     void applyChannelsUiToPlot();
     void applyTriggerUiToPlot();
+    void applyCursorsUiToPlot();
 };
 
 #endif // SDOSCOPEWGT_H

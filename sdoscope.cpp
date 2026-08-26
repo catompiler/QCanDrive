@@ -2044,6 +2044,8 @@ void SDOScope::genTestData()
     m_prescaler = 0;
     m_hist_samples = 0;
 
+    const qreal sine_freq = 50.0;
+
     m_channels = new Channel[m_max_channels];
 
     for(size_t ch_n = 0; ch_n < m_max_channels; ch_n ++){
@@ -2057,7 +2059,7 @@ void SDOScope::genTestData()
             ch->setBaseValue(310.0);
             ch->setEnabled(true);
             for(size_t n = 0; n < m_max_samples; n ++){
-                qreal val = 1.0 * sin(static_cast<double>(n) * 2.0 * M_PI / m_max_samples + M_PI * 2.0 / 3.0 * static_cast<double>(ch_n));
+                qreal val = 1.0 * sin(static_cast<double>(n) * m_min_Ts * 2.0 * M_PI * sine_freq + M_PI * 2.0 / 3.0 * static_cast<double>(ch_n));
                 ch->setSample(n, val * RegTypes::iqBase(ch->dataType()));
             }
         }

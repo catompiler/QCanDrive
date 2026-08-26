@@ -40,3 +40,13 @@ qreal OScopeVertical::invVDiv() const
 {
     return m_invVDiv;
 }
+
+qreal OScopeVertical::transform(qreal val) const
+{
+    return (val + m_vOffset) * m_invVDiv;
+}
+
+qreal OScopeVertical::invTransform(qreal val) const
+{
+    return val * m_vDiv - m_vOffset;
+}

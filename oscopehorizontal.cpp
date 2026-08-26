@@ -40,3 +40,13 @@ qreal OScopeHorizontal::invHDiv() const
 {
     return m_invHDiv;
 }
+
+qreal OScopeHorizontal::transform(qreal val) const
+{
+    return (val + m_hOffset) * m_invHDiv;
+}
+
+qreal OScopeHorizontal::invTransform(qreal val) const
+{
+    return val * m_hDiv - m_hOffset;
+}

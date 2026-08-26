@@ -30,7 +30,7 @@ OScopeChannelWgt::OScopeChannelWgt(QWidget *parent)
     connect(ui->asVert, &OScopeAxisWgt::scaleChanged, this, &OScopeChannelWgt::vertScaleChanged);
     connect(ui->asVert, &OScopeAxisWgt::offsetChanged, this, &OScopeChannelWgt::vertOffsetChanged);
 
-    connect(ui->cbVisible, &QCheckBox::stateChanged, this, &OScopeChannelWgt::visiblityCheckStateChanged);
+    connect(ui->cbVisible, &QCheckBox::checkStateChanged, this, &OScopeChannelWgt::visiblityCheckStateChanged);
     connect(ui->tbPenColorSel, &QToolButton::clicked, this, &OScopeChannelWgt::penColorSel_clicked);
     connect(ui->cbPenStyle, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OScopeChannelWgt::penStyle_currentIndexChanged);
     connect(ui->sbLineWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &OScopeChannelWgt::lineWidth_valueChanged);
@@ -186,7 +186,7 @@ void OScopeChannelWgt::vertOffsetChanged(qreal value)
     m_plot->replot();
 }
 
-void OScopeChannelWgt::visiblityCheckStateChanged(int checkState)
+void OScopeChannelWgt::visiblityCheckStateChanged(Qt::CheckState checkState)
 {
     if(m_plot == nullptr || m_channel == -1) return;
 

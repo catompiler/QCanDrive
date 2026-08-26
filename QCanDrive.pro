@@ -48,6 +48,7 @@ SOURCES += \
     oscopeaxiswgt.cpp \
     oscopechannelwgt.cpp \
     oscopechszerosscaledraw.cpp \
+    oscopecursorswgt.cpp \
     oscopedata.cpp \
     oscopehorizontal.cpp \
     oscopeknob.cpp \
@@ -158,6 +159,7 @@ HEADERS += \
     oscopechannelwgt.h \
     oscopechprop.h \
     oscopechszerosscaledraw.h \
+    oscopecursorswgt.h \
     oscopedata.h \
     oscopehorizontal.h \
     oscopeknob.h \
@@ -257,6 +259,7 @@ FORMS += \
     canopenwin.ui \
     oscopeaxiswgt.ui \
     oscopechannelwgt.ui \
+    oscopecursorswgt.ui \
     oscopetriggerwgt.ui \
     sdoscopechseditdlg.ui \
     sdoscopeparamsdlg.ui \

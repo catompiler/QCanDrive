@@ -30,7 +30,17 @@ void OScopePlotSeriesData::setHorizontal(OScopeHorizontal* newHori)
     m_hori = newHori;
 }
 
-void OScopePlotSeriesData::setScope(OScopeData* newOScopeData)
+OScopeData* OScopePlotSeriesData::oscopeData()
+{
+    return m_oscData;
+}
+
+const OScopeData* OScopePlotSeriesData::oscopeData() const
+{
+    return m_oscData;
+}
+
+void OScopePlotSeriesData::setOScopeData(OScopeData* newOScopeData)
 {
     m_oscData = newOScopeData;
 }
@@ -67,6 +77,25 @@ void OScopePlotSeriesData::setVOffset(qreal newVOffset)
     m_vert->setVOffset(newVOffset);
 
     //invalidateBounds();
+}
+
+qreal OScopePlotSeriesData::time(size_t idx) const
+{
+    assert(m_oscData != nullptr);
+    assert(m_hori != nullptr);
+
+    qreal val = m_oscData->Ts() * (static_cast<long>(idx) - static_cast<long>(m_oscData->historySize()));
+
+    return val;
+}
+
+qreal OScopePlotSeriesData::value(size_t idx) const
+{
+    assert(m_oscData != nullptr);
+
+    qreal val = m_oscData->sample(m_ch_n, idx);
+
+    return val;
 }
 
 void OScopePlotSeriesData::invalidateBounds()
@@ -138,7 +167,7 @@ qreal OScopePlotSeriesData::getYValue(size_t i) const
 
     qreal val = m_oscData->sample(m_ch_n, i);
 
-    return (val + m_vert->vOffset()) * m_vert->invVDiv();
+    return m_vert->transform(val);//(val + m_vert->vOffset()) * m_vert->invVDiv();
 }
 
 qreal OScopePlotSeriesData::getXValue(size_t i) const
@@ -148,6 +177,6 @@ qreal OScopePlotSeriesData::getXValue(size_t i) const
 
     qreal val = m_oscData->Ts() * (static_cast<long>(i) - static_cast<long>(m_oscData->historySize()));
 
-    return (val + m_hori->hOffset()) * m_hori->invHDiv();
+    return m_hori->transform(val);//(val + m_hori->hOffset()) * m_hori->invHDiv();
 }
 

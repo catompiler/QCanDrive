@@ -22,6 +22,9 @@ public:
 
     qreal invVDiv() const;
 
+    qreal transform(qreal val) const;
+    qreal invTransform(qreal val) const;
+
 private:
     qreal m_vDiv;
     qreal m_vOffset;
