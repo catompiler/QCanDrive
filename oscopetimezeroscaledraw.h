@@ -39,7 +39,7 @@ protected:
     void drawZeroTime(QPainter* painter, const QPalette& palette) const;
     void drawZeroLabel(QPainter* painter, const QColor& markerCol, const QColor& labelCol, const QString& labelText, int zeroPos) const;
     void drawMarker(QPainter* painter, const QColor& markerCol, const QPoint& zeroPoint, Alignment align) const;
-    void drawLabel(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, Alignment align) const;
+    void drawLabelText(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, Alignment align) const;
 
     QString readableTimeValue(qreal value) const;
 

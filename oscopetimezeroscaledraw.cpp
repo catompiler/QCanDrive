@@ -207,7 +207,7 @@ void OScopeTimeZeroScaleDraw::drawZeroLabel(QPainter* painter, const QColor& mar
     //painter->drawRect(pos().x(), pos().y(), 10, 10);
 
     drawMarker(painter, markerCol, markerZeroPoint, alignment());
-    drawLabel(painter, labelCol, labelZeroPoint, labelText, alignment());
+    drawLabelText(painter, labelCol, labelZeroPoint, labelText, alignment());
 }
 
 void OScopeTimeZeroScaleDraw::drawMarker(QPainter* painter, const QColor& markerCol, const QPoint& zeroPoint, QwtScaleDraw::Alignment align) const
@@ -236,7 +236,7 @@ void OScopeTimeZeroScaleDraw::drawMarker(QPainter* painter, const QColor& marker
     TriangleMarkerSymbol::drawTriangleMarker(painter, zeroPoint, MARKER_HALF_HEIGHT * 2, MARKER_WIDTH, dir);
 }
 
-void OScopeTimeZeroScaleDraw::drawLabel(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, QwtScaleDraw::Alignment align) const
+void OScopeTimeZeroScaleDraw::drawLabelText(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, QwtScaleDraw::Alignment align) const
 {
     //const QwtScaleMap& map = scaleMap();
     //const QwtScaleDiv& div = scaleDiv();

@@ -212,7 +212,7 @@ void OScopeChsZerosScaleDraw::drawZero(QPainter* painter, const QColor& markerCo
         }
 
         drawMarker(painter, markerCol, zeroPoint, lim_align);
-        drawLabel(painter, labelCol, zeroPoint, labelText, lim_align);
+        drawLabelText(painter, labelCol, zeroPoint, labelText, lim_align);
     }else if(lowerLimit){
         QwtScaleDraw::Alignment lim_align;
 
@@ -240,10 +240,10 @@ void OScopeChsZerosScaleDraw::drawZero(QPainter* painter, const QColor& markerCo
         }
 
         drawMarker(painter, markerCol, zeroPoint, lim_align);
-        drawLabel(painter, labelCol, zeroPoint, labelText, lim_align);
+        drawLabelText(painter, labelCol, zeroPoint, labelText, lim_align);
     }else{ // noLimit
         drawMarker(painter, markerCol, zeroPoint, alignment());
-        drawLabel(painter, labelCol, zeroPoint, labelText, alignment());
+        drawLabelText(painter, labelCol, zeroPoint, labelText, alignment());
     }
 }
 
@@ -273,7 +273,7 @@ void OScopeChsZerosScaleDraw::drawMarker(QPainter* painter, const QColor& marker
     TriangleMarkerSymbol::drawTriangleMarker(painter, zeroPoint, MARKER_HALF_HEIGHT * 2, MARKER_WIDTH, dir);
 }
 
-void OScopeChsZerosScaleDraw::drawLabel(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, QwtScaleDraw::Alignment align) const
+void OScopeChsZerosScaleDraw::drawLabelText(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, QwtScaleDraw::Alignment align) const
 {
     //const QwtScaleMap& map = scaleMap();
     //const QwtScaleDiv& div = scaleDiv();

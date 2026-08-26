@@ -35,7 +35,7 @@ protected:
     void drawZeros(QPainter* painter, const QPalette& palette) const;
     void drawZero(QPainter* painter, const QColor& markerCol, const QColor& labelCol, const QString& labelText, int zeroPos, int lowerBound, int upperBound) const;
     void drawMarker(QPainter* painter, const QColor& markerCol, const QPoint& zeroPoint, Alignment align) const;
-    void drawLabel(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, Alignment align) const;
+    void drawLabelText(QPainter* painter, const QColor& labelCol, const QPoint& zeroPoint, const QString& labelText, Alignment align) const;
 
     QwtPlot* m_plot;
 };
