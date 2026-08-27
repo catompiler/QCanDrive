@@ -1,5 +1,6 @@
 #include "oscopeaxiswgt.h"
 #include "ui_oscopeaxiswgt.h"
+#include "unitformatter.h"
 #include <QwtRoundScaleDraw>
 #include <math.h>
 #include <algorithm>
@@ -11,6 +12,8 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
     , ui(new Ui::OScopeAxisWgt)
 {
     ui->setupUi(this);
+
+    m_unitFmt = nullptr;
 
     m_scaleAdjustType = ADJUST_TO_NEAREST;
 
@@ -60,6 +63,8 @@ OScopeAxisWgt::OScopeAxisWgt(QWidget *parent)
 
 OScopeAxisWgt::~OScopeAxisWgt()
 {
+    if(m_unitFmt) delete m_unitFmt;
+
     delete ui;
 }
 
@@ -83,26 +88,16 @@ void OScopeAxisWgt::setOffsetTitle(const QString& newOffsetTitle)
     m_offsetTitle = newOffsetTitle;
 }
 
-QString OScopeAxisWgt::unit() const
+UnitFormatter* OScopeAxisWgt::unitFormatter() const
 {
-    return m_unit;
+    return m_unitFmt;
 }
 
-QStringList OScopeAxisWgt::unitUpPrefixes() const
+void OScopeAxisWgt::setUnitFormatter(UnitFormatter* newFormatter)
 {
-    return m_unitUpPrefixes;
-}
+    if(m_unitFmt) delete m_unitFmt;
 
-QStringList OScopeAxisWgt::unitDownPrefixes() const
-{
-    return m_unitDownPrefixes;
-}
-
-void OScopeAxisWgt::setUnit(const QString& newUnit, const QStringList& upPrefixes, const QStringList& downPrefixes)
-{
-    m_unit = newUnit;
-    m_unitUpPrefixes = upPrefixes;
-    m_unitDownPrefixes = downPrefixes;
+    m_unitFmt = newFormatter;
 
     updateScaleDispVal();
     updateOffsetDispVal();
@@ -311,42 +306,9 @@ int OScopeAxisWgt::offsetIndexFromValue(qreal offsetVal) const
     return round(offsetVal / (scale() * OFFSET_K));
 }
 
-QPair<QString, int> OScopeAxisWgt::getUnitPrefix(int expVal) const
-{
-    if(expVal == 0) return qMakePair(QString(), 0);
-
-    const QStringList& prefixes = (expVal >= 0) ? m_unitUpPrefixes : m_unitDownPrefixes;
-
-    if(prefixes.empty()) return qMakePair(QString(), 0);
-
-    int index = (expVal > 0) ? expVal - 1 : -(expVal + 1);
-
-    if(index >= prefixes.size()) index = prefixes.size() - 1;
-
-    return qMakePair(prefixes.at(index), (expVal >= 0) ? index + 1 : -index - 1);
-}
-
 QString OScopeAxisWgt::getDispVal(qreal dispVal) const
 {
-    int expVal = 0;
-
-    if(dispVal > 0.0){
-        expVal = static_cast<int>(floor(log10( dispVal) / 3.0)); //log1000
-    }else if(dispVal < 0.0){
-        expVal = static_cast<int>(floor(log10(-dispVal) / 3.0)); //log1000
-    }
-
-    auto prefixPair = getUnitPrefix(expVal);
-
-    //qDebug() << expVal << prefixPair;
-
-    QString prefix = prefixPair.first;
-    qreal value = dispVal / pow(1000, prefixPair.second);
-
-    return QString("%1 %2%3")
-        .arg(QString::number(value))
-        .arg(prefix)
-        .arg(m_unit);
+    return m_unitFmt ? m_unitFmt->format(dispVal) : QString::number(dispVal);
 }
 
 void OScopeAxisWgt::updateScaleDispVal()

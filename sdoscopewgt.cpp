@@ -4,8 +4,10 @@
 #include "sdoscopeparamsdlg.h"
 #include <QPushButton>
 #include "oscopeplot.h"
+#include "sdoscopedata.h"
 #include "oscopeplotseriesdata.h"
 #include "oscopedata.h"
+#include "timeformatter.h"
 #include "sdoscope.h"
 #include "slcanopennode.h"
 #include "reglistmodel.h"
@@ -19,7 +21,6 @@
 #include <QPen>
 #include <QColor>
 #include <QDebug>
-#include "sdoscopedata.h"
 #include <math.h>
 #include <QTimer>
 
@@ -36,11 +37,7 @@ SDOScopeWgt::SDOScopeWgt(QWidget *parent)
     ui->asHori->setScaleMin(1e-5);
     ui->asHori->setScaleMax(1e+1);
     ui->asHori->setScaleTurns(2);
-    ui->asHori->setUnit(
-        tr("с"),
-        QStringList(),
-        QStringList() << tr("м") << tr("мк")
-    );
+    ui->asHori->setUnitFormatter(new TimeFormatter());
     connect(ui->asHori, &OScopeAxisWgt::scaleChanged, this, &SDOScopeWgt::horiScaleChanged);
     connect(ui->asHori, &OScopeAxisWgt::offsetChanged, this, &SDOScopeWgt::horiOffsetChanged);
 

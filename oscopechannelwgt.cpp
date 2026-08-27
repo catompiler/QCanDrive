@@ -1,6 +1,7 @@
 #include "oscopechannelwgt.h"
 #include "ui_oscopechannelwgt.h"
 #include "oscopeplot.h"
+#include "voltageformatter.h"
 #include <QColorDialog>
 #include <QPen>
 #include <QDebug>
@@ -19,11 +20,7 @@ OScopeChannelWgt::OScopeChannelWgt(QWidget *parent)
     ui->asVert->setScaleMin(1e-5);
     ui->asVert->setScaleMax(1e+4);
     ui->asVert->setScaleTurns(2);
-    ui->asVert->setUnit(
-        tr("В"),
-        QStringList() << tr("к") << tr("М"),
-        QStringList() << tr("м") << tr("мк")
-        );
+    ui->asVert->setUnitFormatter(new VoltageFormatter());
 
     populatePenStyles();
 

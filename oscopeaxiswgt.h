@@ -5,6 +5,8 @@
 #include <QPair>
 #include <QStringList>
 
+class UnitFormatter;
+
 namespace Ui {
 class OScopeAxisWgt;
 }
@@ -36,10 +38,10 @@ public:
     QString offsetTitle() const;
     void setOffsetTitle(const QString& newOffsetTitle);
 
-    QString unit() const;
-    QStringList unitUpPrefixes() const;
-    QStringList unitDownPrefixes() const;
-    void setUnit(const QString& newUnit, const QStringList& upPrefixes, const QStringList& downPrefixes);
+    UnitFormatter* unitFormatter() const;
+    //! Устанавливает форматирователь значения.
+    //! Берёт во владение, удаляя предыдущий.
+    void setUnitFormatter(UnitFormatter* newFormatter);
 
     qreal scaleMin() const;
     void setScaleMin(qreal newScaleMin);
@@ -75,9 +77,7 @@ private:
     QString m_scaleTitle;
     QString m_offsetTitle;
 
-    QString m_unit;
-    QStringList m_unitUpPrefixes;
-    QStringList m_unitDownPrefixes;
+    UnitFormatter* m_unitFmt;
 
     AdjustType m_scaleAdjustType;
 
@@ -89,7 +89,6 @@ private:
     int scaleIndexFromValue(qreal scaleVal) const;
     int offsetIndexFromValue(qreal offsetVal) const;
 
-    QPair<QString, int> getUnitPrefix(int expVal) const;
     QString getDispVal(qreal dispVal) const;
 
     void updateScaleDispVal();
