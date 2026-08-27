@@ -1,5 +1,6 @@
 #include "oscopetimezeroscaledraw.h"
 #include "trianglemarkersymbol.h"
+#include "timeformatter.h"
 #include <QPainter>
 #include <QPalette>
 #include <QFont>
@@ -11,14 +12,6 @@
 #include <QColor>
 #include <math.h>
 #include <QDebug>
-
-
-// Единицы измерения.
-const QMap<int, QString> OScopeTimeZeroScaleDraw::m_unitMap = {
-    {-6, QObject::tr("мкс")},
-    {-3, QObject::tr("мс")},
-    { 0, QObject::tr("с")}
-};
 
 
 
@@ -278,22 +271,5 @@ void OScopeTimeZeroScaleDraw::drawLabelText(QPainter* painter, const QColor& lab
 
 QString OScopeTimeZeroScaleDraw::readableTimeValue(qreal value) const
 {
-    qreal valM = 0.0;
-    qreal valE = 0;
-
-    if(value != 0.0){
-        qreal valE1000 = floor(log10(fabs(value)) / 3.0); //log1000(...)
-
-        valM = value / pow(1000.0, valE1000);
-        valE = valE1000 * 3.0;
-    }
-
-    auto prefixIt = m_unitMap.lowerBound(valE);
-    QString valUnit = ((prefixIt != m_unitMap.end()) ? (prefixIt.value()) : (m_unitMap.last()));
-
-    QString valStr = QString("%1 %2").arg(valM).arg(valUnit);
-
-    //qDebug() << value << valE << valM << valUnit << valStr;
-
-    return valStr;
+    return TimeFormatter::formatValue(value);
 }

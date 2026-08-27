@@ -44,8 +44,6 @@ protected:
     QString readableTimeValue(qreal value) const;
 
     OScopePlot* m_plot;
-
-    static const QMap<int, QString> m_unitMap; //!< Приставки к елинице измерения.
 };
 
 #endif // OSCOPETIMEZEROSCALEDRAW_H
