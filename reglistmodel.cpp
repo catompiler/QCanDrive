@@ -5,6 +5,7 @@
 #include <QSize>
 #include <algorithm>
 #include <iterator>
+#include <utility>
 #include <QDebug>
 
 
@@ -41,7 +42,7 @@ RegListModel::RegListModel(QObject *parent)
 
 RegListModel::~RegListModel()
 {
-    for(auto& entry: qAsConst(*m_reglist)){
+    for(auto& entry: std::as_const(*m_reglist)){
         delete entry;
     }
     delete m_reglist;
@@ -56,7 +57,7 @@ void RegListModel::setRegList(const RegEntryList& reglist)
 {
     beginResetModel();
 
-    for(auto& entry: qAsConst(*m_reglist)){
+    for(auto& entry: std::as_const(*m_reglist)){
         delete entry;
     }
 

@@ -12,6 +12,7 @@
 #include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QString>
+#include <utility>
 #include <QDebug>
 
 
