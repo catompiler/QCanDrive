@@ -732,7 +732,7 @@ int32_t iqBase(DataType type)
     return 1;
 }
 
-int32_t iqIntMinimum(DataType type)
+int64_t iqIntMinimum(DataType type)
 {
     switch(type){
     case DataType::IQ24:
@@ -755,7 +755,7 @@ int32_t iqIntMinimum(DataType type)
     return 0;
 }
 
-int32_t iqIntMaximum(DataType type)
+int64_t iqIntMaximum(DataType type)
 {
     switch(type){
     case DataType::IQ24:
@@ -782,8 +782,8 @@ int32_t iqIntMaximum(DataType type)
 
 qreal iqMinimum(DataType type)
 {
-    int32_t baseVal = iqBase(type);
-    int32_t minVal = iqIntMinimum(type);
+    auto baseVal = iqBase(type);
+    auto minVal = iqIntMinimum(type);
 
     // Для не числовых типов данных.
     if(baseVal == 0 || minVal == 0) return 0.0;
@@ -793,8 +793,8 @@ qreal iqMinimum(DataType type)
 
 qreal iqMaximum(DataType type)
 {
-    int32_t baseVal = iqBase(type);
-    int32_t maxVal = iqIntMaximum(type);
+    auto baseVal = iqBase(type);
+    auto maxVal = iqIntMaximum(type);
 
     // Для не числовых типов данных.
     if(baseVal == 0 || maxVal == 0) return 0.0;
