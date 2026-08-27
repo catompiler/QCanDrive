@@ -5,6 +5,8 @@
 #include "oscopechszerosscaledraw.h"
 #include "oscopetimezeroscaledraw.h"
 #include "trianglemarkersymbol.h"
+#include "timeformatter.h"
+#include "voltageformatter.h"
 #include <QwtPlotCanvas>
 #include <QwtPlotCurve>
 #include <QwtPlotGrid>
@@ -690,11 +692,11 @@ void OScopePlot::floatingCursorMoved(const QPointF& pos)
         return;
     }
 
-    // TODO: Елиницы измерения времени.
-
     // Отобразим именно дискретное время согласно индесу,
     // а не согласно координатам сетки осциллографа.
-    QString valuesText = tr("T: %1").arg(m_oscData->Ts() * (Tidx - static_cast<int>(m_oscData->historySize())));
+    QString valuesText = tr("T: %1").arg(TimeFormatter::formatValue(
+            m_oscData->Ts() * (Tidx - static_cast<int>(m_oscData->historySize()))
+        ));
 
     //qDebug() << pos << Tpos << Tidx;
 
@@ -713,9 +715,11 @@ void OScopePlot::floatingCursorMoved(const QPointF& pos)
         //qDebug() << pltData->value(Tidx);
 
         // Добавим в подсказку номер/имя сигнала и его значение.
-        valuesText += QStringLiteral("\n%1 (\"%2\"): %3").arg(signal_number)
-                                                       .arg(curv->title().text())
-                                                       .arg(pltData->value(Tidx));
+        valuesText += QStringLiteral("\n%1 (\"%2\"): %3")
+                          .arg(signal_number)
+                          .arg(curv->title().text())
+                          .arg(VoltageFormatter::formatValue(pltData->value(Tidx))
+                      );
     }
 
     //qDebug() << valuesText;

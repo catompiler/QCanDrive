@@ -103,6 +103,7 @@ SOURCES += \
     slcan/slcan_slave.c \
     slcan_port_qt.cpp \
     slcanopennode.cpp \
+    timeformatter.cpp \
     trendploteditdlg.cpp \
     exportdlg.cpp \
     flagseditdlg.cpp \
@@ -128,7 +129,9 @@ SOURCES += \
     regvar.cpp \
     regvarmodel.cpp \
     sellineedit.cpp \
-    trianglemarkersymbol.cpp
+    trianglemarkersymbol.cpp \
+    unitformatter.cpp \
+    voltageformatter.cpp
 
 HEADERS += \
     CANopenNode/301/CO_Emergency.h \
@@ -225,6 +228,7 @@ HEADERS += \
     slcan_conf.h \
     slcan_port_qt.h \
     slcanopennode.h \
+    timeformatter.h \
     trendploteditdlg.h \
     exportdlg.h \
     first_arg_type.hpp \
@@ -252,7 +256,9 @@ HEADERS += \
     regvar.h \
     regvarmodel.h \
     sellineedit.h \
-    trianglemarkersymbol.h
+    trianglemarkersymbol.h \
+    unitformatter.h \
+    voltageformatter.h
 
 FORMS += \
     candrivewin.ui \
