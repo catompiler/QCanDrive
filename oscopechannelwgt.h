@@ -33,6 +33,9 @@ public:
     bool signalVisible() const;
     void setSignalVisible(bool newVisible);
 
+    QString signalName() const;
+    void setSignalName(const QString& newName);
+
     QColor penColor() const;
     void setPenColor(const QColor& newPenColor);
 
@@ -52,6 +55,7 @@ private slots:
     void vertOffsetChanged(qreal value);
 
     void visiblityCheckStateChanged(Qt::CheckState checkState);
+    void nameTextChanged(const QString& newName);
     void penColorSel_clicked(bool checked);
     void penStyle_currentIndexChanged(int index);
     void lineWidth_valueChanged(double value);

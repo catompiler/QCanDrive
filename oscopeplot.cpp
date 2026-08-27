@@ -379,7 +379,7 @@ bool OScopePlot::updateData()
         // Данные канала.
         OScopePlotSeriesData* series_data = new OScopePlotSeriesData(m_hori, osc_data, ch_i);
         // Добавить сигнал.
-        int added_n = addSignal(series_data);
+        int added_n = addSignal(series_data, tr("Канал %1").arg(ch_i + 1));
         // Если не удалось.
         if(added_n < 0){
             // Удалим данные.

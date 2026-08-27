@@ -31,6 +31,7 @@ OScopeChannelWgt::OScopeChannelWgt(QWidget *parent)
     connect(ui->tbPenColorSel, &QToolButton::clicked, this, &OScopeChannelWgt::penColorSel_clicked);
     connect(ui->cbPenStyle, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OScopeChannelWgt::penStyle_currentIndexChanged);
     connect(ui->sbLineWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &OScopeChannelWgt::lineWidth_valueChanged);
+    connect(ui->leName, &QLineEdit::textChanged, this, &OScopeChannelWgt::nameTextChanged);
 }
 
 OScopeChannelWgt::~OScopeChannelWgt()
@@ -94,6 +95,16 @@ void OScopeChannelWgt::setSignalVisible(bool newVisible)
     ui->cbVisible->blockSignals(false);
 }
 
+QString OScopeChannelWgt::signalName() const
+{
+    return ui->leName->text();
+}
+
+void OScopeChannelWgt::setSignalName(const QString& newName)
+{
+    ui->leName->setText(newName);
+}
+
 QColor OScopeChannelWgt::penColor() const
 {
     const QPalette& pal = ui->frPenColor->palette();
@@ -140,6 +151,8 @@ void OScopeChannelWgt::updateValues()
 
     ui->cbVisible->setChecked(m_plot->signalVisible(m_channel));
 
+    ui->leName->setText(m_plot->signalName(m_channel));
+
     QPen pen = m_plot->pen(m_channel);
     setPenColor(pen.color());
     setPenStyle(pen.style());
@@ -154,6 +167,8 @@ void OScopeChannelWgt::applyValues() const
     if(m_plot == nullptr || m_channel == -1) return;
 
     m_plot->setSignalVisible(m_channel, ui->cbVisible->isChecked() && isEnabled());
+
+    m_plot->setSignalName(m_channel, ui->leName->text());
 
     QPen pen = m_plot->pen(m_channel);
     pen.setColor(penColor());
@@ -190,6 +205,13 @@ void OScopeChannelWgt::visiblityCheckStateChanged(Qt::CheckState checkState)
     m_plot->setSignalVisible(m_channel, (checkState == Qt::Checked) && isEnabled());
 
     m_plot->replot();
+}
+
+void OScopeChannelWgt::nameTextChanged(const QString& newName)
+{
+    if(m_plot == nullptr || m_channel == -1) return;
+
+    m_plot->setSignalName(m_channel, newName);
 }
 
 void OScopeChannelWgt::penColorSel_clicked(bool checked)
