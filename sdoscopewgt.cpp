@@ -353,12 +353,12 @@ void SDOScopeWgt::sdoscopeApplied()
     qDebug() << "SDOScopeWgt::sdoscopeApplied()";
 
     // Очистим каналы.
-    m_scope->clear();
+    //m_scope->clear();
 
     auto plt = getPlot();
 
     // Обновим графики каналов.
-    plt->updateData();
+    plt->refreshData();
 
     populateChannelsUi();
     populateTriggerChannels();
@@ -375,12 +375,12 @@ void SDOScopeWgt::sdoscopeAppliedChannels()
     qDebug() << "SDOScopeWgt::sdoscopeAppliedChannels()";
 
     // Очистим каналы.
-    m_scope->clear();
+    //m_scope->clear();
 
     auto plt = getPlot();
 
     // Обновим графики каналов.
-    plt->updateData();
+    plt->refreshData();
 
     populateChannelsUi();
     populateTriggerChannels();
@@ -569,7 +569,12 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
 
             const SDOScopeChsEditDlg::ChannelData& ch_data = chs_data[i];
 
-            plt->setSignalName(i, ch_data.name);
+            OScopeChannelWgt* ocw = qobject_cast<OScopeChannelWgt*>(ui->twChannels->widget(i));
+            if(ocw){
+                ocw->setSignalName(ch_data.name);
+            }else{
+                plt->setSignalName(i, ch_data.name);
+            }
             ch->setEnabled(ch_data.enabled);
             ch->setRegIndex(RegUtils::getIndex(ch_data.regFullIndex));
             ch->setRegSubIndex(RegUtils::getSubIndex(ch_data.regFullIndex));
@@ -692,13 +697,13 @@ void SDOScopeWgt::updateUiEnabled()
     bool init = m_initialized;
     bool busy = m_scope->isBusy();
     bool trig = m_scope->isApplyingTrig();
-    bool run  = m_scope->isRunning();
-    bool read = m_scope->isReading();
-    bool run_read = run || read;
+    //bool run  = m_scope->isRunning();
+    //bool read = m_scope->isReading();
+    //bool run_read = run || read;
     bool has_signals = getPlot()->hasVisibleSignals();
 
-    ui->pbRun->setEnabled(init && (!run_read || ui->pbRun->isChecked()));
-    ui->pbSingle->setEnabled(init && !run_read);
+    ui->pbRun->setEnabled(init && (!busy || ui->pbRun->isChecked()));
+    ui->pbSingle->setEnabled(init && !busy);
     ui->pbParams->setEnabled(init && !busy);
     ui->pbChannels->setEnabled(init && !busy);
     ui->twTrig->setEnabled(init && !trig);
@@ -714,8 +719,10 @@ void SDOScopeWgt::refreshUi()
     refreshCursorsUi();
 
     auto plt = getPlot();
+    ui->asHori->blockSignals(true);
     ui->asHori->setScale(plt->hDiv());
     ui->asHori->setOffset(plt->hOffset());
+    ui->asHori->blockSignals(false);
 }
 
 void SDOScopeWgt::refreshChannelsUi()

@@ -60,6 +60,8 @@ SDOScope::SDOScope(QObject *parent)
     // Только после инициализации (нужны каналы).
     //populateApplyTasks();
 
+    m_apply_trig_state = APPLY_TRIG_NONE;
+
     m_run_state = RUN_NONE;
     m_run_status_read = false;
 

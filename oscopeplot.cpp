@@ -388,6 +388,13 @@ bool OScopePlot::updateData()
         }
     }
 
+    return refreshData();
+}
+
+bool OScopePlot::refreshData()
+{
+    invalidateAllBounds();
+
     updateZerosScale();
     updateZeroTimeMark();
     updateZeroTimeScale();

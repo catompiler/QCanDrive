@@ -128,9 +128,7 @@ Qt::PenStyle OScopeChannelWgt::penStyle() const
 
 void OScopeChannelWgt::setPenStyle(Qt::PenStyle newPenStyle)
 {
-    ui->cbPenStyle->blockSignals(true);
     ui->cbPenStyle->setCurrentIndex(ui->cbPenStyle->findData(static_cast<int>(newPenStyle)));
-    ui->cbPenStyle->blockSignals(false);
 }
 
 qreal OScopeChannelWgt::penWidth() const
@@ -140,26 +138,39 @@ qreal OScopeChannelWgt::penWidth() const
 
 void OScopeChannelWgt::setPenWidth(qreal newPenWidth)
 {
-    ui->sbLineWidth->blockSignals(true);
     ui->sbLineWidth->setValue(newPenWidth);
-    ui->sbLineWidth->blockSignals(false);
 }
 
 void OScopeChannelWgt::updateValues()
 {
     if(m_plot == nullptr || m_channel == -1) return;
 
+    ui->cbVisible->blockSignals(true);
     ui->cbVisible->setChecked(m_plot->signalVisible(m_channel));
+    ui->cbVisible->blockSignals(false);
 
+    ui->leName->blockSignals(true);
     ui->leName->setText(m_plot->signalName(m_channel));
+    ui->leName->blockSignals(false);
 
     QPen pen = m_plot->pen(m_channel);
-    setPenColor(pen.color());
-    setPenStyle(pen.style());
-    setPenWidth(pen.widthF());
 
+    ui->frPenColor->blockSignals(true);
+    setPenColor(pen.color());
+    ui->frPenColor->blockSignals(false);
+
+    ui->cbPenStyle->blockSignals(true);
+    setPenStyle(pen.style());
+    ui->cbPenStyle->blockSignals(false);
+
+    ui->sbLineWidth->blockSignals(true);
+    setPenWidth(pen.widthF());
+    ui->sbLineWidth->blockSignals(false);
+
+    ui->asVert->blockSignals(true);
     ui->asVert->setScale(m_plot->vDiv(m_channel));
     ui->asVert->setOffset(m_plot->vOffset(m_channel));
+    ui->asVert->blockSignals(false);
 }
 
 void OScopeChannelWgt::applyValues() const
@@ -176,8 +187,8 @@ void OScopeChannelWgt::applyValues() const
     pen.setWidthF(penWidth());
     m_plot->setPen(m_channel, pen);
 
-    m_plot->setVDiv(m_channel, ui->asVert->scale());
     m_plot->setVOffset(m_channel, ui->asVert->offset());
+    m_plot->setVDiv(m_channel, ui->asVert->scale());
 }
 
 void OScopeChannelWgt::vertScaleChanged(qreal value)

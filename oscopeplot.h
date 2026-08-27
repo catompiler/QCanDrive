@@ -69,8 +69,10 @@ public:
 
     //! Очищает график и добавляет сигналы каналов осциллографа.
     bool setData(OScopeData* newOscData);
-    //! Обновляет каналы из ранее установленных данных каналов осциллографа.
+    //! Пересоздаёт каналы из ранее установленных данных каналов осциллографа.
     bool updateData();
+    //! Обновляет каналы из ранее установленных данных каналов осциллографа.
+    bool refreshData();
 
     // takes ownership of the plotData
     int addSignal(OScopePlotSeriesData* pltData, const QString& newName = QString(), const QColor& newColor = QColor(), const qreal& z = -1);
