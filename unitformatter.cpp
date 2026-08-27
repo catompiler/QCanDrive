@@ -24,7 +24,7 @@ const UnitFormatter::UnitRule* UnitFormatter::findRule(const UnitRules& unitRule
     if(unitRules.isEmpty()) return nullptr;
 
     auto it = std::lower_bound(unitRules.begin(), unitRules.end(), qAbs(value), [](const UnitRule& rule, const qreal& val){
-        return rule.threshold < val;
+        return rule.threshold <= val;
     });
 
     if(it == unitRules.end()) return &unitRules.last();
