@@ -13,9 +13,9 @@ OScopeTriggerWgt::OScopeTriggerWgt(QWidget *parent)
 
     populateTriggerTypes();
 
-    connect(ui->cbTrigEnabled, QCheckBox::checkStateChanged, this, &OScopeTriggerWgt::trigEnabled_stateChanged);
-    connect(ui->cbTrigType, static_cast<void (QComboBox::*)(int)>(QComboBox::currentIndexChanged), this, &OScopeTriggerWgt::trigType_currentIndexChanged);
-    connect(ui->cbTrigChannel, static_cast<void (QComboBox::*)(int)>(QComboBox::currentIndexChanged), this, &OScopeTriggerWgt::trigChannel_currentIndexChanged);
+    connect(ui->cbTrigEnabled, &QCheckBox::checkStateChanged, this, &OScopeTriggerWgt::trigEnabled_stateChanged);
+    connect(ui->cbTrigType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OScopeTriggerWgt::trigType_currentIndexChanged);
+    connect(ui->cbTrigChannel, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &OScopeTriggerWgt::trigChannel_currentIndexChanged);
     connect(ui->dsbTrigValue, static_cast<void (QDoubleSpinBox::*)(qreal)>(&QDoubleSpinBox::valueChanged), this, &OScopeTriggerWgt::trigValue_valueChanged);
 }
 
