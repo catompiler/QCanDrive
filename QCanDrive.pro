@@ -39,6 +39,7 @@ INCLUDEPATH += CANopenNode/ \
 SOURCES += \
     candrivewin.cpp \
     cockpitwgt.cpp \
+    filter1.cpp \
     main.cpp \
     CANopenNode/301/CO_Emergency.c \
     CANopenNode/301/CO_HBconsumer.c \
@@ -171,6 +172,7 @@ HEADERS += \
     cotypes.h \
     covaluesholder.h \
     covaluetypes.h \
+    filter1.h \
     oscopeaxiswgt.h \
     oscopechannelwgt.h \
     oscopechprop.h \
