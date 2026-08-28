@@ -199,6 +199,7 @@ void OScopeChsZerosScaleDraw::drawZero(QPainter* painter, const QColor& markerCo
             zeroPoint.setX(zeroPoint.x());
             zeroPoint.setY(zeroPoint.y() - MARKER_HALF_HEIGHT);
             break;
+        default:
         case QwtScaleDraw::LeftScale:
             lim_align = QwtScaleDraw::TopScale;
             zeroPoint.setX(zeroPoint.x() - MARKER_HALF_HEIGHT);
@@ -227,6 +228,7 @@ void OScopeChsZerosScaleDraw::drawZero(QPainter* painter, const QColor& markerCo
             zeroPoint.setX(zeroPoint.x());
             zeroPoint.setY(zeroPoint.y() - MARKER_HALF_HEIGHT);
             break;
+        default:
         case QwtScaleDraw::LeftScale:
             lim_align = QwtScaleDraw::BottomScale;
             zeroPoint.setX(zeroPoint.x() - MARKER_HALF_HEIGHT);
