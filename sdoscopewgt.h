@@ -44,6 +44,7 @@ public slots:
     void disconnected();
     void single();
     void run();
+    void stopRun();
     void abort();
     void autoScale();
 

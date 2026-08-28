@@ -371,6 +371,17 @@ bool SDOScope::run()
     return processRun() != PROCESSING_ERROR;
 }
 
+bool SDOScope::stopRun()
+{
+    if(!m_slcon) return false;
+    if(!isInitialized()) return false;
+    if(m_state != STATE_RUN) return false;
+
+    m_run_state = RUN_STOP;
+
+    return processRun() != PROCESSING_ERROR;
+}
+
 bool SDOScope::read()
 {
     if(!m_slcon) return false;
@@ -1830,6 +1841,52 @@ SDOScope::ProcessingState SDOScope::processRun()
         proc_err = ERROR_NONE;
         proc_state = PROCESSING_DONE;
     }break;
+
+    case RUN_STOP:{
+        // Ожидание завершения предыдущего этапа.
+        if(m_comm->running()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        // Установить управление.
+        m_control = CONTROL_NONE;
+        // Записать.
+        SDOComm* comm = m_slcon->write(m_nodeId, m_entryIndex, CONTROL_SUBINDEX, &m_control, sizeof(m_control), m_comm);
+        if(comm == nullptr){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+        m_run_state = RUN_STOP_WAIT;
+    }
+
+    __attribute__((fallthrough));
+    case RUN_STOP_WAIT:{
+        // Ожидание завершения предыдущего этапа.
+        if(!m_comm->isFinished()){
+            break;
+        }
+        if(m_comm->hasError()){
+            proc_err = ERROR_COMM;
+            proc_state = PROCESSING_ERROR;
+            break;
+        }
+
+        m_run_state = RUN_DONE;
+
+        m_state = STATE_NONE;
+        m_error = ERROR_NONE;
+
+        handleFinished();
+
+        return PROCESSING_DONE;
+    }break;
+
     }
 
 

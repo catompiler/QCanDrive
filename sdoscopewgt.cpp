@@ -201,6 +201,19 @@ void SDOScopeWgt::run()
     }
 }
 
+void SDOScopeWgt::stopRun()
+{
+    qDebug() << "SDOScopeWgt::stopRun()";
+
+    if(!m_initialized) return;
+
+    if(!m_scope->stopRun()){
+        qDebug() << "SDOScope stopRun failed";
+
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка останова осциллографа!"));
+    }
+}
+
 void SDOScopeWgt::abort()
 {
     m_scope->abort();
@@ -341,6 +354,11 @@ void SDOScopeWgt::sdoscopeReaded()
 
     // Обновим график.
     plt->replot();
+
+    // Если кнопка SINGLE активна - переведём её в не нажатое состояние.
+    if(ui->pbSingle->isChecked()){
+        ui->pbSingle->setChecked(false);
+    }
 
     // Если кнопка RUN активна - запустим снова.
     if(ui->pbRun->isChecked()){
@@ -595,9 +613,11 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
 
 void SDOScopeWgt::btnRun_clicked(bool checked)
 {
-    if(!checked) return;
-
-    run();
+    if(checked){
+        run();
+    }else{
+        if(m_scope->isRunning()) stopRun();
+    }
 
     // Обновление доступности элементов UI.
     updateUiEnabled();
@@ -605,9 +625,11 @@ void SDOScopeWgt::btnRun_clicked(bool checked)
 
 void SDOScopeWgt::btnSingle_clicked(bool checked)
 {
-    Q_UNUSED(checked);
-
-    single();
+    if(checked){
+        single();
+    }else{
+        if(m_scope->isRunning()) stopRun();
+    }
 
     // Обновление доступности элементов UI.
     updateUiEnabled();
@@ -703,7 +725,7 @@ void SDOScopeWgt::updateUiEnabled()
     bool has_signals = getPlot()->hasVisibleSignals();
 
     ui->pbRun->setEnabled(init && (!busy || ui->pbRun->isChecked()));
-    ui->pbSingle->setEnabled(init && !busy);
+    ui->pbSingle->setEnabled(init && (!busy || ui->pbSingle->isChecked()));
     ui->pbParams->setEnabled(init && !busy);
     ui->pbChannels->setEnabled(init && !busy);
     ui->twTrig->setEnabled(init && !trig);
