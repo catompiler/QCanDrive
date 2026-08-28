@@ -92,10 +92,12 @@ static void testRegExpReplace()
 }*/
 
 // DeepSeek + https://stackoverflow.com/questions/48256772/dark-theme-for-qt-widgets
-void applyDarkTheme()
+#if defined(APPLY_FUSION_THEME) && APPLY_FUSION_THEME == 1
+void applyTheme()
 {
     qApp->setStyle(QStyleFactory::create("Fusion"));
 
+#if defined(APPLY_DARK_PALETTE) && APPLY_DARK_PALETTE == 1
     QPalette darkPalette(qApp->palette());
 
     // Базовые цвета фона и текста
@@ -137,13 +139,18 @@ void applyDarkTheme()
 
     // Применяем палитру ко всему приложению
     qApp->setPalette(darkPalette);
+#endif // APPLY_DARK_PALETTE
 }
+#endif // APPLY_FUSION_THEME
 
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    applyDarkTheme();
+
+#if defined(APPLY_FUSION_THEME) && APPLY_FUSION_THEME == 1
+    applyTheme();
+#endif // APPLY_FUSION_THEME
 
     CanDriveWin w;
 
