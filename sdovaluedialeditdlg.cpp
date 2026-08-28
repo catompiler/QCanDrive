@@ -235,6 +235,8 @@ void SDOValueDialEditDlg::setPrecision(uint newPrecision)
 
 void SDOValueDialEditDlg::on_tbRegSel_clicked(bool checked)
 {
+    Q_UNUSED(checked)
+
     if(m_regSelectDlg == nullptr) return;
 
     m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());

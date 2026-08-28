@@ -154,6 +154,8 @@ void SignalCurveEditDlg::setBrushStyle(Qt::BrushStyle newBrushStyle)
 
 void SignalCurveEditDlg::on_tbRegSel_clicked(bool checked)
 {
+    Q_UNUSED(checked)
+
     if(m_regSelectDlg == nullptr) return;
 
     m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());

@@ -255,6 +255,8 @@ void SettingsDlg::m_tbWindowBackColorSel_clicked(bool checked)
 
 void SettingsDlg::m_tbCockpitFileSel_clicked(bool checked)
 {
+    Q_UNUSED(checked)
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть cockpit"), QString(), tr("Cockpit (*.cpxml)"));
 
     if(fileName.isEmpty()) return;
@@ -264,6 +266,8 @@ void SettingsDlg::m_tbCockpitFileSel_clicked(bool checked)
 
 void SettingsDlg::m_tbRegListFileSel_clicked(bool checked)
 {
+    Q_UNUSED(checked)
+
     QString filename = QFileDialog::getOpenFileName(this, tr("Список регистров"), QString(),
                                                           tr("Файлы списка регистров (*.regxml2);;Файлы списка регистров - старая версия (*.regxml)"));
 

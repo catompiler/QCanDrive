@@ -329,6 +329,8 @@ void SDOValueButtonEditDlg::setActivateValue(uint32_t newActivateValue)
 
 void SDOValueButtonEditDlg::on_tbRegSel_clicked(bool checked)
 {
+    Q_UNUSED(checked)
+
     if(m_regSelectDlg == nullptr) return;
 
     m_regSelectDlg->selectReg(ui->sbIndex->value(), ui->sbSubIndex->value());
