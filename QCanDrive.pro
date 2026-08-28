@@ -141,7 +141,6 @@ SOURCES += \
     regtypes.cpp \
     regutils.cpp \
     regvar.cpp \
-    regvarmodel.cpp \
     sellineedit.cpp \
     trianglemarkersymbol.cpp \
     unitformatter.cpp \
@@ -268,7 +267,6 @@ HEADERS += \
     regtypes.h \
     regutils.h \
     regvar.h \
-    regvarmodel.h \
     sellineedit.h \
     trianglemarkersymbol.h \
     unitformatter.h \
