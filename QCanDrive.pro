@@ -2,17 +2,31 @@ QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+# C++ standard
 CONFIG += c++17
-
-# debug
-CONFIG += debug
 
 # Qwt
 CONFIG += qwt
 
 # flags
-QMAKE_CXXFLAGS += -O0 -ggdb
+QMAKE_CXXFLAGS += -Wall -Wextra -pedantic
+QMAKE_CXXFLAGS_DEBUG += -O0 -ggdb
+QMAKE_CXXFLAGS_RELEASE += -O2
 
+# defines
+DEFINES +=
+
+# debug
+CONFIG(debug, debug|release){
+}
+# release
+CONFIG(release, debug|release){
+}
+
+# on windows set fusion theme
+win32 {
+    DEFINES += APPLY_FUSION_THEME=1
+}
 
 INCLUDEPATH += CANopenNode/ \
                slcan/ \
