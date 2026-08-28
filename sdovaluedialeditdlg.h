@@ -79,6 +79,9 @@ public:
     uint precision() const;
     void setPrecision(uint newPrecision);
 
+    qreal filterTime() const;
+    void setFilterTime(qreal newT);
+
 private slots:
     void on_tbRegSel_clicked(bool checked = false);
     void on_tbOutsideBackColorSel_clicked(bool checked = false);

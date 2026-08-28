@@ -188,6 +188,16 @@ void SDOValueDial::setRangeMax(qreal newRangeMax)
     setUpperBound(newRangeMax);
 }
 
+qreal SDOValueDial::filterTime() const
+{
+    return m_filter.T();
+}
+
+void SDOValueDial::setFilterTime(qreal newT)
+{
+    m_filter.setT(newT);
+}
+
 bool SDOValueDial::setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType, qreal newMin, qreal newMax)
 {
     if(m_valsHolder == nullptr) return false;
@@ -239,7 +249,9 @@ void SDOValueDial::sdovalueReaded()
     auto sdoval = qobject_cast<CoValuesHolder::HoldedSDOValuePtr>(sender());
     if(sdoval == nullptr) return;
 
-    setValue(COValue::valueFrom<qreal>(sdoval->data(), m_sdoValueType, 0.0));
+    qreal curVal = COValue::valueFrom<qreal>(sdoval->data(), m_sdoValueType, 0.0);
+
+    setValue(m_filter(curVal));
 }
 
 

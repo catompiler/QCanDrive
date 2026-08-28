@@ -6,6 +6,7 @@
 #include "cotypes.h"
 #include "covaluetypes.h"
 #include "covaluesholder.h"
+#include "filter1.h"
 
 
 class SDOValue;
@@ -52,6 +53,9 @@ public:
     qreal rangeMax() const;
     void setRangeMax(qreal newRangeMax);
 
+    qreal filterTime() const;
+    void setFilterTime(qreal newT);
+
     bool setSDOValue(CO::NodeId newNodeId, CO::Index newIndex, CO::SubIndex newSubIndex, COValue::Type newType, qreal newMin = 0.0, qreal newMax = 1.0);
     CoValuesHolder::HoldedSDOValuePtr getSDOValue();
     CoValuesHolder::HoldedSDOValuePtr getSDOValue() const;
@@ -68,6 +72,8 @@ protected:
 
     QString m_name;
     uint m_precision;
+
+    Filter1 m_filter;
 
     void drawScaleContents(QPainter* painter, const QPointF& center, double radius) const override;
     void drawNeedle(QPainter* painter, const QPointF& center, double radius, double direction, QPalette::ColorGroup colorGroup) const override;

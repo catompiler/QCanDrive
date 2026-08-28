@@ -454,6 +454,7 @@ void CockpitWgt::m_actEditDial_triggered(bool checked)
     m_dialDlg->setNeedleColor(dial->needleColor());
     m_dialDlg->setPenWidth(dial->penWidth());
     m_dialDlg->setPrecision(dial->precision());
+    m_dialDlg->setFilterTime(dial->filterTime());
 
     m_dialDlg->setRangeMin(dial->rangeMin());
     m_dialDlg->setRangeMax(dial->rangeMax());
@@ -482,6 +483,7 @@ void CockpitWgt::m_actEditDial_triggered(bool checked)
         dial->setNeedleColor(m_dialDlg->needleColor());
         dial->setPenWidth(m_dialDlg->penWidth());
         dial->setPrecision(m_dialDlg->precision());
+        dial->setFilterTime(m_dialDlg->filterTime());
 
         m_layout->takeAt(dialLayIndex);
         m_layout->addWidget(dial, m_dialDlg->posRow(), m_dialDlg->posColumn(), m_dialDlg->sizeRows(), m_dialDlg->sizeColumns());

@@ -574,6 +574,7 @@ bool CockpitSerializer::writeSDOValueDial(QXmlStreamWriter& xml, const SDOValueD
     xml.writeTextElement("precision", QString::number(dl->precision()));
     xml.writeTextElement("rangeMin", QString::number(dl->rangeMin()));
     xml.writeTextElement("rangeMax", QString::number(dl->rangeMax()));
+    xml.writeTextElement("filterTime", QString::number(dl->filterTime()));
 
     xml.writeEndElement();
 
@@ -641,6 +642,9 @@ SDOValueDial* CockpitSerializer::readSDOValueDial(QXmlStreamReader& xml) const
             }
             else if(name == "rangeMax"){
                 dl->setRangeMax(realValue(xml.readElementText(), 0));
+            }
+            else if(name == "filterTime"){
+                dl->setFilterTime(realValue(xml.readElementText(), 0));
             }
             else{
 #if defined(CS_ABORT_ON_UNKNOWN_ELEMENT) && CS_ABORT_ON_UNKNOWN_ELEMENT == 1

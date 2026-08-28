@@ -233,6 +233,16 @@ void SDOValueDialEditDlg::setPrecision(uint newPrecision)
     ui->sbPrecision->setValue(static_cast<int>(newPrecision));
 }
 
+qreal SDOValueDialEditDlg::filterTime() const
+{
+    return ui->dsbFilterTime->value();
+}
+
+void SDOValueDialEditDlg::setFilterTime(qreal newT)
+{
+    ui->dsbFilterTime->setValue(newT);
+}
+
 void SDOValueDialEditDlg::on_tbRegSel_clicked(bool checked)
 {
     Q_UNUSED(checked)
