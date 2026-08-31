@@ -122,24 +122,20 @@ SDOScopeWgt::~SDOScopeWgt()
     delete ui;
 }
 
-const RegListModel* SDOScopeWgt::regListModel() const
-{
-    return m_scope->regListModel();
-}
-
-RegListModel* SDOScopeWgt::regListModel()
+RegListModel* SDOScopeWgt::regListModel() const
 {
     return m_scope->regListModel();
 }
 
 void SDOScopeWgt::setRegListModel(RegListModel* newRegListModel)
 {
-     m_scope->setRegListModel(newRegListModel);
+    m_scope->setRegListModel(newRegListModel);
+    m_chs_edit_dlg->setRegListModel(newRegListModel);
 }
 
 SLCanOpenNode* SDOScopeWgt::getSLCanOpenNode()
 {
-     return m_scope->getSLCanOpenNode();
+    return m_scope->getSLCanOpenNode();
 }
 
 void SDOScopeWgt::setSLCanOpenNode(SLCanOpenNode* slcon)

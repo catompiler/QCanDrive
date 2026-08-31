@@ -30,8 +30,7 @@ public:
     explicit SDOScopeWgt(QWidget *parent = nullptr);
     ~SDOScopeWgt();
 
-    const RegListModel* regListModel() const;
-    RegListModel* regListModel();
+    RegListModel* regListModel() const;
     void setRegListModel(RegListModel* newRegListModel);
 
     SLCanOpenNode* getSLCanOpenNode();

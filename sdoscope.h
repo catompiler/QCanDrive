@@ -26,8 +26,7 @@ public:
     explicit SDOScope(QObject *parent = nullptr);
     ~SDOScope();
 
-    const RegListModel* regListModel() const;
-    RegListModel* regListModel();
+    RegListModel* regListModel() const;
     void setRegListModel(RegListModel* newRegListModel);
 
     SLCanOpenNode* getSLCanOpenNode();

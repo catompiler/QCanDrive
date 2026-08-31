@@ -7,6 +7,8 @@
 #include <QVector>
 
 
+class RegListModel;
+
 
 class SDOScopeChannelsModel : public QAbstractItemModel
 {
@@ -37,6 +39,9 @@ public:
     void setChannelsData(ChannelsData newData);
     const ChannelsData& channelsData() const;
 
+    RegListModel* regListModel() const;
+    void setRegListModel(RegListModel* newRegListModel);
+
     // Header:
     QVariant headerData(int section,
                         Qt::Orientation orientation,
@@ -58,6 +63,7 @@ public:
 
 private:
     ChannelsData* m_data;
+    RegListModel* m_regListModel;
 };
 
 #endif // SDOSCOPECHANNELSMODEL_H

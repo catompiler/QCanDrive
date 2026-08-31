@@ -60,6 +60,16 @@ void SDOScopeChsEditDlg::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
     m_channelDelegate->setRegSelectDialog(newRegSelectDialog);
 }
 
+RegListModel* SDOScopeChsEditDlg::regListModel() const
+{
+    return m_channelsModel->regListModel();
+}
+
+void SDOScopeChsEditDlg::setRegListModel(RegListModel* newRegListModel)
+{
+    m_channelsModel->setRegListModel(newRegListModel);
+}
+
 const SDOScopeChsEditDlg::ChannelsData& SDOScopeChsEditDlg::channelsData() const
 {
     return m_channelsModel->channelsData();

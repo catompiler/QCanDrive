@@ -1,6 +1,8 @@
 #include "sdoscopechannelsmodel.h"
 #include "regtypes.h"
 #include "regutils.h"
+#include "regvar.h"
+#include "reglistmodel.h"
 #include <QSize>
 #include <QDebug>
 
@@ -26,6 +28,8 @@ SDOScopeChannelsModel::SDOScopeChannelsModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
     m_data = new ChannelsData();
+
+    m_regListModel = nullptr;
 }
 
 SDOScopeChannelsModel::~SDOScopeChannelsModel()
@@ -43,6 +47,16 @@ void SDOScopeChannelsModel::setChannelsData(ChannelsData newData)
 
     emit layoutAboutToBeChanged();
     emit layoutChanged();
+}
+
+RegListModel* SDOScopeChannelsModel::regListModel() const
+{
+    return m_regListModel;
+}
+
+void SDOScopeChannelsModel::setRegListModel(RegListModel* newRegListModel)
+{
+    m_regListModel = newRegListModel;
 }
 
 const SDOScopeChannelsModel::ChannelsData& SDOScopeChannelsModel::channelsData() const
@@ -177,9 +191,23 @@ bool SDOScopeChannelsModel::setData(const QModelIndex &index, const QVariant &va
     case COL_NAME:
         ch_data.name = value.toString();
         break;
-    case COL_REG:
+    case COL_REG:{
         ch_data.regFullIndex = value.toUInt();
-        break;
+
+        if(m_regListModel){
+            RegVar* rv = m_regListModel->varByRegIndex(
+                RegUtils::getIndex(ch_data.regFullIndex),
+                RegUtils::getSubIndex(ch_data.regFullIndex)
+                );
+            if(rv){
+                ch_data.dataType = rv->dataType();
+
+                QModelIndex type_index = this->index(index.row(), COL_DATA_TYPE);
+
+                emit dataChanged(type_index, type_index, {role});
+            }
+        }
+    }break;
     case COL_DATA_TYPE:
         ch_data.dataType = static_cast<DataType>(value.toUInt());
         break;

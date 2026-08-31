@@ -29,6 +29,9 @@ public:
     RegSelectDlg* regSelectDialog() const;
     void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
+    RegListModel* regListModel() const;
+    void setRegListModel(RegListModel* newRegListModel);
+
 private:
     Ui::SDOScopeChsEditDlg *ui;
     SDOScopeChannelsModel* m_channelsModel;

@@ -112,12 +112,7 @@ SDOScope::~SDOScope()
     if(m_channels) delete[] m_channels;
 }
 
-const RegListModel* SDOScope::regListModel() const
-{
-    return m_regListModel;
-}
-
-RegListModel* SDOScope::regListModel()
+RegListModel* SDOScope::regListModel() const
 {
     return m_regListModel;
 }
