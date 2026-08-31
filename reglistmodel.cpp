@@ -96,6 +96,31 @@ void RegListModel::addRegList(RegEntryList& reglist)
     emit layoutChanged();
 }
 
+RegVarList RegListModel::getRegRapams() const
+{
+    RegVarList res_list;
+
+    for(auto re_it = m_reglist->begin(); re_it != m_reglist->end(); ++ re_it){
+        RegEntry* re = *re_it;
+
+        for(auto var_it = re->begin(); var_it != re->end(); ++ var_it){
+            RegVar* rv = *var_it;
+
+            // Только параметры и только числовые.
+            if(rv->flags() & RegFlag::CONF && RegTypes::isNumeric(rv->dataType())){
+                // QString mem_addr = rv->memAddr();
+
+                // if(!mem_addr.isEmpty()){
+                //     res_list.insert(mem_addr, rv);
+                // }
+                res_list.append(rv);
+            }
+        }
+    }
+
+    return res_list;
+}
+
 bool RegListModel::hasEntryByRegIndex(reg_index_t index) const
 {
     return entryByRegIndex(index) != nullptr;

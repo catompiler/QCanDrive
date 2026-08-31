@@ -14,6 +14,7 @@ class RegVar;
 
 
 typedef QVector<RegEntry*> RegEntryList;
+typedef QList<RegVar*> RegVarList;
 
 
 class RegListModel : public QAbstractItemModel
@@ -43,6 +44,8 @@ public:
 
     void setRegList(const RegEntryList& reglist);
     void addRegList(RegEntryList& reglist);
+
+    RegVarList getRegRapams() const;
 
     bool hasEntryByRegIndex(reg_index_t index) const;
     RegEntry* entryByRegIndex(reg_index_t index) const;

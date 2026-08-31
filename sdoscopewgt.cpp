@@ -153,6 +153,16 @@ void SDOScopeWgt::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
     m_chs_edit_dlg->setRegSelectDialog(newRegSelectDialog);
 }
 
+CO::NodeId SDOScopeWgt::nodeId() const
+{
+    return m_scope->nodeId();
+}
+
+void SDOScopeWgt::setNodeId(CO::NodeId newNodeId)
+{
+    m_scope->setNodeId(newNodeId);
+}
+
 CO::Index SDOScopeWgt::entryIndex() const
 {
     return m_scope->entryIndex();

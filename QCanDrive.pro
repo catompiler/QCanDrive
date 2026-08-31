@@ -74,6 +74,8 @@ SOURCES += \
     oscopevertical.cpp \
     oscplot.cpp \
     oscplotdata.cpp \
+    paramsloader.cpp \
+    paramsreader.cpp \
     reglisteditorwgt.cpp \
     regsviewdelegate.cpp \
     regsviewmodel.cpp \
@@ -188,6 +190,8 @@ HEADERS += \
     oscopevertical.h \
     oscplot.h \
     oscplotdata.h \
+    paramsloader.h \
+    paramsreader.h \
     reglisteditorwgt.h \
     regsviewdelegate.h \
     regsviewmodel.h \

@@ -250,6 +250,11 @@ qreal iqPrecision(DataType type);
 // Получает число знаков после запятой.
 int iqDecimals(DataType type);
 
+// Распаковывает значение до 32 бит с учётом знака.
+bool unpackTo32(int32_t* value, const void* rawValue, DataType type);
+
+// Запаковывает значение из 32 бит с учётом знака.
+bool packFrom32(void* rawValue, const int32_t* value, DataType type);
 
 // Получает значение по сырому значению и типу.
 template <typename T>

@@ -848,4 +848,76 @@ int iqDecimals(DataType type)
     return 0;
 }
 
+bool unpackTo32(int32_t* value, const void* rawValue, DataType type)
+{
+    if(!value || !rawValue) return false;
+
+    switch(type){
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+        *value = *static_cast<const int32_t*>(rawValue);
+        break;
+    case DataType::I32:
+        *value = *static_cast<const int32_t*>(rawValue);
+        break;
+    case DataType::I16:
+        *value = *static_cast<const int16_t*>(rawValue);
+        break;
+    case DataType::I8:
+        *value = *static_cast<const int8_t*>(rawValue);
+        break;
+    case DataType::U32:
+        *value = *static_cast<const int32_t*>(rawValue);
+        break;
+    case DataType::U16:
+        *value = *static_cast<const uint16_t*>(rawValue);
+        break;
+    case DataType::U8:
+        *value = *static_cast<const uint8_t*>(rawValue);
+        break;
+    case DataType::STR:
+    case DataType::MEM:
+        return false;
+    }
+
+    return true;
+}
+
+bool packFrom32(void* rawValue, const int32_t* value, DataType type)
+{
+    if(!value || !rawValue) return false;
+
+    switch(type){
+    case DataType::IQ24:
+    case DataType::IQ15:
+    case DataType::IQ7:
+        *static_cast<int32_t*>(rawValue) = *value;
+        break;
+    case DataType::I32:
+        *static_cast<int32_t*>(rawValue) = *value;
+        break;
+    case DataType::I16:
+        *static_cast<int16_t*>(rawValue) = *value;
+        break;
+    case DataType::I8:
+        *static_cast<int8_t*>(rawValue) = *value;
+        break;
+    case DataType::U32:
+        *static_cast<uint32_t*>(rawValue) = *value;
+        break;
+    case DataType::U16:
+        *static_cast<uint16_t*>(rawValue) = *value;
+        break;
+    case DataType::U8:
+        *static_cast<uint8_t*>(rawValue) = *value;
+        break;
+    case DataType::STR:
+    case DataType::MEM:
+        return false;
+    }
+
+    return true;
+}
+
 }

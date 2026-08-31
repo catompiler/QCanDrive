@@ -39,6 +39,9 @@ public:
     RegSelectDlg* regSelectDialog() const;
     void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
 
+    CO::NodeId nodeId() const;
+    void setNodeId(CO::NodeId newNodeId);
+
     CO::Index entryIndex() const;
     void setEntryIndex(CO::Index newIndex);
 

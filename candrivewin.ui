@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="twMain">
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tabCockpit">
        <attribute name="title">
@@ -250,7 +250,7 @@
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
    <addaction name="actRegListOpen"/>
    <addaction name="actRegListOpenAppend"/>
@@ -279,13 +279,16 @@
     <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
-    <bool>false</bool>
+    <bool>true</bool>
    </attribute>
    <addaction name="actRegsViewRefresh"/>
    <addaction name="actRegsViewAutoRefresh"/>
    <addaction name="separator"/>
    <addaction name="actRegsViewExpandTree"/>
    <addaction name="actRegsViewCollapseTree"/>
+   <addaction name="separator"/>
+   <addaction name="actUploadFromDrive"/>
+   <addaction name="actDownloadToDrive"/>
   </widget>
   <action name="actDebugExec">
    <property name="icon">
@@ -593,6 +596,36 @@
     <string>С&amp;вернуть</string>
    </property>
   </action>
+  <action name="actDownloadToDrive">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Download to drive-48.png</normaloff>:/images/icons/Download to drive-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Загрузить на привод</string>
+   </property>
+   <property name="toolTip">
+    <string>ПК -&gt; Устройство</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actUploadFromDrive">
+   <property name="icon">
+    <iconset resource="reglisteditor.qrc">
+     <normaloff>:/images/icons/Upload from drive-48.png</normaloff>:/images/icons/Upload from drive-48.png</iconset>
+   </property>
+   <property name="text">
+    <string>Загрузить с привода</string>
+   </property>
+   <property name="toolTip">
+    <string>Устройство -&gt; ПК</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -619,8 +652,8 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="qt_canopennode_slcan.qrc"/>
   <include location="candrive.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
   <include location="reglisteditor.qrc"/>
  </resources>
  <connections/>

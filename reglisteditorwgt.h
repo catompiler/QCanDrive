@@ -30,8 +30,8 @@ public:
 
     const RegEntryList* regEntryList() const;
 
-    const RegListModel* regListModel() const;
     RegListModel* regListModel();
+    const RegListModel* regListModel() const;
 
     QPair<CO::Index, CO::SubIndex> selectReg();
 

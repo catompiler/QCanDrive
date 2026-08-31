@@ -21,5 +21,7 @@
         <file>icons/Add Property-48.png</file>
         <file>icons/Copy-48.png</file>
         <file>icons/Delete-48.png</file>
+        <file>icons/Download to drive-48.png</file>
+        <file>icons/Upload from drive-48.png</file>
     </qresource>
 </RCC>

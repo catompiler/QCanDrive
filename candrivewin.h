@@ -11,6 +11,8 @@ class QLabel;
 class SettingsDlg;
 class SLCanOpenNode;
 class CoValuesHolder;
+class ParamsLoader;
+class ParamsReader;
 
 
 class CanDriveWin : public QMainWindow
@@ -31,6 +33,9 @@ private slots:
     void m_ui_actDisconnect_triggered(bool checked);
     void m_ui_actSettings_triggered(bool checked);
 
+    void m_ui_actDownloadToDrive_triggered(bool checked);
+    void m_ui_actUploadFromDrive_triggered(bool checked);
+
 private:
     Ui::CanDriveWin *ui;
     QLabel* m_sblblConStatus;
@@ -38,6 +43,9 @@ private:
 
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;
+
+    ParamsLoader* m_paramsLoader;
+    ParamsReader* m_paramsReader;
 
     void updateStatusBar();
     void applySettings();

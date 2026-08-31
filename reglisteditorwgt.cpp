@@ -115,12 +115,12 @@ const RegEntryList* RegListEditorWgt::regEntryList() const
     return m_regsListModel->regEntryList();
 }
 
-const RegListModel* RegListEditorWgt::regListModel() const
+RegListModel* RegListEditorWgt::regListModel()
 {
     return m_regsListModel;
 }
 
-RegListModel* RegListEditorWgt::regListModel()
+const RegListModel* RegListEditorWgt::regListModel() const
 {
     return m_regsListModel;
 }
