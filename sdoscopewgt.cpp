@@ -157,6 +157,26 @@ void SDOScopeWgt::setRegSelectDialog(RegSelectDlg* newRegSelectDialog)
     m_chs_edit_dlg->setRegSelectDialog(newRegSelectDialog);
 }
 
+CO::Index SDOScopeWgt::entryIndex() const
+{
+    return m_scope->entryIndex();
+}
+
+void SDOScopeWgt::setEntryIndex(CO::Index newIndex)
+{
+    m_scope->setEntryIndex(newIndex);
+}
+
+CO::SubIndex SDOScopeWgt::versionSubIndex() const
+{
+    return m_scope->versionSubIndex();
+}
+
+void SDOScopeWgt::setVersionSubIndex(CO::SubIndex newSubIndex)
+{
+    m_scope->setVersionSubIndex(newSubIndex);
+}
+
 void SDOScopeWgt::connected()
 {
     qDebug() << "SDOScopeWgt::connected()";

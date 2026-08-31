@@ -392,6 +392,8 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
     m_settingsDlg->setHbFirstTime(s->co.hbFirstTime);
     m_settingsDlg->setHbPeriod(s->co.hbPeriod);
     m_settingsDlg->setWindowColor(s->appear.windowColor);
+    m_settingsDlg->setOscopeEntryIndex(s->oscope.index);
+    m_settingsDlg->setOscopeVersionSubIndex(s->oscope.subIndex);
     //m_settingsDlg->set(m_settings->);
 
     if(m_settingsDlg->exec()){
@@ -417,6 +419,8 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
         s->co.hbFirstTime = m_settingsDlg->hbFirstTime();
         s->co.hbPeriod = m_settingsDlg->hbPeriod();
         s->appear.windowColor = m_settingsDlg->windowColor();
+        s->oscope.index = m_settingsDlg->oscopeEntryIndex();
+        s->oscope.subIndex = m_settingsDlg->oscopeVersionSubIndex();
 
         applySettings();
     }
@@ -459,5 +463,8 @@ void CanDriveWin::applySettings()
     ui->twMain->setPalette(pal);
     ui->tabCockpit->setPalette(pal);
     ui->cockpitWgt->setPalette(pal);
+
+    ui->oscopeWgt->setEntryIndex(s->oscope.index);
+    ui->oscopeWgt->setVersionSubIndex(s->oscope.subIndex);
 }
 

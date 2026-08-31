@@ -286,6 +286,26 @@ void SettingsDlg::setReglistFile(const QString& newReglistFile)
     ui->leRegListFile->setText(newReglistFile);
 }
 
+CO::Index SettingsDlg::oscopeEntryIndex() const
+{
+    return ui->sbOscIndex->value();
+}
+
+void SettingsDlg::setOscopeEntryIndex(CO::Index newIndex)
+{
+    ui->sbOscIndex->setValue(newIndex);
+}
+
+CO::SubIndex SettingsDlg::oscopeVersionSubIndex() const
+{
+    return ui->sbOscSubIndex->value();
+}
+
+void SettingsDlg::setOscopeVersionSubIndex(CO::SubIndex newSubIndex)
+{
+    ui->sbOscSubIndex->setValue(newSubIndex);
+}
+
 QString SettingsDlg::cockpitFile() const
 {
     return ui->leCockpitFile->text();

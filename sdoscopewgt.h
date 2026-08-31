@@ -2,6 +2,7 @@
 #define SDOSCOPEWGT_H
 
 #include <QWidget>
+#include "cotypes.h"
 
 class OScopePlot;
 class SDOScope;
@@ -38,6 +39,12 @@ public:
 
     RegSelectDlg* regSelectDialog() const;
     void setRegSelectDialog(RegSelectDlg* newRegSelectDialog);
+
+    CO::Index entryIndex() const;
+    void setEntryIndex(CO::Index newIndex);
+
+    CO::SubIndex versionSubIndex() const;
+    void setVersionSubIndex(CO::SubIndex newSubIndex);
 
 public slots:
     void connected();

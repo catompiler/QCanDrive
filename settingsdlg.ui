@@ -117,7 +117,7 @@
        <item row="4" column="1">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -221,7 +221,7 @@
        <item row="7" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -291,7 +291,7 @@
           <string>COB-ID от сервера к клиенту</string>
          </property>
          <property name="textFormat">
-          <enum>Qt::AutoText</enum>
+          <enum>Qt::TextFormat::AutoText</enum>
          </property>
          <property name="scaledContents">
           <bool>false</bool>
@@ -488,14 +488,14 @@
           <bool>true</bool>
          </property>
          <property name="frameShape">
-          <enum>QFrame::Panel</enum>
+          <enum>QFrame::Shape::Panel</enum>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -507,15 +507,84 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabOscope">
+      <attribute name="title">
+       <string>Осциллограф</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="gbOscIndex">
+         <property name="title">
+          <string>Адрес поля версии</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lblOscIndex">
+            <property name="text">
+             <string>Индекс</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="sbOscIndex">
+            <property name="prefix">
+             <string>0x</string>
+            </property>
+            <property name="maximum">
+             <number>65535</number>
+            </property>
+            <property name="value">
+             <number>10240</number>
+            </property>
+            <property name="displayIntegerBase">
+             <number>16</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lblOscSubIndex">
+            <property name="text">
+             <string>Под-индекс</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="sbOscSubIndex">
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="value">
+             <number>3</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>195</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

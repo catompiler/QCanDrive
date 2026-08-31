@@ -29,6 +29,7 @@ bool Settings::save() const
     savePort(s);
     saveCo(s);
     saveAppear(s);
+    saveOscope(s);
     writeExporting(s);
 
     return s.status() == QSettings::NoError;
@@ -42,6 +43,7 @@ bool Settings::load()
     loadPort(s);
     loadCo(s);
     loadAppear(s);
+    loadOscope(s);
     readExporting(s);
 
     return s.status() == QSettings::NoError;
@@ -101,6 +103,16 @@ void Settings::saveAppear(QSettings& s) const
     s.endGroup();
 }
 
+void Settings::saveOscope(QSettings& s) const
+{
+    s.beginGroup("oscope");
+
+    s.setValue("index", oscope.index);
+    s.setValue("subIndex", oscope.subIndex);
+
+    s.endGroup();
+}
+
 void Settings::loadGeneral(QSettings& s)
 {
     s.beginGroup("common");
@@ -151,6 +163,16 @@ void Settings::loadAppear(QSettings& s)
     s.beginGroup("appear");
 
     appear.windowColor = QColor::fromRgb(s.value("windowColor", 0x333333).toUInt());
+
+    s.endGroup();
+}
+
+void Settings::loadOscope(QSettings& s)
+{
+    s.beginGroup("oscope");
+
+    oscope.index    = s.value("index", 0x2800).toUInt();
+    oscope.subIndex = s.value("subIndex", 3).toUInt();
 
     s.endGroup();
 }

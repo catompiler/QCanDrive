@@ -84,6 +84,12 @@ public:
     QString reglistFile() const;
     void setReglistFile(const QString& newReglistFile);
 
+    CO::Index oscopeEntryIndex() const;
+    void setOscopeEntryIndex(CO::Index newIndex);
+
+    CO::SubIndex oscopeVersionSubIndex() const;
+    void setOscopeVersionSubIndex(CO::SubIndex newSubIndex);
+
 private slots:
     void m_tbWindowBackColorSel_clicked(bool checked = false);
     void m_tbCockpitFileSel_clicked(bool checked = false);

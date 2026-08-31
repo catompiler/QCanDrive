@@ -54,6 +54,11 @@ public:
         QColor windowColor;
     } appear;
 
+    struct Oscilloscope {
+        uint index; //!< Индекс модуля осциллографа.
+        uint subIndex; //!< Подындекс поля версии модуля осциллографа.
+    } oscope;
+
     struct SDOValuePlot {
         uint samplesCount;
         QString plotName;
@@ -129,11 +134,13 @@ private:
     void savePort(QSettings& s) const;
     void saveCo(QSettings& s) const;
     void saveAppear(QSettings& s) const;
+    void saveOscope(QSettings& s) const;
 
     void loadGeneral(QSettings& s);
     void loadPort(QSettings& s);
     void loadCo(QSettings& s);
     void loadAppear(QSettings& s);
+    void loadOscope(QSettings& s);
 
     void readExporting(QSettings& settings);
     void writeExporting(QSettings& settings) const;
