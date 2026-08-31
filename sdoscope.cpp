@@ -282,6 +282,8 @@ bool SDOScope::apply()
     m_error = ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
+    m_apply_base_ch = 0;
+    m_apply_base_read = false;
 
     return processApply() != PROCESSING_ERROR;
 }
@@ -300,6 +302,8 @@ bool SDOScope::applyCommon()
     m_error = ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
+    m_apply_base_ch = 0;
+    m_apply_base_read = false;
 
     return processApplyCommon() != PROCESSING_ERROR;
 }
@@ -350,6 +354,8 @@ bool SDOScope::applyChannels()
     m_error = ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
+    m_apply_base_ch = 0;
+    m_apply_base_read = false;
 
     return processApplyChannels() != PROCESSING_ERROR;
 }
@@ -1489,13 +1495,102 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(boo
                 proc_state = PROCESSING_ERROR;
                 break;
             }
+
+            m_apply_cur_task = 0;
         }
 
-        m_apply_state = APPLY_WAIT;
+        m_apply_state = APPLY_CHANNELS_UPDATE_BASE;
     }
 
     __attribute__((fallthrough));
-    case APPLY_WAIT:{
+    case APPLY_CHANNELS_UPDATE_BASE:{
+        // Если нужно обновлять настройки каналов.
+        if(applChannels){
+            // Ожидание завершения предыдущего этапа.
+            if(m_comm->running()){
+                break;
+            }
+            if(m_comm->isFinished() && m_comm->hasError()){
+                proc_err = ERROR_COMM;
+                proc_state = PROCESSING_ERROR;
+                break;
+            }
+
+            // Если чтение данных уже было запущено.
+            if(m_apply_base_read){
+                // Канал.
+                Channel* ch_readed = &m_channels[m_apply_base_ch];
+                // Установим базовое значение канала.
+                ch_readed->setBaseValue(COValue::valueFrom<qreal>(&m_apply_base_value, m_apply_base_dataType, 1.0));
+
+                // Следующий канал.
+                m_apply_base_ch ++;
+            }
+
+            // Канал.
+            Channel* ch = nullptr;
+            // Регистр значения канала.
+            RegVar* rv = nullptr;
+            // Регистр базового значения.
+            RegVar* rv_base = nullptr;
+
+            // По всем каналам.
+            while(m_apply_base_ch < m_max_channels){
+                // Получим текущий канал.
+                ch = &m_channels[m_apply_base_ch];
+
+                // Если уже есть значение (не ноль) -
+                // то обновлять не нужно.
+                if(ch->baseValue() != 0.0){
+                    m_apply_base_ch ++;
+                    continue;
+                }
+
+                // Найдём регистр.
+                rv = findRegVar(ch->regIndex(), ch->regSubIndex());
+                // Если не найден - пропустим
+                if(rv == nullptr){
+                    m_apply_base_ch ++;
+                    continue;
+                }
+
+                // Найдём регистр базового значения.
+                rv_base = findRegVar(rv->baseIndex(), rv->baseSubIndex());
+                // Если не найден, тоже пропустим - читать просто нечего.
+                if(rv_base == nullptr){
+                    m_apply_base_ch ++;
+                    continue;
+                }
+
+                break;
+            }
+
+            // Если есть откуда обновлять.
+            // Если список не окончен и регистр найден - запустим чтение его базового значения.
+            if(ch != nullptr && rv != nullptr && rv_base != nullptr){
+
+                m_apply_base_dataType = rv_base->dataType();
+
+                SDOComm* comm = m_slcon->read(m_nodeId, rv->baseIndex(), rv->baseSubIndex(), &m_apply_base_value, sizeof(m_apply_base_value), m_comm);
+                if(comm == nullptr){
+                    proc_err = ERROR_COMM;
+                    proc_state = PROCESSING_ERROR;
+                    break;
+                }
+
+                // Установим флаг чтения.
+                m_apply_base_read = true;
+
+                // Выходим и ожидаем завершения чтения.
+                break;
+            }
+        }
+
+        m_apply_state = APPLY_CHANNELS_WAIT;
+    }
+
+    __attribute__((fallthrough));
+    case APPLY_CHANNELS_WAIT:{
         // Если нужно применить настройки каналов.
         if(applChannels){
             // Ожидание завершения предыдущего этапа.

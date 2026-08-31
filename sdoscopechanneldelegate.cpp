@@ -71,6 +71,7 @@ QWidget* SDOScopeChannelDelegate::createEditor(QWidget* parent, const QStyleOpti
         QDoubleSpinBox* dsb = new QDoubleSpinBox(parent);
         dsb->setMinimum(0.0);
         dsb->setMaximum(INT32_MAX);
+        dsb->setSpecialValueText(tr("Загрузить"));
         res_widget = dsb;
     }break;
     }

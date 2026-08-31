@@ -176,7 +176,8 @@ public:
         APPLY_COMMON,
         APPLY_TRIG,
         APPLY_CHANNELS,
-        APPLY_WAIT,
+        APPLY_CHANNELS_UPDATE_BASE,
+        APPLY_CHANNELS_WAIT,
         APPLY_DONE
     };
 
@@ -520,6 +521,10 @@ private:
     TasksVector m_apply_channels_tasks;
     uint m_apply_cur_task;
     bool m_apply_status_read;
+    uint m_apply_base_ch;
+    bool m_apply_base_read;
+    DataType m_apply_base_dataType;
+    uint32_t m_apply_base_value;
 
     // Применение триггера, не зависимо от остальных операций.
     ApplyTrigState m_apply_trig_state;
