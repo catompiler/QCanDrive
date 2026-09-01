@@ -68,7 +68,7 @@ RegsViewWgt::RegsViewWgt(QWidget *parent)
     m_progressDlg->setAutoReset(false);
     m_progressDlg->setMinimumDuration(1000);
     m_progressDlg->reset();
-    connect(m_progressDlg, QProgressDialog::canceled, this, &RegsViewWgt::m_progressDialog_canceled);
+    connect(m_progressDlg, &QProgressDialog::canceled, this, &RegsViewWgt::m_progressDialog_canceled);
 
     m_paramsLoader = new ParamsLoader();
     m_paramsReader = new ParamsReader();
