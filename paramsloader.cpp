@@ -13,6 +13,7 @@ ParamsLoader::ParamsLoader(QObject *parent)
     m_nodeId = 0;
 
     m_state = STATE_NONE;
+    m_lastOp = OP_NONE;
 
     m_valuesList = new RegValuesList();
     m_regVarList = new RegVarList();
@@ -57,19 +58,49 @@ void ParamsLoader::setNodeId(CO::NodeId newNodeId)
     m_nodeId = newNodeId;
 }
 
-RegVarList ParamsLoader::regVarList()
+RegVarList ParamsLoader::varList()
 {
     return *m_regVarList;
 }
 
-const RegVarList ParamsLoader::regVarList() const
+const RegVarList& ParamsLoader::varList() const
 {
     return *m_regVarList;
 }
 
-void ParamsLoader::setVarList(RegVarList varList)
+void ParamsLoader::setVarList(RegVarList newVarList)
 {
-    *m_regVarList = varList;
+    m_regVarList->swap(newVarList);
+}
+
+ParamsLoader::RegValuesList ParamsLoader::valuesList()
+{
+    return *m_valuesList;
+}
+
+const ParamsLoader::RegValuesList& ParamsLoader::valuesList() const
+{
+    return *m_valuesList;
+}
+
+void ParamsLoader::setValuesList(RegValuesList newValuesList)
+{
+    m_valuesList->swap(newValuesList);
+}
+
+ParamsLoader::Operation ParamsLoader::lastOperation() const
+{
+    return m_lastOp;
+}
+
+bool ParamsLoader::busy() const
+{
+    return m_state != STATE_NONE;
+}
+
+bool ParamsLoader::cancelled() const
+{
+    return m_comm->cancelled();
 }
 
 void ParamsLoader::clear()
@@ -85,34 +116,50 @@ bool ParamsLoader::uploadFromDrive()
     if(m_state != STATE_NONE) return false;
     if(m_comm->running()) return false;
 
+    m_valuesList->clear();
+
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
 
-    m_valuesList->clear();
     m_valuesProcessed = 0;
     m_curVarIndex = 0;
     m_state = STATE_UPLOAD;
+    m_lastOp = OP_UPLOAD_FROM_DRIVE;
 
     return processUpload();
 }
 
-bool ParamsLoader::downloadToDrive(RegValuesList valuesList)
+bool ParamsLoader::downloadToDrive()
 {
-    if(valuesList.isEmpty()) return false;
     if(m_slcon == nullptr) return false;
     if(!m_slcon->isConnected()) return false;
     if(m_state != STATE_NONE) return false;
     if(m_comm->running()) return false;
 
+    if(m_valuesList->isEmpty()) return false;
+
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
 
-    *m_valuesList = valuesList;
     m_valuesProcessed = 0;
     m_curVarIndex = 0;
     m_state = STATE_DOWNLOAD;
+    m_lastOp = OP_DOWNLOAD_TO_DRIVE;
 
     return processDownload();
+}
+
+bool ParamsLoader::downloadToDrive(RegValuesList newValuesList)
+{
+    setValuesList(qMove(newValuesList));
+    return downloadToDrive();
+}
+
+int ParamsLoader::valuesToProcess() const
+{
+    return m_regVarList->count();
 }
 
 void ParamsLoader::sdoFinished()
@@ -135,10 +182,21 @@ int ParamsLoader::valuesProcessed() const
     return m_valuesProcessed;
 }
 
+void ParamsLoader::cancel()
+{
+    m_comm->cancel();
+}
+
 bool ParamsLoader::processUpload()
 {
     // Ждём завершения операции.
     if(m_comm->running()){
+        return false;
+    }
+
+    if(m_comm->cancelled()){
+        m_state = STATE_NONE;
+        emit finished();
         return false;
     }
 

@@ -20,6 +20,9 @@
 #include <QFileDialog>
 #include <QScopedPointer>
 #include <QTimer>
+#include "paramsloader.h"
+#include "paramsreader.h"
+#include <QProgressDialog>
 #include <QDebug>
 
 
@@ -60,6 +63,20 @@ RegsViewWgt::RegsViewWgt(QWidget *parent)
     m_refreshTimer = new QTimer();
     connect(m_refreshTimer, &QTimer::timeout, this, &RegsViewWgt::refreshRegs);
 
+    m_progressDlg = new QProgressDialog();
+    m_progressDlg->setAutoClose(false);
+    m_progressDlg->setAutoReset(false);
+    m_progressDlg->setMinimumDuration(1000);
+    m_progressDlg->reset();
+    connect(m_progressDlg, QProgressDialog::canceled, this, &RegsViewWgt::m_progressDialog_canceled);
+
+    m_paramsLoader = new ParamsLoader();
+    m_paramsReader = new ParamsReader();
+    connect(m_paramsLoader, &ParamsLoader::errorOccured, this, &RegsViewWgt::m_paramsLoader_errorOccured);
+    connect(m_paramsLoader, &ParamsLoader::done, this, &RegsViewWgt::m_paramsLoader_done);
+    connect(m_paramsLoader, &ParamsLoader::finished, this, &RegsViewWgt::m_paramsLoader_finished);
+    connect(m_paramsLoader, &ParamsLoader::progressChanged, this, &RegsViewWgt::m_paramsLoader_progressChanged);
+
     /*getTreeView()->setSelectionMode(QAbstractItemView::SingleSelection);
     QItemSelectionModel* sel_model = getTreeView()->selectionModel();
     if(sel_model == nullptr){
@@ -81,6 +98,11 @@ RegsViewWgt::RegsViewWgt(QWidget *parent)
 RegsViewWgt::~RegsViewWgt()
 {
     storeSettings();
+
+    delete m_paramsReader;
+    delete m_paramsLoader;
+
+    delete m_progressDlg;
 
     delete m_refreshTimer;
     delete m_regsViewDelegate;
@@ -115,6 +137,33 @@ const SLCanOpenNode* RegsViewWgt::getSLCanOpenNode() const
 void RegsViewWgt::setSLCanOpenNode(SLCanOpenNode* slcon)
 {
     m_regsViewModel->setSLCanOpenNode(slcon);
+    m_paramsLoader->setSLCanOpenNode(slcon);
+}
+
+CO::NodeId RegsViewWgt::nodeId() const
+{
+    return m_regsViewModel->nodeId();
+}
+
+void RegsViewWgt::setNodeId(CO::NodeId newNodeId)
+{
+    m_regsViewModel->setNodeId(newNodeId);
+    m_paramsLoader->setNodeId(newNodeId);
+}
+
+uint RegsViewWgt::regsRefreshPeriod() const
+{
+    return static_cast<uint>(m_refreshTimer->interval());
+}
+
+void RegsViewWgt::setRegsRefreshPeriod(uint newRegsRefreshPeriod)
+{
+    bool running = m_refreshTimer->isActive();
+
+    m_refreshTimer->stop();
+    m_refreshTimer->setInterval(static_cast<int>(newRegsRefreshPeriod));
+
+    if(running) m_refreshTimer->start();
 }
 
 void RegsViewWgt::expandTree()
@@ -139,6 +188,79 @@ void RegsViewWgt::setRefreshingRegs(bool newRefreshing)
     }else{
         m_refreshTimer->stop();
         m_regsViewModel->stopRefreshingRegs();
+    }
+}
+
+void RegsViewWgt::uploadFromDrive()
+{
+    qDebug() << "RegsViewWgt::uploadFromDrive()";
+
+    RegListModel* regListModel = this->regListModel();
+    if(!regListModel){
+        qDebug() << "regListModel == NULL";
+        return;
+    }
+
+    m_paramsLoader->setVarList(regListModel->getRegRapams());
+    if(m_paramsLoader->valuesToProcess() == 0){
+        QMessageBox::critical(this, tr("Ошибка"), tr("Нет параметров для выгрузки!"));
+        return;
+    }
+
+    m_progressDlg->reset();
+    m_progressDlg->setLabelText(tr("Выгрузка параметров из устройства..."));
+    m_progressDlg->setMinimum(0);
+    m_progressDlg->setMaximum(m_paramsLoader->valuesToProcess());
+    m_progressDlg->setValue(0);
+
+    if(m_paramsLoader->uploadFromDrive()){
+        m_progressDlg->show();
+    }else{
+        qDebug() << "uploadFromDrive failed";
+        m_progressDlg->reset();
+    }
+}
+
+void RegsViewWgt::downloadToDrive()
+{
+    qDebug() << "RegsViewWgt::downloadToDrive()";
+
+    RegListModel* regListModel = this->regListModel();
+    if(!regListModel){
+        qDebug() << "regListModel == NULL";
+        return;
+    }
+
+    m_paramsLoader->setVarList(regListModel->getRegRapams());
+    if(m_paramsLoader->valuesToProcess() == 0){
+        QMessageBox::critical(this, tr("Ошибка"), tr("Нет параметров для загрузки!"));
+        return;
+    }
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Загрузить параметры"), QString(), tr("Параметры (*.ini)"));
+    if(fileName.isEmpty()) return;
+
+    {
+        ParamsReader reader;
+        ParamsReader::RegValuesList valuesList = reader.read(fileName, m_paramsLoader->varList());
+        if(valuesList.isEmpty()){
+            QMessageBox::critical(this, tr("Ошибка"), tr("Невозможно прочитать параметры из файла или файл пуст!"));
+            return;
+        }
+        m_paramsLoader->setValuesList(valuesList);
+    }
+
+    m_progressDlg->reset();
+    m_progressDlg->setLabelText(tr("Загрука параметров в устройство..."));
+    m_progressDlg->setMinimum(0);
+    m_progressDlg->setMaximum(m_paramsLoader->valuesToProcess());
+    m_progressDlg->setValue(0);
+
+    if(m_paramsLoader->downloadToDrive()){
+        m_progressDlg->show();
+    }else{
+        qDebug() << "downloadToDrive failed";
+        m_progressDlg->reset();
     }
 }
 
@@ -168,29 +290,53 @@ void RegsViewWgt::m_tvRegList_selection_changed(const QItemSelection &selected, 
     }
 }
 
-CO::NodeId RegsViewWgt::nodeId() const
+void RegsViewWgt::m_paramsLoader_errorOccured(const QString& errStr)
 {
-    return m_regsViewModel->nodeId();
+    qDebug() << "RegsViewWgt::m_paramsLoader_errorOccured";
+
+    QMessageBox::critical(this, tr("Ошибка"), errStr);
 }
 
-void RegsViewWgt::setNodeId(CO::NodeId newNodeId)
+void RegsViewWgt::m_paramsLoader_done()
 {
-    m_regsViewModel->setNodeId(newNodeId);
+    qDebug() << "RegsViewWgt::m_paramsLoader_done";
+
+    if(m_paramsLoader->lastOperation() == ParamsLoader::OP_UPLOAD_FROM_DRIVE){
+
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранить параметры"), QString(), tr("Параметры (*.ini)"));
+
+        if(fileName.isEmpty()) return;
+
+        ParamsReader reader;
+
+        if(!reader.write(fileName, m_paramsLoader->varList(), m_paramsLoader->valuesList())){
+            QMessageBox::critical(this, tr("Ошибка"), tr("Невозможно записать параметры в файл!"));
+        }
+    }else if(m_paramsLoader->lastOperation() == ParamsLoader::OP_DOWNLOAD_TO_DRIVE){
+        QMessageBox::information(this, tr("Готово"), tr("Параметры успешно записаны!"));
+    }
 }
 
-uint RegsViewWgt::regsRefreshPeriod() const
+void RegsViewWgt::m_paramsLoader_finished()
 {
-    return static_cast<uint>(m_refreshTimer->interval());
+    qDebug() << "RegsViewWgt::m_paramsLoader_finished";
+
+    m_progressDlg->reset();
+    m_progressDlg->hide();
 }
 
-void RegsViewWgt::setRegsRefreshPeriod(uint newRegsRefreshPeriod)
+void RegsViewWgt::m_paramsLoader_progressChanged(int progress)
 {
-    bool running = m_refreshTimer->isActive();
+    qDebug() << "RegsViewWgt::m_paramsLoader_progressChanged";
 
-    m_refreshTimer->stop();
-    m_refreshTimer->setInterval(static_cast<int>(newRegsRefreshPeriod));
+    m_progressDlg->setValue(progress);
+}
 
-    if(running) m_refreshTimer->start();
+void RegsViewWgt::m_progressDialog_canceled()
+{
+    qDebug() << "RegsViewWgt::m_progressDialog_canceled";
+
+    m_paramsLoader->cancel();
 }
 
 

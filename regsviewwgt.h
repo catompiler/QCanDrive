@@ -14,6 +14,9 @@ class RegListModel;
 class RegsViewDelegate;
 class RegEntry;
 class Settings;
+class QProgressDialog;
+class ParamsLoader;
+class ParamsReader;
 
 
 class RegsViewWgt : public QTreeView
@@ -43,10 +46,18 @@ public slots:
     void collapseTree();
     void refreshRegs();
     void setRefreshingRegs(bool newRefreshing);
+    void uploadFromDrive();
+    void downloadToDrive();
 
 private slots:
     void m_tvRegList_activated(const QModelIndex &index);
     void m_tvRegList_selection_changed(const QItemSelection &selected, const QItemSelection &deselected);
+
+    void m_paramsLoader_errorOccured(const QString& errStr);
+    void m_paramsLoader_done();
+    void m_paramsLoader_finished();
+    void m_paramsLoader_progressChanged(int progress);
+    void m_progressDialog_canceled();
 
 private:
     QTreeView* getTreeView() { return this; }
@@ -56,6 +67,10 @@ private:
     RegsViewDelegate* m_regsViewDelegate;
 
     QTimer* m_refreshTimer;
+
+    QProgressDialog* m_progressDlg;
+    ParamsLoader* m_paramsLoader;
+    ParamsReader* m_paramsReader;
 
     void restoreSettings();
     void storeSettings();

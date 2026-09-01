@@ -24,7 +24,8 @@ public:
     virtual ObjectType type() const = 0;
 
     //! Родитель.
-    RegEntry* parent() const;
+    RegEntry* parent();
+    const RegEntry* parent() const;
 
     //! Имя.
     QString name() const;

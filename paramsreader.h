@@ -7,6 +7,9 @@
 #include "reglistmodel.h"
 
 
+class QSettings;
+
+
 class ParamsReader : public QObject
 {
     Q_OBJECT
@@ -23,7 +26,8 @@ public:
 signals:
 
 private:
-    bool writeVar(const RegVar* rv) const;
+    bool writeVar(QSettings& settings, const RegVar* rv, int32_t value) const;
+    int32_t readVar(QSettings& settings, const RegVar* rv, bool* isOk) const;
 };
 
 #endif // PARAMSREADER_H

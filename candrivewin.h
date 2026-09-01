@@ -11,8 +11,6 @@ class QLabel;
 class SettingsDlg;
 class SLCanOpenNode;
 class CoValuesHolder;
-class ParamsLoader;
-class ParamsReader;
 
 
 class CanDriveWin : public QMainWindow
@@ -43,9 +41,6 @@ private:
 
     SLCanOpenNode* m_slcon;
     CoValuesHolder* m_valsHolder;
-
-    ParamsLoader* m_paramsLoader;
-    ParamsReader* m_paramsReader;
 
     void updateStatusBar();
     void applySettings();

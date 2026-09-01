@@ -25,6 +25,12 @@ public:
         STATE_DOWNLOAD = 2
     };
 
+    enum Operation {
+        OP_NONE = 0,
+        OP_UPLOAD_FROM_DRIVE = 1,
+        OP_DOWNLOAD_TO_DRIVE = 2
+    };
+
 
     explicit ParamsLoader(QObject *parent = nullptr);
     ~ParamsLoader();
@@ -35,15 +41,26 @@ public:
     CO::NodeId nodeId() const;
     void setNodeId(CO::NodeId newNodeId);
 
-    RegVarList regVarList();
-    const RegVarList regVarList() const;
-    void setVarList(RegVarList varList);
+    RegVarList varList();
+    const RegVarList& varList() const;
+    void setVarList(RegVarList newVarList);
+
+    RegValuesList valuesList();
+    const RegValuesList& valuesList() const;
+    void setValuesList(RegValuesList newValuesList);
+
+    Operation lastOperation() const;
+
+    bool busy() const;
+    bool cancelled() const;
 
     void clear();
 
     bool uploadFromDrive();
-    bool downloadToDrive(RegValuesList valuesList);
+    bool downloadToDrive();
+    bool downloadToDrive(RegValuesList newValuesList);
 
+    int valuesToProcess() const;
     int valuesProcessed() const;
 
 signals:
@@ -51,6 +68,9 @@ signals:
     void progressChanged(int progress); //!< От 0 до размера RegVarList.
     void done();
     void finished();
+
+public slots:
+    void cancel();
 
 private slots:
     void sdoFinished();
@@ -62,6 +82,7 @@ private:
     SDOComm* m_comm;
 
     State m_state;
+    Operation m_lastOp;
 
     RegVarList* m_regVarList;
     int m_curVarIndex;

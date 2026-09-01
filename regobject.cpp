@@ -33,7 +33,12 @@ RegObject::~RegObject()
 //    return nullptr;
 //}
 
-RegEntry* RegObject::parent() const
+RegEntry* RegObject::parent()
+{
+    return m_parent;
+}
+
+const RegEntry* RegObject::parent() const
 {
     return m_parent;
 }

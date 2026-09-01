@@ -7,15 +7,12 @@
 #include "covaluetypes.h"
 #include "cockpitwgt.h"
 #include "reglisteditorwgt.h"
-#include "paramsloader.h"
-#include "paramsreader.h"
 #include <QLabel>
 #include <QDebug>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
 #include <QTextStream>
-#include <QProgressDialog>
 
 
 CanDriveWin::CanDriveWin(QWidget *parent)
@@ -54,11 +51,6 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     m_valsHolder = new CoValuesHolder(m_slcon, nullptr);
     connect(m_slcon, &SLCanOpenNode::connected, m_valsHolder, &CoValuesHolder::enableUpdating);
     connect(m_slcon, &SLCanOpenNode::disconnected, m_valsHolder, &CoValuesHolder::disableUpdating);
-
-    m_paramsLoader = new ParamsLoader();
-    m_paramsLoader->setSLCanOpenNode(m_slcon);
-
-    m_paramsReader = new ParamsReader();
 
     ui->cockpitWgt->setValsHolder(m_valsHolder);
     ui->cockpitWgt->setRegSelectDialog(ui->tvRegList->regSelectDialog());
@@ -137,9 +129,6 @@ CanDriveWin::~CanDriveWin()
     // statusbar widgets.
     statusBar()->removeWidget(m_sblblConStatus);
     delete m_sblblConStatus;
-
-    delete m_paramsReader;
-    delete m_paramsLoader;
 
     ui->cockpitWgt->clearCockpit();
     delete ui->cockpitWgt;
@@ -444,44 +433,14 @@ void CanDriveWin::m_ui_actDownloadToDrive_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    qDebug() << "CanDriveWin::m_ui_actDownloadToDrive_triggered";
+    ui->tvRegView->downloadToDrive();
 }
 
 void CanDriveWin::m_ui_actUploadFromDrive_triggered(bool checked)
 {
     Q_UNUSED(checked)
 
-    qDebug() << "CanDriveWin::m_ui_actUploadFromDrive_triggered";
-
-    RegListModel* regListModel = ui->tvRegList->regListModel();
-
-    ParamsLoader* loader = new ParamsLoader();
-
-    loader->setNodeId(Settings::get()->co.nodeId);
-    loader->setSLCanOpenNode(m_slcon);
-    loader->setVarList(regListModel->getRegRapams());
-
-    connect(loader, &ParamsLoader::errorOccured, [](const QString& errStr){
-        qDebug() << "ParamsLoader::errorOccured" << errStr;
-    });
-
-    connect(loader, &ParamsLoader::done, [](){
-        qDebug() << "ParamsLoader::done";
-    });
-
-    connect(loader, &ParamsLoader::finished, [loader](){
-        qDebug() << "ParamsLoader::finished";
-
-        loader->deleteLater();
-    });
-
-    connect(loader, &ParamsLoader::progressChanged, [](int progress){
-        qDebug() << "ParamsLoader::progressChanged" << progress;
-    });
-
-    if(!loader->uploadFromDrive()){
-        qDebug() << "uploadFromDrive failed";
-    }
+    ui->tvRegView->uploadFromDrive();
 }
 
 void CanDriveWin::updateStatusBar()
