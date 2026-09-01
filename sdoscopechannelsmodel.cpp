@@ -147,7 +147,11 @@ QVariant SDOScopeChannelsModel::data(const QModelIndex &index, int role) const
         case COL_DATA_TYPE:
             return RegTypes::dataTypeStr(ch_data.dataType);
         case COL_BASE_VALUE:
-            return ch_data.baseValue;
+            if(ch_data.baseValue != 0.0){
+                return ch_data.baseValue;
+            }else{
+                return tr("Загрузить");
+            }
         }
         break;
     case Qt::EditRole:
