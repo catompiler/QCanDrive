@@ -170,6 +170,7 @@ bool SDOScope::init()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_init_state = INIT_BEGIN;
     m_state = STATE_INIT;
     m_error = ERROR_NONE;
@@ -196,6 +197,7 @@ bool SDOScope::update()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE;
     m_error = ERROR_NONE;
@@ -215,6 +217,7 @@ bool SDOScope::updateCommon()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_COMMON;
     m_error = ERROR_NONE;
@@ -234,6 +237,7 @@ bool SDOScope::updateTrig()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_TRIG;
     m_error = ERROR_NONE;
@@ -253,6 +257,7 @@ bool SDOScope::updateChannels()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_CHANNELS;
     m_error = ERROR_NONE;
@@ -272,6 +277,7 @@ bool SDOScope::apply()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY;
     m_error = ERROR_NONE;
@@ -292,6 +298,7 @@ bool SDOScope::applyCommon()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_COMMON;
     m_error = ERROR_NONE;
@@ -329,6 +336,7 @@ bool SDOScope::applyTrig()
 
     m_comm_apply_trig->setState(SDOComm::IDLE);
     m_comm_apply_trig->setError(SDOComm::ERROR_NONE);
+    m_comm_apply_trig->setCancel(false);
     m_apply_trig_state = APPLY_TRIG_BEGIN;
     m_error = ERROR_NONE;
 
@@ -344,6 +352,7 @@ bool SDOScope::applyChannels()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_CHANNELS;
     m_error = ERROR_NONE;
@@ -364,6 +373,7 @@ bool SDOScope::run()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_run_state = RUN_BEGIN;
     m_state = STATE_RUN;
     m_error = ERROR_NONE;
@@ -392,6 +402,7 @@ bool SDOScope::read()
 
     m_comm->setState(SDOComm::IDLE);
     m_comm->setError(SDOComm::ERROR_NONE);
+    m_comm->setCancel(false);
     m_read_state = READ_BEGIN;
     m_state = STATE_READ;
     m_error = ERROR_NONE;
