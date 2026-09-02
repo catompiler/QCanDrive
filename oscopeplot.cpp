@@ -514,6 +514,8 @@ void OScopePlot::setSignalVisible(int n, bool newVisible)
     if(curv == nullptr) return;
 
     curv->setVisible(newVisible);
+
+    updateZerosScale();
 }
 
 QString OScopePlot::signalName(int n) const
