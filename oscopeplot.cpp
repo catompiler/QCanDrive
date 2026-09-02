@@ -692,7 +692,7 @@ void OScopePlot::floatingCursorMoved(const QPointF& pos)
     }
 
     qreal Tpos = m_hori->invTransform(pos.x());
-    int Tidx = qRound(Tpos / m_oscData->Ts());
+    int Tidx = qRound(Tpos / m_oscData->Ts()) + static_cast<int>(m_oscData->historySize());
 
     if(Tidx < 0 || static_cast<size_t>(Tidx) >= m_oscData->samplesCount()){
         QToolTip::hideText();
