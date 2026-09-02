@@ -138,14 +138,14 @@ void OScopeChsZerosScaleDraw::drawZeros(QPainter* painter, const QPalette& palet
 
     const auto& items = m_plot->itemList(QwtPlotItem::Rtti_PlotCurve);
 
-    int n = 1;
+    int n = 0;
     for(const auto& item: items){
+        n ++;
+
         auto curv = static_cast<QwtPlotCurve*>(item);
         if(!curv->isVisible()) continue;
 
         drawZero(painter, curv->pen().color(), palette.color(QPalette::WindowText), QString::number(n), qRound(map.transform(curv->baseline())), lowerBound, upperBound);
-
-        n ++;
     }
 }
 
