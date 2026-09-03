@@ -38,6 +38,7 @@ SDOScope::SDOScope(QObject *parent)
     m_status = STATUS_NONE;
 
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_state = STATE_NONE;
 
     m_init_state = INIT_NONE;
@@ -54,7 +55,6 @@ SDOScope::SDOScope(QObject *parent)
     //populateUpdateTasks();
 
     m_apply_state = APPLY_NONE;
-    m_error = ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
     // Только после инициализации (нужны каналы).
@@ -174,6 +174,7 @@ bool SDOScope::init()
     m_init_state = INIT_BEGIN;
     m_state = STATE_INIT;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_init_cur_task = 0;
 
     return processInit() != PROCESSING_ERROR;
@@ -184,6 +185,7 @@ bool SDOScope::deinit()
     m_init_state = INIT_NONE;
     m_state = STATE_NONE;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
 
     return true;
 }
@@ -201,6 +203,7 @@ bool SDOScope::update()
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_update_cur_task = 0;
     m_update_base_ch = 0;
     m_update_base_read = false;
@@ -221,6 +224,7 @@ bool SDOScope::updateCommon()
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_COMMON;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_update_cur_task = 0;
     m_update_base_ch = 0;
     m_update_base_read = false;
@@ -241,6 +245,7 @@ bool SDOScope::updateTrig()
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_TRIG;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_update_cur_task = 0;
     m_update_base_ch = 0;
     m_update_base_read = false;
@@ -261,6 +266,7 @@ bool SDOScope::updateChannels()
     m_update_state = UPDATE_BEGIN;
     m_state = STATE_UPDATE_CHANNELS;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_update_cur_task = 0;
     m_update_base_ch = 0;
     m_update_base_read = false;
@@ -281,6 +287,7 @@ bool SDOScope::apply()
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
     m_apply_base_ch = 0;
@@ -302,6 +309,7 @@ bool SDOScope::applyCommon()
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_COMMON;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
     m_apply_base_ch = 0;
@@ -339,6 +347,7 @@ bool SDOScope::applyTrig()
     m_comm_apply_trig->setCancel(false);
     m_apply_trig_state = APPLY_TRIG_BEGIN;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
 
     return processApplyTrigIndep() != PROCESSING_ERROR;
 }
@@ -356,6 +365,7 @@ bool SDOScope::applyChannels()
     m_apply_state = APPLY_BEGIN;
     m_state = STATE_APPLY_CHANNELS;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_apply_cur_task = 0;
     m_apply_status_read = false;
     m_apply_base_ch = 0;
@@ -377,6 +387,7 @@ bool SDOScope::run()
     m_run_state = RUN_BEGIN;
     m_state = STATE_RUN;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_run_status_read = false;
 
     return processRun() != PROCESSING_ERROR;
@@ -406,6 +417,7 @@ bool SDOScope::read()
     m_read_state = READ_BEGIN;
     m_state = STATE_READ;
     m_error = ERROR_NONE;
+    m_error_comm = SDOComm::ERROR_NONE;
     m_read_ch = 0;
     m_read_read = false;
 
@@ -414,7 +426,7 @@ bool SDOScope::read()
 
 bool SDOScope::abort()
 {
-    if(!m_slcon) return true;
+    if(!m_slcon) return false;
 
     if(m_slcon->cancel(m_comm)){
         m_error = ERROR_CANCELED;
@@ -493,6 +505,16 @@ uint32_t SDOScope::maxSampleRate() const
 qreal SDOScope::minTs() const
 {
     return m_min_Ts;
+}
+
+SDOComm::Error SDOScope::commError() const
+{
+    return m_error_comm;
+}
+
+SDOScope::State SDOScope::state() const
+{
+    return m_state;
 }
 
 SDOScope::Error SDOScope::error() const
@@ -797,7 +819,8 @@ SDOScope::ProcessingState SDOScope::processInit()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_init_state = INIT_DONE;
 
         emit initialized();
@@ -807,6 +830,7 @@ SDOScope::ProcessingState SDOScope::processInit()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_init_state = INIT_DONE;
 
         handleError();
@@ -846,7 +870,8 @@ SDOScope::ProcessingState SDOScope::processUpdate()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_update_state = UPDATE_DONE;
 
         emit updated();
@@ -856,6 +881,7 @@ SDOScope::ProcessingState SDOScope::processUpdate()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_update_state = UPDATE_DONE;
 
         handleError();
@@ -885,7 +911,8 @@ SDOScope::ProcessingState SDOScope::processUpdateCommon()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_update_state = UPDATE_DONE;
 
         emit updatedCommon();
@@ -895,6 +922,7 @@ SDOScope::ProcessingState SDOScope::processUpdateCommon()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_update_state = UPDATE_DONE;
 
         handleError();
@@ -924,7 +952,8 @@ SDOScope::ProcessingState SDOScope::processUpdateTrig()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_update_state = UPDATE_DONE;
 
         emit updatedTrig();
@@ -934,6 +963,7 @@ SDOScope::ProcessingState SDOScope::processUpdateTrig()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_update_state = UPDATE_DONE;
 
         handleError();
@@ -963,7 +993,8 @@ SDOScope::ProcessingState SDOScope::processUpdateChannels()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_update_state = UPDATE_DONE;
 
         emit updatedChannels();
@@ -973,6 +1004,7 @@ SDOScope::ProcessingState SDOScope::processUpdateChannels()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_update_state = UPDATE_DONE;
 
         handleError();
@@ -1243,7 +1275,8 @@ SDOScope::ProcessingState SDOScope::processApply()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_apply_state = APPLY_DONE;
 
         emit applied();
@@ -1253,6 +1286,7 @@ SDOScope::ProcessingState SDOScope::processApply()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_apply_state = APPLY_DONE;
 
         handleError();
@@ -1282,7 +1316,8 @@ SDOScope::ProcessingState SDOScope::processApplyCommon()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_apply_state = APPLY_DONE;
 
         emit appliedCommon();
@@ -1292,6 +1327,7 @@ SDOScope::ProcessingState SDOScope::processApplyCommon()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_apply_state = APPLY_DONE;
 
         handleError();
@@ -1321,7 +1357,8 @@ SDOScope::ProcessingState SDOScope::processApplyTrig()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_apply_state = APPLY_DONE;
 
         emit appliedTrig();
@@ -1331,6 +1368,7 @@ SDOScope::ProcessingState SDOScope::processApplyTrig()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_apply_state = APPLY_DONE;
 
         handleError();
@@ -1360,7 +1398,8 @@ SDOScope::ProcessingState SDOScope::processApplyChannels()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_apply_state = APPLY_DONE;
 
         emit appliedChannels();
@@ -1370,6 +1409,7 @@ SDOScope::ProcessingState SDOScope::processApplyChannels()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_apply_state = APPLY_DONE;
 
         handleError();
@@ -1684,7 +1724,8 @@ SDOScope::ProcessingState SDOScope::processApplyTrigIndep()
     switch(proc_state){
     default:
     case PROCESSING_DONE:
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_apply_trig_state = APPLY_TRIG_DONE;
 
         emit appliedTrig();
@@ -1693,6 +1734,7 @@ SDOScope::ProcessingState SDOScope::processApplyTrigIndep()
 
     case PROCESSING_ERROR:
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_apply_trig_state = APPLY_TRIG_DONE;
 
         handleError();
@@ -1982,6 +2024,7 @@ SDOScope::ProcessingState SDOScope::processRun()
 
         m_state = STATE_NONE;
         m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
 
         handleFinished();
 
@@ -1996,7 +2039,8 @@ SDOScope::ProcessingState SDOScope::processRun()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_run_state = RUN_DONE;
 
         emit done();
@@ -2006,6 +2050,7 @@ SDOScope::ProcessingState SDOScope::processRun()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_run_state = RUN_DONE;
 
         handleError();
@@ -2123,7 +2168,6 @@ SDOScope::ProcessingState SDOScope::processRead()
 
     __attribute__((fallthrough));
     case READ_DONE:{
-        proc_err = ERROR_NONE;
         proc_state = PROCESSING_DONE;
     }break;
     }
@@ -2134,7 +2178,8 @@ SDOScope::ProcessingState SDOScope::processRead()
     default:
     case PROCESSING_DONE:
         m_state = STATE_NONE;
-        m_error = proc_err;
+        m_error = ERROR_NONE;
+        m_error_comm = SDOComm::ERROR_NONE;
         m_read_state = READ_DONE;
 
         emit readed();
@@ -2144,6 +2189,7 @@ SDOScope::ProcessingState SDOScope::processRead()
     case PROCESSING_ERROR:
         m_state = STATE_NONE;
         m_error = proc_err;
+        m_error_comm = m_comm->error();
         m_read_state = READ_DONE;
 
         handleError();

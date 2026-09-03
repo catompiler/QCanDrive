@@ -3,6 +3,42 @@
 #include <QDebug>
 
 
+QString SDOComm::errorToStr(Error err)
+{
+    switch(err){
+    case SDOComm::ERROR_NONE:
+        return tr("Нет ошибки");
+    case SDOComm::ERROR_IO:
+        return tr("Ошибка передачи данных");
+    case SDOComm::ERROR_TIMEOUT:
+        return tr("Превышение времени ожидания");
+    case SDOComm::ERROR_CANCEL:
+        return tr("Отменено");
+    case SDOComm::ERROR_INVALID_SIZE:
+        return tr("Неправильный тип или размер данных");
+    case SDOComm::ERROR_INVALID_VALUE:
+        return tr("Ошибка значения");
+    case SDOComm::ERROR_ACCESS:
+        return tr("Ошибка доступа");
+    case SDOComm::ERROR_NOT_FOUND:
+        return tr("Отсутствует запрошенный параметр");
+    case SDOComm::ERROR_NO_DATA:
+        return tr("Отсутствуют запрошенные данные");
+    case SDOComm::ERROR_OUT_OF_MEM:
+        return tr("Недостуточно памяти");
+    case SDOComm::ERROR_GENERAL:
+        return tr("Общая ошибка");
+    case SDOComm::ERROR_PRAM_INCOMPAT:
+        return tr("Несовместимость параметра");
+    case SDOComm::ERROR_DEV_INCOMPAT:
+        return tr("Внутренняя несовместимость");
+    case SDOComm::ERROR_UNKNOWN:
+        return tr("Неизвестная ошибка");
+    default:
+        return tr("Неопознанная ошибка");
+    }
+}
+
 SDOComm::SDOComm(QObject *parent)
     : QObject{parent}
 {

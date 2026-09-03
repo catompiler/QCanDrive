@@ -187,18 +187,20 @@ void SDOScopeWgt::connected()
 {
     qDebug() << "SDOScopeWgt::connected()";
 
-    if(!m_scope->init()){
-        qDebug() << "SDOScope init failed";
+    scopeInit();
 
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка инициализации осциллографа!"));
-    }
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::disconnected()
 {
     qDebug() << "SDOScopeWgt::disconnected()";
 
+    scopeDeinit();
+
     m_initialized = false;
+
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::single()
@@ -207,11 +209,13 @@ void SDOScopeWgt::single()
 
     if(!m_initialized) return;
 
-    if(!m_scope->run()){
-        qDebug() << "SDOScope run failed";
+    if(ui->pbSingle->isChecked()) return;
 
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка запуска осциллографа!"));
-    }
+    bool started = scopeRun();
+
+    ui->pbSingle->setChecked(started);
+
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::run()
@@ -220,11 +224,24 @@ void SDOScopeWgt::run()
 
     if(!m_initialized) return;
 
-    if(!m_scope->run()){
-        qDebug() << "SDOScope run failed";
+    if(ui->pbRun->isChecked()) return;
 
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка запуска осциллографа!"));
-    }
+    bool started = scopeRun();
+
+    ui->pbRun->setChecked(started);
+
+    updateUiEnabled();
+}
+
+void SDOScopeWgt::read()
+{
+    qDebug() << "SDOScopeWgt::read()";
+
+    if(!m_initialized) return;
+
+    scopeRead();
+
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::stopRun()
@@ -233,16 +250,18 @@ void SDOScopeWgt::stopRun()
 
     if(!m_initialized) return;
 
-    if(!m_scope->stopRun()){
-        qDebug() << "SDOScope stopRun failed";
+    scopeStopRun();
 
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка останова осциллографа!"));
-    }
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::abort()
 {
-    m_scope->abort();
+    qDebug() << "SDOScopeWgt::abort()";
+
+    scopeAbort();
+
+    updateUiEnabled();
 }
 
 void SDOScopeWgt::autoScale()
@@ -301,6 +320,177 @@ void SDOScopeWgt::autoScale()
     plt->replot();
 }
 
+bool SDOScopeWgt::scopeInit()
+{
+    qDebug() << "SDOScopeWgt::scopeInit()";
+
+    if(!m_scope->init()){
+        qDebug() << "SDOScope init failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка инициализации осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeDeinit()
+{
+    m_scope->abort();
+    m_scope->deinit();
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeUpdate()
+{
+    qDebug() << "SDOScopeWgt::scopeUpdate()";
+
+    if(!m_scope->update()){
+        qDebug() << "SDOScope update failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка обновления осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeUpdateCommon()
+{
+    qDebug() << "SDOScopeWgt::scopeUpdateCommon()";
+
+    if(!m_scope->updateCommon()){
+        qDebug() << "SDOScope updateCommon failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка обновления общих параметров осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeUpdateChannels()
+{
+    qDebug() << "SDOScopeWgt::scopeUpdateChannels()";
+
+    if(!m_scope->updateChannels()){
+        qDebug() << "SDOScope updateChannels failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка обновления каналов осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeUpdateTrigger()
+{
+    qDebug() << "SDOScopeWgt::scopeUpdateTrigger()";
+
+    if(!m_scope->updateTrig()){
+        qDebug() << "SDOScope updateTrig failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка обновления триггера осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeApply()
+{
+    qDebug() << "SDOScopeWgt::scopeApply()";
+
+    if(!m_scope->apply()){
+        qDebug() << "SDOScope apply failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeApplyCommon()
+{
+    qDebug() << "SDOScopeWgt::scopeApplyCommon()";
+
+    if(!m_scope->applyCommon()){
+        qDebug() << "SDOScope applyCommon failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения общих параметров осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeApplyChannels()
+{
+    qDebug() << "SDOScopeWgt::scopeApplyChannels()";
+
+    if(!m_scope->applyChannels()){
+        qDebug() << "SDOScope applyChannels failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения каналов осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeApplyTrigger()
+{
+    qDebug() << "SDOScopeWgt::scopeApplyTrigger()";
+
+    if(!m_scope->applyTrig()){
+        qDebug() << "SDOScope applyTrig failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения триггера осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeRun()
+{
+    qDebug() << "SDOScopeWgt::scopeRun()";
+
+    if(!m_scope->run()){
+        qDebug() << "SDOScope run failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка запуска работы осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeStopRun()
+{
+    qDebug() << "SDOScopeWgt::scopeStopRun()";
+
+    if(!m_scope->stopRun()){
+        qDebug() << "SDOScope stopRun failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка останова осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeRead()
+{
+    qDebug() << "SDOScopeWgt::scopeRead()";
+
+    if(!m_scope->read()){
+        qDebug() << "SDOScope read failed";
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка запуска чтения осциллографа!"));
+        return false;
+    }
+
+    return true;
+}
+
+bool SDOScopeWgt::scopeAbort()
+{
+    qDebug() << "SDOScopeWgt::scopeAbort()";
+
+    return m_scope->abort();
+}
+
 void SDOScopeWgt::sdoscopeFinished()
 {
     qDebug() << "SDOScopeWgt::sdoscopeFinished()";
@@ -315,11 +505,7 @@ void SDOScopeWgt::sdoscopeInitialized()
 
     m_initialized = true;
 
-    if(!m_scope->update()){
-        qDebug() << "SDOScope update failed";
-
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка обновления осциллографа!"));
-    }
+    scopeUpdate();
 }
 
 void SDOScopeWgt::sdoscopeUpdated()
@@ -357,16 +543,58 @@ void SDOScopeWgt::sdoscopeErrorOccured()
 {
     qDebug() << "SDOScopeWgt::sdoscopeErrorOccured()" << static_cast<int>(m_scope->error());
 
-    QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка работы осциллографа!\n%1").arg(static_cast<int>(m_scope->error())));
+    switch(m_scope->error()){
+    case SDOScope::ERROR_NONE:
+        // :-D
+        QMessageBox::information(this, tr("Ошибка!"), tr("Операция успешно завершена!"));
+        break;
+    case SDOScope::ERROR_CANCELED:
+        // Прерывание операции.
+        //QMessageBox::warning(this, tr("Предупреждение!"), tr("Работа осциллографа прервана!"));
+        break;
+    case SDOScope::ERROR_COMM:{
+        switch(m_scope->commError()){
+        case SDOComm::ERROR_NONE:
+            // :-D
+            QMessageBox::information(this, tr("Ошибка!"), tr("Обмен данными успешно завершён!"));
+            break;
+        case SDOComm::ERROR_IO:
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка ввода-вывода!"));
+            break;
+        case SDOComm::ERROR_TIMEOUT:
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Превышение допустимого времени запроса!"));
+            break;
+        case SDOComm::ERROR_CANCEL:
+            // Либо обмен прерван пользователем, либо произошло отключение.
+            //QMessageBox::warning(this, tr("Предупреждение!"), tr("Обмен данными прерван!"));
+            break;
+        default:
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка коммуникации с осциллографом! (%1)\n%2!")
+                                                           .arg(static_cast<int>(m_scope->commError()))
+                                                           .arg(SDOComm::errorToStr(m_scope->commError())));
+            break;
+        }
+    }break;
+    case SDOScope::ERROR_VERSION:
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка версии осциллографа на устройстве!"));
+        break;
+    case SDOScope::ERROR_CONSTRAINTS:
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Параметры осциллографа на устройстве выходят за допустимые пределы!"));
+        break;
+    case SDOScope::ERROR_INVALID:
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Некорректные параметры осциллографа на устройстве!"));
+        break;
+    default:
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка работы осциллографа! (%1)").arg(static_cast<int>(m_scope->error())));
+        break;
+    }
+
+    uiStopOperations();
 }
 
 void SDOScopeWgt::sdoscopeDone()
 {
-    if(!m_scope->read()){
-        qDebug() << "SDOScope read failed";
-
-        QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка чтения осциллографа!"));
-    }
+    scopeRead();
 }
 
 void SDOScopeWgt::sdoscopeReaded()
@@ -388,7 +616,7 @@ void SDOScopeWgt::sdoscopeReaded()
 
     // Если кнопка RUN активна - запустим снова.
     if(ui->pbRun->isChecked()){
-        run();
+        scopeRun();
     }
 }
 
@@ -470,7 +698,7 @@ void SDOScopeWgt::triggerEnabledChanged(bool newEnabled)
 {
     m_scope->setTriggerEnabled(newEnabled);
 
-    if(!m_scope->applyTrig()){
+    if(!scopeApplyTrigger()){
         qDebug() << "SDOScope applyTrig failed";
     }
 
@@ -486,7 +714,7 @@ void SDOScopeWgt::triggerTypeChanged(int newType)
 {
     m_scope->setTriggerType(static_cast<SDOScope::TriggerType>(newType));
 
-    if(!m_scope->applyTrig()){
+    if(!scopeApplyTrigger()){
         qDebug() << "SDOScope applyTrig failed";
     }
 
@@ -525,8 +753,9 @@ void SDOScopeWgt::triggerChannelChanged(uint newChannel)
 
     updateTriggerUiByChannel();
 
-    if(!m_scope->applyTrig()){
-        qDebug() << "SDOScope applyTrig failed";
+    if(!scopeApplyTrigger()){
+        // уже есть в функции в условии.
+        //qDebug() << "SDOScope applyTrig failed";
     }
 
     // Обновление доступности элементов UI.
@@ -539,7 +768,7 @@ void SDOScopeWgt::triggerChannelChanged(uint newChannel)
 
 void SDOScopeWgt::triggerValueChangedTmr_timeout()
 {
-    if(!m_scope->applyTrig()){
+    if(!scopeApplyTrigger()){
         qDebug() << "SDOScope applyTrig failed";
     }
 
@@ -566,10 +795,10 @@ void SDOScopeWgt::btnScopeParams_clicked(bool checked)
         m_scope->setSamplesCount(m_params_dlg->samplesCount());
         m_scope->setHistSamplesCount(m_params_dlg->histSamplesCount());
 
-        if(!m_scope->applyCommon()){
-            qDebug() << "SDOScope applyCommon failed";
-
-            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения параметров осциллографа!"));
+        if(!scopeApplyCommon()){
+            // уже есть в функции в условии.
+            //qDebug() << "SDOScope applyCommon failed";
+            //QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения параметров осциллографа!"));
         }
 
         // Обновление доступности элементов UI.
@@ -626,10 +855,10 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
             ch->setBaseValue(ch_data.baseValue);
         }
 
-        if(!m_scope->applyChannels()){
-            qDebug() << "SDOScope applyChannels failed";
-
-            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка настройки каналов осциллографа!"));
+        if(!scopeApplyChannels()){
+            // уже есть в функции в условии.
+            //qDebug() << "SDOScope applyChannels failed";
+            //QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка настройки каналов осциллографа!"));
         }
 
         // Обновление доступности элементов UI.
@@ -640,9 +869,9 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
 void SDOScopeWgt::btnRun_clicked(bool checked)
 {
     if(checked){
-        run();
+        scopeRun();
     }else{
-        if(m_scope->isRunning()) stopRun();
+        if(m_scope->isRunning()) scopeStopRun();
     }
 
     // Обновление доступности элементов UI.
@@ -652,9 +881,9 @@ void SDOScopeWgt::btnRun_clicked(bool checked)
 void SDOScopeWgt::btnSingle_clicked(bool checked)
 {
     if(checked){
-        single();
+        scopeRun();
     }else{
-        if(m_scope->isRunning()) stopRun();
+        if(m_scope->isRunning()) scopeStopRun();
     }
 
     // Обновление доступности элементов UI.
@@ -665,7 +894,7 @@ void SDOScopeWgt::btnAbort_clicked(bool checked)
 {
     Q_UNUSED(checked);
 
-    abort();
+    scopeAbort();
 
     // Обновление доступности элементов UI.
     updateUiEnabled();
@@ -738,6 +967,12 @@ void SDOScopeWgt::populateTriggerChannels()
     }
 
     ui->twTrig->blockSignals(false);
+}
+
+void SDOScopeWgt::uiStopOperations()
+{
+    ui->pbRun->setChecked(false);
+    ui->pbSingle->setChecked(false);
 }
 
 void SDOScopeWgt::updateUiEnabled()

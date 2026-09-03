@@ -6,6 +6,7 @@
 #include <QPair>
 #include "cotypes.h"
 #include "covaluetypes.h"
+#include "sdocomm.h"
 
 
 #ifndef SDOSCOPE_TEST_DATA
@@ -337,8 +338,14 @@ public:
     //! Получить минимальный период дискретизации.
     qreal minTs() const;
 
+    //! Получает состояние осциллографа.
+    State state() const;
+
     //! Получить ошибку.
     Error error() const;
+
+    //! Получить ошибку коммуникации.
+    SDOComm::Error commError() const;
 
     //! Проверить, инициализирован ли осциллограф.
     bool isInitialized() const;
@@ -493,8 +500,9 @@ private:
 
     Channel* m_channels;
 
-    Error m_error;
     State m_state;
+    Error m_error;
+    SDOComm::Error m_error_comm;
 
 
     // Переменные состояния инициализации.

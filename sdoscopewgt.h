@@ -2,6 +2,7 @@
 #define SDOSCOPEWGT_H
 
 #include <QWidget>
+#include "sdoscope.h"
 #include "cotypes.h"
 
 class OScopePlot;
@@ -53,9 +54,26 @@ public slots:
     void disconnected();
     void single();
     void run();
+    void read();
     void stopRun();
     void abort();
     void autoScale();
+
+protected slots:
+    bool scopeInit();
+    bool scopeDeinit();
+    bool scopeUpdate();
+    bool scopeUpdateCommon();
+    bool scopeUpdateChannels();
+    bool scopeUpdateTrigger();
+    bool scopeApply();
+    bool scopeApplyCommon();
+    bool scopeApplyChannels();
+    bool scopeApplyTrigger();
+    bool scopeRun();
+    bool scopeStopRun();
+    bool scopeRead();
+    bool scopeAbort();
 
 private slots:
     void sdoscopeFinished();
@@ -104,6 +122,7 @@ private:
 
     void populateChannelsUi();
     void populateTriggerChannels();
+    void uiStopOperations();
     void updateUiEnabled();
     void refreshUi();
     void refreshChannelsUi();

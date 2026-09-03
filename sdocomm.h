@@ -2,6 +2,7 @@
 #define SDOCOMM_H
 
 #include <QObject>
+#include <QString>
 #include "cotypes.h"
 #include "sdocomm_data.h"
 
@@ -44,6 +45,8 @@ public:
         ERROR_DEV_INCOMPAT  = 12,
         ERROR_UNKNOWN       = 13,
     };
+
+    static QString errorToStr(Error err);
 
     explicit SDOComm(QObject *parent = nullptr);
     ~SDOComm();
