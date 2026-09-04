@@ -204,10 +204,18 @@
     <addaction name="actRegsViewExpandTree"/>
     <addaction name="actRegsViewCollapseTree"/>
    </widget>
+   <widget class="QMenu" name="mnuOScope">
+    <property name="title">
+     <string>Осциллограф</string>
+    </property>
+    <addaction name="actOScopeOpen"/>
+    <addaction name="actOScopeSave"/>
+   </widget>
    <addaction name="mnuProgram"/>
    <addaction name="mnuCockpit"/>
    <addaction name="mnuRegList"/>
    <addaction name="mnuRegsView"/>
+   <addaction name="mnuOScope"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="tbMain">
@@ -626,6 +634,16 @@
     <enum>QAction::MenuRole::NoRole</enum>
    </property>
   </action>
+  <action name="actOScopeSave">
+   <property name="text">
+    <string>Сохранить</string>
+   </property>
+  </action>
+  <action name="actOScopeOpen">
+   <property name="text">
+    <string>Загрузить</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -653,8 +671,8 @@
  </customwidgets>
  <resources>
   <include location="candrive.qrc"/>
-  <include location="qt_canopennode_slcan.qrc"/>
   <include location="reglisteditor.qrc"/>
+  <include location="qt_canopennode_slcan.qrc"/>
  </resources>
  <connections/>
 </ui>

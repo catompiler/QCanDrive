@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "sdoscope.h"
 #include "cotypes.h"
+#include "oscopeserializer.h"
 
 class OScopePlot;
 class SDOScope;
@@ -50,6 +51,8 @@ public:
     void setVersionSubIndex(CO::SubIndex newSubIndex);
 
 public slots:
+    void saveOscope();
+    void openOscope();
     void connected();
     void disconnected();
     void single();
@@ -135,6 +138,9 @@ private:
     void applyChannelsUiToPlot();
     void applyTriggerUiToPlot();
     void applyCursorsUiToPlot();
+
+    void getOScopeConf(OScopeSerializer::ScopeConf& conf) const;
+    void setOScopeConf(const OScopeSerializer::ScopeConf& conf);
 };
 
 #endif // SDOSCOPEWGT_H

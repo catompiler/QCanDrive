@@ -38,6 +38,9 @@ public:
     static constexpr int TRIGGER_MARK_HEIGHT = 5;
     static constexpr int TRIGGER_MARK_MARGIN = 2;
 
+    static constexpr Qt::PenStyle defaultLineStyle = Qt::SolidLine;
+    static constexpr qreal defaultLineWidthF = 1.5;
+
     OScopePlot(QWidget* parent = nullptr, const QString& newName = QString());
     ~OScopePlot();
 
@@ -81,6 +84,9 @@ public:
     int signalsCount() const;
     bool hasVisibleSignals() const;
 
+    // СБрасывает сигнала, в том числе скрывает его.
+    void resetSignal(int n);
+
     // Данные канала.
     OScopePlotSeriesData* plotData(int n);
     const OScopePlotSeriesData* plotData(int n) const;
@@ -111,6 +117,9 @@ public:
     QRectF boundingRect() const;
 
     static QList<Qt::GlobalColor> getDefaultColors();
+    static Qt::GlobalColor getDefaultColor(int n);
+
+    static QString getDefaultName(int n);
 
     bool legendItemEnabled() const;
     void setLegendItemEnabled(bool newEnabled);

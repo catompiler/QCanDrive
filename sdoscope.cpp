@@ -1177,6 +1177,12 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processUpdateImpl(bo
                 // Получим текущий канал.
                 ch = &m_channels[m_update_base_ch];
 
+                // Если базовое значение не задано.
+                if(ch->baseValue() == 0.0){
+                    // Установим базовое значение в 1.0.
+                    ch->setBaseValue(1.0);
+                }
+
                 // Найдём регистр.
                 rv = findRegVar(ch->regIndex(), ch->regSubIndex());
                 // Если не найден - пропустим
@@ -1591,6 +1597,9 @@ QPair<SDOScope::ProcessingState, SDOScope::Error> SDOScope::processApplyImpl(boo
                     m_apply_base_ch ++;
                     continue;
                 }
+
+                // Установим базовое значение в 1.0.
+                ch->setBaseValue(1.0);
 
                 // Найдём регистр.
                 rv = findRegVar(ch->regIndex(), ch->regSubIndex());
@@ -2285,12 +2294,10 @@ void SDOScope::genTestData()
 
 SDOScope::Channel::Channel()
 {
-    m_enabled = 0;
-    m_reg_id = 0;
     m_samples = nullptr;
     m_samples_count = 0;
-    m_dataType = DataType::IQ24;
-    m_base_value = 1.0;
+
+    reset();
 }
 
 SDOScope::Channel::Channel(Channel&& ch)
@@ -2403,6 +2410,14 @@ void SDOScope::Channel::clear()
     if(m_samples == nullptr) return;
 
     memset(m_samples, 0x0, m_samples_count * sizeof(sample_t));
+}
+
+void SDOScope::Channel::reset()
+{
+    m_enabled = 0;
+    m_reg_id = 0;
+    m_dataType = DataType::IQ24;
+    m_base_value = 1.0;
 }
 
 uint32_t* SDOScope::Channel::enabledPtr()

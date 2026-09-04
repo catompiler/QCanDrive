@@ -69,6 +69,7 @@ SOURCES += \
     oscopeknob.cpp \
     oscopeplot.cpp \
     oscopeplotseriesdata.cpp \
+    oscopeserializer.cpp \
     oscopetimezeroscaledraw.cpp \
     oscopetriggerwgt.cpp \
     oscopevertical.cpp \
@@ -120,6 +121,7 @@ SOURCES += \
     slcan/slcan_slave.c \
     slcan_port_qt.cpp \
     slcanopennode.cpp \
+    stringutils.cpp \
     timeformatter.cpp \
     trendploteditdlg.cpp \
     exportdlg.cpp \
@@ -185,6 +187,7 @@ HEADERS += \
     oscopeknob.h \
     oscopeplot.h \
     oscopeplotseriesdata.h \
+    oscopeserializer.h \
     oscopetimezeroscaledraw.h \
     oscopetriggerwgt.h \
     oscopevertical.h \
@@ -247,6 +250,7 @@ HEADERS += \
     slcan_conf.h \
     slcan_port_qt.h \
     slcanopennode.h \
+    stringutils.h \
     timeformatter.h \
     trendploteditdlg.h \
     exportdlg.h \

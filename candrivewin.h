@@ -34,6 +34,9 @@ private slots:
     void m_ui_actDownloadToDrive_triggered(bool checked);
     void m_ui_actUploadFromDrive_triggered(bool checked);
 
+    void m_ui_actOScopeOpen_triggered(bool checked);
+    void m_ui_actOScopeSave_triggered(bool checked);
+
 private:
     Ui::CanDriveWin *ui;
     QLabel* m_sblblConStatus;

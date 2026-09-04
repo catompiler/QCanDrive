@@ -38,13 +38,6 @@ public:
 
 protected:
 
-    int intValue(const QStringView& str, int defVal = 0) const;
-    int intValue(const QString& str, int defVal = 0) const;
-    unsigned int uintValue(const QStringView& str, unsigned int defVal = 0) const;
-    unsigned int uintValue(const QString& str, unsigned int defVal = 0) const;
-    double realValue(const QStringView& str, double defVal = 0) const;
-    double realValue(const QString& str, double defVal = 0) const;
-
     CockpitWidgets readCockpit(QXmlStreamReader& xml, bool* isOk = nullptr) const;
     bool writeCockpit(QXmlStreamWriter& xml, const CockpitWidgets& widgets) const;
 

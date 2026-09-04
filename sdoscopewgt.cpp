@@ -183,6 +183,73 @@ void SDOScopeWgt::setVersionSubIndex(CO::SubIndex newSubIndex)
     m_scope->setVersionSubIndex(newSubIndex);
 }
 
+void SDOScopeWgt::saveOscope()
+{
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранить осциллограф"), QString(), tr("Oscope (*.oscpxml)"));
+
+    if(fileName.isEmpty()) return;
+
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::WriteOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл: %1").arg(fileName));
+        return;
+    }
+
+    OScopeSerializer ser;
+    OScopeSerializer::ScopeConf oscopeConf;
+
+    getOScopeConf(oscopeConf);
+
+    bool isOk = ser.serialize(&file, oscopeConf);
+
+    if(!isOk){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно сохранить файл: %1").arg(fileName));
+        file.close();
+        return;
+    }
+
+    file.close();
+}
+
+void SDOScopeWgt::openOscope()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть осциллограф"), QString(), tr("Oscope (*.oscpxml)"));
+
+    if(fileName.isEmpty()) return;
+
+    QFile file(fileName);
+
+    if(!file.open(QIODevice::ReadOnly)){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно открыть файл: %1").arg(fileName));
+        return;
+    }
+
+    OScopeSerializer ser;
+    OScopeSerializer::ScopeConf oscopeConf;
+
+    bool isOk = ser.deserialize(&file, oscopeConf);
+
+    if(!isOk){
+        QMessageBox::critical(this, tr("Ошибка!"), tr("Невозможно загрузить файл: %1").arg(fileName));
+        file.close();
+        return;
+    }
+
+    file.close();
+
+    setOScopeConf(oscopeConf);
+
+    if(!scopeApply()){
+        // уже есть в функции в условии.
+        //qDebug() << "SDOScope apply failed";
+        //QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка применения осциллографа!"));
+    }
+
+    // Обновление доступности элементов UI.
+    updateUiEnabled();
+}
+
 void SDOScopeWgt::connected()
 {
     qDebug() << "SDOScopeWgt::connected()";
@@ -704,7 +771,8 @@ void SDOScopeWgt::triggerEnabledChanged(bool newEnabled)
     m_scope->setTriggerEnabled(newEnabled);
 
     if(!scopeApplyTrigger()){
-        qDebug() << "SDOScope applyTrig failed";
+        // уже есть в функции в условии.
+        //qDebug() << "SDOScope applyTrig failed";
     }
 
     // Обновление доступности элементов UI.
@@ -720,7 +788,8 @@ void SDOScopeWgt::triggerTypeChanged(int newType)
     m_scope->setTriggerType(static_cast<SDOScope::TriggerType>(newType));
 
     if(!scopeApplyTrigger()){
-        qDebug() << "SDOScope applyTrig failed";
+        // уже есть в функции в условии.
+        //qDebug() << "SDOScope applyTrig failed";
     }
 
     // Обновление доступности элементов UI.
@@ -774,7 +843,8 @@ void SDOScopeWgt::triggerChannelChanged(uint newChannel)
 void SDOScopeWgt::triggerValueChangedTmr_timeout()
 {
     if(!scopeApplyTrigger()){
-        qDebug() << "SDOScope applyTrig failed";
+        // уже есть в функции в условии.
+        //qDebug() << "SDOScope applyTrig failed";
     }
 
     // Обновление доступности элементов UI.
@@ -874,7 +944,9 @@ void SDOScopeWgt::btnScopeChannels_clicked(bool checked)
 void SDOScopeWgt::btnRun_clicked(bool checked)
 {
     if(checked){
-        scopeRun();
+        if(!scopeRun()){
+            ui->pbRun->setChecked(false);
+        }
     }else{
         if(m_scope->isRunning()) scopeStopRun();
     }
@@ -886,7 +958,9 @@ void SDOScopeWgt::btnRun_clicked(bool checked)
 void SDOScopeWgt::btnSingle_clicked(bool checked)
 {
     if(checked){
-        scopeRun();
+        if(!scopeRun()){
+            ui->pbSingle->setChecked(false);
+        }
     }else{
         if(m_scope->isRunning()) scopeStopRun();
     }
@@ -1124,4 +1198,98 @@ void SDOScopeWgt::applyCursorsUiToPlot()
     auto plt = getPlot();
 
     plt->setCursorsFloatingEnabled(ui->cwCursors->floatingEnabled());
+}
+
+void SDOScopeWgt::getOScopeConf(OScopeSerializer::ScopeConf& conf) const
+{
+    conf.common.prescaler = m_scope->prescaler();
+    conf.common.samplesCount = m_scope->samplesCount();
+    conf.common.histSamplesCount = m_scope->histSamplesCount();
+
+    auto plt = getPlot();
+
+    conf.common.hDiv = plt->hDiv();
+    conf.common.hOffset = plt->hOffset();
+
+    conf.trigger.enabled = m_scope->triggerEnabled();
+    conf.trigger.channel = m_scope->triggerChannel();
+    conf.trigger.type = m_scope->triggerType();
+    conf.trigger.value = m_scope->triggerValue();
+
+    conf.cursors.floating.enabled = plt->cursorsFloatingEnabled();
+
+    for(uint ch_i = 0; ch_i < m_scope->channelsCount(); ch_i ++){
+        auto* ch = m_scope->channel(ch_i);
+
+        conf.channels.append(OScopeSerializer::ChannelConf());
+        auto& ch_conf = conf.channels.last();
+
+        // Канал осциллографа.
+        ch_conf.enabled = ch->enabled();
+        ch_conf.index = ch->regIndex();
+        ch_conf.subIndex = ch->regSubIndex();
+        ch_conf.dataType = ch->dataType();
+        ch_conf.baseValue = ch->baseValue();
+        // Сигнал графика.
+        QPen p = plt->pen(ch_i);
+        ch_conf.penColor = p.color();
+        ch_conf.penStyle = p.style();
+        ch_conf.penWidthF = p.widthF();
+        ch_conf.visible = plt->signalVisible(ch_i);
+        ch_conf.name = plt->signalName(ch_i);
+        ch_conf.vDiv = plt->vDiv(ch_i);
+        ch_conf.vOffset = plt->vOffset(ch_i);
+    }
+}
+
+void SDOScopeWgt::setOScopeConf(const OScopeSerializer::ScopeConf& conf)
+{
+    m_scope->setPrescaler(conf.common.prescaler);
+    m_scope->setSamplesCount(conf.common.samplesCount);
+    m_scope->setHistSamplesCount(conf.common.histSamplesCount);
+
+    auto plt = getPlot();
+
+    plt->setHDiv(conf.common.hDiv);
+    plt->setHOffset(conf.common.hOffset);
+
+    m_scope->setTriggerEnabled(conf.trigger.enabled);
+    m_scope->setTriggerChannel(conf.trigger.channel);
+    m_scope->setTriggerType(conf.trigger.type);
+    m_scope->setTriggerValue(conf.trigger.value);
+
+    plt->setCursorsFloatingEnabled(conf.cursors.floating.enabled);
+
+    for(uint ch_i = 0; ch_i < m_scope->channelsCount(); ch_i ++){
+        auto* ch = m_scope->channel(ch_i);
+
+        // Если в параметрах есть конфигурация канала.
+        if(ch_i < conf.channels.count()){
+            // Загрузим её.
+            const auto& ch_conf = conf.channels.at(ch_i);
+            // Канал осциллографа.
+            ch->setEnabled(ch_conf.enabled);
+            ch->setRegIndex(ch_conf.index);
+            ch->setRegSubIndex(ch_conf.subIndex);
+            ch->setDataType(ch_conf.dataType);
+            ch->setBaseValue(ch_conf.baseValue);
+            // Сигнал графика.
+            QPen p;
+            p.setColor(ch_conf.penColor);
+            p.setStyle(ch_conf.penStyle);
+            p.setWidthF(ch_conf.penWidthF);
+            plt->setPen(ch_i, p);
+            plt->setSignalVisible(ch_i, ch_conf.visible);
+            plt->setSignalName(ch_i, ch_conf.name);
+            plt->setVDiv(ch_i, ch_conf.vDiv);
+            plt->setVOffset(ch_i, ch_conf.vOffset);
+        }
+        // Иначе сбросим настройки канала.
+        else{
+            // Канал осциллографа.
+            ch->reset();
+            // График канала.
+            plt->resetSignal(ch_i);
+        }
+    }
 }

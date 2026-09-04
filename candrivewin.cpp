@@ -103,6 +103,9 @@ CanDriveWin::CanDriveWin(QWidget *parent)
     connect(ui->actDownloadToDrive, &QAction::triggered, this, &CanDriveWin::m_ui_actDownloadToDrive_triggered);
     connect(ui->actUploadFromDrive, &QAction::triggered, this, &CanDriveWin::m_ui_actUploadFromDrive_triggered);
 
+    connect(ui->actOScopeOpen, &QAction::triggered, this, &CanDriveWin::m_ui_actOScopeOpen_triggered);
+    connect(ui->actOScopeSave, &QAction::triggered, this, &CanDriveWin::m_ui_actOScopeSave_triggered);
+
     //connect(ui->act, &QAction::triggered, this, &CanDriveWin::m_ui_act_triggered);
 
     applySettings();
@@ -441,6 +444,20 @@ void CanDriveWin::m_ui_actUploadFromDrive_triggered(bool checked)
     Q_UNUSED(checked)
 
     ui->tvRegView->uploadFromDrive();
+}
+
+void CanDriveWin::m_ui_actOScopeOpen_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    ui->oscopeWgt->openOscope();
+}
+
+void CanDriveWin::m_ui_actOScopeSave_triggered(bool checked)
+{
+    Q_UNUSED(checked)
+
+    ui->oscopeWgt->saveOscope();
 }
 
 void CanDriveWin::updateStatusBar()

@@ -10,7 +10,11 @@
 #include "sdovaluebar.h"
 #include "sdovaluebutton.h"
 #include "sdovalueindicator.h"
+#include "stringutils.h"
 #include <QDebug>
+
+
+using namespace StringUtils;
 
 
 #define CS_ABORT_ON_UNKNOWN_ELEMENT 0
@@ -81,54 +85,6 @@ CockpitSerializer::CockpitWidgets CockpitSerializer::deserialize(QIODevice* dev,
     widgets = readCockpit(xml, isOk);
 
     return widgets;
-}
-
-int CockpitSerializer::intValue(const QStringView& str, int defVal) const
-{
-    bool ok = false;
-    decltype(defVal) val = str.toInt(&ok, 0);
-    if(ok) return val;
-    return defVal;
-}
-
-int CockpitSerializer::intValue(const QString& str, int defVal) const
-{
-    bool ok = false;
-    decltype(defVal) val = str.toInt(&ok, 0);
-    if(ok) return val;
-    return defVal;
-}
-
-unsigned int CockpitSerializer::uintValue(const QStringView& str, unsigned int defVal) const
-{
-    bool ok = false;
-    decltype(defVal) val = str.toUInt(&ok, 0);
-    if(ok) return val;
-    return defVal;
-}
-
-unsigned int CockpitSerializer::uintValue(const QString& str, unsigned int defVal) const
-{
-    bool ok = false;
-    decltype(defVal) val = str.toUInt(&ok, 0);
-    if(ok) return val;
-    return defVal;
-}
-
-double CockpitSerializer::realValue(const QStringView& str, double defVal) const
-{
-    bool ok = false;
-    decltype(defVal) val = str.toDouble(&ok);
-    if(ok) return val;
-    return defVal;
-}
-
-double CockpitSerializer::realValue(const QString& str, double defVal) const
-{
-    bool ok = false;
-    decltype(defVal) val = str.toDouble(&ok);
-    if(ok) return val;
-    return defVal;
 }
 
 CockpitSerializer::CockpitWidgets CockpitSerializer::readCockpit(QXmlStreamReader& xml, bool* isOk) const

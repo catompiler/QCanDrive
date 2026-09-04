@@ -29,8 +29,6 @@
 #include <QDebug>
 
 
-static const qreal defaultLineWidthF = 1.5;
-
 
 static const Qt::GlobalColor m_colors[] = {
            Qt::yellow,
@@ -379,7 +377,7 @@ bool OScopePlot::updateData()
         // Данные канала.
         OScopePlotSeriesData* series_data = new OScopePlotSeriesData(m_hori, osc_data, ch_i);
         // Добавить сигнал.
-        int added_n = addSignal(series_data, tr("Канал %1").arg(ch_i + 1));
+        int added_n = addSignal(series_data, getDefaultName(ch_i));
         // Если не удалось.
         if(added_n < 0){
             // Удалим данные.
@@ -421,7 +419,7 @@ int OScopePlot::addSignal(OScopePlotSeriesData* pltData, const QString& newName,
     if(newColor.isValid()){
         curveColor = newColor;
     }else{
-        curveColor = m_colors[curvesCount % ColorsCount];
+        curveColor = getDefaultColor(curvesCount);
     }
 
     if(m_defaultAlpha > 0.0 && m_defaultAlpha <= 1.0){
@@ -429,7 +427,7 @@ int OScopePlot::addSignal(OScopePlotSeriesData* pltData, const QString& newName,
     }
 
     QPen curvePen;
-    curvePen.setStyle(Qt::SolidLine);
+    curvePen.setStyle(defaultLineStyle);
     curvePen.setWidthF(defaultLineWidthF);
     curvePen.setColor(curveColor);
     QBrush curveBrush;
@@ -478,6 +476,28 @@ bool OScopePlot::hasVisibleSignals() const
         if(signalVisible(i)) return true;
     }
     return false;
+}
+
+void OScopePlot::resetSignal(int n)
+{
+    setSignalVisible(n, false);
+    setSignalName(n, getDefaultName(n));
+
+    QColor c = m_colors[n % ColorsCount];
+
+    QPen p;
+    p.setColor(c);
+    p.setWidthF(defaultLineWidthF);
+    p.setStyle(Qt::SolidLine);
+    setPen(n, p);
+
+    QBrush b;
+    b.setColor(c);
+    b.setStyle(Qt::NoBrush);
+    setBrush(n, b);
+
+    setVDiv(n, 1.0);
+    setVOffset(n, 0.0);
 }
 
 OScopePlotSeriesData* OScopePlot::plotData(int n)
@@ -771,6 +791,16 @@ QList<Qt::GlobalColor> OScopePlot::getDefaultColors()
     }
 
     return colors;
+}
+
+Qt::GlobalColor OScopePlot::getDefaultColor(int n)
+{
+    return m_colors[n % ColorsCount];
+}
+
+QString OScopePlot::getDefaultName(int n)
+{
+    return tr("Канал %1").arg(n + 1);
 }
 
 int OScopePlot::findCurve(const QwtPlotCurve* findCurv) const
