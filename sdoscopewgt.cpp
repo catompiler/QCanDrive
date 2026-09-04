@@ -631,6 +631,7 @@ void SDOScopeWgt::sdoscopeApplied()
 
     // Обновим графики каналов.
     plt->refreshData();
+    updatePlotChannelsVisiblity();
 
     populateChannelsUi();
     populateTriggerChannels();
@@ -653,6 +654,7 @@ void SDOScopeWgt::sdoscopeAppliedChannels()
 
     // Обновим графики каналов.
     plt->refreshData();
+    updatePlotChannelsVisiblity();
 
     populateChannelsUi();
     populateTriggerChannels();
@@ -973,6 +975,15 @@ void SDOScopeWgt::uiStopOperations()
 {
     ui->pbRun->setChecked(false);
     ui->pbSingle->setChecked(false);
+}
+
+void SDOScopeWgt::updatePlotChannelsVisiblity()
+{
+    auto plt = getPlot();
+
+    for(uint i = 0; i < m_scope->channelsCount(); i ++){
+        plt->setSignalVisible(i, m_scope->channel(i)->enabled());
+    }
 }
 
 void SDOScopeWgt::updateUiEnabled()

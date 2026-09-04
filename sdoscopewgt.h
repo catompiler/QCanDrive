@@ -123,6 +123,7 @@ private:
     void populateChannelsUi();
     void populateTriggerChannels();
     void uiStopOperations();
+    void updatePlotChannelsVisiblity();
     void updateUiEnabled();
     void refreshUi();
     void refreshChannelsUi();
