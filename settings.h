@@ -55,6 +55,7 @@ public:
     } appear;
 
     struct Oscilloscope {
+        bool enabled; //!< Включен ли осциллограф.
         uint index; //!< Индекс модуля осциллографа.
         uint subIndex; //!< Подындекс поля версии модуля осциллографа.
     } oscope;

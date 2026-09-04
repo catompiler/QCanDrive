@@ -286,6 +286,16 @@ void SettingsDlg::setReglistFile(const QString& newReglistFile)
     ui->leRegListFile->setText(newReglistFile);
 }
 
+bool SettingsDlg::oscopeEnabled() const
+{
+    return ui->cbOscEnabled->isChecked();
+}
+
+void SettingsDlg::setOscopeEnabled(bool newEnabled)
+{
+    ui->cbOscEnabled->setChecked(newEnabled);
+}
+
 CO::Index SettingsDlg::oscopeEntryIndex() const
 {
     return ui->sbOscIndex->value();

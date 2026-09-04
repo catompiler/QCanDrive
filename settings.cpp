@@ -107,6 +107,7 @@ void Settings::saveOscope(QSettings& s) const
 {
     s.beginGroup("oscope");
 
+    s.setValue("enabled", oscope.enabled);
     s.setValue("index", oscope.index);
     s.setValue("subIndex", oscope.subIndex);
 
@@ -171,6 +172,7 @@ void Settings::loadOscope(QSettings& s)
 {
     s.beginGroup("oscope");
 
+    oscope.enabled  = s.value("enabled", true).toBool();
     oscope.index    = s.value("index", 0x2800).toUInt();
     oscope.subIndex = s.value("subIndex", 3).toUInt();
 

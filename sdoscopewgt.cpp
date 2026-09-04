@@ -185,6 +185,10 @@ void SDOScopeWgt::setVersionSubIndex(CO::SubIndex newSubIndex)
 
 void SDOScopeWgt::saveOscope()
 {
+    qDebug() << "SDOScopeWgt::saveOscope()";
+
+    if(!isEnabled()) return;
+
     QString fileName = QFileDialog::getSaveFileName(this, tr("Сохранить осциллограф"), QString(), tr("Oscope (*.oscpxml)"));
 
     if(fileName.isEmpty()) return;
@@ -214,6 +218,10 @@ void SDOScopeWgt::saveOscope()
 
 void SDOScopeWgt::openOscope()
 {
+    qDebug() << "SDOScopeWgt::openOscope()";
+
+    if(!isEnabled()) return;
+
     QString fileName = QFileDialog::getOpenFileName(this, tr("Открыть осциллограф"), QString(), tr("Oscope (*.oscpxml)"));
 
     if(fileName.isEmpty()) return;
@@ -250,18 +258,22 @@ void SDOScopeWgt::openOscope()
     updateUiEnabled();
 }
 
-void SDOScopeWgt::connected()
+void SDOScopeWgt::connectToDev()
 {
     qDebug() << "SDOScopeWgt::connected()";
+
+    if(!isEnabled()) return;
 
     scopeInit();
 
     updateUiEnabled();
 }
 
-void SDOScopeWgt::disconnected()
+void SDOScopeWgt::disconnectFromDev()
 {
     qDebug() << "SDOScopeWgt::disconnected()";
+
+    if(!isEnabled()) return;
 
     scopeDeinit();
 
@@ -273,6 +285,8 @@ void SDOScopeWgt::disconnected()
 void SDOScopeWgt::single()
 {
     qDebug() << "SDOScopeWgt::single()";
+
+    if(!isEnabled()) return;
 
     if(!m_initialized) return;
 
@@ -289,6 +303,8 @@ void SDOScopeWgt::run()
 {
     qDebug() << "SDOScopeWgt::run()";
 
+    if(!isEnabled()) return;
+
     if(!m_initialized) return;
 
     if(ui->pbRun->isChecked()) return;
@@ -304,6 +320,8 @@ void SDOScopeWgt::read()
 {
     qDebug() << "SDOScopeWgt::read()";
 
+    if(!isEnabled()) return;
+
     if(!m_initialized) return;
 
     scopeRead();
@@ -315,6 +333,8 @@ void SDOScopeWgt::stopRun()
 {
     qDebug() << "SDOScopeWgt::stopRun()";
 
+    if(!isEnabled()) return;
+
     if(!m_initialized) return;
 
     scopeStopRun();
@@ -325,6 +345,8 @@ void SDOScopeWgt::stopRun()
 void SDOScopeWgt::abort()
 {
     qDebug() << "SDOScopeWgt::abort()";
+
+    if(!isEnabled()) return;
 
     scopeAbort();
 

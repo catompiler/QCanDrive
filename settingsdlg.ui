@@ -513,6 +513,13 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <widget class="QCheckBox" name="cbOscEnabled">
+         <property name="text">
+          <string>Включен</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="gbOscIndex">
          <property name="title">
           <string>Адрес поля версии</string>

@@ -148,7 +148,7 @@ void CanDriveWin::CANopen_connected()
 {
     qDebug() << "CANopen_connected()";
 
-    ui->oscopeWgt->connected();
+    ui->oscopeWgt->connectToDev();
 
     updateStatusBar();
 }
@@ -157,7 +157,7 @@ void CanDriveWin::CANopen_disconnected()
 {
     qDebug() << "CANopen_disconnected()";
 
-    ui->oscopeWgt->disconnected();
+    ui->oscopeWgt->disconnectFromDev();
 
     updateStatusBar();
 }
@@ -398,6 +398,7 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
     m_settingsDlg->setHbFirstTime(s->co.hbFirstTime);
     m_settingsDlg->setHbPeriod(s->co.hbPeriod);
     m_settingsDlg->setWindowColor(s->appear.windowColor);
+    m_settingsDlg->setOscopeEnabled(s->oscope.enabled);
     m_settingsDlg->setOscopeEntryIndex(s->oscope.index);
     m_settingsDlg->setOscopeVersionSubIndex(s->oscope.subIndex);
     //m_settingsDlg->set(m_settings->);
@@ -425,6 +426,7 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
         s->co.hbFirstTime = m_settingsDlg->hbFirstTime();
         s->co.hbPeriod = m_settingsDlg->hbPeriod();
         s->appear.windowColor = m_settingsDlg->windowColor();
+        s->oscope.enabled = m_settingsDlg->oscopeEnabled();
         s->oscope.index = m_settingsDlg->oscopeEntryIndex();
         s->oscope.subIndex = m_settingsDlg->oscopeVersionSubIndex();
 
@@ -500,7 +502,21 @@ void CanDriveWin::applySettings()
     ui->tabCockpit->setPalette(pal);
     ui->cockpitWgt->setPalette(pal);
 
+    // Флаги преключения разрешения осциилографа.
+    // Флаг что осциллограф стал включенным.
+    bool oscopeEnabled = !ui->oscopeWgt->isEnabled() &&  s->oscope.enabled;
+    // Флаг что осциллограф стал выключенным.
+    bool oscopeDisabled = ui->oscopeWgt->isEnabled() && !s->oscope.enabled;
+    // Если соединено и осциилограф стал выключенным - разъединим осциилограф.
+    if(m_slcon->isConnected() && oscopeDisabled) ui->oscopeWgt->disconnectFromDev();
+    // Настройки осциллографа.
+    ui->oscopeWgt->setEnabled(s->oscope.enabled);
     ui->oscopeWgt->setEntryIndex(s->oscope.index);
     ui->oscopeWgt->setVersionSubIndex(s->oscope.subIndex);
+    // Если соединено и осциилограф стал включенным - соединим осциилограф.
+    if(m_slcon->isConnected() && oscopeEnabled) ui->oscopeWgt->connectToDev();
+    // Обновим доступность элементов меню осциллографа.
+    ui->actOScopeOpen->setEnabled(ui->oscopeWgt->isEnabled());
+    ui->actOScopeSave->setEnabled(ui->oscopeWgt->isEnabled());
 }
 

@@ -53,8 +53,8 @@ public:
 public slots:
     void saveOscope();
     void openOscope();
-    void connected();
-    void disconnected();
+    void connectToDev();
+    void disconnectFromDev();
     void single();
     void run();
     void read();

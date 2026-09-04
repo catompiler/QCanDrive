@@ -84,6 +84,9 @@ public:
     QString reglistFile() const;
     void setReglistFile(const QString& newReglistFile);
 
+    bool oscopeEnabled() const;
+    void setOscopeEnabled(bool newEnabled);
+
     CO::Index oscopeEntryIndex() const;
     void setOscopeEntryIndex(CO::Index newIndex);
 
