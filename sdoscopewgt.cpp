@@ -606,6 +606,9 @@ void SDOScopeWgt::sdoscopeReaded()
     // Сбросим кешированные границы.
     plt->invalidateAllBounds();
 
+    // Обновим курсоры.
+    plt->updateCursors();
+
     // Обновим график.
     plt->replot();
 

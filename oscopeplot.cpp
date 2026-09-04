@@ -686,55 +686,14 @@ void OScopePlot::invalidateAllBounds()
     }
 }
 
+void OScopePlot::updateCursors()
+{
+    updateFloatingCursor();
+}
+
 void OScopePlot::floatingCursorMoved(const QPointF& pos)
 {
-    if(m_oscData == nullptr){
-        QToolTip::hideText();
-        return;
-    }
-
-    qreal Tpos = m_hori->invTransform(pos.x());
-    int Tidx = qRound(Tpos / m_oscData->Ts()) + static_cast<int>(m_oscData->historySize());
-
-    if(Tidx < 0 || static_cast<size_t>(Tidx) >= m_oscData->samplesCount()){
-        QToolTip::hideText();
-        return;
-    }
-
-    // Отобразим именно дискретное время согласно индесу,
-    // а не согласно координатам сетки осциллографа.
-    QString valuesText = tr("T: %1").arg(TimeFormatter::formatValue(
-            m_oscData->Ts() * (Tidx - static_cast<int>(m_oscData->historySize()))
-        ));
-
-    //qDebug() << pos << Tpos << Tidx;
-
-    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
-
-    int signal_number = 0;
-    for(const auto& item: items){
-        signal_number ++;
-
-        auto curv = static_cast<QwtPlotCurve*>(item);
-
-        if(!curv->isVisible()) continue;
-
-        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
-
-        //qDebug() << pltData->value(Tidx);
-
-        // Добавим в подсказку номер/имя сигнала и его значение.
-        valuesText += QStringLiteral("\n%1 (\"%2\"): %3")
-                          .arg(signal_number)
-                          .arg(curv->title().text())
-                          .arg(VoltageFormatter::formatValue(pltData->value(Tidx))
-                      );
-    }
-
-    //qDebug() << valuesText;
-
-    // Отобразим подсказку.
-    QToolTip::showText(QCursor::pos(), valuesText, canvas());
+    showFloatingCursor(pos);
 }
 
 bool OScopePlot::legendItemEnabled() const
@@ -1003,4 +962,78 @@ void OScopePlot::updateTriggerMark()
 
     m_trigSymbol->setColor(channelCol);
     m_trigMarker->setLinePen(QPen(channelCol));
+}
+
+void OScopePlot::showFloatingCursor(const QPointF& pos)
+{
+    //qDebug() << pos;
+
+    if(m_oscData == nullptr){
+        QToolTip::hideText();
+        return;
+    }
+
+    qreal Tpos = m_hori->invTransform(pos.x());
+    int Tidx = qRound(Tpos / m_oscData->Ts()) + static_cast<int>(m_oscData->historySize());
+
+    if(Tidx < 0 || static_cast<size_t>(Tidx) >= m_oscData->samplesCount()){
+        QToolTip::hideText();
+        return;
+    }
+
+    // Отобразим именно дискретное время согласно индесу,
+    // а не согласно координатам сетки осциллографа.
+    QString valuesText = tr("T: %1").arg(TimeFormatter::formatValue(
+        m_oscData->Ts() * (Tidx - static_cast<int>(m_oscData->historySize()))
+        ));
+
+    //qDebug() << pos << Tpos << Tidx;
+
+    const auto& items = itemList(QwtPlotItem::Rtti_PlotCurve);
+
+    int signal_number = 0;
+    for(const auto& item: items){
+        signal_number ++;
+
+        auto curv = static_cast<QwtPlotCurve*>(item);
+
+        if(!curv->isVisible()) continue;
+
+        auto pltData = static_cast<OScopePlotSeriesData*>(curv->data());
+
+        //qDebug() << pltData->value(Tidx);
+
+        // Добавим в подсказку номер/имя сигнала и его значение.
+        valuesText += QStringLiteral("\n%1 (\"%2\"): %3")
+                          .arg(signal_number)
+                          .arg(curv->title().text())
+                          .arg(VoltageFormatter::formatValue(pltData->value(Tidx))
+                               );
+    }
+
+    //qDebug() << valuesText;
+
+    // Отобразим подсказку.
+    QToolTip::showText(QCursor::pos(), valuesText, canvas());
+}
+
+void OScopePlot::updateFloatingCursor()
+{
+    if(!m_floatingPicker->isEnabled()) return;
+
+    QwtPlotLayout* lay = plotLayout();
+    if(!lay) return;
+
+    QPoint curPos = mapFromGlobal(QCursor::pos());
+    QRect canvasRect = lay->canvasRect().toRect();
+
+    //qDebug() << curPos << canvasRect;
+
+    if(!canvasRect.contains(curPos, true)) return;
+
+    QPointF pos;
+    pos.setX(invTransform(QwtAxis::XBottom, curPos.x()));
+    pos.setY(invTransform(QwtAxis::YLeft, curPos.y()));
+
+    showFloatingCursor(pos);
 }

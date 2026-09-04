@@ -132,6 +132,7 @@ public:
 public slots:
     void clear(); // Вызывает removeSignals();
     void invalidateAllBounds(); // Помечает предрассчитанные границы графиков как невалидные.
+    void updateCursors();
 
 private slots:
     void floatingCursorMoved(const QPointF& pos);
@@ -171,6 +172,8 @@ protected:
     void updateZeroTimeMark();
     void updateZeroTimeScale();
     void updateTriggerMark();
+    void showFloatingCursor(const QPointF& pos);
+    void updateFloatingCursor();
 };
 
 #endif // OSCOPEPLOT_H
