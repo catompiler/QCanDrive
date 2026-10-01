@@ -206,8 +206,8 @@ void Settings::readExporting(QSettings& settings)
     v.regdataDeclUserCode = s.value("regdataDeclUserCode", "").toString();
     v.regdataImplUserCode = s.value("regdataImplUserCode", "").toString();
     v.regDataExport = s.value("regDataExport", true).toBool();
-    v.cohFileName = s.value("cohFileName", "(OD_NAME).h").toString();
-    v.cocFileName = s.value("cocFileName", "(OD_NAME).c").toString();
+    v.cohFileName = s.value("cohFileName", "$(OD_NAME).h").toString();
+    v.cocFileName = s.value("cocFileName", "$(OD_NAME).c").toString();
     v.cohUserCode = s.value("cohUserCode", "").toString();
     v.cocUserCode = s.value("cocUserCode", "").toString();
     v.coExport = s.value("coExport", true).toBool();
