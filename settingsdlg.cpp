@@ -213,6 +213,16 @@ void SettingsDlg::setSdoTimeout(uint newSdoTimeout)
     ui->sbSdoTimeout->setValue(newSdoTimeout);
 }
 
+uint SettingsDlg::sdoRetries() const
+{
+    return ui->sbSdoRetries->value();
+}
+
+void SettingsDlg::setSdoRetries(uint newSdoRetries)
+{
+    ui->sbSdoRetries->setValue(newSdoRetries);
+}
+
 uint SettingsDlg::hbFirstTime() const
 {
     return ui->sbHBTimeFirst->value();

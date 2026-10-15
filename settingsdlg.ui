@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>358</width>
-    <height>399</height>
+    <width>356</width>
+    <height>443</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -238,92 +238,19 @@
        <string>CANopen</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="lblDevNodeId">
-         <property name="text">
-          <string>ID устройства</string>
+       <item row="10" column="2">
+        <widget class="QSpinBox" name="sbHBTime">
+         <property name="suffix">
+          <string> мс</string>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QSpinBox" name="sbDevNodeId">
          <property name="minimum">
-          <number>1</number>
+          <number>0</number>
          </property>
          <property name="maximum">
-          <number>127</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="lblCliNodeId">
-         <property name="text">
-          <string>ID клиента</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QSpinBox" name="sbCliNodeId">
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>127</number>
+          <number>10000</number>
          </property>
          <property name="value">
-          <number>127</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="lblCobIdCliToSrv">
-         <property name="text">
-          <string>COB-ID от клиента к серверу</string>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="lblCobIdSrvToCli">
-         <property name="text">
-          <string>COB-ID от сервера к клиенту</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::TextFormat::AutoText</enum>
-         </property>
-         <property name="scaledContents">
-          <bool>false</bool>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QSpinBox" name="sbCobIdSrvToCli">
-         <property name="prefix">
-          <string>0x</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>4095</number>
-         </property>
-         <property name="value">
-          <number>1408</number>
-         </property>
-         <property name="displayIntegerBase">
-          <number>16</number>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="3">
-        <widget class="QCheckBox" name="cbSdoBlockTransfer">
-         <property name="text">
-          <string>Использовать блочную передачу</string>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -334,26 +261,20 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="2">
-        <widget class="QSpinBox" name="sbCliTimeout">
-         <property name="suffix">
-          <string> мс</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-         <property name="value">
-          <number>100</number>
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblDevNodeId">
+         <property name="text">
+          <string>ID устройства</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0" colspan="2">
-        <widget class="QLabel" name="lblSrvTimeout">
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblCobIdCliToSrv">
          <property name="text">
-          <string>Тайм-аут сервера</string>
+          <string>COB-ID от клиента к серверу</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -380,68 +301,6 @@
          </property>
         </widget>
        </item>
-       <item row="7" column="2">
-        <widget class="QSpinBox" name="sbSdoTimeout">
-         <property name="suffix">
-          <string> мс</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-         <property name="value">
-          <number>500</number>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="lblHBTimeFirst">
-         <property name="text">
-          <string>Первый HeartBeat</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="2">
-        <widget class="QSpinBox" name="sbHBTimeFirst">
-         <property name="suffix">
-          <string> мс</string>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="0" colspan="2">
-        <widget class="QLabel" name="lblHBTime">
-         <property name="text">
-          <string>Период HeartBeat</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="2">
-        <widget class="QSpinBox" name="sbHBTime">
-         <property name="suffix">
-          <string> мс</string>
-         </property>
-         <property name="minimum">
-          <number>0</number>
-         </property>
-         <property name="maximum">
-          <number>10000</number>
-         </property>
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="2">
         <widget class="QSpinBox" name="sbCobIdCliToSrv">
          <property name="prefix">
@@ -460,6 +319,157 @@
           <number>16</number>
          </property>
         </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblCliNodeId">
+         <property name="text">
+          <string>ID клиента</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="sbDevNodeId">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>127</number>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="2">
+        <widget class="QSpinBox" name="sbHBTimeFirst">
+         <property name="suffix">
+          <string> мс</string>
+         </property>
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>10000</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="lblHBTimeFirst">
+         <property name="text">
+          <string>Первый HeartBeat</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QLabel" name="lblSrvTimeout">
+         <property name="text">
+          <string>Тайм-аут сервера</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="3">
+        <widget class="QCheckBox" name="cbSdoBlockTransfer">
+         <property name="text">
+          <string>Использовать блочную передачу</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QSpinBox" name="sbCliTimeout">
+         <property name="suffix">
+          <string> мс</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>10000</number>
+         </property>
+         <property name="value">
+          <number>100</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QSpinBox" name="sbCobIdSrvToCli">
+         <property name="prefix">
+          <string>0x</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>4095</number>
+         </property>
+         <property name="value">
+          <number>1408</number>
+         </property>
+         <property name="displayIntegerBase">
+          <number>16</number>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <widget class="QSpinBox" name="sbSdoTimeout">
+         <property name="suffix">
+          <string> мс</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>10000</number>
+         </property>
+         <property name="value">
+          <number>500</number>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="0" colspan="2">
+        <widget class="QLabel" name="lblHBTime">
+         <property name="text">
+          <string>Период HeartBeat</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="lblCobIdSrvToCli">
+         <property name="text">
+          <string>COB-ID от сервера к клиенту</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::TextFormat::AutoText</enum>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QSpinBox" name="sbCliNodeId">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>127</number>
+         </property>
+         <property name="value">
+          <number>127</number>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="lblSdoRetries">
+         <property name="text">
+          <string>Число попыток SDO</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QSpinBox" name="sbSdoRetries"/>
        </item>
       </layout>
      </widget>

@@ -44,6 +44,7 @@ public:
         ERROR_PRAM_INCOMPAT = 11,
         ERROR_DEV_INCOMPAT  = 12,
         ERROR_UNKNOWN       = 13,
+        ERROR_STATE         = 14,
     };
 
     static QString errorToStr(Error err);
@@ -114,6 +115,20 @@ public:
     bool dataBufferingDone() const;
     size_t dataSizeToBuffering() const;
     void* dataToBuffering() const;
+
+    // Попытки повторной обработки.
+    //! Максимальное число попыток.
+    size_t retriesMax() const;
+    void setRetriesMax(size_t newRetriesMax);
+    //! Текущее число попыток.
+    size_t retries() const;
+    void setRetries(size_t newRetries);
+    //! Можно ли ещё попытаться передать?
+    bool canRetry() const;
+    //! Инкремент попыток.
+    void incRetries();
+    //! Сброс попыток.
+    void resetRetries();
 
 signals:
     void finished();

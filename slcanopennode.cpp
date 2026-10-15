@@ -27,6 +27,7 @@ SLCanOpenNode::SLCanOpenNode(QObject *parent)
     m_cobidServerToClient = 0x580;
     m_heartbeatTime = 0;
     m_defaultTimeout = 1000;
+    m_defaultRetriesMaxCount = 0;
 
     m_coProcessTimer = new QTimer(this);
     m_coProcessTimer->setSingleShot(false);
@@ -334,6 +335,16 @@ void SLCanOpenNode::setAdapterNoAnswers(bool newNoAnswers)
     slcan_master_set_no_answers(&m_scm, newNoAnswers);
 }
 
+size_t SLCanOpenNode::defaultRetriesMaxCount() const
+{
+    return m_defaultRetriesMaxCount;
+}
+
+void SLCanOpenNode::setDefaultRetriesMaxCount(size_t newDefaultRetriesMaxCount)
+{
+    m_defaultRetriesMaxCount = newDefaultRetriesMaxCount;
+}
+
 bool SLCanOpenNode::updateOd()
 {
     if(isConnected()) return false;
@@ -434,6 +445,21 @@ void SLCanOpenNode::processSDOClient(uint32_t dt)
 #endif
 }
 
+bool SLCanOpenNode::frontCommRetry(SDOComm* comm)
+{
+    if(comm == nullptr) return false;
+
+    if(!comm->canRetry()) return false;
+
+    comm->incRetries();
+
+    comm->resetTransferedSize();
+    comm->resetBufferedSize();
+    comm->setState(SDOComm::QUEUED);
+
+    return true;
+}
+
 bool SLCanOpenNode::processFrontComm(uint32_t dt)
 {
     if(m_sdoComms.isEmpty()) return false;
@@ -454,8 +480,11 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
             uint32_t cobidSrvToCli = m_cobidServerToClient + sdoc->nodeId();
             sdo_ret = CO_SDOclient_setup(sdo_cli, cobidCliToSrv, cobidSrvToCli, sdoc->nodeId());
             if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
+                if(frontCommRetry(sdoc)){
+                    return true;
+                }
                 sdoc->setState(SDOComm::DONE);
-                sdoc->setError(SDOComm::ERROR_IO);
+                sdoc->setError(SDOComm::ERROR_STATE);
                 return true;
             }
             sdoc->setState(SDOComm::INIT);
@@ -469,8 +498,11 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                                      static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
+                if(frontCommRetry(sdoc)){
+                    return true;
+                }
                 sdoc->setState(SDOComm::DONE);
-                sdoc->setError(SDOComm::ERROR_IO);
+                sdoc->setError(SDOComm::ERROR_STATE);
                 return true;
             }
             sdoc->setState(SDOComm::DATA);
@@ -499,6 +531,9 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 }
                 sdoc->setState(SDOComm::DONE);
             }else if(sdo_ret < 0){
+                if(frontCommRetry(sdoc)){
+                    return true;
+                }
                 //qDebug() << size_ret << Qt::hex << sdo_abort_ret;
                 SDOComm::Error finish_err = sdoCommError(sdo_abort_ret);
                 sdoc->setState(SDOComm::DONE);
@@ -526,8 +561,11 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
             uint32_t cobidSrvToCli = m_cobidServerToClient + sdoc->nodeId();
             sdo_ret = CO_SDOclient_setup(sdo_cli, cobidCliToSrv, cobidSrvToCli, sdoc->nodeId());
             if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
+                if(frontCommRetry(sdoc)){
+                    return true;
+                }
                 sdoc->setState(SDOComm::DONE);
-                sdoc->setError(SDOComm::ERROR_IO);
+                sdoc->setError(SDOComm::ERROR_STATE);
                 return true;
             }
             sdoc->setState(SDOComm::INIT);
@@ -541,8 +579,11 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                                      static_cast<uint>(UINT16_MAX)),
                             m_SDOclientBlockTransfer);
             if(sdo_ret != CO_SDO_RT_ok_communicationEnd){
+                if(frontCommRetry(sdoc)){
+                    return true;
+                }
                 sdoc->setState(SDOComm::DONE);
-                sdoc->setError(SDOComm::ERROR_IO);
+                sdoc->setError(SDOComm::ERROR_STATE);
                 return true;
             }
             sdoc->setState(SDOComm::RUN);
@@ -567,6 +608,9 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
                 }
                 sdoc->setState(SDOComm::DATA);
             }else if(sdo_ret < 0){
+                if(frontCommRetry(sdoc)){
+                    return true;
+                }
                 //qDebug() << size_ret << Qt::hex << sdo_abort_ret;
                 SDOComm::Error finish_err = sdoCommError(sdo_abort_ret);
                 sdoc->setState(SDOComm::DONE);
@@ -606,8 +650,8 @@ bool SLCanOpenNode::processFrontComm(uint32_t dt)
             }else{
                 if(sdoc->state() == SDOComm::DATA && size_ret == 0){
 #if defined(SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH) && SDO_COMM_READ_ERROR_ON_SIZE_MISMATCH == 1
-                    sdoc->setState(SDOCommunication::DONE);
-                    sdoc->setError(SDOCommunication::ERROR_INVALID_SIZE);
+                    sdoc->setState(SDOComm::DONE);
+                    sdoc->setError(SDOComm::ERROR_INVALID_SIZE);
 #else
                     sdoc->setState(SDOComm::DONE);
                     sdoc->setError(SDOComm::ERROR_NONE);
@@ -692,7 +736,7 @@ SDOComm::Error SLCanOpenNode::sdoCommError(CO_SDO_abortCode_t code) const
     return SDOComm::ERROR_UNKNOWN;
 }
 
-SDOComm* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubIndex, void* data, size_t dataSize, SDOComm* sdocomm, int timeout)
+SDOComm* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubIndex, void* data, size_t dataSize, SDOComm* sdocomm, int timeout, size_t retries)
 {
     if(!isConnected()) return nullptr;
 
@@ -712,6 +756,8 @@ SDOComm* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubInde
     }
     sdoc->setTransferSize(dataSize);
     sdoc->setTimeout((timeout == 0) ? m_defaultTimeout : timeout);
+    sdoc->setRetriesMax((retries == 0) ? m_defaultRetriesMaxCount : retries);
+    sdoc->resetRetries();
 
     if(!read(sdoc)){
         if(sdocomm == nullptr) delete sdoc;
@@ -721,7 +767,7 @@ SDOComm* SLCanOpenNode::read(NodeId devId, Index dataIndex, SubIndex dataSubInde
     return sdoc;
 }
 
-SDOComm* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex dataSubIndex, const void* data, size_t dataSize, SDOComm* sdocomm, int timeout)
+SDOComm* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex dataSubIndex, const void* data, size_t dataSize, SDOComm* sdocomm, int timeout, size_t retries)
 {
     if(!isConnected()) return nullptr;
 
@@ -741,6 +787,8 @@ SDOComm* SLCanOpenNode::write(NodeId devId, Index dataIndex, SubIndex dataSubInd
     }
     sdoc->setTransferSize(dataSize);
     sdoc->setTimeout((timeout == 0) ? m_defaultTimeout : timeout);
+    sdoc->setRetriesMax((retries == 0) ? m_defaultRetriesMaxCount : retries);
+    sdoc->resetRetries();
 
     if(!write(sdoc)){
         if(sdocomm == nullptr) delete sdoc;

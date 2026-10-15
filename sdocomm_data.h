@@ -18,6 +18,8 @@ struct SDOComm_data {
     size_t m_transferSize;
     size_t m_dataTransfered;
     size_t m_dataBuffered;
+    size_t m_retriesMax;
+    size_t m_retriesCur;
 };
 
 #endif // SDOCOMM_DATA_H

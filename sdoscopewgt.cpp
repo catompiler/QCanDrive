@@ -650,6 +650,9 @@ void SDOScopeWgt::sdoscopeErrorOccured()
         case SDOComm::ERROR_IO:
             QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка ввода-вывода!"));
             break;
+        case SDOComm::ERROR_STATE:
+            QMessageBox::critical(this, tr("Ошибка!"), tr("Ошибка состояния протокола обмена!"));
+            break;
         case SDOComm::ERROR_TIMEOUT:
             QMessageBox::critical(this, tr("Ошибка!"), tr("Превышение допустимого времени запроса!"));
             break;

@@ -88,6 +88,7 @@ void Settings::saveCo(QSettings& s) const
     s.setValue("cliTimeout",          co.cliTimeout);
     s.setValue("srvTimeout",          co.srvTimeout);
     s.setValue("sdoTimeout",          co.sdoTimeout);
+    s.setValue("sdoRetries",          co.sdoRetries);
     s.setValue("hbFirstTime",         co.hbFirstTime);
     s.setValue("hbPeriod",            co.hbPeriod);
 
@@ -153,6 +154,7 @@ void Settings::loadCo(QSettings& s)
     co.cliTimeout =          s.value("cliTimeout",          500).toUInt();
     co.srvTimeout =          s.value("srvTimeout",          500).toUInt();
     co.sdoTimeout =          s.value("sdoTimeout",          1000).toUInt();
+    co.sdoRetries =          s.value("sdoRetries",          0).toUInt();
     co.hbFirstTime =         s.value("hbFirstTime",         0).toUInt();
     co.hbPeriod =            s.value("hbPeriod",            0).toUInt();
 

@@ -46,6 +46,7 @@ public:
         uint cliTimeout;
         uint srvTimeout;
         uint sdoTimeout;
+        uint sdoRetries;
         uint hbFirstTime;
         uint hbPeriod;
     } co;

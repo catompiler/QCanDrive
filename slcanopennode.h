@@ -71,20 +71,24 @@ public:
     bool adapterNoAnswers() const;
     void setAdapterNoAnswers(bool newNoAnswers);
 
+    size_t defaultRetriesMaxCount() const;
+    void setDefaultRetriesMaxCount(size_t newDefaultRetriesMaxCount);
+
     bool updateOd();
 
     /*
      * read & write:
      * timeout == -1 -> max timeout (65535).
      * timeout ==  0 -> default timeout.
+     * retries ==  0 -> default retries.
      * sdocomm == nullptr -> alloc new sdo comm.
      */
 
     SDOComm* read(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
-                               void* data, size_t dataSize, SDOComm* sdocomm = nullptr, int timeout = -1);
+                               void* data, size_t dataSize, SDOComm* sdocomm = nullptr, int timeout = -1, size_t retries = 0);
 
     SDOComm* write(NodeId devId, Index dataIndex, SubIndex dataSubIndex,
-                               const void* data, size_t dataSize, SDOComm* sdocomm = nullptr, int timeout = -1);
+                               const void* data, size_t dataSize, SDOComm* sdocomm = nullptr, int timeout = -1, size_t retries = 0);
 
     bool read(SDOComm* sdocom);
     bool write(SDOComm* sdocom);
@@ -122,10 +126,12 @@ private:
     uint32_t m_cobidServerToClient;
     uint16_t m_heartbeatTime;
     int m_defaultTimeout;
+    size_t m_defaultRetriesMaxCount;
 
     QQueue<SDOComm*> m_sdoComms;
 
     void processSDOClient(uint32_t dt);
+    bool frontCommRetry(SDOComm* comm);
     bool processFrontComm(uint32_t dt);
     SDOComm::Error sdoCommError(CO_SDO_abortCode_t code) const;
     void cancelAllSDOComms();

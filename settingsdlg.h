@@ -93,6 +93,9 @@ public:
     CO::SubIndex oscopeVersionSubIndex() const;
     void setOscopeVersionSubIndex(CO::SubIndex newSubIndex);
 
+    uint sdoRetries() const;
+    void setSdoRetries(uint newSdoRetries);
+
 private slots:
     void m_tbWindowBackColorSel_clicked(bool checked = false);
     void m_tbCockpitFileSel_clicked(bool checked = false);

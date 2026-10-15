@@ -34,6 +34,8 @@ QString SDOComm::errorToStr(Error err)
         return tr("Внутренняя несовместимость");
     case SDOComm::ERROR_UNKNOWN:
         return tr("Неизвестная ошибка");
+    case SDOComm::ERROR_STATE:
+        return tr("Ошибка состояния");
     default:
         return tr("Неопознанная ошибка");
     }
@@ -55,6 +57,8 @@ SDOComm::SDOComm(QObject *parent)
     m_d->m_transferSize = 0;
     m_d->m_dataTransfered = 0;
     m_d->m_dataBuffered = 0;
+    m_d->m_retriesMax = 0;
+    m_d->m_retriesCur = 0;
 }
 
 SDOComm::~SDOComm()
@@ -290,4 +294,39 @@ void* SDOComm::dataToBuffering() const
     uint8_t* ptr = static_cast<uint8_t*>(m_d->m_data);
 
     return &ptr[m_d->m_dataBuffered];
+}
+
+size_t SDOComm::retriesMax() const
+{
+    return m_d->m_retriesMax;
+}
+
+void SDOComm::setRetriesMax(size_t newRetriesMax)
+{
+    m_d->m_retriesMax = newRetriesMax;
+}
+
+size_t SDOComm::retries() const
+{
+    return m_d->m_retriesCur;
+}
+
+void SDOComm::setRetries(size_t newRetries)
+{
+    m_d->m_retriesCur = newRetries;
+}
+
+bool SDOComm::canRetry() const
+{
+    return m_d->m_retriesCur < m_d->m_retriesMax;
+}
+
+void SDOComm::incRetries()
+{
+    m_d->m_retriesCur ++;
+}
+
+void SDOComm::resetRetries()
+{
+    m_d->m_retriesCur = 0;
 }

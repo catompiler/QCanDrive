@@ -395,6 +395,7 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
     m_settingsDlg->setClientTimeout(s->co.cliTimeout);
     m_settingsDlg->setServerTimeout(s->co.srvTimeout);
     m_settingsDlg->setSdoTimeout(s->co.sdoTimeout);
+    m_settingsDlg->setSdoRetries(s->co.sdoRetries);
     m_settingsDlg->setHbFirstTime(s->co.hbFirstTime);
     m_settingsDlg->setHbPeriod(s->co.hbPeriod);
     m_settingsDlg->setWindowColor(s->appear.windowColor);
@@ -423,6 +424,7 @@ void CanDriveWin::m_ui_actSettings_triggered(bool checked)
         s->co.cliTimeout = m_settingsDlg->clientTimeout();
         s->co.srvTimeout = m_settingsDlg->serverTimeout();
         s->co.sdoTimeout = m_settingsDlg->sdoTimeout();
+        s->co.sdoRetries = m_settingsDlg->sdoRetries();
         s->co.hbFirstTime = m_settingsDlg->hbFirstTime();
         s->co.hbPeriod = m_settingsDlg->hbPeriod();
         s->appear.windowColor = m_settingsDlg->windowColor();
@@ -483,6 +485,7 @@ void CanDriveWin::applySettings()
     m_slcon->setSDOserverTimeout(s->co.srvTimeout);
     m_slcon->setSDOclientTimeout(s->co.cliTimeout);
     m_slcon->setDefaultTimeout(s->co.sdoTimeout);
+    m_slcon->setDefaultRetriesMaxCount(s->co.sdoRetries);
     m_slcon->setCobidClientToServer(s->co.cobidCliToSrv);
     m_slcon->setCobidServerToClient(s->co.cobidSrvToCli);
     m_slcon->setSDOclientBlockTransfer(s->co.useSdoBlockTransfer);
